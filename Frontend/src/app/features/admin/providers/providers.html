@@ -1,0 +1,86 @@
+<div class="admin-providers-page">
+  <div class="page-header">
+    <div>
+      <span>Red de proveedores</span>
+      <h1>Proveedores</h1>
+      <p>Supervisa proveedores registrados, estado de verificación e integración API.</p>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span>Total proveedores</span>
+      <strong>184</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Verificados</span>
+      <strong>156</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>API conectada</span>
+      <strong>132</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Observados</span>
+      <strong>08</strong>
+    </div>
+  </div>
+
+  <section class="providers-card">
+    <div class="providers-card__header">
+      <h2>Listado de proveedores</h2>
+      <div class="search-box">Buscar proveedor, correo o estado...</div>
+    </div>
+
+    <div class="providers-table">
+      <div class="providers-table__head">
+        <div>Proveedor</div>
+        <div>Correo</div>
+        <div>Productos</div>
+        <div>API</div>
+        <div>Rating</div>
+        <div>Estado</div>
+        <div>Acción</div>
+      </div>
+
+      <div class="providers-table__row" *ngFor="let provider of providers">
+        <div class="provider-cell">
+          <div class="avatar">{{ provider.name.charAt(0) }}</div>
+          <strong>{{ provider.name }}</strong>
+        </div>
+
+        <div>{{ provider.email }}</div>
+        <div>{{ provider.products }}</div>
+
+        <div>
+          <span
+            class="api-status"
+            [class.pending]="provider.api === 'Pendiente'"
+            [class.error]="provider.api === 'Error'"
+          >
+            {{ provider.api }}
+          </span>
+        </div>
+
+        <div>⭐ {{ provider.rating }}</div>
+
+        <div>
+          <span
+            class="status"
+            [class.pending]="provider.status === 'Pendiente'"
+            [class.observed]="provider.status === 'Observado'"
+          >
+            {{ provider.status }}
+          </span>
+        </div>
+
+        <div>
+          <button class="btn-secondary">Revisar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

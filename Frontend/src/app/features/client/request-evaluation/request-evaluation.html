@@ -1,0 +1,65 @@
+<div class="evaluation-page">
+  <div class="page-title">
+    <span>Post-entrega</span>
+    <h1>Evaluar Proveedor</h1>
+    <p>Tu opinión ayuda a mejorar la red de proveedores B2B.</p>
+  </div>
+
+  <div class="evaluation-grid">
+    <!-- FORM -->
+    <section class="evaluation-card">
+      <h2>Calificación general</h2>
+
+      <div class="stars">
+        <span
+          *ngFor="let star of [1,2,3,4,5]"
+          (click)="setRating(star)"
+          [class.active]="star <= rating"
+        >
+          ★
+        </span>
+      </div>
+
+      <textarea
+        placeholder="Describe tu experiencia con el proveedor..."
+      ></textarea>
+
+      <button class="submit-btn" (click)="submitEvaluation()">
+        Enviar Evaluación
+      </button>
+    </section>
+
+    <!-- INFO -->
+    <aside class="provider-summary">
+      <div class="provider-header">
+        <div class="icon">◎</div>
+
+        <div>
+          <h3>Global Tech Solutions</h3>
+          <span>Orden completada</span>
+        </div>
+      </div>
+
+      <div class="summary-list">
+        <div>
+          <span>Orden</span>
+          <strong>ORD-2026-0148</strong>
+        </div>
+
+        <div>
+          <span>Fecha entrega</span>
+          <strong>25 Abr 2026</strong>
+        </div>
+
+        <div>
+          <span>Monto</span>
+          <strong>US$ 12,744.00</strong>
+        </div>
+      </div>
+
+      <div class="info-box">
+        Califica al proveedor según cumplimiento, tiempos de entrega y calidad del servicio.
+      </div>
+    </aside>
+  </div>
+</div>

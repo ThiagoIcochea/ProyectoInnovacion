@@ -1,0 +1,50 @@
+<div class="admin-settings-page">
+  <div class="page-header">
+    <div>
+      <span>Sistema</span>
+      <h1>Configuración General</h1>
+      <p>Administra parámetros globales de la plataforma.</p>
+    </div>
+  </div>
+
+  <section class="settings-card">
+    <div class="form-grid">
+
+      <div class="form-group">
+        <label>Nombre del Sistema</label>
+        <input [(ngModel)]="config.systemName" />
+      </div>
+
+      <div class="form-group">
+        <label>Email de Soporte</label>
+        <input [(ngModel)]="config.supportEmail" />
+      </div>
+
+      <div class="form-group">
+        <label>Zona Horaria</label>
+        <select [(ngModel)]="config.timezone">
+          <option value="America/Lima">Perú (GMT-5)</option>
+          <option value="America/Mexico_City">México</option>
+          <option value="Europe/Madrid">España</option>
+        </select>
+      </div>
+
+      <div class="form-group toggle">
+        <label>Modo Mantenimiento</label>
+        <input type="checkbox" [(ngModel)]="config.maintenanceMode" />
+      </div>
+
+      <div class="form-group toggle">
+        <label>IA Activada</label>
+        <input type="checkbox" [(ngModel)]="config.aiEnabled" />
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" (click)="save()">
+        Guardar Cambios
+      </button>
+    </div>
+  </section>
+</div>

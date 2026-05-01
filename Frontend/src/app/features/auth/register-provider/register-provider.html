@@ -1,0 +1,137 @@
+<div class="auth-page">
+  <div class="auth-shell auth-shell--provider">
+    <section class="auth-side auth-side--provider">
+      <div class="auth-brand">NetProcure</div>
+
+      <div class="auth-side__content">
+        <span class="auth-kicker">Registro de proveedor</span>
+
+        <h1>Conecta tu catálogo y vende más en B2B.</h1>
+
+        <p>
+          Registra tu empresa para recibir solicitudes RFQ, cotizar productos de red
+          y participar en oportunidades de negocio con clientes empresariales.
+        </p>
+
+        <ul class="auth-benefits">
+          <li>Acceso a solicitudes diarias de infraestructura de red</li>
+          <li>Integración de inventario y stock vía API</li>
+          <li>Proceso de cotización claro y centralizado</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="auth-form-panel auth-form-panel--scroll">
+      <div class="auth-form-header">
+        <h2>Registro de Proveedor</h2>
+        <p>Completa la información de tu empresa y configura tu integración.</p>
+      </div>
+
+      <form class="auth-form">
+        <div class="section-title">1. Datos de la Empresa</div>
+
+        <div class="form-group">
+          <label for="razonSocial">Razón Social</label>
+          <input
+            id="razonSocial"
+            type="text"
+            placeholder="Ej. Global Tech Solutions S.A.C."
+          />
+        </div>
+
+        <div class="form-grid form-grid--2">
+          <div class="form-group">
+            <label for="ruc">RUC</label>
+            <input id="ruc" type="text" placeholder="Ingresa 11 dígitos" />
+          </div>
+
+          <div class="form-group">
+            <label for="telefonoEmpresa">Teléfono</label>
+            <input
+              id="telefonoEmpresa"
+              type="text"
+              placeholder="Ej. +51 999 999 999"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="correoEmpresa">Correo Electrónico</label>
+          <input
+            id="correoEmpresa"
+            type="email"
+            placeholder="contacto@tuempresa.com"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="direccionEmpresa">Dirección de Domicilio</label>
+          <input
+            id="direccionEmpresa"
+            type="text"
+            placeholder="Av. Principal 123, Distrito, Ciudad, País"
+          />
+        </div>
+
+        <div class="section-title">2. Configuración de API (Catálogo y Stock)</div>
+
+        <div class="info-box">
+          Para poder recomendarte en las solicitudes RFQ que hagan match con tu
+          inventario, necesitamos conectarnos a tu API de productos. El sistema
+          consultará disponibilidad en tiempo real.
+        </div>
+
+        <div class="form-group">
+          <label for="endpoint">Endpoint URL</label>
+          <input
+            id="endpoint"
+            type="text"
+            placeholder="https://api.tuempresa.com/v1/inventory"
+          />
+        </div>
+
+        <div class="form-grid form-grid--2">
+          <div class="form-group">
+            <label for="tipoConexion">Tipo de Conexión</label>
+            <select id="tipoConexion">
+              <option>REST API</option>
+              <option>GraphQL</option>
+              <option>Webhook</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="puerto">Puerto (si aplica)</label>
+            <input id="puerto" type="text" placeholder="Ej. 443 o 8080" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="apiKey">API Key / Token de Autenticación</label>
+          <input
+            id="apiKey"
+            type="text"
+            placeholder="Ingresa tu API Key o Bearer Token"
+          />
+        </div>
+
+        <label class="checkbox-row">
+          <input type="checkbox" />
+          <span>
+            He leído y acepto los
+            <a href="#">Términos y Condiciones</a>
+            y autorizo el uso de la API según las
+            <a href="#">Políticas de Privacidad</a>.
+          </span>
+        </label>
+
+        <button type="button" class="btn-primary">Registrar mi Empresa</button>
+      </form>
+
+      <div class="auth-form-footer">
+        <span>¿Ya tienes cuenta como proveedor?</span>
+        <a routerLink="/login">Inicia sesión aquí</a>
+      </div>
+    </section>
+  </div>
+</div>

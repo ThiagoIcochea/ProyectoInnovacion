@@ -1,0 +1,29 @@
+.admin-logs-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.logs-card {
+  background: #1e293b;
+  border-radius: 16px;
+}
+
+.logs-table__head,
+.logs-table__row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 1rem;
+}
+
+.type {
+  background: rgba(59,130,246,0.14);
+  color: #60a5fa;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.type.error {
+  background: rgba(239,68,68,0.14);
+  color: #ef4444;
+}

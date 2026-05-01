@@ -1,0 +1,142 @@
+<div class="quotation-page">
+  <div class="page-title">
+    <a routerLink="/app/rfq/results" class="back-button">←</a>
+
+    <div>
+      <span>Lista para aprobación</span>
+      <h1>Detalle de Cotización</h1>
+      <p>Cotización ID: #COT-2026-0892-GTS</p>
+    </div>
+  </div>
+
+  <section class="supplier-card">
+    <div class="supplier-icon">◎</div>
+
+    <div class="supplier-info">
+      <h2>Global Tech Solutions S.A.C.</h2>
+      <p>⭐ 4.9 · 128 reseñas verificadas</p>
+
+      <div class="supplier-badges">
+        <span>Gold Partner Cisco</span>
+        <span>ISO 9001</span>
+      </div>
+    </div>
+
+    <div class="validity-box">
+      <span>Válido hasta</span>
+      <strong>25 Abr 2026</strong>
+    </div>
+  </section>
+
+  <div class="quotation-grid">
+    <section class="detail-card">
+      <div class="card-header">
+        <h2>Productos incluidos</h2>
+        <p>Equipos y cantidades cotizadas por el proveedor seleccionado.</p>
+      </div>
+
+      <div class="quotation-table">
+        <div class="quotation-table__head">
+          <div>Producto</div>
+          <div>Cant.</div>
+          <div>Precio unit.</div>
+          <div>Descuento</div>
+          <div>Subtotal</div>
+        </div>
+
+        <div class="quotation-table__row" *ngFor="let product of products">
+          <div class="product-cell">
+            <div class="product-thumb"></div>
+
+            <div>
+              <strong>{{ product.name }}</strong>
+              <span>SKU: {{ product.sku }}</span>
+            </div>
+          </div>
+
+          <div>{{ product.qty }}</div>
+          <div>{{ product.price }}</div>
+
+          <div>
+            <span
+              class="discount-badge"
+              [class.empty]="product.discount === '-'"
+            >
+              {{ product.discount }}
+            </span>
+          </div>
+
+          <div class="subtotal">{{ product.subtotal }}</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="summary-card">
+      <h2>Resumen de Cotización</h2>
+
+      <div class="summary-list">
+        <div>
+          <span>Subtotal sin IGV</span>
+          <strong>US$ 11,250.00</strong>
+        </div>
+
+        <div>
+          <span>Descuento aplicado</span>
+          <strong class="text-success">-US$ 450.00</strong>
+        </div>
+
+        <div>
+          <span>Costo de envío</span>
+          <strong class="text-success">Gratis</strong>
+        </div>
+
+        <div>
+          <span>IGV (18%)</span>
+          <strong>US$ 1,944.00</strong>
+        </div>
+
+        <div class="total-row">
+          <span>Total a pagar</span>
+          <strong>US$ 12,744.00</strong>
+        </div>
+      </div>
+
+      <a routerLink="/app/rfq/payment" class="btn-primary">
+        Aceptar cotización
+      </a>
+
+      <button class="btn-secondary">
+        Solicitar cambios
+      </button>
+    </aside>
+  </div>
+
+  <section class="terms-card">
+    <div class="card-header">
+      <h2>Términos, condiciones y garantía</h2>
+      <p>Condiciones comerciales asociadas a esta cotización.</p>
+    </div>
+
+    <div class="terms-grid">
+      <div class="term-box">
+        <span>Tiempo de entrega</span>
+        <strong>2 - 3 días hábiles</strong>
+      </div>
+
+      <div class="term-box">
+        <span>Garantía general</span>
+        <strong>3 años extendida</strong>
+      </div>
+
+      <div class="term-box">
+        <span>Condición logística</span>
+        <strong>Entrega en sede principal</strong>
+      </div>
+
+      <div class="term-box">
+        <span>Soporte</span>
+        <strong>Soporte técnico postventa</strong>
+      </div>
+    </div>
+  </section>
+</div>

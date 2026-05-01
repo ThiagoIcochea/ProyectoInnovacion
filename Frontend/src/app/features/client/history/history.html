@@ -1,0 +1,48 @@
+<div class="history-page">
+  <div class="page-header">
+    <div>
+      <span>Archivo de compras</span>
+      <h1>Historial</h1>
+      <p>Consulta solicitudes cerradas, completadas o canceladas.</p>
+    </div>
+  </div>
+
+  <section class="history-card">
+    <div class="history-card__header">
+      <h2>Solicitudes anteriores</h2>
+
+      <div class="filters">
+        <button>Todos</button>
+        <button>Completados</button>
+        <button>Cancelados</button>
+      </div>
+    </div>
+
+    <div class="history-table">
+      <div class="history-table__head">
+        <div>Código</div>
+        <div>Proveedor</div>
+        <div>Categoría</div>
+        <div>Monto</div>
+        <div>Fecha</div>
+        <div>Estado</div>
+      </div>
+
+      <div class="history-table__row" *ngFor="let item of history">
+        <div class="code">{{ item.code }}</div>
+        <div>{{ item.provider }}</div>
+        <div>{{ item.category }}</div>
+        <div>{{ item.amount }}</div>
+        <div>{{ item.date }}</div>
+        <div>
+          <span
+            class="status"
+            [class.cancelled]="item.status === 'Cancelado'"
+          >
+            {{ item.status }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,125 @@
+<div class="provider-payments-page">
+  <div class="page-header">
+    <div>
+      <span>Validación financiera</span>
+      <h1>Validación de Pagos</h1>
+      <p>Revisa comprobantes enviados por clientes y confirma la operación.</p>
+    </div>
+  </div>
+
+  <div class="payments-grid">
+    <aside class="payment-list-card">
+      <div class="list-header">
+        <h2>Pendientes de revisión</h2>
+        <span>3 pagos</span>
+      </div>
+
+      <div class="search-box">Buscar por ID de pago o cliente...</div>
+
+      <div class="payment-list">
+        <button
+          class="payment-item"
+          *ngFor="let payment of payments"
+          [class.active]="payment.active"
+        >
+          <div>
+            <strong>{{ payment.id }}</strong>
+            <p>{{ payment.client }}</p>
+            <b>{{ payment.amount }}</b>
+          </div>
+
+          <div class="payment-meta">
+            <span>{{ payment.time }}</span>
+            <em [class.approved]="payment.status === 'Aprobado'">
+              {{ payment.status }}
+            </em>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <section class="payment-detail-card">
+      <div class="detail-header">
+        <div>
+          <span class="status-pill">Pendiente de validación</span>
+          <h2>Pago PAG-2026-1045</h2>
+          <p>Asociado a Cotización: COT-2026-0891</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="payment-info">
+          <h3>Detalles del Cliente</h3>
+
+          <div class="info-list">
+            <div>
+              <span>Razón Social</span>
+              <strong>TechNova S.A.</strong>
+            </div>
+
+            <div>
+              <span>RUC</span>
+              <strong>20548192831</strong>
+            </div>
+
+            <div>
+              <span>Contacto</span>
+              <strong>carlos.m@technova.com</strong>
+            </div>
+          </div>
+
+          <h3>Información de Transferencia</h3>
+
+          <div class="info-list">
+            <div>
+              <span>Método de pago</span>
+              <strong>Transferencia bancaria</strong>
+            </div>
+
+            <div>
+              <span>Banco origen</span>
+              <strong>Banco de Crédito BCP</strong>
+            </div>
+
+            <div>
+              <span>Fecha operación</span>
+              <strong>25 Abr 2026, 09:15 AM</strong>
+            </div>
+
+            <div>
+              <span>Código operación</span>
+              <strong>0981273912</strong>
+            </div>
+          </div>
+
+          <div class="amount-box">
+            <span>Monto a validar</span>
+            <strong>$12,450.00</strong>
+          </div>
+
+          <div class="validation-box">
+            <h3>Validación</h3>
+            <p>Confirma si el monto y código de operación coinciden con tu cuenta bancaria.</p>
+
+            <div class="validation-actions">
+              <button class="btn-danger">Rechazar pago</button>
+              <button class="btn-primary">Aprobar pago</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="voucher-card">
+          <h3>Comprobante adjunto</h3>
+
+          <div class="voucher-preview"></div>
+
+          <div class="voucher-actions">
+            <button>Zoom +</button>
+            <button>Zoom -</button>
+            <button>Descargar</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </div>
+</div>

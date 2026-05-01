@@ -1,0 +1,78 @@
+<div class="admin-users-page">
+  <div class="page-header">
+    <div>
+      <span>Gestión de accesos</span>
+      <h1>Usuarios</h1>
+      <p>Administra clientes, proveedores y estados de acceso a la plataforma.</p>
+    </div>
+
+    <button class="btn-primary">+ Nuevo usuario</button>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span>Total usuarios</span>
+      <strong>2,845</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Clientes</span>
+      <strong>2,661</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Proveedores</span>
+      <strong>184</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Pendientes</span>
+      <strong>23</strong>
+    </div>
+  </div>
+
+  <section class="users-card">
+    <div class="users-card__header">
+      <h2>Listado de usuarios</h2>
+
+      <div class="search-box">Buscar por nombre, correo o rol...</div>
+    </div>
+
+    <div class="users-table">
+      <div class="users-table__head">
+        <div>Usuario</div>
+        <div>Correo</div>
+        <div>Rol</div>
+        <div>Estado</div>
+        <div>Registro</div>
+        <div>Acción</div>
+      </div>
+
+      <div class="users-table__row" *ngFor="let user of users">
+        <div class="user-cell">
+          <div class="avatar">{{ user.name.charAt(0) }}</div>
+          <strong>{{ user.name }}</strong>
+        </div>
+
+        <div>{{ user.email }}</div>
+        <div>{{ user.role }}</div>
+
+        <div>
+          <span
+            class="status"
+            [class.pending]="user.status === 'Pendiente'"
+            [class.suspended]="user.status === 'Suspendido'"
+          >
+            {{ user.status }}
+          </span>
+        </div>
+
+        <div>{{ user.date }}</div>
+
+        <div>
+          <button class="btn-secondary">Gestionar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

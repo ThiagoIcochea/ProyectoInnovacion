@@ -1,0 +1,77 @@
+<div class="payment-page">
+  <div class="page-title">
+    <span>Último paso</span>
+    <h1>Confirmación de Pago</h1>
+    <p>Selecciona el método de pago y registra tu transacción.</p>
+  </div>
+
+  <div class="payment-grid">
+    <!-- MÉTODOS -->
+    <section class="payment-methods">
+      <h2>Método de pago</h2>
+
+      <div
+        class="method-card"
+        [class.active]="selectedMethod === 'transfer'"
+        (click)="selectMethod('transfer')"
+      >
+        <strong>Transferencia bancaria</strong>
+        <p>Realiza una transferencia y sube el comprobante.</p>
+      </div>
+
+      <div
+        class="method-card"
+        [class.active]="selectedMethod === 'card'"
+        (click)="selectMethod('card')"
+      >
+        <strong>Tarjeta corporativa</strong>
+        <p>Pago inmediato con tarjeta empresarial.</p>
+      </div>
+
+      <div
+        class="method-card"
+        [class.active]="selectedMethod === 'credit'"
+        (click)="selectMethod('credit')"
+      >
+        <strong>Línea de crédito</strong>
+        <p>Disponible para clientes aprobados.</p>
+      </div>
+
+      <div class="upload-box" *ngIf="selectedMethod === 'transfer'">
+        <p>Subir comprobante</p>
+        <button>Seleccionar archivo</button>
+      </div>
+    </section>
+
+    <!-- RESUMEN -->
+    <aside class="payment-summary">
+      <h2>Resumen final</h2>
+
+      <div class="summary-list">
+        <div>
+          <span>Proveedor</span>
+          <strong>Global Tech Solutions</strong>
+        </div>
+
+        <div>
+          <span>Subtotal</span>
+          <strong>US$ 11,250.00</strong>
+        </div>
+
+        <div>
+          <span>IGV</span>
+          <strong>US$ 1,944.00</strong>
+        </div>
+
+        <div class="total">
+          <span>Total</span>
+          <strong>US$ 12,744.00</strong>
+        </div>
+      </div>
+
+      <button class="confirm-btn" (click)="confirmPayment()">
+        Confirmar Pago
+      </button>
+    </aside>
+  </div>
+</div>

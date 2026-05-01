@@ -1,0 +1,34 @@
+<div class="admin-logs-page">
+  <div class="page-header">
+    <div>
+      <span>Auditoría</span>
+      <h1>Logs del sistema</h1>
+      <p>Registro de eventos y actividad interna.</p>
+    </div>
+  </div>
+
+  <section class="logs-card">
+    <div class="logs-table">
+      <div class="logs-table__head">
+        <div>Evento</div>
+        <div>Usuario</div>
+        <div>Tipo</div>
+        <div>Fecha</div>
+      </div>
+
+      <div class="logs-table__row" *ngFor="let log of logs">
+        <div>{{ log.event }}</div>
+        <div>{{ log.user }}</div>
+        <div>
+          <span
+            class="type"
+            [class.error]="log.type === 'Error'"
+          >
+            {{ log.type }}
+          </span>
+        </div>
+        <div>{{ log.date }}</div>
+      </div>
+    </div>
+  </section>
+</div>

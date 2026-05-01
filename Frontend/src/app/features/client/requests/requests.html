@@ -1,0 +1,90 @@
+<div class="requests-page">
+  <div class="page-header">
+    <div>
+      <span>Gestión post-compra</span>
+      <h1>Mis Solicitudes</h1>
+      <p>
+        Revisa el estado de tus solicitudes, realiza seguimiento y evalúa a tus proveedores.
+      </p>
+    </div>
+
+    <a routerLink="/app/rfq/catalog" class="btn-primary">
+      Nueva RFQ
+    </a>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span>Solicitudes activas</span>
+      <strong>08</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>En preparación</span>
+      <strong>03</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>En camino</span>
+      <strong>02</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Entregadas</span>
+      <strong>03</strong>
+    </div>
+  </div>
+
+  <section class="requests-card">
+    <div class="requests-card__header">
+      <div>
+        <h2>Solicitudes recientes</h2>
+        <p>Listado de procesos RFQ activos y entregados recientemente.</p>
+      </div>
+
+      <div class="filter-actions">
+        <button>Todos</button>
+        <button>Activos</button>
+        <button>Entregados</button>
+      </div>
+    </div>
+
+    <div class="requests-table">
+      <div class="requests-table__head">
+        <div>Código</div>
+        <div>Proveedor</div>
+        <div>Ítems</div>
+        <div>Monto</div>
+        <div>Fecha</div>
+        <div>Estado</div>
+        <div>Acciones</div>
+      </div>
+
+      <div class="requests-table__row" *ngFor="let request of requests">
+        <div class="request-code">{{ request.code }}</div>
+        <div>{{ request.provider }}</div>
+        <div>{{ request.items }}</div>
+        <div>{{ request.amount }}</div>
+        <div>{{ request.date }}</div>
+        <div>
+          <span class="status-badge" [ngClass]="request.statusClass">
+            {{ request.status }}
+          </span>
+        </div>
+        <div class="actions">
+          <a routerLink="/app/requests/tracking" class="btn-secondary">
+            Tracking
+          </a>
+
+          <a
+            *ngIf="request.statusClass === 'delivered'"
+            routerLink="/app/requests/evaluation"
+            class="btn-primary-small"
+          >
+            Evaluar
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

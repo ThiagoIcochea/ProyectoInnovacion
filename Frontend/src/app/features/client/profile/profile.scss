@@ -1,0 +1,162 @@
+.profile-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header {
+  span {
+    color: #60a5fa;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+
+  h1 {
+    color: #e5e7eb;
+    margin: 0.35rem 0;
+    font-size: 2rem;
+  }
+
+  p {
+    color: #9ca3af;
+    margin: 0;
+  }
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1.5rem;
+}
+
+.profile-card,
+.settings-card {
+  background: #1e293b;
+  border: 1px solid #374151;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin: 0 0 0.3rem;
+    color: #e5e7eb;
+  }
+
+  p {
+    margin: 0;
+    color: #9ca3af;
+  }
+}
+
+.avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(59, 130, 246, 0.16);
+  color: #60a5fa;
+  font-weight: 900;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+
+  &.full {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    color: #e5e7eb;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  input {
+    height: 46px;
+    border-radius: 12px;
+    border: 1px solid #374151;
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 0 1rem;
+    outline: none;
+
+    &:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+    }
+  }
+}
+
+.btn-primary {
+  margin-top: 1.25rem;
+  height: 46px;
+  padding: 0 1rem;
+  border: none;
+  border-radius: 12px;
+  background: #3b82f6;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+
+  &:hover {
+    background: #2563eb;
+  }
+}
+
+.settings-card {
+  h2 {
+    color: #e5e7eb;
+    margin: 0 0 1rem;
+  }
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(55, 65, 81, 0.6);
+
+  strong {
+    display: block;
+    color: #e5e7eb;
+    margin-bottom: 0.3rem;
+  }
+
+  span {
+    color: #9ca3af;
+    font-size: 0.9rem;
+  }
+
+  input {
+    accent-color: #3b82f6;
+  }
+}
+
+@media (max-width: 1100px) {
+  .profile-grid,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group.full {
+    grid-column: auto;
+  }
+}

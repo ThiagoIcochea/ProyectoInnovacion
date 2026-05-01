@@ -1,0 +1,81 @@
+<div class="api-settings-page">
+  <div class="page-header">
+    <div>
+      <span>Integración</span>
+      <h1>Configuración API</h1>
+      <p>Conecta tu inventario para sincronizar catálogo, stock y precios en tiempo real.</p>
+    </div>
+
+    <div class="status-pill">API conectada</div>
+  </div>
+
+  <div class="api-grid">
+    <section class="api-card">
+      <h2>Credenciales de conexión</h2>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Endpoint URL</label>
+          <input type="text" value="https://api.globaltech.com/v1/inventory" />
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de conexión</label>
+          <select>
+            <option>REST API</option>
+            <option>GraphQL</option>
+            <option>Webhook</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Puerto</label>
+          <input type="text" value="443" />
+        </div>
+
+        <div class="form-group">
+          <label>API Key / Token</label>
+          <input type="password" value="12345678901234567890" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-secondary">Probar conexión</button>
+        <button class="btn-primary">Guardar configuración</button>
+      </div>
+    </section>
+
+    <aside class="sync-card">
+      <h2>Estado de sincronización</h2>
+
+      <div class="sync-status">
+        <div class="sync-icon">✓</div>
+        <div>
+          <strong>Sincronización activa</strong>
+          <span>Última actualización: hoy, 09:45 AM</span>
+        </div>
+      </div>
+
+      <div class="sync-list">
+        <div>
+          <span>Productos sincronizados</span>
+          <strong>128</strong>
+        </div>
+
+        <div>
+          <span>Stock actualizado</span>
+          <strong>96%</strong>
+        </div>
+
+        <div>
+          <span>Errores recientes</span>
+          <strong class="text-warning">02</strong>
+        </div>
+      </div>
+
+      <div class="info-box">
+        NetProcure consultará esta API para validar disponibilidad antes de mostrarte como proveedor compatible.
+      </div>
+    </aside>
+  </div>
+</div>

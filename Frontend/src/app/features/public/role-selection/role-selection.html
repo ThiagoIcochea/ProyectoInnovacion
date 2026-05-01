@@ -1,0 +1,20 @@
+<div class="role-page">
+  <div class="role-header">
+    <div class="brand">NetProcure</div>
+    <h1>Selecciona tu rol</h1>
+    <p>Elige cómo deseas registrarte dentro de la plataforma.</p>
+  </div>
+
+  <div class="role-grid">
+    <a
+      class="role-card"
+      *ngFor="let role of roles"
+      [routerLink]="role.route"
+    >
+      <div class="role-card__icon">{{ role.icon }}</div>
+      <h3>{{ role.title }}</h3>
+      <p>{{ role.description }}</p>
+      <div class="role-card__action">Registrarme →</div>
+    </a>
+  </div>
+</div>

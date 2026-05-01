@@ -1,0 +1,95 @@
+<div class="results-page">
+  <section class="results-main">
+    <div class="page-title">
+      <a routerLink="/app/rfq/catalog" class="back-button">←</a>
+
+      <div>
+        <span>Paso 2 de 3</span>
+        <h1>Proveedores Compatibles</h1>
+        <p>
+          Estos proveedores pueden cubrir el 100% de los productos seleccionados
+          según tu RFQ.
+        </p>
+      </div>
+    </div>
+
+    <div class="success-alert">
+      <div class="success-alert__icon">✓</div>
+
+      <div>
+        <strong>Análisis y validación exitosos</strong>
+        <p>
+          Hemos consultado la red B2B mediante integraciones API en tiempo real.
+          3 proveedores cuentan con stock completo para atender tu solicitud.
+        </p>
+      </div>
+    </div>
+
+    <div class="provider-list">
+      <article class="provider-card" *ngFor="let provider of providers">
+        <div class="provider-card__top">
+          <div class="provider-icon">◎</div>
+
+          <div class="provider-info">
+            <h2>{{ provider.name }}</h2>
+            <p>⭐ {{ provider.rating }} ({{ provider.reviews }}) · {{ provider.location }}</p>
+          </div>
+
+          <div class="provider-badges">
+            <span *ngFor="let badge of provider.badges">{{ badge }}</span>
+          </div>
+        </div>
+
+        <div class="provider-metrics">
+          <div>
+            <span>Precio total de cotización</span>
+            <strong>{{ provider.price }}</strong>
+          </div>
+
+          <div>
+            <span>Tiempo estimado de entrega</span>
+            <strong>{{ provider.delivery }}</strong>
+          </div>
+        </div>
+
+        <div class="provider-actions">
+          <a routerLink="/app/rfq/quotation" class="btn-secondary">
+            Ver detalle de cotización
+          </a>
+
+          <a routerLink="/app/rfq/quotation" class="btn-primary">
+            Seleccionar proveedor
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <aside class="summary-panel">
+    <div class="summary-step">Paso 2 de 3</div>
+
+    <h2>Resumen de Solicitud</h2>
+    <p>ID: #RFQ-2026-0892</p>
+
+    <div class="summary-list">
+      <div class="summary-item" *ngFor="let item of summaryItems">
+        <div class="summary-thumb"></div>
+
+        <div>
+          <strong>{{ item.name }}</strong>
+          <span>{{ item.qty }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-box">
+      <span>Estado</span>
+      <strong>Esperando selección</strong>
+    </div>
+
+    <p class="summary-note">
+      Una vez seleccionado un proveedor, podrás revisar los términos de pago y
+      confirmar la transacción.
+    </p>
+  </aside>
+</div>

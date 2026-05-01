@@ -1,0 +1,42 @@
+.admin-integrations-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.integration-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.integration-card {
+  background: #1e293b;
+  border: 1px solid #374151;
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.integration-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status {
+  background: rgba(34,197,94,0.14);
+  color: #22c55e;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.status.error {
+  background: rgba(239,68,68,0.14);
+  color: #ef4444;
+}
+
+.actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}

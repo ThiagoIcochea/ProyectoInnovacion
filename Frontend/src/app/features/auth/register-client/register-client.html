@@ -1,0 +1,88 @@
+<div class="auth-page">
+  <div class="auth-shell">
+    <section class="auth-side">
+      <div class="auth-brand">NetProcure</div>
+
+      <div class="auth-side__content">
+        <span class="auth-kicker">Registro de cliente</span>
+
+        <h1>Compra infraestructura de red con mayor control.</h1>
+
+        <p>
+          Crea tu cuenta para generar RFQs, comparar proveedores y gestionar
+          compras de switches, routers, firewalls y otros equipos de networking.
+        </p>
+
+        <ul class="auth-benefits">
+          <li>Solicitudes RFQ para productos de red</li>
+          <li>Comparación de proveedores y tiempos de entrega</li>
+          <li>Seguimiento centralizado de órdenes</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="auth-form-panel">
+      <div class="auth-form-header">
+        <h2>Registro de Cliente</h2>
+        <p>Ingresa tus datos para crear tu cuenta corporativa.</p>
+      </div>
+
+      <form class="auth-form">
+        <div class="form-grid form-grid--2">
+          <div class="form-group">
+            <label for="nombres">Nombres</label>
+            <input id="nombres" type="text" placeholder="Tus nombres" />
+          </div>
+
+          <div class="form-group">
+            <label for="apellidos">Apellidos</label>
+            <input id="apellidos" type="text" placeholder="Tus apellidos" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="correo">Correo electrónico</label>
+          <input id="correo" type="email" placeholder="correo@empresa.com" />
+        </div>
+
+        <div class="form-grid form-grid--2">
+          <div class="form-group">
+            <label for="telefono">Teléfono</label>
+            <input id="telefono" type="text" placeholder="+51 987 654 321" />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Contraseña</label>
+            <input id="password" type="password" placeholder="••••••••" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="direccion">Dirección de domicilio / entrega</label>
+          <input
+            id="direccion"
+            type="text"
+            placeholder="Av. Principal 123, Distrito, Ciudad"
+          />
+        </div>
+
+        <label class="checkbox-row">
+          <input type="checkbox" />
+          <span>
+            He leído y acepto los
+            <a href="#">Términos y Condiciones</a>
+            y la
+            <a href="#">Política de Privacidad</a>.
+          </span>
+        </label>
+
+        <button type="button" class="btn-primary">Crear cuenta</button>
+      </form>
+
+      <div class="auth-form-footer">
+        <span>¿Ya tienes una cuenta?</span>
+        <a routerLink="/login">Inicia sesión aquí</a>
+      </div>
+    </section>
+  </div>
+</div>

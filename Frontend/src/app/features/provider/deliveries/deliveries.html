@@ -1,0 +1,138 @@
+<div class="provider-deliveries-page">
+  <div class="page-header">
+    <div>
+      <span>Logística</span>
+      <h1>Gestión de Entregas</h1>
+      <p>Administra órdenes activas, estados de despacho y confirmación de entrega.</p>
+    </div>
+  </div>
+
+  <div class="deliveries-grid">
+    <aside class="orders-card">
+      <div class="list-header">
+        <h2>Órdenes activas</h2>
+        <span>2 en progreso</span>
+      </div>
+
+      <div class="search-box">Buscar por ID de orden o cliente...</div>
+
+      <div class="order-list">
+        <button
+          class="order-item"
+          *ngFor="let order of orders"
+          [class.active]="order.active"
+        >
+          <div>
+            <strong>{{ order.id }}</strong>
+            <p>{{ order.client }}</p>
+            <small>{{ order.items }}</small>
+          </div>
+
+          <div class="order-meta">
+            <span>{{ order.time }}</span>
+            <em
+              [class.shipping]="order.status === 'En camino'"
+              [class.delivered]="order.status === 'Entregado'"
+            >
+              {{ order.status }}
+            </em>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <section class="delivery-detail-card">
+      <div class="detail-header">
+        <div>
+          <span class="status-pill">En preparación</span>
+          <h2>Orden ORD-2026-1045</h2>
+          <p>Destino: Sede principal, Lima</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="shipment-info">
+          <h3>Información de envío</h3>
+
+          <div class="info-grid">
+            <div>
+              <span>Cliente destino</span>
+              <strong>TechNova S.A.</strong>
+            </div>
+
+            <div>
+              <span>Contacto receptor</span>
+              <strong>Carlos Mendoza</strong>
+              <small>+51 987 654 321</small>
+            </div>
+
+            <div class="full">
+              <span>Dirección de entrega</span>
+              <strong>Av. República de Panamá 3418, Piso 5</strong>
+              <small>San Isidro, Lima, Perú</small>
+            </div>
+          </div>
+
+          <div class="instructions-box">
+            Entregar por rampa de carga subterránea. Presentar guía de remisión
+            en garita número 2.
+          </div>
+
+          <h3>Contenido del envío</h3>
+
+          <div class="shipment-table">
+            <div class="shipment-table__head">
+              <div>Producto</div>
+              <div>SKU</div>
+              <div>Cant.</div>
+            </div>
+
+            <div class="shipment-table__row" *ngFor="let item of shipmentProducts">
+              <div>{{ item.product }}</div>
+              <div>{{ item.sku }}</div>
+              <div>{{ item.qty }}</div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="delivery-progress-card">
+          <h3>Progreso de entrega</h3>
+
+          <div class="timeline">
+            <div
+              class="timeline-item"
+              *ngFor="let step of steps"
+              [ngClass]="step.status"
+            >
+              <div class="marker">
+                <span *ngIf="step.status === 'done'">✓</span>
+                <span *ngIf="step.status === 'active'">•</span>
+              </div>
+
+              <div>
+                <strong>{{ step.title }}</strong>
+                <p>{{ step.description }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="update-box">
+            <h3>Actualizar estado</h3>
+
+            <label>Nuevo estado</label>
+            <select>
+              <option>En preparación</option>
+              <option>En camino</option>
+              <option>Entregado</option>
+            </select>
+
+            <label>Código de entrega</label>
+            <input type="text" placeholder="Ej. NP-482913" />
+
+            <button>Actualizar tracking</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </div>
+</div>

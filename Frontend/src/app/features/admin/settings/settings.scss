@@ -1,0 +1,42 @@
+.admin-settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.settings-card {
+  background: #1e293b;
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group input,
+.form-group select {
+  background: #0f172a;
+  border: 1px solid #374151;
+  padding: 0.6rem;
+  border-radius: 8px;
+  color: white;
+}
+
+.toggle {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actions {
+  margin-top: 1.5rem;
+}

@@ -1,0 +1,31 @@
+<div class="admin-integrations-page">
+  <div class="page-header">
+    <div>
+      <span>Integraciones</span>
+      <h1>API & Conectores</h1>
+      <p>Gestiona servicios conectados al sistema.</p>
+    </div>
+  </div>
+
+  <div class="integration-grid">
+    <div class="integration-card" *ngFor="let item of integrations">
+      <div class="integration-header">
+        <h2>{{ item.name }}</h2>
+
+        <span
+          class="status"
+          [class.error]="item.status === 'Error'"
+        >
+          {{ item.status }}
+        </span>
+      </div>
+
+      <p>Última sincronización: {{ item.lastSync }}</p>
+
+      <div class="actions">
+        <button class="btn-secondary">Probar conexión</button>
+        <button class="btn-primary">Configurar</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,144 @@
+.payment-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-title {
+  span {
+    color: #60a5fa;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+
+  h1 {
+    color: #e5e7eb;
+    margin: 0.3rem 0;
+  }
+
+  p {
+    color: #9ca3af;
+    margin: 0;
+  }
+}
+
+.payment-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.5rem;
+}
+
+.payment-methods,
+.payment-summary {
+  background: #1e293b;
+  border: 1px solid #374151;
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.payment-methods h2,
+.payment-summary h2 {
+  color: #e5e7eb;
+  margin-bottom: 1rem;
+}
+
+.method-card {
+  padding: 1rem;
+  border: 1px solid #374151;
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: 0.2s;
+
+  strong {
+    color: #e5e7eb;
+  }
+
+  p {
+    color: #9ca3af;
+    margin: 0.25rem 0 0;
+  }
+
+  &:hover {
+    background: #273449;
+  }
+
+  &.active {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.12);
+  }
+}
+
+.upload-box {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px dashed #374151;
+  border-radius: 12px;
+  text-align: center;
+
+  p {
+    color: #9ca3af;
+    margin-bottom: 0.5rem;
+  }
+
+  button {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+}
+
+.summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  span {
+    color: #9ca3af;
+  }
+
+  strong {
+    color: #e5e7eb;
+  }
+}
+
+.total {
+  border-top: 1px solid #374151;
+  padding-top: 0.75rem;
+
+  strong {
+    color: #60a5fa;
+    font-size: 1.2rem;
+  }
+}
+
+.confirm-btn {
+  width: 100%;
+  margin-top: 1rem;
+  height: 44px;
+  border-radius: 10px;
+  background: #3b82f6;
+  border: none;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+
+  &:hover {
+    background: #2563eb;
+  }
+}
+
+@media (max-width: 1100px) {
+  .payment-grid {
+    grid-template-columns: 1fr;
+  }
+}

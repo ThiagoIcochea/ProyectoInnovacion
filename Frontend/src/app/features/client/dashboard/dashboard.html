@@ -1,0 +1,88 @@
+<div class="dashboard-page">
+  <section class="dashboard-main">
+    <div class="hero-grid">
+      <div class="hero-card">
+        <span class="hero-card__badge">Cotización inteligente</span>
+        <h1>Cotización Inteligente B2B</h1>
+        <p>
+          Agrega los equipos de red que necesitas y nuestro sistema encontrará
+          proveedores compatibles con stock, mejor precio y menor tiempo de entrega.
+        </p>
+
+        <a routerLink="/app/rfq/catalog" class="hero-card__action">
+          Iniciar RFQ →
+        </a>
+      </div>
+
+      <div class="promo-card">
+        <span>Patrocinado</span>
+        <div class="promo-card__icon">▣</div>
+        <h3>Rack Servers Dell</h3>
+        <p>Descuentos exclusivos para compras B2B.</p>
+        <button>Ver oferta</button>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div>
+        <h2>Productos más recomendados</h2>
+        <p>
+          Equipos destacados por valoración de clientes empresariales,
+          estabilidad operativa y desempeño en implementaciones de red.
+        </p>
+      </div>
+
+      <span>Ranking por reseñas verificadas</span>
+    </div>
+
+    <div class="product-grid">
+      <div class="product-card" *ngFor="let product of recommendedProducts">
+        <div class="product-card__image">
+          <span>{{ product.tag }}</span>
+        </div>
+
+        <div class="product-card__tags">
+          <span>{{ product.brand }}</span>
+          <span>{{ product.type }}</span>
+        </div>
+
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description }}</p>
+
+        <button class="product-card__button">Agregar al RFQ</button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="request-panel">
+    <div class="request-panel__step">Paso 1 de 3</div>
+
+    <h2>Solicitud de Cotización</h2>
+    <p>{{ requestItems.length }} modelos de equipos seleccionados</p>
+
+    <div class="alert-box">
+      El sistema mostrará únicamente proveedores con stock para todos los
+      equipos de esta lista.
+    </div>
+
+    <div class="request-list">
+      <div class="request-item" *ngFor="let item of requestItems">
+        <div class="request-item__thumb"></div>
+
+        <div class="request-item__content">
+          <strong>{{ item.name }}</strong>
+
+          <div class="qty-control">
+            <button>-</button>
+            <span>{{ item.qty }}</span>
+            <button>+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a routerLink="/app/rfq/results" class="request-panel__button">
+      Buscar Proveedores
+    </a>
+  </aside>
+</div>

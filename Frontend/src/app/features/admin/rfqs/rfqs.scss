@@ -1,0 +1,42 @@
+.admin-rfqs-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rfqs-card {
+  background: #1e293b;
+  border: 1px solid #374151;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.rfqs-card__header {
+  padding: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.rfqs-table__head,
+.rfqs-table__row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  padding: 1rem;
+}
+
+.status {
+  background: rgba(34,197,94,0.14);
+  color: #22c55e;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.status.warning {
+  background: rgba(245,158,11,0.14);
+  color: #f59e0b;
+}
+
+.status.danger {
+  background: rgba(239,68,68,0.14);
+  color: #ef4444;
+}

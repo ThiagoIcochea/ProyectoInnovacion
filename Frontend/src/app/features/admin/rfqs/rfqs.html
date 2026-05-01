@@ -1,0 +1,46 @@
+<div class="admin-rfqs-page">
+  <div class="page-header">
+    <div>
+      <span>Gestión RFQ</span>
+      <h1>Solicitudes RFQ</h1>
+      <p>Monitorea todas las solicitudes del sistema.</p>
+    </div>
+  </div>
+
+  <section class="rfqs-card">
+    <div class="rfqs-card__header">
+      <h2>Listado de RFQs</h2>
+      <div class="search-box">Buscar por ID, cliente o proveedor...</div>
+    </div>
+
+    <div class="rfqs-table">
+      <div class="rfqs-table__head">
+        <div>ID</div>
+        <div>Cliente</div>
+        <div>Proveedor</div>
+        <div>Monto</div>
+        <div>Estado</div>
+        <div>Fecha</div>
+      </div>
+
+      <div class="rfqs-table__row" *ngFor="let rfq of rfqs">
+        <div class="code">{{ rfq.id }}</div>
+        <div>{{ rfq.client }}</div>
+        <div>{{ rfq.provider }}</div>
+        <div>{{ rfq.amount }}</div>
+
+        <div>
+          <span
+            class="status"
+            [class.warning]="rfq.status === 'En proceso'"
+            [class.danger]="rfq.status === 'Cancelado'"
+          >
+            {{ rfq.status }}
+          </span>
+        </div>
+
+        <div>{{ rfq.date }}</div>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,27 @@
+import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+
+@Component({
+  selector: 'app-role-selection',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  templateUrl: './role-selection.html',
+  styleUrl: './role-selection.scss'
+})
+export class RoleSelectionComponent {
+  roles = [
+    {
+      title: 'Cliente',
+      description: 'Gestiona RFQs, compara proveedores y realiza compras de infraestructura de red.',
+      icon: '🧑‍💼',
+      route: '/register-client'
+    },
+    {
+      title: 'Proveedor',
+      description: 'Recibe solicitudes, cotiza productos de red y gestiona entregas.',
+      icon: '🏭',
+      route: '/register-provider'
+    }
+  ];
+}

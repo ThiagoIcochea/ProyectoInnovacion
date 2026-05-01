@@ -1,0 +1,199 @@
+<div class="catalog-page">
+  <aside class="filters-panel">
+    <div class="filter-section">
+      <div class="filter-header">
+        <h3>Categorías</h3>
+      </div>
+
+      <label class="check-row">
+        <input type="checkbox" />
+        <span>Routers</span>
+        <small>12</small>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" checked />
+        <span>Switches</span>
+        <small>45</small>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" />
+        <span>Access Points</span>
+        <small>28</small>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" />
+        <span>Firewalls</span>
+        <small>8</small>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" />
+        <span>Transceivers & Cables</span>
+        <small>112</small>
+      </label>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-header">
+        <h3>Marcas</h3>
+      </div>
+
+      <label class="check-row">
+        <input type="checkbox" checked />
+        <span>Cisco</span>
+        <small>124</small>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" checked />
+        <span>Ubiquiti</span>
+        <small>85</small>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" />
+        <span>Fortinet</span>
+        <small>42</small>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" />
+        <span>Aruba</span>
+        <small>38</small>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" />
+        <span>Mikrotik</span>
+        <small>15</small>
+      </label>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-header">
+        <h3>Precio estimado</h3>
+      </div>
+
+      <div class="price-row">
+        <input type="text" placeholder="Min $" />
+        <input type="text" placeholder="Max $" />
+      </div>
+
+      <button class="filter-button">Aplicar filtro</button>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-header">
+        <h3>Puertos</h3>
+      </div>
+
+      <label class="check-row">
+        <input type="checkbox" />
+        <span>8 Puertos</span>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" />
+        <span>16 Puertos</span>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" checked />
+        <span>24 Puertos</span>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox" checked />
+        <span>48 Puertos</span>
+      </label>
+    </div>
+  </aside>
+
+  <section class="catalog-content">
+    <div class="catalog-header">
+      <div>
+        <span>Inicio › Catálogo › Switches</span>
+        <h1>Equipos de Red - Switches</h1>
+      </div>
+
+      <div class="sort-box">
+        <label>Ordenar por:</label>
+        <select>
+          <option>Relevancia</option>
+          <option>Stock local</option>
+          <option>Precio referencial</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="product-grid">
+      <div class="product-card" *ngFor="let product of products">
+        <div class="product-image"></div>
+
+        <div class="product-body">
+          <div class="product-meta">
+            <span>{{ product.brand }}</span>
+            <strong>{{ product.badge }}</strong>
+          </div>
+
+          <h3>{{ product.name }}</h3>
+          <p>{{ product.description }}</p>
+
+          <div class="product-footer">
+            <span>Ref: {{ product.ref }}</span>
+            <button>+ Agregar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="request-panel">
+    <div class="request-panel__header">
+      <h2>Panel de Solicitud</h2>
+      <span>2 ítems</span>
+    </div>
+
+    <div class="request-list">
+      <div class="request-item" *ngFor="let item of requestItems">
+        <div class="request-thumb"></div>
+
+        <div class="request-info">
+          <strong>{{ item.name }}</strong>
+          <small>{{ item.detail }}</small>
+
+          <div class="qty-row">
+            <span>Cant:</span>
+            <button>-</button>
+            <strong>{{ item.qty }}</strong>
+            <button>+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="request-summary">
+      <div>
+        <span>Equipos distintos:</span>
+        <strong>2</strong>
+      </div>
+
+      <div>
+        <span>Cantidad total:</span>
+        <strong>47 unidades</strong>
+      </div>
+    </div>
+
+    <div class="info-box">
+      Modo RFQ Estricto: se buscarán proveedores que puedan cotizar y entregar
+      todos los ítems seleccionados en una sola orden.
+    </div>
+
+    <a routerLink="/app/rfq/results" class="primary-action">
+      Buscar Proveedores RFQ →
+    </a>
+  </aside>
+</div>
