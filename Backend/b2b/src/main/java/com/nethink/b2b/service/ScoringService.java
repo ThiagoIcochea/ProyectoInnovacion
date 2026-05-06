@@ -1,6 +1,8 @@
 package com.nethink.b2b.service;
 
+import com.nethink.b2b.dto.request.RFQRequest;
 import com.nethink.b2b.dto.response.RFQProveedorResponse;
+import com.nethink.b2b.entity.enums.PrioridadRFQ;
 import com.nethink.b2b.repository.ComentarioRepository;
 import com.nethink.b2b.repository.EvaluacionRepository;
 import com.nethink.b2b.repository.ReclamoRepository;
@@ -23,35 +25,68 @@ public class ScoringService {
         this.comentarioRepo = comentarioRepo;
     }
 
-    public void calcularScore(List<RFQProveedorResponse> proveedores) {
+    public void calcularScore(List<RFQProveedorResponse> proveedores,
+                              PrioridadRFQ prioridad) {
+
+        if (proveedores == null || proveedores.isEmpty()) return;
+
+        double wPrecio = 0.4;
+        double wTiempo = 0.3;
+        double wCalidad = 0.3;
+
+        if (prioridad == null) {
+            prioridad = PrioridadRFQ.BALANCEADO;
+        }
+
+        if (prioridad == PrioridadRFQ.PRECIO) {
+            wPrecio = 0.6;
+            wTiempo = 0.2;
+            wCalidad = 0.2;
+        }
+
+        if (prioridad == PrioridadRFQ.TIEMPO) {
+            wPrecio = 0.2;
+            wTiempo = 0.6;
+            wCalidad = 0.2;
+        }
+
+        if (prioridad == PrioridadRFQ.CALIDAD) {
+            wPrecio = 0.2;
+            wTiempo = 0.2;
+            wCalidad = 0.6;
+        }
 
         double mejorPrecio = proveedores.stream()
-                .mapToDouble(RFQProveedorResponse::getTotalCotizacion)
+                .mapToDouble(p -> p.getTotalCotizacion() != null ? p.getTotalCotizacion() : Double.MAX_VALUE)
                 .min()
                 .orElse(1);
 
         double mejorTiempo = proveedores.stream()
-                .mapToInt(RFQProveedorResponse::getTiempoEntregaPromedio)
+                .mapToInt(p -> p.getTiempoEntregaPromedio() != null ? p.getTiempoEntregaPromedio() : Integer.MAX_VALUE)
                 .min()
                 .orElse(1);
 
         for (RFQProveedorResponse p : proveedores) {
 
-            double scorePrecio = mejorPrecio / p.getTotalCotizacion();
-            double scoreTiempo = (double) mejorTiempo / p.getTiempoEntregaPromedio();
+            double precio = p.getTotalCotizacion() != null ? p.getTotalCotizacion() : Double.MAX_VALUE;
+            double tiempo = p.getTiempoEntregaPromedio() != null ? p.getTiempoEntregaPromedio() : Integer.MAX_VALUE;
+
+            double scorePrecio = mejorPrecio / precio;
+            double scoreTiempo = mejorTiempo / tiempo;
             double scoreCalidad = calcularCalidad(p.getIdProveedor());
 
             double scoreFinal =
-                    (0.4 * scorePrecio) +
-                    (0.3 * scoreTiempo) +
-                    (0.3 * scoreCalidad);
+                    (wPrecio * scorePrecio) +
+                    (wTiempo * scoreTiempo) +
+                    (wCalidad * scoreCalidad);
 
             p.setScoreFinal(scoreFinal);
         }
     }
 
-    // 🔴 CALIDAD REAL (EVALUACIONES + COMENTARIOS + RECLAMOS)
     private double calcularCalidad(Integer idProveedor) {
+
+        if (idProveedor == null) return 3.0;
 
         Double evaluacion = evaluacionRepo.promedioCalidad(idProveedor);
 
@@ -60,18 +95,20 @@ public class ScoringService {
 
         Integer reclamos = reclamoRepo.contarReclamos(idProveedor);
 
-        double base = (evaluacion != null) ? evaluacion : 3.5;
+        double base = evaluacion != null ? evaluacion : 3.5;
 
-        // comentarios influyen directamente
-        double impactoComentarios = (positivos * 0.1) - (negativos * 0.2);
+        int pos = positivos != null ? positivos : 0;
+        int neg = negativos != null ? negativos : 0;
+        int rec = reclamos != null ? reclamos : 0;
 
-        // reclamos penalizan más fuerte
-        double impactoReclamos = reclamos * 0.3;
+        double impactoComentarios = (pos * 0.1) - (neg * 0.2);
+        double impactoReclamos = rec * 0.3;
 
         double calidadFinal = base + impactoComentarios - impactoReclamos;
 
         if (calidadFinal < 1) return 1;
+        if (calidadFinal > 5) return 5;
 
-        return Math.min(calidadFinal, 5);
+        return calidadFinal;
     }
 }

@@ -6,9 +6,12 @@ public class FiltroRFQRequest {
 
     private Double precioMin;
     private Double precioMax;
-
+    private List<Integer> categorias;
     private List<Integer> marcas;
     private List<String> especificaciones;
+
+    public FiltroRFQRequest() {
+    }
 
     public Double getPrecioMin() {
         return precioMin;
@@ -24,6 +27,14 @@ public class FiltroRFQRequest {
 
     public void setPrecioMax(Double precioMax) {
         this.precioMax = precioMax;
+    }
+
+    public List<Integer> getCategorias() {
+        return categorias;
+    }
+
+    public void setCategorias(List<Integer> categorias) {
+        this.categorias = categorias;
     }
 
     public List<Integer> getMarcas() {

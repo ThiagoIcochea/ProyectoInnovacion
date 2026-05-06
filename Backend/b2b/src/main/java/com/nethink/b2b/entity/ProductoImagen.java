@@ -20,7 +20,7 @@ public class ProductoImagen {
 
     private Integer orden;
 
-    private String fuente;
+   
 
     public ProductoImagen() {}
 
@@ -64,11 +64,5 @@ public class ProductoImagen {
         this.orden = orden;
     }
 
-    public String getFuente() {
-        return fuente;
-    }
-
-    public void setFuente(String fuente) {
-        this.fuente = fuente;
-    }
+   
 }

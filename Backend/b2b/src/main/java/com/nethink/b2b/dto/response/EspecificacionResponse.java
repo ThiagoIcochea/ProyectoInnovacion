@@ -7,6 +7,11 @@ public class EspecificacionResponse {
 
     public EspecificacionResponse() {}
 
+    public EspecificacionResponse(String nombre, String valor) {
+        this.nombre = nombre;
+        this.valor = valor;
+    }
+    
     public String getNombre() {
         return nombre;
     }

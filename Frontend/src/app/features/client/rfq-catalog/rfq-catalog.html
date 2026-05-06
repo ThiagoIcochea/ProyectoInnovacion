@@ -1,199 +1,119 @@
 <div class="catalog-page">
+
   <aside class="filters-panel">
     <div class="filter-section">
-      <div class="filter-header">
-        <h3>Categorías</h3>
+      <div class="filter-header"><h3>Categorías</h3></div>
+      <div *ngFor="let cat of filtros.categorias" class="category-item-group">
+        <label class="check-row">
+          <input type="checkbox" (change)="toggleFiltro('cat', cat.id)" [checked]="selectedCategories.includes(cat.id)" />
+          <span>{{ cat.nombre }}</span>
+          <small>{{ cat.cantidad }}</small>
+        </label>
+        <div class="specs-inline-input" *ngIf="selectedCategories.includes(cat.id)">
+          <input type="text" [(ngModel)]="specsPorCategoria[cat.id]" 
+                 placeholder="Espec. para {{cat.nombre}}..." class="mini-input">
+        </div>
       </div>
-
-      <label class="check-row">
-        <input type="checkbox" />
-        <span>Routers</span>
-        <small>12</small>
-      </label>
-
-      <label class="check-row">
-        <input type="checkbox" checked />
-        <span>Switches</span>
-        <small>45</small>
-      </label>
-
-      <label class="check-row">
-        <input type="checkbox" />
-        <span>Access Points</span>
-        <small>28</small>
-      </label>
-
-      <label class="check-row">
-        <input type="checkbox" />
-        <span>Firewalls</span>
-        <small>8</small>
-      </label>
-
-      <label class="check-row">
-        <input type="checkbox" />
-        <span>Transceivers & Cables</span>
-        <small>112</small>
-      </label>
     </div>
 
     <div class="filter-section">
-      <div class="filter-header">
-        <h3>Marcas</h3>
-      </div>
-
-      <label class="check-row">
-        <input type="checkbox" checked />
-        <span>Cisco</span>
-        <small>124</small>
-      </label>
-
-      <label class="check-row">
-        <input type="checkbox" checked />
-        <span>Ubiquiti</span>
-        <small>85</small>
-      </label>
-
-      <label class="check-row">
-        <input type="checkbox" />
-        <span>Fortinet</span>
-        <small>42</small>
-      </label>
-
-      <label class="check-row">
-        <input type="checkbox" />
-        <span>Aruba</span>
-        <small>38</small>
-      </label>
-
-      <label class="check-row">
-        <input type="checkbox" />
-        <span>Mikrotik</span>
-        <small>15</small>
+      <div class="filter-header"><h3>Marcas</h3></div>
+      <label class="check-row" *ngFor="let m of filtros.marcas">
+        <input type="checkbox" (change)="toggleFiltro('marca', m.id)" [checked]="selectedBrands.includes(m.id)" />
+        <span>{{ m.nombre }}</span>
+        <small>{{ m.cantidad }}</small>
       </label>
     </div>
 
-    <div class="filter-section">
-      <div class="filter-header">
-        <h3>Precio estimado</h3>
-      </div>
-
-      <div class="price-row">
-        <input type="text" placeholder="Min $" />
-        <input type="text" placeholder="Max $" />
-      </div>
-
-      <button class="filter-button">Aplicar filtro</button>
-    </div>
-
-    <div class="filter-section">
-      <div class="filter-header">
-        <h3>Puertos</h3>
-      </div>
-
-      <label class="check-row">
-        <input type="checkbox" />
-        <span>8 Puertos</span>
-      </label>
-
-      <label class="check-row">
-        <input type="checkbox" />
-        <span>16 Puertos</span>
-      </label>
-
-      <label class="check-row">
-        <input type="checkbox" checked />
-        <span>24 Puertos</span>
-      </label>
-
-      <label class="check-row">
-        <input type="checkbox" checked />
-        <span>48 Puertos</span>
-      </label>
-    </div>
+    <button class="filter-button" (click)="aplicarFiltrosRefinado()">
+      Filtrar Catálogo
+    </button>
   </aside>
 
   <section class="catalog-content">
     <div class="catalog-header">
-      <div>
-        <span>Inicio › Catálogo › Switches</span>
-        <h1>Equipos de Red - Switches</h1>
-      </div>
-
-      <div class="sort-box">
-        <label>Ordenar por:</label>
-        <select>
-          <option>Relevancia</option>
-          <option>Stock local</option>
-          <option>Precio referencial</option>
-        </select>
-      </div>
+      <h1>Catálogo de Equipos</h1>
     </div>
 
     <div class="product-grid">
-      <div class="product-card" *ngFor="let product of products">
-        <div class="product-image"></div>
-
+      <div class="product-card" *ngFor="let product of paginatedProducts">
+        <div class="product-image-container">
+          <img [src]="product.imagenes?.[0]?.url || 'assets/no-image.png'" class="product-img">
+        </div>
         <div class="product-body">
           <div class="product-meta">
-            <span>{{ product.brand }}</span>
-            <strong>{{ product.badge }}</strong>
+            <span class="brand-label">{{ product.marca }}</span>
+            <span class="category-badge">{{ product.categoria }}</span>
+          </div>
+          <h3>{{ product.producto }}</h3>
+          
+          <div class="specs-mini-grid" *ngIf="product.especificaciones?.length">
+            <span class="spec-pill" *ngFor="let s of product.especificaciones.slice(0,3)">
+              {{ s.nombre }}: {{ s.valor }}
+            </span>
           </div>
 
-          <h3>{{ product.name }}</h3>
-          <p>{{ product.description }}</p>
-
+          <p class="description">{{ product.descripcion }}</p>
           <div class="product-footer">
-            <span>Ref: {{ product.ref }}</span>
-            <button>+ Agregar</button>
+            <span class="product-id">#{{ product.idProducto }}</span>
+            <button class="add-button" (click)="agregarProducto(product)">+ Agregar</button>
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="pagination-container" *ngIf="products.length > pageSize">
+      <button class="pag-btn" (click)="prevPage()" [disabled]="currentPage === 1">Anterior</button>
+      <span class="pag-info">{{ currentPage }} / {{ totalPages }}</span>
+      <button class="pag-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
     </div>
   </section>
 
   <aside class="request-panel">
     <div class="request-panel__header">
-      <h2>Panel de Solicitud</h2>
-      <span>2 ítems</span>
+      <h2>Mi Solicitud</h2>
+      <span>{{ requestItems.length }} ítems</span>
     </div>
 
     <div class="request-list">
       <div class="request-item" *ngFor="let item of requestItems">
-        <div class="request-thumb"></div>
-
         <div class="request-info">
-          <strong>{{ item.name }}</strong>
-          <small>{{ item.detail }}</small>
-
+          <div class="request-top">
+            <strong>{{ item.name }}</strong>
+            <button (click)="eliminarDelCarrito(item)" class="btn-remove">✕</button>
+          </div>
           <div class="qty-row">
-            <span>Cant:</span>
-            <button>-</button>
+            <button (click)="disminuir(item)">-</button>
             <strong>{{ item.qty }}</strong>
-            <button>+</button>
+            <button (click)="aumentar(item)">+</button>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="request-summary">
-      <div>
-        <span>Equipos distintos:</span>
-        <strong>2</strong>
+    <div class="request-config">
+      <div class="config-item">
+        <label>Prioridad:</label>
+        <select [(ngModel)]="prioridad" class="priority-select">
+          <option value="BALANCEADO">Balanceado</option>
+          <option value="PRECIO">Precio</option>
+          <option value="TIEMPO">Tiempo</option>
+          <option value="CALIDAD">Calidad</option>
+        </select>
       </div>
 
-      <div>
-        <span>Cantidad total:</span>
-        <strong>47 unidades</strong>
+      <div class="config-item">
+        <label>Presupuesto:</label>
+        <div class="price-inputs">
+          <input type="number" [(ngModel)]="precioMin" placeholder="Min">
+          <input type="number" [(ngModel)]="precioMax" placeholder="Max">
+        </div>
       </div>
     </div>
 
-    <div class="info-box">
-      Modo RFQ Estricto: se buscarán proveedores que puedan cotizar y entregar
-      todos los ítems seleccionados en una sola orden.
-    </div>
-
-    <a routerLink="/app/rfq/results" class="primary-action">
+    <button (click)="buscarProveedoresRFQ()" class="primary-action" [disabled]="requestItems.length === 0">
       Buscar Proveedores RFQ →
-    </a>
+    </button>
   </aside>
+
 </div>

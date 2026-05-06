@@ -5,6 +5,9 @@ public class ItemRFQRequest {
     private Integer idProducto;
     private Integer cantidad;
 
+    public ItemRFQRequest() {
+    }
+
     public Integer getIdProducto() {
         return idProducto;
     }

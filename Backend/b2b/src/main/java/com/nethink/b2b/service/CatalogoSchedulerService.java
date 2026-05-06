@@ -12,8 +12,5 @@ public class CatalogoSchedulerService {
         this.syncService = syncService;
     }
 
-    @Scheduled(fixedDelayString = "#{@configService.getValor('SYNC_INTERVAL')}")
-    public void sincronizarAutomatico() {
-        syncService.sincronizarTodos();
-    }
+ 
 }

@@ -3,9 +3,18 @@ package com.nethink.b2b.dto.response;
 public class ItemCotizadoResponse {
 
     private String producto;
+    private String nombreProducto;
     private Integer cantidad;
     private Double precioUnitario;
     private Double subtotal;
+   
+     public String getNombreProducto() {
+        return nombreProducto;
+    }
+
+    public void setNombreProducto(String nombreProducto) {
+        this.nombreProducto = nombreProducto;
+    }
 
     public String getProducto() {
         return producto;

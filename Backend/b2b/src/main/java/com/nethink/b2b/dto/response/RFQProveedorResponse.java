@@ -5,6 +5,7 @@ import java.util.List;
 public class RFQProveedorResponse {
 
     private Integer idProveedor;
+    private String nombreProveedor;
     private String razonSocial;
 
     private Double totalCotizacion;
@@ -19,6 +20,14 @@ public class RFQProveedorResponse {
 
     public void setIdProveedor(Integer idProveedor) {
         this.idProveedor = idProveedor;
+    }
+
+     public String getNombreProveedor() {
+        return nombreProveedor;
+    }
+
+    public void setNombreProveedor(String nombreProveedor) {
+        this.nombreProveedor = nombreProveedor;
     }
 
     public String getRazonSocial() {

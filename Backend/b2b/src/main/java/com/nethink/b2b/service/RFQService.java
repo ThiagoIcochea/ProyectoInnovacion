@@ -1,45 +1,96 @@
 package com.nethink.b2b.service;
 
+import com.nethink.b2b.dto.request.ItemRFQRequest;
 import com.nethink.b2b.dto.request.RFQRequest;
+import com.nethink.b2b.dto.response.ItemCotizadoResponse;
 import com.nethink.b2b.dto.response.RFQProveedorResponse;
-import com.nethink.b2b.service.MatchingService;
-import com.nethink.b2b.service.PricingService;
-import com.nethink.b2b.service.ScoringService;
+import com.nethink.b2b.entity.ProveedorProducto;
+import com.nethink.b2b.repository.ProveedorProductoRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RFQService {
 
-    private final MatchingService matchingService;
-    private final PricingService pricingService;
+    private final ProveedorProductoRepository provProdRepo;
     private final ScoringService scoringService;
 
-    public RFQService(MatchingService matchingService,
-                      PricingService pricingService,
-                      ScoringService scoringService) {
-        this.matchingService = matchingService;
-        this.pricingService = pricingService;
+    public RFQService(ProveedorProductoRepository provProdRepo, ScoringService scoringService) {
+        this.provProdRepo = provProdRepo;
         this.scoringService = scoringService;
     }
 
-    public List<RFQProveedorResponse> generarCotizacion(RFQRequest request) {
+    // Nombre cambiado para coincidir con tu Controller
+    public List<RFQProveedorResponse> buscarYCalificarProveedores(RFQRequest request) {
+        List<Integer> idsProductos = request.getItems().stream()
+                .map(ItemRFQRequest::getIdProducto)
+                .toList();
 
-        
-        List<Integer> proveedoresValidos =
-                matchingService.encontrarProveedores(request);
+        List<Integer> proveedoresIds = provProdRepo.findProveedoresConTodosLosProductos(
+                idsProductos, 
+                idsProductos.size()
+        );
 
-        
-        List<RFQProveedorResponse> cotizaciones =
-                pricingService.calcularCotizaciones(request, proveedoresValidos);
+        if (proveedoresIds.isEmpty()) return new ArrayList<>();
 
-      
-        scoringService.calcularScore(cotizaciones);
+        List<ProveedorProducto> detalles = provProdRepo.findDetallesParaScoring(proveedoresIds, idsProductos);
+        Map<Integer, List<ProveedorProducto>> porProveedor = detalles.stream()
+                .collect(Collectors.groupingBy(pp -> pp.getProveedor().getIdProveedor()));
 
-       
-        return cotizaciones.stream()
-                .sorted((a, b) -> Double.compare(b.getScoreFinal(), a.getScoreFinal()))
+        List<RFQProveedorResponse> candidatos = new ArrayList<>();
+
+        for (Map.Entry<Integer, List<ProveedorProducto>> entry : porProveedor.entrySet()) {
+            List<ProveedorProducto> stockProv = entry.getValue();
+            double totalCotizacion = 0;
+            int tiempoMaximo = 0;
+            boolean cumpleStock = true;
+            
+            List<ItemCotizadoResponse> itemsDetalle = new ArrayList<>();
+
+            for (ItemRFQRequest itemReq : request.getItems()) {
+                ProveedorProducto pp = stockProv.stream()
+                        .filter(p -> p.getProducto().getIdProducto().equals(itemReq.getIdProducto()))
+                        .findFirst().orElse(null);
+
+                if (pp != null && pp.getStock() >= itemReq.getCantidad()) {
+                    double precioUnitario = pp.getPrecio().doubleValue();
+                    double subtotal = precioUnitario * itemReq.getCantidad();
+                    
+                    totalCotizacion += subtotal;
+                    if (pp.getTiempoEntregaDias() > tiempoMaximo) tiempoMaximo = pp.getTiempoEntregaDias();
+
+                    ItemCotizadoResponse itemDetalle = new ItemCotizadoResponse();
+                    itemDetalle.setNombreProducto(pp.getProducto().getNombre());
+                    itemDetalle.setCantidad(itemReq.getCantidad());
+                    itemDetalle.setPrecioUnitario(precioUnitario);
+                    itemDetalle.setSubtotal(subtotal);
+                    itemsDetalle.add(itemDetalle);
+                } else {
+                    cumpleStock = false;
+                    break;
+                }
+            }
+
+            if (cumpleStock) {
+                if (request.getFiltro().getPrecioMin() != null && totalCotizacion < request.getFiltro().getPrecioMin()) continue;
+                if (request.getFiltro().getPrecioMax() != null && totalCotizacion > request.getFiltro().getPrecioMax()) continue;
+
+                RFQProveedorResponse resp = new RFQProveedorResponse();
+                resp.setIdProveedor(entry.getKey());
+                resp.setNombreProveedor(stockProv.get(0).getProveedor().getRazonSocial());
+                resp.setTotalCotizacion(totalCotizacion);
+                resp.setTiempoEntregaPromedio(tiempoMaximo);
+                resp.setItems(itemsDetalle); 
+                candidatos.add(resp);
+            }
+        }
+
+        scoringService.calcularScore(candidatos, request.getPrioridad());
+
+        return candidatos.stream()
+                .sorted(Comparator.comparingDouble(RFQProveedorResponse::getScoreFinal).reversed())
                 .limit(10)
                 .toList();
     }
