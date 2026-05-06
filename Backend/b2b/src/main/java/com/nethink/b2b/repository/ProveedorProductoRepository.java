@@ -10,9 +10,10 @@ import org.springframework.data.repository.query.Param;
 public interface ProveedorProductoRepository 
         extends JpaRepository<ProveedorProducto, Integer> {
 
-    Optional<ProveedorProducto> findByProveedor_IdProveedorAndProducto_IdProducto(
-            Integer idProveedor, 
-            Integer idProducto
+    @Query("SELECT pp FROM ProveedorProducto pp WHERE pp.proveedor.idProveedor = :idProveedor AND pp.producto.idProducto = :idProducto")
+    Optional<ProveedorProducto> buscarPorProveedorYProducto(
+            @Param("idProveedor") Integer idProveedor, 
+            @Param("idProducto") Integer idProducto
     );
 
     @Query(value = """

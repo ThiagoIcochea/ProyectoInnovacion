@@ -9,10 +9,7 @@ import com.nethink.b2b.repository.ConfiguracionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- *
- * @author thico
- */
+
 @Service
 public class ConfigService {
 

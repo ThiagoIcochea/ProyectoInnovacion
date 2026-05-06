@@ -1,6 +1,6 @@
 package com.nethink.b2b.controller;
 
-import com.nethink.b2b.dto.request.FiltroRFQRequest; // Importa tu DTO de filtros
+import com.nethink.b2b.dto.request.FiltroRFQRequest; 
 import com.nethink.b2b.dto.response.CatalogoFiltrosResponse;
 import com.nethink.b2b.entity.Producto;
 import com.nethink.b2b.service.ProductoService;

@@ -11,9 +11,7 @@ public class ProveedorApiService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // =========================
-    // REST
-    // =========================
+ 
     public String consumirREST(String url, String token) {
 
         HttpHeaders headers = new HttpHeaders();
@@ -34,9 +32,7 @@ public class ProveedorApiService {
         return response.getBody();
     }
 
-    // =========================
-    // GRAPHQL
-    // =========================
+   
     public String consumirGraphQL(String url, String token, String query) {
 
         HttpHeaders headers = new HttpHeaders();

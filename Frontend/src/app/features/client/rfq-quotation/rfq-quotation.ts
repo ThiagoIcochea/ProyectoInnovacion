@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { RouterLink, Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-rfq-quotation',
@@ -9,23 +10,69 @@ import { RouterLink } from '@angular/router';
   templateUrl: './rfq-quotation.html',
   styleUrl: './rfq-quotation.scss'
 })
-export class RfqQuotationComponent {
-  products = [
-    {
-      name: 'Cisco Catalyst 9300 48-port PoE+',
-      sku: 'C9300-48P-E',
-      qty: 2,
-      price: 'US$ 3,600.00',
-      discount: '-',
-      subtotal: 'US$ 7,200.00'
-    },
-    {
-      name: 'Ubiquiti UniFi UAP-AC-PRO',
-      sku: 'UAP-AC-PRO-US',
-      qty: 15,
-      price: 'US$ 300.00',
-      discount: '10% volumen',
-      subtotal: 'US$ 4,050.00'
+export class RfqQuotationComponent implements OnInit {
+  provider: any = null;
+  products: any[] = [];
+  subtotal: number = 0;
+  igv: number = 0;
+  total: number = 0;
+  fechaValidez: string = '';
+
+  constructor(private router: Router, private http: HttpClient) {}
+
+  ngOnInit(): void {
+    const data = localStorage.getItem('selected_provider');
+    if (!data) {
+      this.router.navigate(['/app/rfq/results']);
+      return;
     }
-  ];
+    this.provider = JSON.parse(data);
+    this.products = this.provider.items || [];
+    this.calcularMontos();
+    this.establecerFechaValidez();
+  }
+
+  calcularMontos(): void {
+    this.total = this.provider.totalCotizacion;
+    this.subtotal = this.total / 1.18;
+    this.igv = this.total - this.subtotal;
+  }
+
+  establecerFechaValidez(): void {
+    const fecha = new Date();
+    fecha.setDate(fecha.getDate() + 7);
+    this.fechaValidez = fecha.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  confirmarOrden() {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+
+    const body = {
+      idProveedor: this.provider.idProveedor,
+      subtotal: this.subtotal,
+      igv: this.igv,
+      total: this.total,
+      direccionEnvio: "Sede Central Cliente",
+      items: this.products.map(p => ({
+        idProducto: p.idProducto, 
+        cantidad: p.cantidad,
+        precioUnitario: p.precioUnitario
+      }))
+    };
+
+    this.http.post<any>('http://localhost:8080/api/solicitudes/crear', body, { headers })
+      .subscribe({
+        next: (res) => {
+          if (res && res.idSolicitud) {
+            localStorage.setItem('current_solicitud_id', res.idSolicitud.toString());
+            this.router.navigate(['/app/rfq/payment']);
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Error al crear la solicitud en el servidor');
+        }
+      });
+  }
 }

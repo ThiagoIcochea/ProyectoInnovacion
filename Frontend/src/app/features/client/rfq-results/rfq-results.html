@@ -5,27 +5,19 @@
       <div>
         <span>Paso 2 de 3</span>
         <h1>Proveedores Compatibles</h1>
-        <p>Ranking de los mejores proveedores para tu orden basado en tu prioridad y presupuesto.</p>
+        <p>Selecciona la mejor opción para proceder con tu orden de compra.</p>
       </div>
     </div>
 
-    <!-- Alerta dinámica según resultados del ScoringService -->
     <div class="success-alert" *ngIf="providers.length > 0">
       <div class="success-alert__icon">✓</div>
       <div>
         <strong>Análisis de Scoring completado</strong>
-        <p>
-          Se han encontrado {{ providers.length }} proveedores que cubren el 100% de tu solicitud actual.
-        </p>
+        <p>Se han encontrado {{ providers.length }} proveedores que cumplen con el 100% de tu mix de productos.</p>
       </div>
     </div>
 
-    <div class="no-results-alert" *ngIf="providers.length === 0">
-      <p>No se encontraron proveedores que cumplan con todos los requisitos. Intenta ajustar los filtros o la prioridad.</p>
-    </div>
-
     <div class="provider-list">
-      <!-- Iteración del TOP 10 enviado por el Backend -->
       <article class="provider-card" *ngFor="let provider of providers; let i = index">
         <div class="provider-card__top">
           <div class="provider-icon">#{{ i + 1 }}</div>
@@ -54,28 +46,22 @@
         </div>
 
         <div class="provider-actions">
-          <button (click)="verDetalle(provider)" class="btn-secondary">
-            Ver desglose de costos
-          </button>
-
+          <!-- Botón único para avanzar directamente -->
           <button (click)="seleccionarProveedor(provider)" class="btn-primary">
-            Seleccionar Proveedor
+            Seleccionar este proveedor y ver detalle →
           </button>
         </div>
       </article>
     </div>
   </section>
 
-  <!-- Panel lateral con el resumen del carrito local -->
   <aside class="summary-panel">
     <div class="summary-header">
       <h2>Resumen de Solicitud</h2>
-      <p>ID Transaccional: #RFQ-2026-{{ providers.length }}</p>
     </div>
 
     <div class="summary-list">
       <div class="summary-item" *ngFor="let item of summaryItems">
-        <div class="summary-thumb"></div>
         <div class="item-details">
           <strong>{{ item.name }}</strong>
           <span>Cantidad: {{ item.qty }} unidades</span>
@@ -84,54 +70,8 @@
     </div>
 
     <div class="status-box">
-      <span>Estado de la Solicitud</span>
-      <strong>Esperando Selección</strong>
+      <span>Estado</span>
+      <strong>Esperando selección</strong>
     </div>
-
-    <p class="summary-note">
-      Al seleccionar un proveedor, pasarás al Paso 3 para revisar los términos finales y generar la orden de compra.
-    </p>
   </aside>
-
-  <!-- 🔹 MODAL DE DESGLOSE DE COSTOS -->
-  <div class="modal-overlay" *ngIf="showModal" (click)="cerrarModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Desglose: {{ selectedProvDetails?.nombreProveedor }}</h2>
-        <button class="close-btn" (click)="cerrarModal()">✕</button>
-      </div>
-      
-      <div class="modal-body">
-        <table class="details-table">
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Cant.</th>
-              <th>P. Unitario</th>
-              <th>Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of selectedProvDetails?.items">
-              <td>{{ item.nombreProducto }}</td>
-              <td>{{ item.cantidad }}</td>
-              <td>S/ {{ item.precioUnitario | number:'1.2-2' }}</td>
-              <td>S/ {{ item.subtotal | number:'1.2-2' }}</td>
-            </tr>
-          </tbody>
-        </table>
-        
-        <div class="total-summary">
-          <span>Total Final de Cotización:</span>
-          <strong>S/ {{ selectedProvDetails?.totalCotizacion | number:'1.2-2' }}</strong>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn-primary" (click)="seleccionarProveedor(selectedProvDetails)">
-          Confirmar y Seleccionar
-        </button>
-      </div>
-    </div>
-  </div>
 </div>

@@ -1,5 +1,6 @@
 package com.nethink.b2b.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -16,10 +17,12 @@ public class Producto {
 
     @ManyToOne
     @JoinColumn(name = "id_marca")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) 
     private Marca marca;
 
     @ManyToOne
     @JoinColumn(name = "id_categoria")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) 
     private Categoria categoria;
 
     private String descripcion;

@@ -54,14 +54,14 @@ public class ProductoService {
 
    
     public List<CatalogoResponse> filtrarCatalogo(FiltroRFQRequest filtro) {
-    // 1. Si no hay filtros, retornar todo el catálogo
+    
     if ((filtro.getCategorias() == null || filtro.getCategorias().isEmpty()) && 
         (filtro.getMarcas() == null || filtro.getMarcas().isEmpty()) &&
         (filtro.getEspecificaciones() == null || filtro.getEspecificaciones().isEmpty())) {
         return catalogoService.listarCatalogo(); 
     }
 
-    // 2. Obtener productos por Categoría/Marca
+  
     List<Producto> productos = productoRepository.buscarConFiltros(
         filtro.getCategorias(), 
         filtro.getMarcas()
@@ -69,7 +69,7 @@ public class ProductoService {
 
     if (productos.isEmpty()) return new ArrayList<>();
 
-    // 3. Unir con especificaciones en memoria
+    
     List<Integer> ids = productos.stream().map(Producto::getIdProducto).collect(Collectors.toList());
     List<ProductoEspecificacion> todasLasSpecs = especificacionesRepository.findByProducto_IdProductoIn(ids);
     Map<Integer, List<ProductoEspecificacion>> specsMap = todasLasSpecs.stream()
@@ -84,11 +84,11 @@ public class ProductoService {
                 .collect(Collectors.toList()));
             return dto;
         })
-        // 4. FILTRO DE SIMILITUD CORREGIDO (anyMatch)
+        
         .filter(dto -> {
             if (filtro.getEspecificaciones() == null || filtro.getEspecificaciones().isEmpty()) return true;
             
-            // Verifica que todas las palabras buscadas existan en alguna especificación
+        
             return filtro.getEspecificaciones().stream().allMatch(busqueda -> 
                 dto.getEspecificaciones().stream().anyMatch(s -> 
                     (s.getNombre() + " " + s.getValor()).toLowerCase().contains(busqueda.toLowerCase())

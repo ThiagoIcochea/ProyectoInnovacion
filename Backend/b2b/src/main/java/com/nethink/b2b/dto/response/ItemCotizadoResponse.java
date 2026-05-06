@@ -2,13 +2,24 @@ package com.nethink.b2b.dto.response;
 
 public class ItemCotizadoResponse {
 
+    private Integer idProducto;
     private String producto;
     private String nombreProducto;
     private Integer cantidad;
     private Double precioUnitario;
     private Double subtotal;
-   
-     public String getNombreProducto() {
+
+    public ItemCotizadoResponse() {}
+
+    public Integer getIdProducto() {
+        return idProducto;
+    }
+
+    public void setIdProducto(Integer idProducto) {
+        this.idProducto = idProducto;
+    }
+
+    public String getNombreProducto() {
         return nombreProducto;
     }
 

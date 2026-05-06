@@ -14,9 +14,7 @@ public class PricingService {
             List<Integer> proveedores
     ) {
 
-        // aquí conectas con proveedor_producto
-        // y calculas total por proveedor
-
+       
         return proveedores.stream().map(id -> {
 
             RFQProveedorResponse r = new RFQProveedorResponse();

@@ -7,9 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ComentarioRepository extends JpaRepository<Comentario, Integer> {
 
-    // =========================
-    // NEGATIVOS (OPTIMIZADO)
-    // =========================
+  
   @Query("""
     SELECT COUNT(c)
     FROM Comentario c

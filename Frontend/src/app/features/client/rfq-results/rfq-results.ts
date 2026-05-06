@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 
 @Component({
@@ -12,15 +12,8 @@ import { RouterLink, Router } from '@angular/router';
 export class RfqResultsComponent implements OnInit {
   providers: any[] = [];
   summaryItems: any[] = [];
-  
-  // 🔹 Variables para el Modal
-  showModal: boolean = false;
-  selectedProvDetails: any = null;
 
-  constructor(
-    private router: Router,
-    private cdr: ChangeDetectorRef // Necesario para refrescar el modal
-  ) {
+  constructor(private router: Router) {
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras.state && navigation.extras.state['proveedores']) {
       this.providers = navigation.extras.state['proveedores'];
@@ -38,18 +31,8 @@ export class RfqResultsComponent implements OnInit {
     }
   }
 
-  verDetalle(provider: any): void {
-    this.selectedProvDetails = provider;
-    this.showModal = true;
-    this.cdr.detectChanges();
-  }
-
-  cerrarModal(): void {
-    this.showModal = false;
-    this.selectedProvDetails = null;
-  }
-
   seleccionarProveedor(provider: any): void {
+    // Guardamos el objeto completo (incluyendo el array 'items' del backend)
     localStorage.setItem('selected_provider', JSON.stringify(provider));
     this.router.navigate(['/app/rfq/quotation']);
   }

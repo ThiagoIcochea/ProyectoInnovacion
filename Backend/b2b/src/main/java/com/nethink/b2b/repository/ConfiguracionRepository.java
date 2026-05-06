@@ -8,10 +8,6 @@ import com.nethink.b2b.entity.Configuracion;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-/**
- *
- * @author thico
- */
 public interface ConfiguracionRepository extends JpaRepository<Configuracion, Integer> {
     Optional<Configuracion> findByClave(String clave);
 }

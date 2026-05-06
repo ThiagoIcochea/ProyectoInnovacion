@@ -7,8 +7,5 @@ package com.nethink.b2b.repository;
 import com.nethink.b2b.entity.LogsApi;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-/**
- *
- * @author thico
- */
+
 public interface LogsApiRepository extends JpaRepository<LogsApi, Integer> {}

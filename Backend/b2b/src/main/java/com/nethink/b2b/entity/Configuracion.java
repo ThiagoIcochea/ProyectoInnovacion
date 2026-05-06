@@ -26,9 +26,7 @@ public class Configuracion {
 
     private String valor;
     
-     // =========================
-    // GETTERS
-    // =========================
+   
 
     public Integer getId() {
         return id;
@@ -42,9 +40,7 @@ public class Configuracion {
         return valor;
     }
 
-    // =========================
-    // SETTERS
-    // =========================
+ 
 
     public void setId(Integer id) {
         this.id = id;

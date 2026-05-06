@@ -22,7 +22,6 @@ public class RFQService {
         this.scoringService = scoringService;
     }
 
-    // Nombre cambiado para coincidir con tu Controller
     public List<RFQProveedorResponse> buscarYCalificarProveedores(RFQRequest request) {
         List<Integer> idsProductos = request.getItems().stream()
                 .map(ItemRFQRequest::getIdProducto)
@@ -62,6 +61,8 @@ public class RFQService {
                     if (pp.getTiempoEntregaDias() > tiempoMaximo) tiempoMaximo = pp.getTiempoEntregaDias();
 
                     ItemCotizadoResponse itemDetalle = new ItemCotizadoResponse();
+                    itemDetalle.setIdProducto(pp.getProducto().getIdProducto());
+                    itemDetalle.setProducto(pp.getProducto().getNombre());
                     itemDetalle.setNombreProducto(pp.getProducto().getNombre());
                     itemDetalle.setCantidad(itemReq.getCantidad());
                     itemDetalle.setPrecioUnitario(precioUnitario);
@@ -80,6 +81,7 @@ public class RFQService {
                 RFQProveedorResponse resp = new RFQProveedorResponse();
                 resp.setIdProveedor(entry.getKey());
                 resp.setNombreProveedor(stockProv.get(0).getProveedor().getRazonSocial());
+                resp.setRazonSocial(stockProv.get(0).getProveedor().getRazonSocial());
                 resp.setTotalCotizacion(totalCotizacion);
                 resp.setTiempoEntregaPromedio(tiempoMaximo);
                 resp.setItems(itemsDetalle); 

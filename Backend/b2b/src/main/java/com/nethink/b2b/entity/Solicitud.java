@@ -86,9 +86,7 @@ public class Solicitud {
         CLIENTE, PROVEEDOR, SISTEMA
     }
 
-    // =========================
-    // GETTERS & SETTERS
-    // =========================
+   
 
     public Integer getIdSolicitud() {
         return idSolicitud;
