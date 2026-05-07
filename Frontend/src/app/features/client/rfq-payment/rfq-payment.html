@@ -1,71 +1,103 @@
 <div class="payment-page">
+
   <div class="page-title">
     <h1>Confirmación de Pago</h1>
     <p>Solicitud: #{{ solicitudId }} para {{ provider?.nombreProveedor }}</p>
   </div>
 
   <div class="payment-grid">
+
     <section class="payment-main">
-      
+
+      <!-- 🔵 MAPA EN RECTÁNGULO (NO ROMPE FLUJO) -->
       <div class="step-section">
-        <h3>1. Confirmar Dirección de Entrega</h3>
-        <input type="text" [(ngModel)]="direccionEntrega" placeholder="Ingrese dirección exacta de entrega" class="full-input">
+
+        <h3>1. Seleccionar dirección de entrega</h3>
+
+        <div class="map-container">
+          <div id="map"></div>
+        </div>
+
+        <input type="text"
+               [(ngModel)]="direccionEntrega"
+               placeholder="Dirección seleccionada desde el mapa"
+               class="full-input">
+
       </div>
 
+      <!-- 🔵 METODOS DE PAGO (INTACTO) -->
       <div class="step-section">
+
         <h3>2. Cuentas bancarias del proveedor</h3>
+
         <div class="methods-list">
-          <div class="method-card" *ngFor="let m of metodosPago" 
-               [class.active]="selectedMetodo === m" (click)="selectedMetodo = m">
+
+          <div class="method-card"
+               *ngFor="let m of metodosPago"
+               [class.active]="selectedMetodo === m"
+               (click)="selectedMetodo = m">
+
             <div class="card-check" *ngIf="selectedMetodo === m">✓</div>
+
             <strong>{{ m.entidad }}</strong>
             <p>N° Cuenta: {{ m.numeroCuenta }}</p>
-            <small>Tipo: {{ m.tipo }}</small>
+            <small>{{ m.tipo }}</small>
+
           </div>
-          <div *ngIf="metodosPago.length === 0" class="no-data">
-            Cargando métodos de pago del proveedor...
-          </div>
+
         </div>
+
       </div>
 
+      <!-- 🔵 COMPROBANTE (INTACTO) -->
       <div class="upload-section" *ngIf="selectedMetodo">
-        <h3>3. Datos de la Operación ({{ selectedMetodo.entidad }})</h3>
+
+        <h3>3. Datos de la Operación</h3>
+
         <div class="form-row">
           <label>Nro. de Operación:</label>
           <input type="text" [(ngModel)]="codigoOperacion" placeholder="Ej: 00213456">
         </div>
-        
+
         <div class="form-row">
-          <label>Adjuntar Comprobante (Imagen):</label>
-          <input type="file" (change)="onFileSelected($event)" accept="image/*" class="file-input">
+          <label>Adjuntar Comprobante:</label>
+          <input type="file" (change)="onFileSelected($event)" accept="image/*">
         </div>
-        
+
         <div class="preview-box" *ngIf="previewUrl">
-          <p>Vista previa del voucher:</p>
           <img [src]="previewUrl" class="voucher-preview">
         </div>
+
       </div>
+
     </section>
 
+    <!-- 🔵 RESUMEN (INTACTO) -->
     <aside class="payment-summary">
+
       <h3>Resumen de Solicitud</h3>
-      <div class="summary-details">
-        <div class="summary-row">
-          <span>Proveedor:</span>
-          <strong>{{ provider?.nombreProveedor }}</strong>
-        </div>
-        <div class="summary-row total-big">
-          <span>Total a pagar:</span>
-          <strong>S/ {{ provider?.totalCotizacion | number:'1.2-2' }}</strong>
-        </div>
+
+      <div class="summary-row">
+        <span>Proveedor:</span>
+        <strong>{{ provider?.nombreProveedor }}</strong>
       </div>
-      
-      <button class="confirm-btn" 
-              [disabled]="!archivoCaptura || !selectedMetodo || !codigoOperacion" 
+
+      <div class="summary-row total-big">
+        <span>Total a pagar:</span>
+        <strong>S/ {{ provider?.totalCotizacion | number:'1.2-2' }}</strong>
+      </div>
+
+      <button class="confirm-btn"
+              [disabled]="!archivoCaptura || !selectedMetodo || !codigoOperacion || !direccionEntrega"
               (click)="confirmarPago()">
         Confirmar y Finalizar Pedido
       </button>
-      <p class="terms-note">Al confirmar, el proveedor validará el pago para iniciar el envío.</p>
+
+      <p class="terms-note">
+        Al confirmar, el proveedor validará el pago.
+      </p>
+
     </aside>
+
   </div>
 </div>

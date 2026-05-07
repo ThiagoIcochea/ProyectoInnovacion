@@ -3,9 +3,13 @@ package com.nethink.b2b.controller;
 import com.nethink.b2b.dto.request.SolicitudCrearRequest;
 import com.nethink.b2b.entity.MetodoPago;
 import com.nethink.b2b.entity.Solicitud;
+import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.repository.MetodoPagoRepository;
+import com.nethink.b2b.repository.SolicitudRepository;
+import com.nethink.b2b.repository.UsuarioRepository;
 import com.nethink.b2b.service.PagoService;
 import com.nethink.b2b.service.SolicitudService;
+import com.nethink.b2b.dto.response.TrackingResponse;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,14 +23,26 @@ public class SolicitudController {
     private final SolicitudService solicitudService;
     private final MetodoPagoRepository metodoPagoRepository; 
     private final PagoService pagoService;
+    private final UsuarioRepository usuarioRepo;
+    private final SolicitudRepository solicitudRepo;
 
     public SolicitudController(SolicitudService solicitudService, 
                                MetodoPagoRepository metodoPagoRepository, 
-                               PagoService pagoService) {
+                               PagoService pagoService, UsuarioRepository usuarioRepo, SolicitudRepository solicitudRepo) {
         this.solicitudService = solicitudService;
         this.metodoPagoRepository = metodoPagoRepository;
         this.pagoService = pagoService;
+        this.usuarioRepo = usuarioRepo;
+        this.solicitudRepo=solicitudRepo;
     }
+    
+    @GetMapping("/mis-solicitudes")
+public ResponseEntity<List<Solicitud>> listarMisSolicitudes(Principal principal) {
+   
+    Usuario usuario = usuarioRepo.findByCorreo(principal.getName()).orElseThrow();
+    return ResponseEntity.ok(solicitudRepo.findByUsuarioOptimized(usuario.getIdUsuario()));
+}
+
 
     @PostMapping("/crear")
     public ResponseEntity<?> crear(@RequestBody SolicitudCrearRequest request, Principal principal) {
@@ -39,19 +55,40 @@ public class SolicitudController {
         return ResponseEntity.ok(metodoPagoRepository.findByIdProveedor(idProveedor));
     }
 
-    @PostMapping(value = "/{idSolicitud}/pagar", consumes = "multipart/form-data")
-    public ResponseEntity<?> pagar(@PathVariable Integer idSolicitud,
-                                   @RequestParam("archivo") MultipartFile archivo,
-                                   @RequestParam("entidad") String entidad,
-                                   @RequestParam("codigoOperacion") String codigoOperacion,
-                                   @RequestParam("monto") Double monto,
-                                   @RequestParam("metodo") String metodo,
-                                   @RequestParam("direccion") String direccion) {
-        try {
-            return ResponseEntity.ok(pagoService.registrarPago(idSolicitud, archivo, entidad, 
-                                     codigoOperacion, monto, metodo, direccion));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error al procesar el pago: " + e.getMessage());
-        }
+  @PostMapping(value = "/{idSolicitud}/pagar", consumes = "multipart/form-data")
+public ResponseEntity<?> pagar(
+        @PathVariable Integer idSolicitud,
+        @RequestParam("archivo") MultipartFile archivo,
+        @RequestParam("entidad") String entidad,
+        @RequestParam("codigoOperacion") String codigoOperacion,
+        @RequestParam("metodo") String metodo,
+        @RequestParam("direccion") String direccion
+) {
+
+    try {
+
+        return ResponseEntity.ok(
+                pagoService.registrarPago(
+                        idSolicitud,
+                        archivo,
+                        entidad,
+                        codigoOperacion,
+                        metodo,
+                        direccion
+                )
+        );
+
+    } catch (Exception e) {
+
+        return ResponseEntity.internalServerError()
+                .body("Error al procesar el pago: " + e.getMessage());
     }
+}
+    
+  @GetMapping("/{idSolicitud}/tracking")
+public ResponseEntity<?> tracking(@PathVariable Integer idSolicitud) {
+    return ResponseEntity.ok(
+            solicitudService.obtenerTracking(idSolicitud)
+    );
+}
 }

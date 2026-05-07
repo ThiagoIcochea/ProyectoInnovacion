@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-requests',
@@ -9,34 +10,129 @@ import { RouterLink } from '@angular/router';
   templateUrl: './requests.html',
   styleUrl: './requests.scss'
 })
-export class RequestsComponent {
-  requests = [
-    {
-      code: 'RFQ-2026-0892',
-      provider: 'Global Tech Solutions S.A.C.',
-      items: '2 modelos / 17 unidades',
-      amount: 'US$ 12,744.00',
-      date: '21 Abr 2026',
-      status: 'En preparación',
-      statusClass: 'preparing'
-    },
-    {
-      code: 'RFQ-2026-0741',
-      provider: 'CompuRedes Corporativas',
-      items: '3 modelos / 24 unidades',
-      amount: 'US$ 8,930.00',
-      date: '18 Abr 2026',
-      status: 'En camino',
-      statusClass: 'shipping'
-    },
-    {
-      code: 'RFQ-2026-0618',
-      provider: 'NetWorks Corp',
-      items: '1 modelo / 10 unidades',
-      amount: 'US$ 4,250.00',
-      date: '15 Abr 2026',
-      status: 'Entregado',
-      statusClass: 'delivered'
+export class RequestsComponent implements OnInit {
+
+  requests: any[] = [];
+
+  summary = {
+    activas: 0,
+    preparacion: 0,
+    camino: 0,
+    entregadas: 0
+  };
+
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.cargarSolicitudes();
+  }
+
+  cargarSolicitudes(): void {
+
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      return;
     }
-  ];
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    this.http.get<any[]>(
+      'http://localhost:8080/api/solicitudes/mis-solicitudes',
+      { headers }
+    )
+    .subscribe({
+      next: (res) => {
+
+        this.requests = res.map(s => ({
+          id: s.idSolicitud,
+
+          code: `RFQ-2026-${s.idSolicitud
+            .toString()
+            .padStart(4, '0')}`,
+
+          provider:
+            s.idProveedor === 1
+              ? 'Cosapi Data'
+              : s.idProveedor === 2
+              ? 'Global Tech'
+              : 'Proveedor #' + s.idProveedor,
+
+         amount: `S/ ${Number(s.total || 0).toFixed(2)}`,
+
+          date: new Date(s.fechaCreacion)
+            .toLocaleDateString('es-PE', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric'
+            }),
+
+          status: this.mapStatusText(s.estado),
+          statusClass: this.mapStatusClass(s.estado),
+          rawStatus: s.estado
+        }));
+
+        this.calcularResumen();
+
+        this.cdr.detectChanges();
+      },
+
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
+
+  private mapStatusText(estado: string): string {
+
+    const map: any = {
+      PAGO_PENDIENTE: 'Pendiente pago',
+      PAGO_VALIDANDO: 'Validando pago',
+      ESPERANDO_ENVIO: 'En preparación',
+      EN_CAMINO: 'En camino',
+      ENTREGADA: 'Entregado'
+    };
+
+    return map[estado] || estado;
+  }
+
+  private mapStatusClass(estado: string): string {
+
+    const map: any = {
+      PAGO_PENDIENTE: 'pending',
+      PAGO_VALIDANDO: 'validating',
+      ESPERANDO_ENVIO: 'preparing',
+      EN_CAMINO: 'shipping',
+      ENTREGADA: 'delivered'
+    };
+
+    return map[estado] || 'default';
+  }
+
+  private calcularResumen(): void {
+
+    this.summary.activas = this.requests.length;
+
+    this.summary.preparacion =
+      this.requests.filter(r =>
+        r.rawStatus === 'PAGO_VALIDANDO' ||
+        r.rawStatus === 'ESPERANDO_ENVIO'
+      ).length;
+
+    this.summary.camino =
+      this.requests.filter(r =>
+        r.rawStatus === 'EN_CAMINO'
+      ).length;
+
+    this.summary.entregadas =
+      this.requests.filter(r =>
+        r.rawStatus === 'ENTREGADA' ||
+        r.rawStatus === 'COMPLETADA'
+      ).length;
+  }
 }

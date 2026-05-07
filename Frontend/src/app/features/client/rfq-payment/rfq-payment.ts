@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import * as L from 'leaflet';
 
 @Component({
   selector: 'app-rfq-payment',
@@ -11,20 +12,29 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './rfq-payment.html',
   styleUrl: './rfq-payment.scss'
 })
-export class RfqPaymentComponent implements OnInit {
+export class RfqPaymentComponent implements OnInit, AfterViewInit {
+
   solicitudId: number = 0;
   provider: any = null;
   metodosPago: any[] = [];
-  
   selectedMetodo: any = null;
   codigoOperacion: string = '';
-  direccionEntrega: string = ''; 
+  direccionEntrega: string = '';
   archivoCaptura: File | null = null;
   previewUrl: string | null = null;
+  totalSolicitud: number = 0;
+  fechaEntregaEstimada: string = '';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  map: any;
+  marker: any;
+
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+
     const id = localStorage.getItem('current_solicitud_id');
     const provData = localStorage.getItem('selected_provider');
 
@@ -35,61 +45,101 @@ export class RfqPaymentComponent implements OnInit {
 
     this.solicitudId = Number(id);
     this.provider = JSON.parse(provData);
+    this.totalSolicitud = Number(this.provider.total);
+
     this.cargarCuentasDelProveedor(this.provider.idProveedor);
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.initMap(), 200);
   }
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 
-  cargarCuentasDelProveedor(idProv: number) {
-    this.http.get<any[]>(`http://localhost:8080/api/solicitudes/proveedor/${idProv}/metodos-pago`, { headers: this.getAuthHeaders() })
-      .subscribe({
-        next: (res) => {
-          this.metodosPago = res;
-        },
-        error: (err) => console.error("Error cargando cuentas:", err)
-      });
+  initMap(): void {
+
+    this.map = L.map('map').setView([-12.0464, -77.0428], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(this.map);
+
+    this.map.on('click', async (e: any) => {
+
+      const { lat, lng } = e.latlng;
+
+      if (this.marker) {
+        this.map.removeLayer(this.marker);
+      }
+
+      this.marker = L.marker([lat, lng]).addTo(this.map);
+
+      this.direccionEntrega = 'Buscando dirección...';
+
+      const res: any = await this.http.get(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+      ).toPromise();
+
+      const addr = res.address;
+
+      const calle = addr.road || addr.pedestrian || '';
+      const numero = addr.house_number || '';
+      const distrito = addr.suburb || addr.city || '';
+
+      this.direccionEntrega = `${calle} ${numero}, ${distrito}`.trim();
+    });
   }
 
-  onFileSelected(event: any) {
+  onFileSelected(event: any): void {
+
     const file = event.target.files[0];
+
     if (file) {
       this.archivoCaptura = file;
+
       const reader = new FileReader();
       reader.onload = () => this.previewUrl = reader.result as string;
       reader.readAsDataURL(file);
     }
   }
 
-  confirmarPago() {
+  confirmarPago(): void {
+
     if (!this.selectedMetodo || !this.codigoOperacion || !this.archivoCaptura || !this.direccionEntrega) {
-      alert('Debe seleccionar cuenta, ingresar código, confirmar dirección y subir el voucher.');
+      alert('Complete todos los datos');
       return;
     }
 
     const formData = new FormData();
+
     formData.append('archivo', this.archivoCaptura);
     formData.append('entidad', this.selectedMetodo.entidad);
     formData.append('codigoOperacion', this.codigoOperacion);
-    formData.append('monto', this.provider.totalCotizacion.toString());
+    formData.append('monto', this.totalSolicitud.toString());
     formData.append('metodo', this.selectedMetodo.tipo);
-    formData.append('direccion', this.direccionEntrega); 
+    formData.append('direccion', this.direccionEntrega);
 
-    this.http.post(`http://localhost:8080/api/solicitudes/${this.solicitudId}/pagar`, formData, { headers: this.getAuthHeaders() })
-      .subscribe({
-        next: () => {
-          alert('¡Pago registrado con éxito!');
-          localStorage.removeItem('rfq_cart');
-          localStorage.removeItem('current_solicitud_id');
-          localStorage.removeItem('selected_provider');
-          this.router.navigate(['/app/requests']);
-        },
-        error: (err) => {
-          console.error(err);
-          alert('Error al procesar el registro de pago.');
-        }
-      });
+    this.http.post(
+      `http://localhost:8080/api/solicitudes/${this.solicitudId}/pagar`,
+      formData,
+      { headers: this.getAuthHeaders() }
+    ).subscribe({
+      next: () => {
+        alert('Pago registrado correctamente');
+        this.router.navigate(['/app/requests']);
+      },
+      error: () => alert('Error en pago')
+    });
+  }
+
+  cargarCuentasDelProveedor(idProv: number): void {
+
+    this.http.get<any[]>(
+      `http://localhost:8080/api/solicitudes/proveedor/${idProv}/metodos-pago`,
+      { headers: this.getAuthHeaders() }
+    ).subscribe(res => this.metodosPago = res);
   }
 }

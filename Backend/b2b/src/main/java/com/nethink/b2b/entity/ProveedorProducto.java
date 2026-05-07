@@ -1,6 +1,7 @@
 package com.nethink.b2b.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,7 +21,7 @@ public class ProveedorProducto {
     @JoinColumn(name = "id_producto")
     private Producto producto;
 
-    private Double precio;
+    private BigDecimal precio;
     private Integer stock;
 
     @Column(name = "tiempo_entrega_dias")
@@ -63,11 +64,11 @@ public class ProveedorProducto {
         this.producto = producto;
     }
 
-    public Double getPrecio() {
+    public BigDecimal  getPrecio() {
         return precio;
     }
 
-    public void setPrecio(Double precio) {
+    public void setPrecio(BigDecimal precio) {
         this.precio = precio;
     }
 

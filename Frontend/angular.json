@@ -30,9 +30,10 @@
                 "input": "public"
               }
             ],
-            "styles": [
-  "src/styles/styles.scss"
-          ]
+         "styles": [
+  "src/styles/styles.scss",
+  "node_modules/leaflet/dist/leaflet.css"
+]
           },
           "configurations": {
             "production": {

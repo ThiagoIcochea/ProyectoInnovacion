@@ -3,59 +3,41 @@
     <div>
       <span>Gestión post-compra</span>
       <h1>Mis Solicitudes</h1>
-      <p>
-        Revisa el estado de tus solicitudes, realiza seguimiento y evalúa a tus proveedores.
-      </p>
+      <p>Revisa el estado real de tus órdenes y realiza el seguimiento.</p>
     </div>
-
-    <a routerLink="/app/rfq/catalog" class="btn-primary">
-      Nueva RFQ
-    </a>
+    <a routerLink="/app/rfq/catalog" class="btn-primary">Nueva RFQ</a>
   </div>
 
   <div class="summary-grid">
     <div class="summary-card">
-      <span>Solicitudes activas</span>
-      <strong>08</strong>
+      <span>Solicitudes totales</span>
+      <strong>{{ summary.activas | number:'2.0-0' }}</strong>
     </div>
-
     <div class="summary-card">
       <span>En preparación</span>
-      <strong>03</strong>
+      <strong>{{ summary.preparacion | number:'2.0-0' }}</strong>
     </div>
-
     <div class="summary-card">
       <span>En camino</span>
-      <strong>02</strong>
+      <strong>{{ summary.camino | number:'2.0-0' }}</strong>
     </div>
-
     <div class="summary-card">
       <span>Entregadas</span>
-      <strong>03</strong>
+      <strong>{{ summary.entregadas | number:'2.0-0' }}</strong>
     </div>
   </div>
 
   <section class="requests-card">
     <div class="requests-card__header">
-      <div>
-        <h2>Solicitudes recientes</h2>
-        <p>Listado de procesos RFQ activos y entregados recientemente.</p>
-      </div>
-
-      <div class="filter-actions">
-        <button>Todos</button>
-        <button>Activos</button>
-        <button>Entregados</button>
-      </div>
+      <h2>Historial Reciente</h2>
     </div>
 
     <div class="requests-table">
       <div class="requests-table__head">
         <div>Código</div>
         <div>Proveedor</div>
-        <div>Ítems</div>
-        <div>Monto</div>
-        <div>Fecha</div>
+        <div>Monto Total</div>
+        <div>Fecha Creación</div>
         <div>Estado</div>
         <div>Acciones</div>
       </div>
@@ -63,8 +45,7 @@
       <div class="requests-table__row" *ngFor="let request of requests">
         <div class="request-code">{{ request.code }}</div>
         <div>{{ request.provider }}</div>
-        <div>{{ request.items }}</div>
-        <div>{{ request.amount }}</div>
+        <strong>{{ request.amount }}</strong>
         <div>{{ request.date }}</div>
         <div>
           <span class="status-badge" [ngClass]="request.statusClass">
@@ -72,15 +53,12 @@
           </span>
         </div>
         <div class="actions">
-          <a routerLink="/app/requests/tracking" class="btn-secondary">
+          <a [routerLink]="['/app/requests/tracking', request.id]" class="btn-secondary">
             Tracking
           </a>
-
-          <a
-            *ngIf="request.statusClass === 'delivered'"
-            routerLink="/app/requests/evaluation"
-            class="btn-primary-small"
-          >
+          <a *ngIf="request.statusClass === 'delivered'" 
+             [routerLink]="['/app/requests/evaluation', request.id]" 
+             class="btn-primary-small">
             Evaluar
           </a>
         </div>

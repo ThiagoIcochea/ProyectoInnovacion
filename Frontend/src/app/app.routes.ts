@@ -66,11 +66,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/client/requests/requests').then(m => m.RequestsComponent)
       },
-      {
-        path: 'requests/tracking',
-        loadComponent: () =>
-          import('./features/client/request-tracking/request-tracking').then(m => m.RequestTrackingComponent)
-      },
+     {
+  path: 'requests/tracking/:id',
+  loadComponent: () =>
+    import('./features/client/request-tracking/request-tracking').then(m => m.RequestTrackingComponent)
+},
       {
         path: 'requests/evaluation',
         loadComponent: () =>
@@ -87,75 +87,75 @@ export const routes: Routes = [
           import('./features/client/profile/profile').then(m => m.ProfileComponent)
       },
       {
-  path: 'provider/dashboard',
-  loadComponent: () =>
-    import('./features/provider/dashboard/dashboard').then(m => m.ProviderDashboardComponent)
-},
-{
-  path: 'provider/requests',
-  loadComponent: () =>
-    import('./features/provider/requests/requests').then(m => m.ProviderRequestsComponent)
-},
-{
-  path: 'provider/payments',
-  loadComponent: () =>
-    import('./features/provider/payments/payments').then(m => m.ProviderPaymentsComponent)
-},
-{
-  path: 'provider/deliveries',
-  loadComponent: () =>
-    import('./features/provider/deliveries/deliveries').then(m => m.ProviderDeliveriesComponent)
-},
-{
-  path: 'provider/products',
-  loadComponent: () =>
-    import('./features/provider/products/products').then(m => m.ProviderProductsComponent)
-},
-{
-  path: 'admin/dashboard',
-  loadComponent: () =>
-    import('./features/admin/dashboard/dashboard').then(m => m.AdminDashboardComponent)
-},
-{
-  path: 'admin/users',
-  loadComponent: () =>
-    import('./features/admin/users/users').then(m => m.AdminUsersComponent)
-},
-{
-  path: 'admin/providers',
-  loadComponent: () =>
-    import('./features/admin/providers/providers').then(m => m.AdminProvidersComponent)
-},
-{
-  path: 'admin/rfqs',
-  loadComponent: () =>
-    import('./features/admin/rfqs/rfqs').then(m => m.AdminRfqsComponent)
-},
-{
-  path: 'admin/products',
-  loadComponent: () =>
-    import('./features/admin/products/products').then(m => m.AdminProductsComponent)
-},
-{
-  path: 'admin/integrations',
-  loadComponent: () =>
-    import('./features/admin/integrations/integrations').then(m => m.AdminIntegrationsComponent)
-},
-{
-  path: 'admin/logs',
-  loadComponent: () =>
-    import('./features/admin/logs/logs').then(m => m.AdminLogsComponent)
-},
-{
-  path: 'admin/settings',
-  loadComponent: () =>
-    import('./features/admin/settings/settings').then(m => m.AdminSettingsComponent)
-},
-{
-  path: 'provider/api-settings',
-  loadComponent: () =>
-    import('./features/provider/api-settings/api-settings').then(m => m.ProviderApiSettingsComponent)
-}
+        path: 'provider/dashboard',
+        loadComponent: () =>
+          import('./features/provider/dashboard/dashboard').then(m => m.ProviderDashboardComponent)
+      },
+      {
+        path: 'provider/requests',
+        loadComponent: () =>
+          import('./features/provider/requests/requests').then(m => m.ProviderRequestsComponent)
+      },
+      {
+        path: 'provider/payments',
+        loadComponent: () =>
+          import('./features/provider/payments/payments').then(m => m.ProviderPaymentsComponent)
+      },
+      {
+        path: 'provider/deliveries',
+        loadComponent: () =>
+          import('./features/provider/deliveries/deliveries').then(m => m.ProviderDeliveriesComponent)
+      },
+      {
+        path: 'provider/products',
+        loadComponent: () =>
+          import('./features/provider/products/products').then(m => m.ProviderProductsComponent)
+      },
+      {
+        path: 'admin/dashboard',
+        loadComponent: () =>
+          import('./features/admin/dashboard/dashboard').then(m => m.AdminDashboardComponent)
+      },
+      {
+        path: 'admin/users',
+        loadComponent: () =>
+          import('./features/admin/users/users').then(m => m.AdminUsersComponent)
+      },
+      {
+        path: 'admin/providers',
+        loadComponent: () =>
+          import('./features/admin/providers/providers').then(m => m.AdminProvidersComponent)
+      },
+      {
+        path: 'admin/rfqs',
+        loadComponent: () =>
+          import('./features/admin/rfqs/rfqs').then(m => m.AdminRfqsComponent)
+      },
+      {
+        path: 'admin/products',
+        loadComponent: () =>
+          import('./features/admin/products/products').then(m => m.AdminProductsComponent)
+      },
+      {
+        path: 'admin/integrations',
+        loadComponent: () =>
+          import('./features/admin/integrations/integrations').then(m => m.AdminIntegrationsComponent)
+      },
+      {
+        path: 'admin/logs',
+        loadComponent: () =>
+          import('./features/admin/logs/logs').then(m => m.AdminLogsComponent)
+      },
+      {
+        path: 'admin/settings',
+        loadComponent: () =>
+          import('./features/admin/settings/settings').then(m => m.AdminSettingsComponent)
+      },
+      {
+        path: 'provider/api-settings',
+        loadComponent: () =>
+          import('./features/provider/api-settings/api-settings').then(m => m.ProviderApiSettingsComponent)
+      }
     ]
   },
   {

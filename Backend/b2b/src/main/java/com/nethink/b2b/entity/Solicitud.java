@@ -13,15 +13,15 @@ public class Solicitud {
     @Column(name = "id_solicitud")
     private Integer idSolicitud;
 
-    
-
     @Column(name = "id_usuario")
     private Integer idUsuario;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_proveedor", insertable = false, updatable = false)
+    private Proveedor proveedor;
+
     @Column(name = "id_proveedor")
     private Integer idProveedor;
-
-  
 
     @Column(name = "direccion_envio", columnDefinition = "TEXT")
     private String direccionEnvio;
@@ -51,10 +51,6 @@ public class Solicitud {
     @Column(name = "fecha_cancelacion")
     private LocalDateTime fechaCancelacion;
 
-    // =========================
-    // FECHAS
-    // =========================
-
     @Column(name = "fecha_creacion")
     private LocalDateTime fechaCreacion;
 
@@ -69,24 +65,34 @@ public class Solicitud {
 
     @Column(name = "fecha_confirmacion")
     private LocalDateTime fechaConfirmacion;
-
-    // =========================
-    // ENUMS
-    // =========================
+    
+    @Version
+private Long version;
 
     public enum EstadoSolicitud {
-        CREADA, COTIZADA, ACEPTADA, RECHAZADA,
-        PAGO_PENDIENTE, PAGO_VALIDANDO, PAGADA,
-        CONFIRMADA, ESPERANDO_ENVIO, EN_CAMINO,
-        ENTREGADA, COMPLETADA,
-        CANCELADA, NO_ENTREGADA, EN_RECLAMO, VENCIDA
+        CREADA,
+        COTIZADA,
+        ACEPTADA,
+        RECHAZADA,
+        PAGO_PENDIENTE,
+        PAGO_VALIDANDO,
+        PAGADA,
+        CONFIRMADA,
+        ESPERANDO_ENVIO,
+        EN_CAMINO,
+        ENTREGADA,
+        COMPLETADA,
+        CANCELADA,
+        NO_ENTREGADA,
+        EN_RECLAMO,
+        VENCIDA
     }
 
     public enum CanceladoPor {
-        CLIENTE, PROVEEDOR, SISTEMA
+        CLIENTE,
+        PROVEEDOR,
+        SISTEMA
     }
-
-   
 
     public Integer getIdSolicitud() {
         return idSolicitud;
@@ -110,6 +116,14 @@ public class Solicitud {
 
     public void setIdProveedor(Integer idProveedor) {
         this.idProveedor = idProveedor;
+    }
+
+    public Proveedor getProveedor() {
+        return proveedor;
+    }
+
+    public void setProveedor(Proveedor proveedor) {
+        this.proveedor = proveedor;
     }
 
     public String getDireccionEnvio() {

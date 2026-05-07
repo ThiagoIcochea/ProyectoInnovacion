@@ -55,9 +55,9 @@ public class RFQService {
 
                 if (pp != null && pp.getStock() >= itemReq.getCantidad()) {
                     double precioUnitario = pp.getPrecio().doubleValue();
-                    double subtotal = precioUnitario * itemReq.getCantidad();
+                 double subtotal = precioUnitario * itemReq.getCantidad();
+                     totalCotizacion += subtotal;
                     
-                    totalCotizacion += subtotal;
                     if (pp.getTiempoEntregaDias() > tiempoMaximo) tiempoMaximo = pp.getTiempoEntregaDias();
 
                     ItemCotizadoResponse itemDetalle = new ItemCotizadoResponse();

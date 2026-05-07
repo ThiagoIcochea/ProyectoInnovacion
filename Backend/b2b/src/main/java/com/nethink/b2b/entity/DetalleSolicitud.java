@@ -22,8 +22,8 @@ public class DetalleSolicitud {
 
     private Integer cantidad;
 
-    @Column(name = "precio_unitario")
-    private Double precioUnitario;
+   @Column(name = "precio_unitario")
+private BigDecimal precioUnitario;
 
     @Column(name = "tiempo_entrega_dias")
     private Integer tiempoEntregaDias;
@@ -65,13 +65,13 @@ public class DetalleSolicitud {
         this.cantidad = cantidad;
     }
 
-    public Double getPrecioUnitario() {
-        return precioUnitario;
-    }
+   public BigDecimal getPrecioUnitario() {
+    return precioUnitario;
+}
 
-    public void setPrecioUnitario(Double precioUnitario) {
-        this.precioUnitario = precioUnitario;
-    }
+public void setPrecioUnitario(BigDecimal precioUnitario) {
+    this.precioUnitario = precioUnitario;
+}
 
     public Integer getTiempoEntregaDias() {
         return tiempoEntregaDias;

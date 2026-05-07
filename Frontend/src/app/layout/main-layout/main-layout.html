@@ -10,98 +10,171 @@
       </div>
     </div>
 
-    <!-- CLIENTE -->
     <ng-container *ngIf="isClient">
       <nav class="sidebar__nav">
-        <a routerLink="/app/dashboard" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/dashboard']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Inicio
         </a>
 
-        <a routerLink="/app/rfq/catalog" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/rfq/catalog']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Catálogo RFQ
         </a>
 
-        <a routerLink="/app/requests" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/requests']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Mis Solicitudes
         </a>
 
-        <a routerLink="/app/history" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/history']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Historial
         </a>
 
-        <a routerLink="/app/profile" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/profile']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Perfil
         </a>
       </nav>
     </ng-container>
 
-    <!-- PROVEEDOR -->
     <ng-container *ngIf="isProvider">
       <div class="sidebar__badge">Proveedor</div>
 
       <nav class="sidebar__nav">
-        <a routerLink="/app/provider/dashboard" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/provider/dashboard']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Dashboard
         </a>
 
-        <a routerLink="/app/provider/requests" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/provider/requests']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Solicitudes
           <span class="sidebar__count">12</span>
         </a>
 
-        <a routerLink="/app/provider/payments" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/provider/payments']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Pagos
           <span class="sidebar__count">3</span>
         </a>
 
-        <a routerLink="/app/provider/deliveries" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/provider/deliveries']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Entregas
         </a>
 
-        <a routerLink="/app/provider/products" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/provider/products']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Productos
         </a>
 
-        <a routerLink="/app/provider/api-settings" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/provider/api-settings']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Configuración API
         </a>
       </nav>
     </ng-container>
 
-    <!-- ADMIN -->
     <ng-container *ngIf="isAdmin">
       <div class="sidebar__badge sidebar__badge--admin">Admin</div>
 
       <nav class="sidebar__nav">
-        <a routerLink="/app/admin/dashboard" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/admin/dashboard']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Dashboard
         </a>
 
-        <a routerLink="/app/admin/users" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/admin/users']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Usuarios
         </a>
 
-        <a routerLink="/app/admin/providers" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/admin/providers']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Proveedores
         </a>
 
-        <a routerLink="/app/admin/rfqs" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/admin/rfqs']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Solicitudes RFQ
         </a>
 
-        <a routerLink="/app/admin/products" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/admin/products']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Catálogo de Productos
         </a>
 
-        <a routerLink="/app/admin/integrations" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/admin/integrations']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Integraciones & API
         </a>
 
-        <a routerLink="/app/admin/logs" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/admin/logs']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Logs del Sistema
         </a>
 
-        <a routerLink="/app/admin/settings" routerLinkActive="active" class="sidebar__link">
+        <a
+          [routerLink]="['/app/admin/settings']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link">
           Configuración General
         </a>
       </nav>

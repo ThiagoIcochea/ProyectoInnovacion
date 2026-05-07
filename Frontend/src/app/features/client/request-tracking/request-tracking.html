@@ -1,84 +1,163 @@
 <div class="tracking-page">
-  <div class="page-title">
-    <a routerLink="/app/requests" class="back-button">←</a>
 
-    <div>
-      <span>Solicitud activa</span>
-      <h1>Tracking de Solicitud</h1>
-      <p>RFQ-2026-0892 · Global Tech Solutions S.A.C.</p>
+  <div *ngIf="loading" class="loading-box">
+    Cargando tracking...
+  </div>
+
+  <div *ngIf="!loading && tracking">
+
+    <div class="page-title">
+
+      <a routerLink="/app/requests" class="back-button">
+        ←
+      </a>
+
+      <div>
+        <span>Solicitud activa</span>
+
+        <h1>Tracking de Solicitud</h1>
+
+        <p>
+          RFQ-2026-{{ tracking.idSolicitud }}
+          ·
+          {{ tracking.proveedor }}
+        </p>
+      </div>
+
     </div>
-  </div>
 
-  <div class="tracking-grid">
-    <section class="tracking-card">
-      <div class="card-header">
-        <h2>Estado del pedido</h2>
-        <p>Seguimiento actualizado de la orden asociada a tu RFQ.</p>
-      </div>
+    <div class="tracking-grid">
 
-      <div class="timeline">
+      <section class="tracking-card">
+
+        <div class="card-header">
+          <h2>Estado del pedido</h2>
+
+          <p>
+            Seguimiento actualizado de la orden asociada a tu RFQ.
+          </p>
+        </div>
+
+        <div class="timeline">
+
+          <div
+            class="timeline-item"
+            *ngFor="let step of steps"
+            [ngClass]="step.status"
+          >
+
+            <div class="timeline-marker">
+
+              <span *ngIf="step.status === 'done'">
+                ✓
+              </span>
+
+              <span *ngIf="step.status === 'active'">
+                •
+              </span>
+
+            </div>
+
+            <div class="timeline-content">
+
+              <h3>{{ step.title }}</h3>
+
+              <p>{{ step.description }}</p>
+
+              <small>{{ step.date }}</small>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <aside class="order-summary">
+
+        <div class="status-pill">
+          {{ getEstadoTexto() }}
+        </div>
+
         <div
-          class="timeline-item"
-          *ngFor="let step of steps"
-          [ngClass]="step.status"
+          class="delivery-code-card"
+          *ngIf="tracking.codigoRecepcion"
         >
-          <div class="timeline-marker">
-            <span *ngIf="step.status === 'done'">✓</span>
-            <span *ngIf="step.status === 'active'">•</span>
+
+          <span>Código de entrega</span>
+
+          <strong>
+            {{ tracking.codigoRecepcion }}
+          </strong>
+
+          <p>
+            Entrega este código únicamente al repartidor cuando recibas el pedido.
+          </p>
+
+        </div>
+
+        <h2>Resumen de entrega</h2>
+
+        <div class="summary-list">
+
+          <div>
+            <span>Orden</span>
+
+            <strong>
+              ORD-2026-{{ tracking.idSolicitud }}
+            </strong>
           </div>
 
-          <div class="timeline-content">
-            <h3>{{ step.title }}</h3>
-            <p>{{ step.description }}</p>
-            <small>{{ step.date }}</small>
+          <div>
+            <span>Proveedor</span>
+
+            <strong>
+              {{ tracking.proveedor }}
+            </strong>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <aside class="order-summary">
-      <div class="status-pill">En preparación</div>
-      <div class="delivery-code-card">
-  <span>Código de entrega</span>
-  <strong>NP-482913</strong>
-  <p>
-    Entrega este código únicamente al repartidor cuando recibas el pedido.
-  </p>
-</div>
+          <div>
+            <span>Monto</span>
 
-      <h2>Resumen de entrega</h2>
+            <strong>
+              S/ {{ tracking.total }}
+            </strong>
+          </div>
 
-      <div class="summary-list">
-        <div>
-          <span>Orden</span>
-          <strong>ORD-2026-0148</strong>
-        </div>
+          <div>
+            <span>Entrega estimada</span>
 
-        <div>
-          <span>Proveedor</span>
-          <strong>Global Tech Solutions</strong>
-        </div>
+          <strong>
+  {{
+    tracking.fechaEntrega
+      ? (tracking.fechaEntrega | date:'dd/MM/yyyy')
+      : 'Pendiente'
+  }}
+</strong>
+          </div>
 
-        <div>
-          <span>Monto</span>
-          <strong>US$ 12,744.00</strong>
-        </div>
+          <div>
+            <span>Dirección</span>
 
-        <div>
-          <span>Entrega estimada</span>
-          <strong>25 Abr 2026</strong>
+            <strong>
+              {{ tracking.direccion }}
+            </strong>
+          </div>
+
         </div>
 
-        <div>
-          <span>Dirección</span>
-          <strong>Av. Javier Prado 1040, Lima</strong>
-        </div>
-      </div>
+        <div class="info-box">
 
-      <div class="info-box">
-        El proveedor está preparando los equipos para despacho. Recibirás una
-        actualización cuando el pedido salga a ruta.
-      </div>
-    </aside>
+          Estado actual:
+          {{ getEstadoTexto() }}
+
+        </div>
+
+      </aside>
+
+    </div>
+
   </div>
+
 </div>
