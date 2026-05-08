@@ -15,6 +15,16 @@ public class TrackingResponse {
     private LocalDateTime fechaEntrega;
 
     private List<TrackingStepResponse> timeline;
+    
+    private Integer idProveedor;
+
+public Integer getIdProveedor() {
+    return idProveedor;
+}
+
+public void setIdProveedor(Integer idProveedor) {
+    this.idProveedor = idProveedor;
+}
 
     public Integer getIdSolicitud() {
         return idSolicitud;

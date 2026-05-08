@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
@@ -23,6 +23,7 @@ export class RequestsComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -35,6 +36,7 @@ export class RequestsComponent implements OnInit {
     const token = localStorage.getItem('token');
 
     if (!token) {
+      console.error('No hay token');
       return;
     }
 
@@ -49,28 +51,24 @@ export class RequestsComponent implements OnInit {
     .subscribe({
       next: (res) => {
 
+        console.log("RESPUESTA BACKEND:", res);
+
         this.requests = res.map(s => ({
           id: s.idSolicitud,
 
-          code: `RFQ-2026-${s.idSolicitud
-            .toString()
-            .padStart(4, '0')}`,
+          code: `RFQ-2026-${s.idSolicitud.toString().padStart(4, '0')}`,
 
-          provider:
-            s.idProveedor === 1
-              ? 'Cosapi Data'
-              : s.idProveedor === 2
-              ? 'Global Tech'
-              : 'Proveedor #' + s.idProveedor,
+          provider: s.nombreProveedor, // 🔥 CORRECTO
 
-         amount: `S/ ${Number(s.total || 0).toFixed(2)}`,
+          amount: `S/ ${Number(s.total).toLocaleString('es-PE', {
+            minimumFractionDigits: 2
+          })}`,
 
-          date: new Date(s.fechaCreacion)
-            .toLocaleDateString('es-PE', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric'
-            }),
+          date: new Date(s.fechaCreacion).toLocaleDateString('es-PE', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+          }),
 
           status: this.mapStatusText(s.estado),
           statusClass: this.mapStatusClass(s.estado),
@@ -79,11 +77,12 @@ export class RequestsComponent implements OnInit {
 
         this.calcularResumen();
 
+        // 🔥 fuerza render Angular
         this.cdr.detectChanges();
       },
 
       error: (err) => {
-        console.error(err);
+        console.error('Error al cargar solicitudes:', err);
       }
     });
   }
@@ -95,7 +94,8 @@ export class RequestsComponent implements OnInit {
       PAGO_VALIDANDO: 'Validando pago',
       ESPERANDO_ENVIO: 'En preparación',
       EN_CAMINO: 'En camino',
-      ENTREGADA: 'Entregado'
+      ENTREGADA: 'Entregado',
+      COMPLETADA: 'Completado'
     };
 
     return map[estado] || estado;
@@ -108,7 +108,8 @@ export class RequestsComponent implements OnInit {
       PAGO_VALIDANDO: 'validating',
       ESPERANDO_ENVIO: 'preparing',
       EN_CAMINO: 'shipping',
-      ENTREGADA: 'delivered'
+      ENTREGADA: 'delivered',
+      COMPLETADA: 'completed'
     };
 
     return map[estado] || 'default';

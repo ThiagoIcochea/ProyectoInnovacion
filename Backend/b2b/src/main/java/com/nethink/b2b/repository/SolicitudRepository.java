@@ -12,14 +12,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SolicitudRepository extends JpaRepository<Solicitud, Integer> {
 
-    @Query("""
-        SELECT s
-        FROM Solicitud s
-        LEFT JOIN FETCH s.proveedor p
-        WHERE s.idUsuario = :idUsuario
-        ORDER BY s.fechaCreacion DESC
-    """)
-    List<Solicitud> findByUsuarioOptimized(@Param("idUsuario") Integer idUsuario);
+@Query("""
+SELECT s
+FROM Solicitud s
+LEFT JOIN FETCH s.proveedor p
+WHERE s.usuario.id = :idUsuario
+ORDER BY s.fechaCreacion DESC
+""")
+List<Solicitud> findByUsuarioOptimized(@Param("idUsuario") Integer idUsuario);
 
     @Query("""
         SELECT s

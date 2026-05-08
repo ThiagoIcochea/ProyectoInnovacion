@@ -13,15 +13,13 @@ public class Solicitud {
     @Column(name = "id_solicitud")
     private Integer idSolicitud;
 
-    @Column(name = "id_usuario")
-    private Integer idUsuario;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario usuario;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_proveedor", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_proveedor", nullable = false)
     private Proveedor proveedor;
-
-    @Column(name = "id_proveedor")
-    private Integer idProveedor;
 
     @Column(name = "direccion_envio", columnDefinition = "TEXT")
     private String direccionEnvio;
@@ -30,12 +28,16 @@ public class Solicitud {
     private Boolean codigoUsado = false;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "estado")
     private EstadoSolicitud estado;
 
+    @Column(precision = 10, scale = 2)
     private BigDecimal subtotal;
 
+    @Column(precision = 10, scale = 2)
     private BigDecimal igv;
 
+    @Column(precision = 10, scale = 2)
     private BigDecimal total;
 
     @Column(name = "codigo_recepcion", unique = true)
@@ -65,9 +67,9 @@ public class Solicitud {
 
     @Column(name = "fecha_confirmacion")
     private LocalDateTime fechaConfirmacion;
-    
+
     @Version
-private Long version;
+    private Long version;
 
     public enum EstadoSolicitud {
         CREADA,
@@ -94,6 +96,8 @@ private Long version;
         SISTEMA
     }
 
+    // Getters y Setters
+
     public Integer getIdSolicitud() {
         return idSolicitud;
     }
@@ -102,20 +106,12 @@ private Long version;
         this.idSolicitud = idSolicitud;
     }
 
-    public Integer getIdUsuario() {
-        return idUsuario;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setIdUsuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
-    }
-
-    public Integer getIdProveedor() {
-        return idProveedor;
-    }
-
-    public void setIdProveedor(Integer idProveedor) {
-        this.idProveedor = idProveedor;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     public Proveedor getProveedor() {
@@ -244,5 +240,13 @@ private Long version;
 
     public void setFechaConfirmacion(LocalDateTime fechaConfirmacion) {
         this.fechaConfirmacion = fechaConfirmacion;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

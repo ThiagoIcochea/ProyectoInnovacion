@@ -39,7 +39,12 @@ public class Proveedor {
     @Column(name = "id_usuario")
     private Integer idUsuario;
 
-    public Proveedor() {}
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_usuario", insertable = false, updatable = false)
+    private Usuario usuario;
+
+    public Proveedor() {
+    }
 
     public Integer getIdProveedor() {
         return idProveedor;
@@ -119,5 +124,13 @@ public class Proveedor {
 
     public void setIdUsuario(Integer idUsuario) {
         this.idUsuario = idUsuario;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 }

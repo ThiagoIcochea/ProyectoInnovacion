@@ -139,18 +139,59 @@
 
 
 
-.map-container {
+.payment-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+.map-box {
   width: 100%;
-  height: 180px;
-  border-radius: 10px;
-  overflow: hidden;
+  height: 280px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
   margin-bottom: 10px;
+}
+
+.full-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
   border: 1px solid #ccc;
 }
 
-#map {
+.method-card {
+  padding: 12px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.method-card.active {
+  border-color: #007bff;
+  background: #f0f6ff;
+}
+
+.payment-summary {
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+}
+
+.total-big {
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+.confirm-btn {
   width: 100%;
-  height: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 10px;
 }
 
 @media (max-width: 1100px) {

@@ -15,11 +15,11 @@ export class RfqQuotationComponent implements OnInit {
   provider: any = null;
   products: any[] = [];
 
-  subtotal: number = 0;
-  igv: number = 0;
-  total: number = 0;
+  subtotal = 0;
+  igv = 0;
+  total = 0;
 
-  fechaValidez: string = '';
+  fechaValidez = '';
 
   constructor(
     private router: Router,
@@ -47,9 +47,7 @@ export class RfqQuotationComponent implements OnInit {
     const total = Number(this.provider.totalCotizacion);
 
     this.total = total;
-
     this.subtotal = Number((total / 1.18).toFixed(2));
-
     this.igv = Number((total - this.subtotal).toFixed(2));
   }
 
@@ -74,14 +72,12 @@ export class RfqQuotationComponent implements OnInit {
     });
 
     const body = {
-
       idProveedor: this.provider.idProveedor,
       subtotal: this.subtotal,
       igv: this.igv,
       total: this.total,
       direccionEnvio: 'Sede Central Cliente',
-
-      items: this.products.map((p: any) => ({
+      items: this.products.map(p => ({
         idProducto: p.idProducto,
         cantidad: Number(p.cantidad),
         precioUnitario: Number(p.precioUnitario)
@@ -92,35 +88,22 @@ export class RfqQuotationComponent implements OnInit {
       'http://localhost:8080/api/solicitudes/crear',
       body,
       { headers }
-    )
-    .subscribe({
+    ).subscribe({
 
       next: (res: any) => {
 
-        if (res && res.idSolicitud) {
+        localStorage.setItem('current_solicitud_id', String(res.idSolicitud));
 
-          localStorage.setItem(
-            'current_solicitud_id',
-            res.idSolicitud.toString()
-          );
+        localStorage.setItem('selected_provider', JSON.stringify({
+          ...this.provider,
+          total: this.total
+        }));
 
-          localStorage.setItem(
-            'selected_provider',
-            JSON.stringify({
-              ...this.provider,
-              subtotal: this.subtotal,
-              igv: this.igv,
-              total: this.total
-            })
-          );
-
-          this.router.navigate(['/app/rfq/payment']);
-        }
+        this.router.navigate(['/app/rfq/payment']);
       },
 
-      error: (err) => {
-        console.error(err);
-        alert('Error al crear la solicitud');
+      error: () => {
+        alert('Error al crear solicitud');
       }
     });
   }

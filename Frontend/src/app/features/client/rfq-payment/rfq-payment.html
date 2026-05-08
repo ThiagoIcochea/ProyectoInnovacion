@@ -9,62 +9,69 @@
 
     <section class="payment-main">
 
-      <!-- 🔵 MAPA EN RECTÁNGULO (NO ROMPE FLUJO) -->
+      <!-- MAPA + UBICACIÓN -->
       <div class="step-section">
 
-        <h3>1. Seleccionar dirección de entrega</h3>
+        <h3>1. Ubicación de Entrega</h3>
 
-        <div class="map-container">
-          <div id="map"></div>
-        </div>
+        <div id="map" class="map-box"></div>
 
-        <input type="text"
-               [(ngModel)]="direccionEntrega"
-               placeholder="Dirección seleccionada desde el mapa"
-               class="full-input">
+        <input
+          type="text"
+          [(ngModel)]="direccionEntrega"
+          placeholder="Ubicación detectada automáticamente"
+          class="full-input"
+          readonly
+        >
 
       </div>
 
-      <!-- 🔵 METODOS DE PAGO (INTACTO) -->
+      <!-- MÉTODOS DE PAGO -->
       <div class="step-section">
 
         <h3>2. Cuentas bancarias del proveedor</h3>
 
         <div class="methods-list">
 
-          <div class="method-card"
-               *ngFor="let m of metodosPago"
-               [class.active]="selectedMetodo === m"
-               (click)="selectedMetodo = m">
+          <div
+            class="method-card"
+            *ngFor="let m of metodosPago"
+            [class.active]="selectedMetodo === m"
+            (click)="selectedMetodo = m">
 
             <div class="card-check" *ngIf="selectedMetodo === m">✓</div>
 
             <strong>{{ m.entidad }}</strong>
             <p>N° Cuenta: {{ m.numeroCuenta }}</p>
-            <small>{{ m.tipo }}</small>
+            <small>Tipo: {{ m.tipo }}</small>
 
+          </div>
+
+          <div *ngIf="metodosPago.length === 0" class="no-data">
+            Cargando métodos de pago...
           </div>
 
         </div>
 
       </div>
 
-      <!-- 🔵 COMPROBANTE (INTACTO) -->
+      <!-- OPERACIÓN -->
       <div class="upload-section" *ngIf="selectedMetodo">
 
         <h3>3. Datos de la Operación</h3>
 
         <div class="form-row">
           <label>Nro. de Operación:</label>
-          <input type="text" [(ngModel)]="codigoOperacion" placeholder="Ej: 00213456">
+          <input type="text" [(ngModel)]="codigoOperacion">
         </div>
 
         <div class="form-row">
-          <label>Adjuntar Comprobante:</label>
+          <label>Comprobante de pago:</label>
           <input type="file" (change)="onFileSelected($event)" accept="image/*">
         </div>
 
         <div class="preview-box" *ngIf="previewUrl">
+          <p>Vista previa:</p>
           <img [src]="previewUrl" class="voucher-preview">
         </div>
 
@@ -72,7 +79,7 @@
 
     </section>
 
-    <!-- 🔵 RESUMEN (INTACTO) -->
+    <!-- RESUMEN -->
     <aside class="payment-summary">
 
       <h3>Resumen de Solicitud</h3>
@@ -84,20 +91,25 @@
 
       <div class="summary-row total-big">
         <span>Total a pagar:</span>
-        <strong>S/ {{ provider?.totalCotizacion | number:'1.2-2' }}</strong>
+        <strong>
+          S/ {{ totalSolicitud || provider?.totalCotizacion || 0 | number:'1.2-2' }}
+        </strong>
       </div>
 
-      <button class="confirm-btn"
-              [disabled]="!archivoCaptura || !selectedMetodo || !codigoOperacion || !direccionEntrega"
-              (click)="confirmarPago()">
-        Confirmar y Finalizar Pedido
+      <button
+        class="confirm-btn"
+        [disabled]="!archivoCaptura || !selectedMetodo || !codigoOperacion"
+        (click)="confirmarPago()">
+
+        Confirmar Pago
       </button>
 
       <p class="terms-note">
-        Al confirmar, el proveedor validará el pago.
+        Al confirmar, el proveedor validará el pago para iniciar el envío.
       </p>
 
     </aside>
 
   </div>
+
 </div>

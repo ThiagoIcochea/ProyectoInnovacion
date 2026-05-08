@@ -3,12 +3,17 @@ package com.nethink.b2b.service;
 import com.nethink.b2b.dto.request.SolicitudCrearRequest;
 import com.nethink.b2b.dto.response.TrackingResponse;
 import com.nethink.b2b.dto.response.TrackingStepResponse;
+import com.nethink.b2b.dto.response.SolicitudResponse;
 import com.nethink.b2b.entity.*;
 import com.nethink.b2b.repository.*;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,70 +24,43 @@ public class SolicitudService {
     private final DetalleSolicitudRepository detalleRepo;
     private final ProveedorProductoRepository provProdRepo;
     private final UsuarioRepository usuarioRepo;
+    private final ProveedorRepository proveedorRepo;
     private final SolicitudHistorialRepository historialRepo;
+    private final EmailService emailService;
 
     public SolicitudService(
             SolicitudRepository solicitudRepo,
             DetalleSolicitudRepository detalleRepo,
             ProveedorProductoRepository provProdRepo,
             UsuarioRepository usuarioRepo,
-            SolicitudHistorialRepository historialRepo
+            ProveedorRepository proveedorRepo,
+            SolicitudHistorialRepository historialRepo,
+            EmailService emailService
     ) {
         this.solicitudRepo = solicitudRepo;
         this.detalleRepo = detalleRepo;
         this.provProdRepo = provProdRepo;
         this.usuarioRepo = usuarioRepo;
+        this.proveedorRepo = proveedorRepo;
         this.historialRepo = historialRepo;
+        this.emailService = emailService;
     }
 
     @Transactional
-    public Solicitud crearSolicitud(
-            SolicitudCrearRequest request,
-            String correoCliente
-    ) {
+    public Solicitud crearSolicitud(SolicitudCrearRequest request, String correoCliente) {
 
         Usuario cliente = usuarioRepo.findByCorreo(correoCliente)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow();
+
+        Proveedor proveedor = proveedorRepo.findById(request.idProveedor())
+                .orElseThrow();
 
         Solicitud sol = new Solicitud();
 
-        sol.setIdUsuario(cliente.getIdUsuario());
-        sol.setIdProveedor(request.idProveedor());
+        sol.setUsuario(cliente);
+        sol.setProveedor(proveedor);
         sol.setDireccionEnvio(request.direccionEnvio());
         sol.setEstado(Solicitud.EstadoSolicitud.PAGO_PENDIENTE);
-
-        BigDecimal total = BigDecimal.ZERO;
-
-        for (var itemReq : request.items()) {
-
-            ProveedorProducto pp =
-                    provProdRepo.buscarPorProveedorYProducto(
-                            request.idProveedor(),
-                            itemReq.idProducto()
-                    ).orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-
-            BigDecimal precioUnitario = pp.getPrecio();
-            BigDecimal cantidad = BigDecimal.valueOf(itemReq.cantidad());
-
-            BigDecimal precioTotalItem = precioUnitario.multiply(cantidad);
-
-            total = total.add(precioTotalItem);
-        }
-
-        total = total.setScale(2, RoundingMode.HALF_UP);
-
-        BigDecimal divisor = BigDecimal.valueOf(1.18);
-
-        BigDecimal subtotal = total
-                .divide(divisor, 2, RoundingMode.HALF_UP);
-
-        BigDecimal igv = total
-                .subtract(subtotal)
-                .setScale(2, RoundingMode.HALF_UP);
-
-        sol.setSubtotal(subtotal);
-        sol.setIgv(igv);
-        sol.setTotal(total);
 
         LocalDateTime ahora = LocalDateTime.now();
 
@@ -90,15 +68,22 @@ public class SolicitudService {
         sol.setCodigoUsado(false);
         sol.setCodigoRecepcion(generarCodigoRecepcion());
 
+        BigDecimal total = BigDecimal.ZERO;
         int maxDiasEntrega = 0;
+
+        Solicitud guardada = solicitudRepo.save(sol);
 
         for (var itemReq : request.items()) {
 
-            ProveedorProducto pp =
-                    provProdRepo.buscarPorProveedorYProducto(
-                            request.idProveedor(),
-                            itemReq.idProducto()
-                    ).orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+            ProveedorProducto pp = provProdRepo.buscarPorProveedorYProducto(
+                    request.idProveedor(),
+                    itemReq.idProducto()
+            ).orElseThrow();
+
+            BigDecimal cantidad = BigDecimal.valueOf(itemReq.cantidad());
+            BigDecimal totalItem = pp.getPrecio().multiply(cantidad);
+
+            total = total.add(totalItem);
 
             if (pp.getTiempoEntregaDias() != null &&
                     pp.getTiempoEntregaDias() > maxDiasEntrega) {
@@ -106,8 +91,7 @@ public class SolicitudService {
             }
 
             DetalleSolicitud detalle = new DetalleSolicitud();
-
-            detalle.setSolicitud(sol);
+            detalle.setSolicitud(guardada);
             detalle.setProveedorProducto(pp);
             detalle.setCantidad(itemReq.cantidad());
             detalle.setPrecioUnitario(pp.getPrecio());
@@ -117,35 +101,71 @@ public class SolicitudService {
             detalleRepo.save(detalle);
         }
 
+        total = total.setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal subtotal = total.divide(BigDecimal.valueOf(1.18), 2, RoundingMode.HALF_UP);
+        BigDecimal igv = total.subtract(subtotal).setScale(2, RoundingMode.HALF_UP);
+
+        guardada.setSubtotal(subtotal);
+        guardada.setIgv(igv);
+        guardada.setTotal(total);
+
         LocalDateTime fechaEntrega = ahora.plusDays(maxDiasEntrega);
 
-        sol.setFechaLimiteEntrega(fechaEntrega);
-        sol.setFechaEntrega(fechaEntrega);
+        guardada.setFechaLimiteEntrega(fechaEntrega);
+        guardada.setFechaEntrega(fechaEntrega);
 
-        Solicitud guardada = solicitudRepo.save(sol);
+        Solicitud finalizada = solicitudRepo.save(guardada);
 
         SolicitudHistorial historial = new SolicitudHistorial();
-        historial.setSolicitud(guardada);
+        historial.setSolicitud(finalizada);
         historial.setEstado("CREADA");
         historial.setDescripcion("Solicitud registrada correctamente");
         historial.setFecha(LocalDateTime.now());
 
         historialRepo.save(historial);
 
-        return guardada;
+        try {
+            emailService.enviarCorreoCliente(finalizada);
+            emailService.enviarCorreoProveedor(finalizada);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return finalizada;
+    }
+
+    public List<SolicitudResponse> listarMisSolicitudes(Integer idUsuario) {
+
+        List<Solicitud> solicitudes = solicitudRepo.findByUsuarioOptimized(idUsuario);
+
+        return solicitudes.stream().map(s -> {
+
+            SolicitudResponse dto = new SolicitudResponse();
+
+            dto.setIdSolicitud(s.getIdSolicitud());
+            dto.setIdProveedor(s.getProveedor().getIdProveedor());
+            dto.setNombreProveedor(s.getProveedor().getRazonSocial());
+            dto.setTotal(s.getTotal());
+            dto.setEstado(s.getEstado().name());
+            dto.setFechaCreacion(s.getFechaCreacion());
+
+            return dto;
+
+        }).collect(Collectors.toList());
     }
 
     private String generarCodigoRecepcion() {
 
-        String caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         String codigo;
 
         do {
             StringBuilder sb = new StringBuilder("NP");
 
             for (int i = 0; i < 6; i++) {
-                int index = (int) (Math.random() * caracteres.length());
-                sb.append(caracteres.charAt(index));
+                int idx = (int) (Math.random() * chars.length());
+                sb.append(chars.charAt(idx));
             }
 
             codigo = sb.toString();
@@ -157,35 +177,31 @@ public class SolicitudService {
 
     public TrackingResponse obtenerTracking(Integer idSolicitud) {
 
-        Solicitud solicitud = solicitudRepo.buscarTracking(idSolicitud)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+        Solicitud s = solicitudRepo.buscarTracking(idSolicitud)
+                .orElseThrow();
 
-        TrackingResponse response = new TrackingResponse();
+        TrackingResponse r = new TrackingResponse();
 
-        response.setIdSolicitud(solicitud.getIdSolicitud());
-        response.setProveedor(solicitud.getProveedor() != null
-                ? solicitud.getProveedor().getRazonSocial()
-                : "Proveedor");
+        r.setIdSolicitud(s.getIdSolicitud());
+        r.setIdProveedor(s.getProveedor().getIdProveedor());
+        r.setProveedor(s.getProveedor().getRazonSocial());
+        r.setEstado(s.getEstado().name());
+        r.setTotal(s.getTotal());
+        r.setDireccion(s.getDireccionEnvio());
+        r.setCodigoRecepcion(s.getCodigoRecepcion());
+        r.setFechaEntrega(s.getFechaEntrega());
 
-        response.setEstado(solicitud.getEstado() != null
-                ? solicitud.getEstado().name()
-                : "CREADA");
+        List<TrackingStepResponse> timeline = new ArrayList<>();
 
-        response.setTotal(solicitud.getTotal());
-        response.setDireccion(solicitud.getDireccionEnvio());
-        response.setCodigoRecepcion(solicitud.getCodigoRecepcion());
-        response.setFechaEntrega(solicitud.getFechaEntrega());
+        TrackingStepResponse step = new TrackingStepResponse();
+        step.setEstado("CREADA");
+        step.setDescripcion("Solicitud registrada correctamente");
+        step.setFecha(s.getFechaCreacion());
 
-        List<TrackingStepResponse> timeline = new java.util.ArrayList<>();
+        timeline.add(step);
 
-        TrackingStepResponse step1 = new TrackingStepResponse();
-        step1.setEstado("CREADA");
-        step1.setDescripcion("Solicitud registrada correctamente");
-        step1.setFecha(solicitud.getFechaCreacion());
-        timeline.add(step1);
+        r.setTimeline(timeline);
 
-        response.setTimeline(timeline);
-
-        return response;
+        return r;
     }
 }
