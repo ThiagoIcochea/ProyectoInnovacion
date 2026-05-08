@@ -60,20 +60,8 @@
           {{ getEstadoTexto() }}
         </div>
 
-        <!-- 🔥 BOTONES SOLO SI PAGO_PENDIENTE -->
-        <div class="actions-box" *ngIf="tracking.estado === 'PAGO_PENDIENTE'">
-
-          <button class="btn-primary"
-                  [routerLink]="['/app/rfq/payment']">
-            Pagar ahora
-          </button>
-
-          <button class="btn-danger"
-                  (click)="cancelarSolicitud()">
-            Cancelar solicitud
-          </button>
-
-        </div>
+     
+     
 
         <h2>Resumen</h2>
 
@@ -100,6 +88,20 @@
             <span>Dirección</span>
             <strong>{{ tracking.direccion }}</strong>
           </div>
+
+        </div>
+
+           <div class="actions-box" *ngIf="tracking.estado === 'PAGO_PENDIENTE'">
+
+          <button class="btn-primary"
+                  [routerLink]="['/app/rfq/payment']">
+            Pagar ahora
+          </button>
+
+          <button class="btn-danger"
+                  (click)="cancelarSolicitud()">
+            Cancelar solicitud
+          </button>
 
         </div>
 

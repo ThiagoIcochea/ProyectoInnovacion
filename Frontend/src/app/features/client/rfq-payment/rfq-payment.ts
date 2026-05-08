@@ -44,7 +44,6 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
     }
 
     this.solicitudId = Number(id);
-
     this.cargarSolicitud();
   }
 
@@ -87,11 +86,37 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
 
   initMap(): void {
 
-    this.map = L.map('map').setView([-12.0464, -77.0428], 13);
+    this.map = L.map('map');
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap'
     }).addTo(this.map);
+
+    if (navigator.geolocation) {
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          this.map.setView([lat, lng], 16);
+
+          this.marker = L.marker([lat, lng]).addTo(this.map);
+
+          this.obtenerDireccion(lat, lng);
+        },
+
+        () => {
+
+          this.map.setView([-12.0464, -77.0428], 13);
+        }
+      );
+
+    } else {
+
+      this.map.setView([-12.0464, -77.0428], 13);
+    }
 
     this.map.on('click', (e: any) => {
 
@@ -107,7 +132,6 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // 🔥 NUEVO: convierte coordenadas a dirección real
   obtenerDireccion(lat: number, lng: number): void {
 
     const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
@@ -130,11 +154,13 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
 
       const numero = a.house_number ? ` ${a.house_number}` : '';
       const distrito = a.suburb || a.city_district || a.city || '';
-      const ciudad = a.city || a.town || '';
+      const provincia = a.county || '';
+      const departamento = a.state || '';
 
-      this.direccionEntrega = `${calle}${numero}, ${distrito}, ${ciudad}`.trim();
+      this.direccionEntrega =
+        `${calle}${numero}, ${distrito}, ${provincia}, ${departamento}`.trim();
 
-      if (!calle && !distrito && !ciudad) {
+      if (!calle && !distrito && !provincia && !departamento) {
         this.direccionEntrega = res.display_name;
       }
     });
@@ -171,7 +197,6 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
       formData,
       { headers: this.headers() }
     ).subscribe(() => {
-
       this.router.navigate(['/app/requests']);
     });
   }
