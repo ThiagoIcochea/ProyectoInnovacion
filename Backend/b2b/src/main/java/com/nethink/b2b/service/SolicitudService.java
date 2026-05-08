@@ -5,6 +5,7 @@ import com.nethink.b2b.dto.response.TrackingResponse;
 import com.nethink.b2b.dto.response.TrackingStepResponse;
 import com.nethink.b2b.dto.response.SolicitudResponse;
 import com.nethink.b2b.entity.*;
+import com.nethink.b2b.entity.Solicitud.EstadoSolicitud;
 import com.nethink.b2b.repository.*;
 
 import java.math.BigDecimal;
@@ -60,7 +61,7 @@ public class SolicitudService {
         sol.setUsuario(cliente);
         sol.setProveedor(proveedor);
         sol.setDireccionEnvio(request.direccionEnvio());
-        sol.setEstado(Solicitud.EstadoSolicitud.PAGO_PENDIENTE);
+        sol.setEstado(EstadoSolicitud.PAGO_PENDIENTE);
 
         LocalDateTime ahora = LocalDateTime.now();
 
@@ -119,7 +120,7 @@ public class SolicitudService {
 
         SolicitudHistorial historial = new SolicitudHistorial();
         historial.setSolicitud(finalizada);
-        historial.setEstado("CREADA");
+        historial.setEstado(EstadoSolicitud.CREADA.name());
         historial.setDescripcion("Solicitud registrada correctamente");
         historial.setFecha(LocalDateTime.now());
 
@@ -147,12 +148,62 @@ public class SolicitudService {
             dto.setIdProveedor(s.getProveedor().getIdProveedor());
             dto.setNombreProveedor(s.getProveedor().getRazonSocial());
             dto.setTotal(s.getTotal());
-            dto.setEstado(s.getEstado().name());
+            dto.setEstado(formatearEstado(s.getEstado()));
             dto.setFechaCreacion(s.getFechaCreacion());
 
             return dto;
 
         }).collect(Collectors.toList());
+    }
+
+    public TrackingResponse obtenerTracking(Integer idSolicitud) {
+
+        Solicitud s = solicitudRepo.buscarTracking(idSolicitud)
+                .orElseThrow();
+
+        TrackingResponse r = new TrackingResponse();
+
+        r.setIdSolicitud(s.getIdSolicitud());
+        r.setIdProveedor(s.getProveedor().getIdProveedor());
+        r.setProveedor(s.getProveedor().getRazonSocial());
+        r.setEstado(formatearEstado(s.getEstado()));
+        r.setTotal(s.getTotal());
+        r.setDireccion(s.getDireccionEnvio());
+        r.setCodigoRecepcion(s.getCodigoRecepcion());
+        r.setFechaEntrega(s.getFechaEntrega());
+
+        List<TrackingStepResponse> timeline = new ArrayList<>();
+
+        TrackingStepResponse step = new TrackingStepResponse();
+        step.setEstado(formatearEstado(EstadoSolicitud.CREADA));
+        step.setDescripcion("Solicitud registrada correctamente");
+        step.setFecha(s.getFechaCreacion());
+
+        timeline.add(step);
+
+        r.setTimeline(timeline);
+
+        return r;
+    }
+
+    public Object cancelarSolicitud(Integer idSolicitud) {
+
+        Solicitud solicitud = solicitudRepo.findById(idSolicitud)
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+
+        solicitud.setEstado(EstadoSolicitud.CANCELADA);
+
+        solicitudRepo.save(solicitud);
+
+        SolicitudHistorial historial = new SolicitudHistorial();
+        historial.setSolicitud(solicitud);
+        historial.setEstado(EstadoSolicitud.CANCELADA.name());
+        historial.setDescripcion("Solicitud cancelada por el usuario");
+        historial.setFecha(LocalDateTime.now());
+
+        historialRepo.save(historial);
+
+        return "Solicitud cancelada correctamente";
     }
 
     private String generarCodigoRecepcion() {
@@ -175,45 +226,16 @@ public class SolicitudService {
         return codigo;
     }
 
-    public TrackingResponse obtenerTracking(Integer idSolicitud) {
+    private String formatearEstado(EstadoSolicitud estado) {
 
-        Solicitud s = solicitudRepo.buscarTracking(idSolicitud)
-                .orElseThrow();
-
-        TrackingResponse r = new TrackingResponse();
-
-        r.setIdSolicitud(s.getIdSolicitud());
-        r.setIdProveedor(s.getProveedor().getIdProveedor());
-        r.setProveedor(s.getProveedor().getRazonSocial());
-        r.setEstado(s.getEstado().name());
-        r.setTotal(s.getTotal());
-        r.setDireccion(s.getDireccionEnvio());
-        r.setCodigoRecepcion(s.getCodigoRecepcion());
-        r.setFechaEntrega(s.getFechaEntrega());
-
-        List<TrackingStepResponse> timeline = new ArrayList<>();
-
-        TrackingStepResponse step = new TrackingStepResponse();
-        step.setEstado("CREADA");
-        step.setDescripcion("Solicitud registrada correctamente");
-        step.setFecha(s.getFechaCreacion());
-
-        timeline.add(step);
-
-        r.setTimeline(timeline);
-
-        return r;
+        return switch (estado) {
+            case CREADA -> "Creada";
+            case PAGO_PENDIENTE -> "Pago pendiente";
+            case PAGO_VALIDANDO -> "Validando pago";
+            case EN_CAMINO -> "En camino";
+            case ENTREGADA -> "Entregado";
+            case CANCELADA -> "Cancelada";
+            default -> throw new IllegalStateException("Unexpected value: " + (estado));
+        };
     }
-    
- public Object cancelarSolicitud(Integer idSolicitud) {
-
-    Solicitud solicitud = solicitudRepo.findById(idSolicitud)
-            .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
-
-    solicitud.setEstado(Solicitud.EstadoSolicitud.CANCELADA);
-
-    solicitudRepo.save(solicitud);
-
-    return "Solicitud cancelada correctamente";
-}
 }
