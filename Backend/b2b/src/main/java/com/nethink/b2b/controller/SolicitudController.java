@@ -108,4 +108,18 @@ public class SolicitudController {
                 solicitudService.obtenerTracking(idSolicitud)
         );
     }
+    @PutMapping("/{idSolicitud}/cancelar")
+public ResponseEntity<?> cancelarSolicitud(@PathVariable Integer idSolicitud) {
+
+    try {
+
+        return ResponseEntity.ok(
+                solicitudService.cancelarSolicitud(idSolicitud)
+        );
+
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError()
+                .body("Error al cancelar la solicitud: " + e.getMessage());
+    }
+}
 }

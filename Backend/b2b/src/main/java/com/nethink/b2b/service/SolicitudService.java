@@ -204,4 +204,16 @@ public class SolicitudService {
 
         return r;
     }
+    
+ public Object cancelarSolicitud(Integer idSolicitud) {
+
+    Solicitud solicitud = solicitudRepo.findById(idSolicitud)
+            .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+
+    solicitud.setEstado(Solicitud.EstadoSolicitud.CANCELADA);
+
+    solicitudRepo.save(solicitud);
+
+    return "Solicitud cancelada correctamente";
+}
 }

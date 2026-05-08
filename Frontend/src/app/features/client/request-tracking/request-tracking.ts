@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-request-tracking',
@@ -28,10 +28,17 @@ export class RequestTrackingComponent implements OnInit {
     if (id) this.cargarTracking(id);
   }
 
+  private headers(): HttpHeaders {
+    return new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    });
+  }
+
   cargarTracking(id: string): void {
 
     this.http.get<any>(
-      `http://localhost:8080/api/solicitudes/${id}/tracking`
+      `http://localhost:8080/api/solicitudes/${id}/tracking`,
+      { headers: this.headers() }
     ).subscribe({
 
       next: (res) => {
@@ -68,7 +75,8 @@ export class RequestTrackingComponent implements OnInit {
 
     this.http.put(
       `http://localhost:8080/api/solicitudes/${id}/cancelar`,
-      {}
+      {},
+      { headers: this.headers() }
     ).subscribe({
 
       next: () => {
@@ -86,7 +94,8 @@ export class RequestTrackingComponent implements OnInit {
       PAGO_PENDIENTE: 'Pago pendiente',
       PAGO_VALIDANDO: 'Validando pago',
       EN_CAMINO: 'En camino',
-      ENTREGADA: 'Entregado'
+      ENTREGADA: 'Entregado',
+      CANCELADA: 'Cancelada'
     };
 
     return map[estado] || estado;
