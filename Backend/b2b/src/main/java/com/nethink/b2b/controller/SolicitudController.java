@@ -108,18 +108,17 @@ public class SolicitudController {
                 solicitudService.obtenerTracking(idSolicitud)
         );
     }
-    @PutMapping("/{idSolicitud}/cancelar")
-public ResponseEntity<?> cancelarSolicitud(@PathVariable Integer idSolicitud) {
+ @PutMapping("/{idSolicitud}/cancelar")
+public ResponseEntity<?> cancelar(
+        @PathVariable Integer idSolicitud,
+        Principal principal
+) {
 
-    try {
-
-        return ResponseEntity.ok(
-                solicitudService.cancelarSolicitud(idSolicitud)
-        );
-
-    } catch (Exception e) {
-        return ResponseEntity.internalServerError()
-                .body("Error al cancelar la solicitud: " + e.getMessage());
-    }
+    return ResponseEntity.ok(
+            solicitudService.cancelarSolicitud(
+                    idSolicitud,
+                    principal.getName()
+            )
+    );
 }
 }

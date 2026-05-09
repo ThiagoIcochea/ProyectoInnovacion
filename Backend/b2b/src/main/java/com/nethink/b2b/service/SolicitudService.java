@@ -187,10 +187,13 @@ public class SolicitudService {
         return r;
     }
 
- public Map<String, String> cancelarSolicitud(Integer idSolicitud) {
+ public Map<String, String> cancelarSolicitud(Integer idSolicitud, String correoUsuario) {
 
     Solicitud solicitud = solicitudRepo.findById(idSolicitud)
             .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+
+    Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
     solicitud.setEstado(EstadoSolicitud.CANCELADA);
 
@@ -198,6 +201,7 @@ public class SolicitudService {
 
     SolicitudHistorial historial = new SolicitudHistorial();
     historial.setSolicitud(solicitud);
+    historial.setIdUsuario(usuario.getIdUsuario());
     historial.setEstado(EstadoSolicitud.CANCELADA.name());
     historial.setDescripcion("Solicitud cancelada por el usuario");
     historial.setFecha(LocalDateTime.now());
@@ -208,7 +212,6 @@ public class SolicitudService {
             "message", "Solicitud cancelada correctamente"
     );
 }
-
     private String generarCodigoRecepcion() {
 
         String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
