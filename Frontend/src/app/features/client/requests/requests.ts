@@ -31,34 +31,32 @@ export class RequestsComponent implements OnInit {
     this.cargarSolicitudes();
   }
 
-  cargarSolicitudes(): void {
-
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      console.error('No hay token');
-      return;
-    }
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
+  private headers(): HttpHeaders {
+    return new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`
     });
+  }
+
+  cargarSolicitudes(): void {
 
     this.http.get<any[]>(
       'http://localhost:8080/api/solicitudes/mis-solicitudes',
-      { headers }
+      { headers: this.headers() }
     )
     .subscribe({
+
       next: (res) => {
 
-        console.log("RESPUESTA BACKEND:", res);
+        const filtradas = res.filter(s =>
+          !['Cancelada', 'Entregado', 'Completada', 'Completado'].includes(s.estado)
+        );
 
-        this.requests = res.map(s => ({
+        this.requests = filtradas.map(s => ({
           id: s.idSolicitud,
 
           code: `RFQ-2026-${s.idSolicitud.toString().padStart(4, '0')}`,
 
-          provider: s.nombreProveedor, // 🔥 CORRECTO
+          provider: s.nombreProveedor,
 
           amount: `S/ ${Number(s.total).toLocaleString('es-PE', {
             minimumFractionDigits: 2
@@ -70,14 +68,12 @@ export class RequestsComponent implements OnInit {
             year: 'numeric'
           }),
 
-          status: this.mapStatusText(s.estado),
+          status: s.estado,
           statusClass: this.mapStatusClass(s.estado),
           rawStatus: s.estado
         }));
 
         this.calcularResumen();
-
-        // 🔥 fuerza render Angular
         this.cdr.detectChanges();
       },
 
@@ -87,29 +83,13 @@ export class RequestsComponent implements OnInit {
     });
   }
 
-  private mapStatusText(estado: string): string {
-
-    const map: any = {
-      PAGO_PENDIENTE: 'Pendiente pago',
-      PAGO_VALIDANDO: 'Validando pago',
-      ESPERANDO_ENVIO: 'En preparación',
-      EN_CAMINO: 'En camino',
-      ENTREGADA: 'Entregado',
-      COMPLETADA: 'Completado'
-    };
-
-    return map[estado] || estado;
-  }
-
   private mapStatusClass(estado: string): string {
 
     const map: any = {
-      PAGO_PENDIENTE: 'pending',
-      PAGO_VALIDANDO: 'validating',
-      ESPERANDO_ENVIO: 'preparing',
-      EN_CAMINO: 'shipping',
-      ENTREGADA: 'delivered',
-      COMPLETADA: 'completed'
+      'Pago pendiente': 'pending',
+      'Validando pago': 'validating',
+      'En preparación': 'preparing',
+      'En camino': 'shipping'
     };
 
     return map[estado] || 'default';
@@ -117,23 +97,21 @@ export class RequestsComponent implements OnInit {
 
   private calcularResumen(): void {
 
-    this.summary.activas = this.requests.length;
+    const activas = this.requests;
+
+    this.summary.activas = activas.length;
 
     this.summary.preparacion =
-      this.requests.filter(r =>
-        r.rawStatus === 'PAGO_VALIDANDO' ||
-        r.rawStatus === 'ESPERANDO_ENVIO'
+      activas.filter(r =>
+        r.rawStatus === 'Validando pago' ||
+        r.rawStatus === 'En preparación'
       ).length;
 
     this.summary.camino =
-      this.requests.filter(r =>
-        r.rawStatus === 'EN_CAMINO'
+      activas.filter(r =>
+        r.rawStatus === 'En camino'
       ).length;
 
-    this.summary.entregadas =
-      this.requests.filter(r =>
-        r.rawStatus === 'ENTREGADA' ||
-        r.rawStatus === 'COMPLETADA'
-      ).length;
+    this.summary.entregadas = 0;
   }
 }

@@ -44,6 +44,7 @@ export class RequestTrackingComponent implements OnInit {
       next: (res) => {
 
         this.tracking = res;
+        
 
         localStorage.setItem('current_solicitud_id', String(res.idSolicitud));
 

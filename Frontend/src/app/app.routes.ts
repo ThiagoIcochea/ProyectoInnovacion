@@ -77,9 +77,9 @@ export const routes: Routes = [
           import('./features/client/request-evaluation/request-evaluation').then(m => m.RequestEvaluationComponent)
       },
       {
-        path: 'history',
-        loadComponent: () =>
-          import('./features/client/history/history').then(m => m.HistoryComponent)
+         path: 'history',
+    loadComponent: () =>
+      import('./features/client/history/history').then(m => m.HistoryComponent)
       },
       {
         path: 'profile',

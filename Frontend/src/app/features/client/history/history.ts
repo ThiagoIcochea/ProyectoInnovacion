@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-history',
@@ -8,31 +9,105 @@ import { Component } from '@angular/core';
   templateUrl: './history.html',
   styleUrl: './history.scss'
 })
-export class HistoryComponent {
-  history = [
-    {
-      code: 'RFQ-2026-0618',
-      provider: 'NetWorks Corp',
-      category: 'Switches',
-      amount: 'US$ 4,250.00',
-      date: '15 Abr 2026',
-      status: 'Completado'
-    },
-    {
-      code: 'RFQ-2026-0542',
-      provider: 'InfraLink Perú',
-      category: 'Firewalls',
-      amount: 'US$ 7,890.00',
-      date: '09 Abr 2026',
-      status: 'Completado'
-    },
-    {
-      code: 'RFQ-2026-0411',
-      provider: 'Global Tech Solutions',
-      category: 'Access Points',
-      amount: 'US$ 3,420.00',
-      date: '02 Abr 2026',
-      status: 'Cancelado'
+export class HistoryComponent implements OnInit {
+
+  history: any[] = [];
+  historyOriginal: any[] = [];
+
+  filtroActivo = 'TODOS';
+
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.cargarHistorial();
+  }
+
+  private headers(): HttpHeaders {
+    return new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    });
+  }
+
+  cargarHistorial(): void {
+
+    this.http.get<any[]>(
+      'http://localhost:8080/api/solicitudes/mis-solicitudes',
+      { headers: this.headers() }
+    )
+    .subscribe({
+
+      next: (res) => {
+
+        this.historyOriginal = res
+          .filter(s =>
+            s.estado === 'Cancelada' ||
+            s.estado === 'Entregado' ||
+            s.estado === 'Completada' ||
+            s.estado === 'Completado'
+          )
+          .map(s => ({
+
+            code: `RFQ-2026-${s.idSolicitud.toString().padStart(4, '0')}`,
+
+            provider: s.nombreProveedor,
+
+            finalState:
+              s.estado === 'Cancelada'
+                ? 'Solicitud cancelada'
+                : 'Compra finalizada',
+
+            amount: `S/ ${Number(s.total).toLocaleString('es-PE', {
+              minimumFractionDigits: 2
+            })}`,
+
+            date: new Date(s.fechaCreacion).toLocaleDateString('es-PE', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric'
+            }),
+
+            status: s.estado
+          }));
+
+        this.history = [...this.historyOriginal];
+
+        this.cdr.detectChanges();
+      },
+
+      error: (err) => {
+        console.error('Error al cargar historial:', err);
+      }
+    });
+  }
+
+  filtrar(tipo: string): void {
+
+    this.filtroActivo = tipo;
+
+    if (tipo === 'TODOS') {
+      this.history = [...this.historyOriginal];
+      return;
     }
-  ];
+
+    if (tipo === 'COMPLETADOS') {
+
+      this.history = this.historyOriginal.filter(h =>
+        h.status === 'Entregado' ||
+        h.status === 'Completado' ||
+        h.status === 'Completada'
+      );
+
+      return;
+    }
+
+    if (tipo === 'CANCELADOS') {
+
+      this.history = this.historyOriginal.filter(h =>
+        h.status === 'Cancelada'
+      );
+    }
+  }
 }

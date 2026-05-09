@@ -91,19 +91,19 @@
 
         </div>
 
-           <div class="actions-box" *ngIf="tracking.estado === 'PAGO_PENDIENTE'">
+          <div class="actions-box" *ngIf="tracking.estado === 'Pago pendiente'">
 
-          <button class="btn-primary"
-                  [routerLink]="['/app/rfq/payment']">
-            Pagar ahora
-          </button>
+  <button class="btn-primary"
+          [routerLink]="['/app/rfq/payment']">
+    Pagar ahora
+  </button>
 
-          <button class="btn-danger"
-                  (click)="cancelarSolicitud()">
-            Cancelar solicitud
-          </button>
+  <button class="btn-danger"
+          (click)="cancelarSolicitud()">
+    Cancelar solicitud
+  </button>
 
-        </div>
+</div>
 
       </aside>
 

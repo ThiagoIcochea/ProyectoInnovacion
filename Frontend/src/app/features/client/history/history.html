@@ -1,4 +1,5 @@
 <div class="history-page">
+
   <div class="page-header">
     <div>
       <span>Archivo de compras</span>
@@ -8,41 +9,72 @@
   </div>
 
   <section class="history-card">
+
     <div class="history-card__header">
+
       <h2>Solicitudes anteriores</h2>
 
       <div class="filters">
-        <button>Todos</button>
-        <button>Completados</button>
-        <button>Cancelados</button>
+
+        <button
+          [class.active]="filtroActivo === 'TODOS'"
+          (click)="filtrar('TODOS')">
+          Todos
+        </button>
+
+        <button
+          [class.active]="filtroActivo === 'COMPLETADOS'"
+          (click)="filtrar('COMPLETADOS')">
+          Completados
+        </button>
+
+        <button
+          [class.active]="filtroActivo === 'CANCELADOS'"
+          (click)="filtrar('CANCELADOS')">
+          Cancelados
+        </button>
+
       </div>
+
     </div>
 
     <div class="history-table">
+
       <div class="history-table__head">
         <div>Código</div>
         <div>Proveedor</div>
-        <div>Categoría</div>
+        <div>Estado Final</div>
         <div>Monto</div>
         <div>Fecha</div>
         <div>Estado</div>
       </div>
 
       <div class="history-table__row" *ngFor="let item of history">
+
         <div class="code">{{ item.code }}</div>
+
         <div>{{ item.provider }}</div>
-        <div>{{ item.category }}</div>
+
+        <div>{{ item.finalState }}</div>
+
         <div>{{ item.amount }}</div>
+
         <div>{{ item.date }}</div>
+
         <div>
           <span
             class="status"
-            [class.cancelled]="item.status === 'Cancelado'"
-          >
+            [class.cancelled]="item.status === 'Cancelada'">
+
             {{ item.status }}
+
           </span>
         </div>
+
       </div>
+
     </div>
+
   </section>
+
 </div>

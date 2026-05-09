@@ -13,6 +13,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -186,25 +187,27 @@ public class SolicitudService {
         return r;
     }
 
-    public Object cancelarSolicitud(Integer idSolicitud) {
+ public Map<String, String> cancelarSolicitud(Integer idSolicitud) {
 
-        Solicitud solicitud = solicitudRepo.findById(idSolicitud)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+    Solicitud solicitud = solicitudRepo.findById(idSolicitud)
+            .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
 
-        solicitud.setEstado(EstadoSolicitud.CANCELADA);
+    solicitud.setEstado(EstadoSolicitud.CANCELADA);
 
-        solicitudRepo.save(solicitud);
+    solicitudRepo.save(solicitud);
 
-        SolicitudHistorial historial = new SolicitudHistorial();
-        historial.setSolicitud(solicitud);
-        historial.setEstado(EstadoSolicitud.CANCELADA.name());
-        historial.setDescripcion("Solicitud cancelada por el usuario");
-        historial.setFecha(LocalDateTime.now());
+    SolicitudHistorial historial = new SolicitudHistorial();
+    historial.setSolicitud(solicitud);
+    historial.setEstado(EstadoSolicitud.CANCELADA.name());
+    historial.setDescripcion("Solicitud cancelada por el usuario");
+    historial.setFecha(LocalDateTime.now());
 
-        historialRepo.save(historial);
+    historialRepo.save(historial);
 
-        return "Solicitud cancelada correctamente";
-    }
+    return Map.of(
+            "message", "Solicitud cancelada correctamente"
+    );
+}
 
     private String generarCodigoRecepcion() {
 
