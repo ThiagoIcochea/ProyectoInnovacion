@@ -100,7 +100,8 @@ listarHistorial(Principal principal) {
             @RequestParam("entidad") String entidad,
             @RequestParam("codigoOperacion") String codigoOperacion,
             @RequestParam("metodo") String metodo,
-            @RequestParam("direccion") String direccion
+            @RequestParam("direccion") String direccion,
+            Principal principal
     ) {
 
         try {
@@ -111,7 +112,8 @@ listarHistorial(Principal principal) {
                             entidad,
                             codigoOperacion,
                             metodo,
-                            direccion
+                            direccion,
+                            principal.getName()
                     )
             );
 
