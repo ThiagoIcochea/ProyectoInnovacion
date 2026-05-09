@@ -60,9 +60,6 @@
           {{ getEstadoTexto() }}
         </div>
 
-     
-     
-
         <h2>Resumen</h2>
 
         <div class="summary-list">
@@ -89,21 +86,28 @@
             <strong>{{ tracking.direccion }}</strong>
           </div>
 
+          <div *ngIf="tracking.estado !== 'Pago pendiente'">
+            <span>Código de recepción</span>
+            <strong>
+              {{ tracking.codigoRecepcion || 'Pendiente de generar' }}
+            </strong>
+          </div>
+
         </div>
 
-          <div class="actions-box" *ngIf="tracking.estado === 'Pago pendiente'">
+        <div class="actions-box" *ngIf="tracking.estado === 'Pago pendiente'">
 
-  <button class="btn-primary"
-          [routerLink]="['/app/rfq/payment']">
-    Pagar ahora
-  </button>
+          <button class="btn-primary"
+                  [routerLink]="['/app/rfq/payment']">
+            Pagar ahora
+          </button>
 
-  <button class="btn-danger"
-          (click)="cancelarSolicitud()">
-    Cancelar solicitud
-  </button>
+          <button class="btn-danger"
+                  (click)="cancelarSolicitud()">
+            Cancelar solicitud
+          </button>
 
-</div>
+        </div>
 
       </aside>
 

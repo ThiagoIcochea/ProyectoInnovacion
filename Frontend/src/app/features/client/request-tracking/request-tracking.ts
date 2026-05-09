@@ -25,7 +25,10 @@ export class RequestTrackingComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) this.cargarTracking(id);
+
+    if (id) {
+      this.cargarTracking(id);
+    }
   }
 
   private headers(): HttpHeaders {
@@ -43,30 +46,47 @@ export class RequestTrackingComponent implements OnInit {
 
       next: (res) => {
 
-        this.tracking = res;
-        
+        console.log('TRACKING:', res);
 
-        localStorage.setItem('current_solicitud_id', String(res.idSolicitud));
+        this.tracking = res;
+
+        localStorage.setItem(
+          'current_solicitud_id',
+          String(res.idSolicitud)
+        );
 
         this.steps = (res.timeline || []).map((t: any, i: number) => ({
           title: this.mapEstado(t.estado),
           description: t.descripcion,
           date: t.fecha,
-          status: i === res.timeline.length - 1 ? 'active' : 'done'
+          status: i === res.timeline.length - 1
+            ? 'active'
+            : 'done'
         }));
 
         this.loading = false;
+
         this.cdr.detectChanges();
       },
 
-      error: () => this.loading = false
+      error: (err) => {
+        console.error(err);
+        this.loading = false;
+      }
     });
   }
 
   irAPago(): void {
-    if (!this.tracking?.idSolicitud) return;
 
-    localStorage.setItem('current_solicitud_id', String(this.tracking.idSolicitud));
+    if (!this.tracking?.idSolicitud) {
+      return;
+    }
+
+    localStorage.setItem(
+      'current_solicitud_id',
+      String(this.tracking.idSolicitud)
+    );
+
     this.router.navigate(['/app/rfq/payment']);
   }
 
@@ -80,11 +100,19 @@ export class RequestTrackingComponent implements OnInit {
       { headers: this.headers() }
     ).subscribe({
 
-      next: () => {
+      next: (res) => {
+
+        console.log('CANCELADO:', res);
+
         this.router.navigate(['/app/requests']);
       },
 
-      error: () => alert('Error al cancelar')
+      error: (err) => {
+
+        console.error('ERROR CANCELAR:', err);
+
+        alert('Error al cancelar');
+      }
     });
   }
 
@@ -103,6 +131,11 @@ export class RequestTrackingComponent implements OnInit {
   }
 
   getEstadoTexto(): string {
-    return this.tracking ? this.mapEstado(this.tracking.estado) : '';
+
+    if (!this.tracking) {
+      return '';
+    }
+
+    return this.mapEstado(this.tracking.estado);
   }
 }
