@@ -1,6 +1,7 @@
 package com.nethink.b2b.service;
 
 import com.nethink.b2b.dto.request.SolicitudCrearRequest;
+import com.nethink.b2b.dto.response.SolicitudHistorialResponse;
 import com.nethink.b2b.dto.response.TrackingResponse;
 import com.nethink.b2b.dto.response.TrackingStepResponse;
 import com.nethink.b2b.dto.response.SolicitudResponse;
@@ -159,34 +160,49 @@ public class SolicitudService {
 
     public TrackingResponse obtenerTracking(Integer idSolicitud) {
 
-        Solicitud s = solicitudRepo.buscarTracking(idSolicitud)
-                .orElseThrow();
+    Solicitud s = solicitudRepo.buscarTracking(idSolicitud)
+            .orElseThrow();
 
-        TrackingResponse r = new TrackingResponse();
+    TrackingResponse r = new TrackingResponse();
 
-        r.setIdSolicitud(s.getIdSolicitud());
-        r.setIdProveedor(s.getProveedor().getIdProveedor());
-        r.setProveedor(s.getProveedor().getRazonSocial());
-        r.setEstado(formatearEstado(s.getEstado()));
-        r.setTotal(s.getTotal());
-        r.setDireccion(s.getDireccionEnvio());
-        r.setCodigoRecepcion(s.getCodigoRecepcion());
-        r.setFechaEntrega(s.getFechaEntrega());
+    r.setIdSolicitud(s.getIdSolicitud());
+    r.setIdProveedor(s.getProveedor().getIdProveedor());
+    r.setProveedor(s.getProveedor().getRazonSocial());
+    r.setEstado(formatearEstado(s.getEstado()));
+    r.setTotal(s.getTotal());
+    r.setDireccion(s.getDireccionEnvio());
+    r.setCodigoRecepcion(s.getCodigoRecepcion());
+    r.setFechaEntrega(s.getFechaEntrega());
 
-        List<TrackingStepResponse> timeline = new ArrayList<>();
+    List<SolicitudHistorial> historiales =
+            historialRepo.findBySolicitud_IdSolicitudOrderByFechaAsc(
+                    idSolicitud
+            );
 
-        TrackingStepResponse step = new TrackingStepResponse();
-        step.setEstado(formatearEstado(EstadoSolicitud.CREADA));
-        step.setDescripcion("Solicitud registrada correctamente");
-        step.setFecha(s.getFechaCreacion());
+    List<TrackingStepResponse> timeline = historiales.stream()
+            .map(h -> {
 
-        timeline.add(step);
+                TrackingStepResponse step =
+                        new TrackingStepResponse();
 
-        r.setTimeline(timeline);
+                step.setEstado(
+                        formatearEstado(
+                                EstadoSolicitud.valueOf(h.getEstado())
+                        )
+                );
 
-        return r;
-    }
+                step.setDescripcion(h.getDescripcion());
 
+                step.setFecha(h.getFecha());
+
+                return step;
+
+            }).collect(Collectors.toList());
+
+    r.setTimeline(timeline);
+
+    return r;
+}
  public Map<String, String> cancelarSolicitud(Integer idSolicitud, String correoUsuario) {
 
     Solicitud solicitud = solicitudRepo.findById(idSolicitud)
@@ -244,4 +260,66 @@ public class SolicitudService {
             default -> throw new IllegalStateException("Unexpected value: " + (estado));
         };
     }
+    
+    public List<SolicitudHistorialResponse> listarHistorial(Integer idUsuario) {
+
+    List<Solicitud> solicitudes = solicitudRepo.findByUsuarioOptimized(idUsuario);
+
+    return solicitudes.stream()
+
+            .filter(s ->
+                    s.getEstado() == EstadoSolicitud.CANCELADA ||
+                    s.getEstado() == EstadoSolicitud.ENTREGADA ||
+                    s.getEstado() == EstadoSolicitud.COMPLETADA
+            )
+
+            .map(s -> {
+
+                SolicitudHistorial historialActual =
+                        historialRepo
+                                .findTopBySolicitud_IdSolicitudAndEstadoOrderByFechaDesc(
+                                        s.getIdSolicitud(),
+                                        s.getEstado().name()
+                                )
+                                .orElse(null);
+
+                SolicitudHistorialResponse dto =
+                        new SolicitudHistorialResponse();
+
+                dto.setIdSolicitud(s.getIdSolicitud());
+
+                dto.setIdProveedor(
+                        s.getProveedor().getIdProveedor()
+                );
+
+                dto.setNombreProveedor(
+                        s.getProveedor().getRazonSocial()
+                );
+
+                dto.setTotal(s.getTotal());
+
+                dto.setEstado(
+                        formatearEstado(s.getEstado())
+                );
+
+                dto.setFechaCreacion(
+                        s.getFechaCreacion()
+                );
+
+                dto.setDescripcionEstado(
+                        historialActual != null
+                                ? historialActual.getDescripcion()
+                                : "Sin descripción"
+                );
+
+                dto.setFechaActualizacionEstado(
+                        historialActual != null
+                                ? historialActual.getFecha()
+                                : s.getFechaCreacion()
+                );
+
+                return dto;
+
+            }).toList();
+}
 }

@@ -1,6 +1,7 @@
 package com.nethink.b2b.controller;
 
 import com.nethink.b2b.dto.request.SolicitudCrearRequest;
+import com.nethink.b2b.dto.response.SolicitudHistorialResponse;
 import com.nethink.b2b.dto.response.SolicitudResponse;
 import com.nethink.b2b.dto.response.TrackingResponse;
 import com.nethink.b2b.entity.MetodoPago;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.security.Principal;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,7 +44,7 @@ public class SolicitudController {
         this.solicitudRepo = solicitudRepo;
     }
 
-    // ✅ CORREGIDO: ahora usa DTO
+    
     @GetMapping("/mis-solicitudes")
     public ResponseEntity<List<SolicitudResponse>> listarMisSolicitudes(Principal principal) {
 
@@ -53,6 +55,23 @@ public class SolicitudController {
                 solicitudService.listarMisSolicitudes(usuario.getIdUsuario())
         );
     }
+    
+   @GetMapping("/mis-solicitudes/historial")
+public ResponseEntity<List<SolicitudHistorialResponse>>
+listarHistorial(Principal principal) {
+
+    Usuario usuario = usuarioRepo
+            .findByCorreo(principal.getName())
+            .orElseThrow(() ->
+                    new RuntimeException("Usuario no encontrado")
+            );
+
+    return ResponseEntity.ok(
+            solicitudService.listarHistorial(
+                    usuario.getIdUsuario()
+            )
+    );
+}
 
     @PostMapping("/crear")
     public ResponseEntity<?> crear(

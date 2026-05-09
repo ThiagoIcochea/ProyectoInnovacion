@@ -34,43 +34,41 @@ export class HistoryComponent implements OnInit {
   cargarHistorial(): void {
 
     this.http.get<any[]>(
-      'http://localhost:8080/api/solicitudes/mis-solicitudes',
+      'http://localhost:8080/api/solicitudes/mis-solicitudes/historial',
       { headers: this.headers() }
     )
     .subscribe({
 
       next: (res) => {
 
-        this.historyOriginal = res
-          .filter(s =>
-            s.estado === 'Cancelada' ||
-            s.estado === 'Entregado' ||
-            s.estado === 'Completada' ||
-            s.estado === 'Completado'
-          )
-          .map(s => ({
+        this.historyOriginal = res.map(s => ({
 
-            code: `RFQ-2026-${s.idSolicitud.toString().padStart(4, '0')}`,
+          code: `RFQ-2026-${s.idSolicitud.toString().padStart(4, '0')}`,
 
-            provider: s.nombreProveedor,
+          provider: s.nombreProveedor,
 
-            finalState:
-              s.estado === 'Cancelada'
-                ? 'Solicitud cancelada'
-                : 'Compra finalizada',
+          description: s.descripcionEstado,
 
-            amount: `S/ ${Number(s.total).toLocaleString('es-PE', {
-              minimumFractionDigits: 2
-            })}`,
+          amount: `S/ ${Number(s.total).toLocaleString('es-PE', {
+            minimumFractionDigits: 2
+          })}`,
 
-            date: new Date(s.fechaCreacion).toLocaleDateString('es-PE', {
+          createdDate: new Date(s.fechaCreacion)
+            .toLocaleDateString('es-PE', {
               day: '2-digit',
               month: 'short',
               year: 'numeric'
             }),
 
-            status: s.estado
-          }));
+          updatedDate: new Date(s.fechaActualizacionEstado)
+            .toLocaleDateString('es-PE', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric'
+            }),
+
+          status: s.estado
+        }));
 
         this.history = [...this.historyOriginal];
 

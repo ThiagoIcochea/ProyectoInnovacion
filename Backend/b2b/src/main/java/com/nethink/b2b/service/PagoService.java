@@ -61,7 +61,7 @@ public class PagoService {
                 direccionConfirmada
         );
 
-        // 4. Crear pago
+      
         Pago pago = new Pago();
         pago.setIdSolicitud(idSolicitud);
         pago.setEntidad(entidad);
@@ -74,7 +74,7 @@ public class PagoService {
 
         Pago pagoGuardado = pagoRepo.save(pago);
 
-        // 5. Historial (ligero, sin joins ni cargas extras)
+      
         SolicitudHistorial historial = new SolicitudHistorial();
         historial.setSolicitud(sol);
         historial.setEstado("PAGO_VALIDANDO");

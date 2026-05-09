@@ -43,9 +43,10 @@
       <div class="history-table__head">
         <div>Código</div>
         <div>Proveedor</div>
-        <div>Estado Final</div>
+        <div>Descripción</div>
         <div>Monto</div>
-        <div>Fecha</div>
+        <div>Creación</div>
+        <div>Última actualización</div>
         <div>Estado</div>
       </div>
 
@@ -55,11 +56,13 @@
 
         <div>{{ item.provider }}</div>
 
-        <div>{{ item.finalState }}</div>
+        <div>{{ item.description }}</div>
 
         <div>{{ item.amount }}</div>
 
-        <div>{{ item.date }}</div>
+        <div>{{ item.createdDate }}</div>
+
+        <div>{{ item.updatedDate }}</div>
 
         <div>
           <span
