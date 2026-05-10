@@ -17,6 +17,7 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
   solicitudId!: number;
   provider: any = null;
   metodosPago: any[] = [];
+  procesandoPago = false;
 
   selectedMetodo: any = null;
   codigoOperacion = '';
@@ -181,23 +182,37 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
     reader.readAsDataURL(this.archivoCaptura);
   }
 
-  confirmarPago(): void {
+   confirmarPago(): void {
 
-    const formData = new FormData();
+  if (this.procesandoPago) return;
 
-    formData.append('archivo', this.archivoCaptura!);
-    formData.append('codigoOperacion', this.codigoOperacion);
-    formData.append('entidad', this.selectedMetodo.entidad);
-    formData.append('metodo', this.selectedMetodo.tipo);
-    formData.append('direccion', this.direccionEntrega);
-    formData.append('monto', String(this.totalSolicitud));
+  this.procesandoPago = true;
 
-    this.http.post(
-      `http://localhost:8080/api/solicitudes/${this.solicitudId}/pagar`,
-      formData,
-      { headers: this.headers() }
-    ).subscribe(() => {
+  const formData = new FormData();
+
+  formData.append('archivo', this.archivoCaptura!);
+  formData.append('codigoOperacion', this.codigoOperacion);
+  formData.append('entidad', this.selectedMetodo.entidad);
+  formData.append('metodo', this.selectedMetodo.tipo);
+  formData.append('direccion', this.direccionEntrega);
+  formData.append('monto', String(this.totalSolicitud));
+
+  this.http.post(
+    `http://localhost:8080/api/solicitudes/${this.solicitudId}/pagar`,
+    formData,
+    { headers: this.headers() }
+  ).subscribe({
+
+    next: () => {
+      this.procesandoPago = false;
       this.router.navigate(['/app/requests']);
-    });
-  }
+    },
+
+    error: (err) => {
+      this.procesandoPago = false;
+      console.error(err);
+      alert('Error al registrar pago');
+    }
+  });
+}
 }

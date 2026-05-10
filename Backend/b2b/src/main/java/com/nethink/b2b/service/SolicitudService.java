@@ -123,6 +123,7 @@ public class SolicitudService {
         SolicitudHistorial historial = new SolicitudHistorial();
         historial.setSolicitud(finalizada);
         historial.setEstado(EstadoSolicitud.CREADA.name());
+        historial.setIdUsuario(cliente.getIdUsuario());
         historial.setDescripcion("Solicitud registrada correctamente");
         historial.setFecha(LocalDateTime.now());
 

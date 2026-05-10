@@ -9,7 +9,7 @@
 
     <section class="payment-main">
 
-      <!-- MAPA + UBICACIÓN -->
+    
       <div class="step-section">
 
         <h3>1. Ubicación de Entrega</h3>
@@ -96,14 +96,19 @@
         </strong>
       </div>
 
-      <button
-        class="confirm-btn"
-        [disabled]="!archivoCaptura || !selectedMetodo || !codigoOperacion"
-        (click)="confirmarPago()">
+<button
+  class="confirm-btn"
+  [disabled]="
+    !archivoCaptura ||
+    !selectedMetodo ||
+    !codigoOperacion ||
+    procesandoPago
+  "
+  (click)="confirmarPago()">
 
-        Confirmar Pago
-      </button>
+  {{ procesandoPago ? 'Procesando...' : 'Confirmar Pago' }}
 
+</button>
       <p class="terms-note">
         Al confirmar, el proveedor validará el pago para iniciar el envío.
       </p>

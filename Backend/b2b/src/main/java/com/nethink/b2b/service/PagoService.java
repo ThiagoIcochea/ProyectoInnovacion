@@ -56,12 +56,12 @@ public class PagoService {
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         String urlPublica = guardarArchivo(archivo);
 
-        // 2. Obtener SOLO lo necesario
+       
         Solicitud sol = solicitudRepo.findById(idSolicitud)
                 .orElseThrow(() ->
                         new RuntimeException("Solicitud no encontrada"));
 
-        // 3. UPDATE optimizado (NO save(entity))
+       
         solicitudRepo.actualizarPago(
                 idSolicitud,
                 Solicitud.EstadoSolicitud.PAGO_VALIDANDO,
@@ -94,9 +94,7 @@ public class PagoService {
         return pagoGuardado;
     }
 
-    // =========================
-    // ARCHIVO (SEPARADO)
-    // =========================
+
     private String guardarArchivo(MultipartFile archivo) throws IOException {
 
         Path uploadPath = Paths.get(UPLOAD_DIR);
