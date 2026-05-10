@@ -4,7 +4,6 @@ import com.nethink.b2b.dto.request.FiltroRFQRequest;
 import com.nethink.b2b.dto.response.CatalogoFiltrosResponse;
 import com.nethink.b2b.entity.Producto;
 import com.nethink.b2b.service.ProductoService;
-import com.nethink.b2b.service.CatalogoService;
 import com.nethink.b2b.dto.response.CatalogoResponse;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -15,11 +14,11 @@ import org.springframework.http.ResponseEntity;
 public class ProductoController {
 
     private final ProductoService productoService;
-    private final CatalogoService catalogoService;
+   
 
-    public ProductoController(ProductoService productoService, CatalogoService catalogoService) {
+    public ProductoController(ProductoService productoService) {
         this.productoService = productoService;
-        this.catalogoService = catalogoService;
+        
     }
 
     @GetMapping
@@ -27,10 +26,7 @@ public class ProductoController {
         return productoService.listarProductos(search);
     }
 
-    @GetMapping("/catalogo")
-    public List<CatalogoResponse> catalogo() {
-        return catalogoService.listarCatalogo();
-    }
+ 
 
     @GetMapping("/filtros")
     public ResponseEntity<CatalogoFiltrosResponse> obtenerFiltros() {

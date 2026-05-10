@@ -114,6 +114,6 @@ public class PagoService {
                 StandardCopyOption.REPLACE_EXISTING
         );
 
-        return "http://localhost:8080/files/" + fileName;
+        return "http://localhost:8080/files/comprobantes/" + fileName;
     }
 }

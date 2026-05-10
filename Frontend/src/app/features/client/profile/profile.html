@@ -1,79 +1,133 @@
 <div class="profile-page">
+
   <div class="page-header">
     <div>
-      <span>Configuración</span>
-      <h1>Perfil</h1>
-      <p>Administra la información de tu cuenta y empresa.</p>
+      <h1>{{ usuario.nombres }} {{ usuario.apellidos }}</h1>
+      <p>Administra la información de tu cuenta</p>
     </div>
   </div>
 
   <div class="profile-grid">
-    <section class="profile-card">
-      <div class="profile-header">
-        <div class="avatar">TC</div>
 
-        <div>
-          <h2>TechCorp S.A.</h2>
-          <p>Cliente corporativo · Administrador IT</p>
+    <section class="profile-card">
+
+      <div class="profile-header">
+
+        <div class="avatar-container">
+
+          <img
+            *ngIf="previewFoto"
+            [src]="previewFoto"
+            class="avatar-image"
+          >
+
+          <div *ngIf="!previewFoto" class="avatar">
+            {{ usuario.nombres?.charAt(0) }}{{ usuario.apellidos?.charAt(0) }}
+          </div>
+
         </div>
+
+      </div>
+
+      <div class="form-group full">
+        <label>Foto de perfil</label>
+
+        <select [(ngModel)]="modoImagen">
+          <option value="archivo">Subir desde mi computadora</option>
+          <option value="url">Usar URL de imagen</option>
+        </select>
+      </div>
+
+      <div class="form-group full" *ngIf="modoImagen === 'archivo'">
+        <input type="file" accept="image/*" (change)="seleccionarFoto($event)">
+      </div>
+
+      <div class="form-group full" *ngIf="modoImagen === 'url'">
+        <input
+          type="text"
+          placeholder="https://..."
+          [(ngModel)]="fotoUrl"
+        >
       </div>
 
       <div class="form-grid">
+
         <div class="form-group">
-          <label>Razón social</label>
-          <input type="text" value="TechCorp S.A." />
+          <label>Nombres</label>
+          <input type="text" [(ngModel)]="usuario.nombres">
         </div>
 
         <div class="form-group">
-          <label>RUC</label>
-          <input type="text" value="20604578912" />
+          <label>Apellidos</label>
+          <input type="text" [(ngModel)]="usuario.apellidos">
         </div>
 
         <div class="form-group">
-          <label>Correo corporativo</label>
-          <input type="email" value="compras@techcorp.com" />
+          <label>Correo</label>
+          <input type="email" [(ngModel)]="usuario.correo">
         </div>
 
         <div class="form-group">
           <label>Teléfono</label>
-          <input type="text" value="+51 987 654 321" />
+          <input type="text" [(ngModel)]="usuario.telefono">
+        </div>
+
+        <div class="form-group">
+          <label>WhatsApp</label>
+          <input type="text" [(ngModel)]="usuario.whatsapp">
         </div>
 
         <div class="form-group full">
-          <label>Dirección principal de entrega</label>
-          <input type="text" value="Av. Javier Prado 1040, Lima" />
+          <label>Dirección</label>
+          <input type="text" [(ngModel)]="usuario.direccion">
         </div>
+
+        <div class="form-group" *ngIf="usuario.rol === 'PROVEEDOR'">
+          <label>Razón Social</label>
+          <input type="text" [(ngModel)]="usuario.razonSocial">
+        </div>
+
+        <div class="form-group" *ngIf="usuario.rol === 'PROVEEDOR'">
+          <label>RUC</label>
+          <input type="text" [(ngModel)]="usuario.ruc">
+        </div>
+
+        <div class="form-group full" *ngIf="usuario.rol === 'PROVEEDOR'">
+          <label>Descripción</label>
+          <textarea rows="4" [(ngModel)]="usuario.descripcion"></textarea>
+        </div>
+
       </div>
 
-      <button class="btn-primary">Guardar cambios</button>
+      <button class="btn-primary" (click)="guardarPerfil()">
+        Guardar cambios
+      </button>
+
     </section>
 
     <aside class="settings-card">
+
       <h2>Preferencias</h2>
 
       <div class="setting-row">
         <div>
           <strong>Notificaciones RFQ</strong>
-          <span>Recibir alertas de cotizaciones y estados.</span>
+          <span>Recibir alertas de cotizaciones y estados</span>
         </div>
-        <input type="checkbox" checked />
-      </div>
 
-      <div class="setting-row">
-        <div>
-          <strong>Validación de stock</strong>
-          <span>Priorizar proveedores con stock completo.</span>
-        </div>
-        <input type="checkbox" checked />
+        <input type="checkbox" [(ngModel)]="usuario.preferencias.notificaciones">
       </div>
 
       <div class="setting-row">
         <div>
           <strong>Entrega rápida</strong>
-          <span>Mostrar primero proveedores con menor tiempo.</span>
+          <span>Priorizar proveedores con menor tiempo</span>
         </div>
-        <input type="checkbox" />
+
+        <input type="checkbox" [(ngModel)]="usuario.preferencias.entregaRapida">
       </div>
+
     </aside>
+
   </div>
 </div>

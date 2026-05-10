@@ -26,4 +26,28 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
         @Param("categorias") List<Integer> categorias, 
         @Param("marcas") List<Integer> marcas
     );
+    List<Producto> findByIdProductoIn(List<Integer> ids);
+@Query(value = """
+    SELECT 
+        p.id_producto,
+        p.nombre,
+        p.descripcion,
+        m.nombre AS marca,
+        c.nombre AS categoria,
+        COUNT(ds.id_detalle) AS veces_pedido
+    FROM detalle_solicitud ds
+    INNER JOIN proveedor_producto pp 
+        ON pp.id_prov_prod = ds.id_prov_prod
+    INNER JOIN productos p 
+        ON p.id_producto = pp.id_producto
+    LEFT JOIN marcas m
+        ON m.id_marca = p.id_marca
+    LEFT JOIN categorias c
+        ON c.id_categoria = p.id_categoria
+    WHERE pp.estado = 'ACTIVO'
+    GROUP BY p.id_producto, p.nombre, p.descripcion, m.nombre, c.nombre
+    ORDER BY veces_pedido DESC
+    LIMIT 10
+""", nativeQuery = true)
+List<Object[]> findTopProductos();
 }

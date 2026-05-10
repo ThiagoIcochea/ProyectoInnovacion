@@ -39,18 +39,18 @@ public class CatalogoService {
                 .map(Producto::getIdProducto)
                 .toList();
 
-        // 2. Carga masiva de datos relacionados (2 queries adicionales)
+     
         List<ProductoEspecificacion> specs = specRepo.findByProducto_IdProductoIn(ids);
         List<ProductoImagen> imagenes = imagenRepo.findByProducto_IdProductoIn(ids);
 
-        // 3. Agrupación en memoria para acceso instantáneo (O(1))
+      
         Map<Integer, List<ProductoEspecificacion>> specsByProd = specs.stream()
                 .collect(Collectors.groupingBy(s -> s.getProducto().getIdProducto()));
 
         Map<Integer, List<ProductoImagen>> imagesByProd = imagenes.stream()
                 .collect(Collectors.groupingBy(i -> i.getProducto().getIdProducto()));
 
-        // 4. Construcción del DTO final sin bucles anidados costosos
+        
         return productos.stream().map(p -> {
             CatalogoResponse r = new CatalogoResponse();
             r.setIdProducto(p.getIdProducto());
@@ -59,7 +59,7 @@ public class CatalogoService {
             r.setCategoria(p.getCategoria() != null ? p.getCategoria().getNombre() : "Sin categoría");
             r.setDescripcion(p.getDescripcion());
 
-            // Mapeo de especificaciones desde el mapa (Rápido)
+           
             List<EspecificacionResponse> specDto = specsByProd.getOrDefault(p.getIdProducto(), new ArrayList<>())
                     .stream()
                     .map(e -> {

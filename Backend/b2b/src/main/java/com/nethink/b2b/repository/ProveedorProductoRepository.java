@@ -38,4 +38,6 @@ public interface ProveedorProductoRepository
             @Param("proveedoresIds") List<Integer> proveedoresIds,
             @Param("productosIds") List<Integer> productosIds
     );
+    
+
 }

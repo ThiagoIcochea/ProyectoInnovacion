@@ -28,7 +28,11 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/files/**",
+                                "/files"
+                        ).permitAll()
 
                         .requestMatchers("/api/config/**")
                         .hasRole(AppConstants.ROLE_ADMIN)

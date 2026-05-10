@@ -1,12 +1,16 @@
 <div class="dashboard-page">
+
   <section class="dashboard-main">
+
     <div class="hero-grid">
+
       <div class="hero-card">
         <span class="hero-card__badge">Cotización inteligente</span>
+
         <h1>Cotización Inteligente B2B</h1>
+
         <p>
-          Agrega los equipos de red que necesitas y nuestro sistema encontrará
-          proveedores compatibles con stock, mejor precio y menor tiempo de entrega.
+          Agrega los equipos de red y el sistema encontrará proveedores con mejor precio, stock y tiempo de entrega.
         </p>
 
         <a routerLink="/app/rfq/catalog" class="hero-card__action">
@@ -14,75 +18,189 @@
         </a>
       </div>
 
-      <div class="promo-card">
-        <span>Patrocinado</span>
+      <div class="promo-card" *ngIf="recommendedProducts.length > 0">
+
+        <span>Más solicitado</span>
+
         <div class="promo-card__icon">▣</div>
-        <h3>Rack Servers Dell</h3>
-        <p>Descuentos exclusivos para compras B2B.</p>
-        <button>Ver oferta</button>
+
+        <h3>{{ recommendedProducts[0]?.producto }}</h3>
+
+        <p>{{ recommendedProducts[0]?.descripcion }}</p>
+
+        <button (click)="agregarAlCarrito(recommendedProducts[0])">
+          Agregar
+        </button>
+
       </div>
+
     </div>
 
     <div class="section-header">
+
       <div>
         <h2>Productos más recomendados</h2>
+
         <p>
-          Equipos destacados por valoración de clientes empresariales,
-          estabilidad operativa y desempeño en implementaciones de red.
+          Ranking dinámico basado en pedidos reales, stock y actividad del sistema.
         </p>
       </div>
 
-      <span>Ranking por reseñas verificadas</span>
+      <span>Top productos</span>
+
     </div>
 
     <div class="product-grid">
+
       <div class="product-card" *ngFor="let product of recommendedProducts">
+
         <div class="product-card__image">
-          <span>{{ product.tag }}</span>
+
+          <img
+            *ngIf="product.imagenes?.length"
+            [src]="product.imagenes[0]?.url"
+            style="width:100%; height:140px; object-fit:cover;"
+          >
+
+          <div *ngIf="!product.imagenes?.length"
+               style="height:140px; display:flex; align-items:center; justify-content:center;">
+            Sin imagen
+          </div>
+
         </div>
 
         <div class="product-card__tags">
-          <span>{{ product.brand }}</span>
-          <span>{{ product.type }}</span>
+          <span>{{ product.marca }}</span>
+          <span>{{ product.categoria }}</span>
         </div>
 
-        <h3>{{ product.name }}</h3>
-        <p>{{ product.description }}</p>
+        <h3>{{ product.producto }}</h3>
 
-        <button class="product-card__button">Agregar al RFQ</button>
+        <p>{{ product.descripcion }}</p>
+
+        <div class="specs" *ngIf="product.especificaciones?.length">
+
+          <small *ngFor="let s of product.especificaciones">
+            {{ s.nombre }}: {{ s.valor }}
+          </small>
+
+        </div>
+
+        <div style="margin-top:10px;">
+          <strong>{{ product.vecesPedido }} pedidos</strong>
+        </div>
+
+        <button class="product-card__button"
+                (click)="agregarAlCarrito(product)">
+          Agregar al RFQ
+        </button>
+
       </div>
+
     </div>
+
   </section>
 
   <aside class="request-panel">
-    <div class="request-panel__step">Paso 1 de 3</div>
 
-    <h2>Solicitud de Cotización</h2>
-    <p>{{ requestItems.length }} modelos de equipos seleccionados</p>
+    <div class="request-panel__step">
+      RFQ Inteligente
+    </div>
+
+    <h2>Carrito RFQ</h2>
+
+    <p>{{ requestItems.length }} productos seleccionados</p>
 
     <div class="alert-box">
-      El sistema mostrará únicamente proveedores con stock para todos los
-      equipos de esta lista.
+      El sistema buscará proveedores que tengan stock disponible para todos los productos.
     </div>
 
     <div class="request-list">
-      <div class="request-item" *ngFor="let item of requestItems">
-        <div class="request-item__thumb"></div>
+
+      <div class="request-item"
+           *ngFor="let item of requestItems">
 
         <div class="request-item__content">
+
           <strong>{{ item.name }}</strong>
 
           <div class="qty-control">
-            <button>-</button>
+
+            <button (click)="disminuir(item)">
+              -
+            </button>
+
             <span>{{ item.qty }}</span>
-            <button>+</button>
+
+            <button (click)="aumentar(item)">
+              +
+            </button>
+
           </div>
+
+          <button
+            style="margin-top:8px;"
+            (click)="eliminar(item)">
+            Eliminar
+          </button>
+
         </div>
+
       </div>
+
     </div>
 
-    <a routerLink="/app/rfq/results" class="request-panel__button">
-      Buscar Proveedores
-    </a>
+    <div class="filters">
+
+      <label>Prioridad</label>
+
+      <select [(ngModel)]="prioridad">
+
+        <option value="BALANCEADO">
+          Balanceado
+        </option>
+
+        <option value="PRECIO">
+          Mejor Precio
+        </option>
+
+        <option value="TIEMPO">
+          Entrega Rápida
+        </option>
+
+        <option value="CALIDAD">
+          Calidad
+        </option>
+
+      </select>
+
+      <label>Presupuesto mínimo</label>
+
+      <input
+        type="number"
+        [(ngModel)]="precioMin"
+        placeholder="Monto mínimo"
+      >
+
+      <label>Presupuesto máximo</label>
+
+      <input
+        type="number"
+        [(ngModel)]="precioMax"
+        placeholder="Monto máximo"
+      >
+
+    </div>
+
+    <button
+      class="request-panel__button"
+      (click)="buscarProveedoresRFQ()"
+      [disabled]="requestItems.length === 0">
+
+      Buscar Proveedores →
+
+    </button>
+
   </aside>
+
 </div>
