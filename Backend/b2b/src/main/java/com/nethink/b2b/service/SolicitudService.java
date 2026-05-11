@@ -2,17 +2,28 @@ package com.nethink.b2b.service;
 
 import com.nethink.b2b.dto.request.SolicitudCrearRequest;
 import com.nethink.b2b.dto.response.SolicitudHistorialResponse;
+import com.nethink.b2b.dto.response.SolicitudResponse;
 import com.nethink.b2b.dto.response.TrackingResponse;
 import com.nethink.b2b.dto.response.TrackingStepResponse;
-import com.nethink.b2b.dto.response.SolicitudResponse;
-import com.nethink.b2b.entity.*;
+import com.nethink.b2b.entity.DetalleSolicitud;
+import com.nethink.b2b.entity.EmpresaCompradora;
+import com.nethink.b2b.entity.Proveedor;
+import com.nethink.b2b.entity.ProveedorProducto;
+import com.nethink.b2b.entity.Solicitud;
 import com.nethink.b2b.entity.Solicitud.EstadoSolicitud;
-import com.nethink.b2b.repository.*;
+import com.nethink.b2b.entity.SolicitudHistorial;
+import com.nethink.b2b.entity.Usuario;
+import com.nethink.b2b.repository.DetalleSolicitudRepository;
+import com.nethink.b2b.repository.EmpresaCompradoraRepository;
+import com.nethink.b2b.repository.ProveedorProductoRepository;
+import com.nethink.b2b.repository.ProveedorRepository;
+import com.nethink.b2b.repository.SolicitudHistorialRepository;
+import com.nethink.b2b.repository.SolicitudRepository;
+import com.nethink.b2b.repository.UsuarioRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,6 +39,7 @@ public class SolicitudService {
     private final ProveedorProductoRepository provProdRepo;
     private final UsuarioRepository usuarioRepo;
     private final ProveedorRepository proveedorRepo;
+    private final EmpresaCompradoraRepository empresaRepo;
     private final SolicitudHistorialRepository historialRepo;
     private final EmailService emailService;
 
@@ -37,6 +49,7 @@ public class SolicitudService {
             ProveedorProductoRepository provProdRepo,
             UsuarioRepository usuarioRepo,
             ProveedorRepository proveedorRepo,
+            EmpresaCompradoraRepository empresaRepo,
             SolicitudHistorialRepository historialRepo,
             EmailService emailService
     ) {
@@ -45,12 +58,16 @@ public class SolicitudService {
         this.provProdRepo = provProdRepo;
         this.usuarioRepo = usuarioRepo;
         this.proveedorRepo = proveedorRepo;
+        this.empresaRepo = empresaRepo;
         this.historialRepo = historialRepo;
         this.emailService = emailService;
     }
 
     @Transactional
-    public Solicitud crearSolicitud(SolicitudCrearRequest request, String correoCliente) {
+    public Solicitud crearSolicitud(
+            SolicitudCrearRequest request,
+            String correoCliente
+    ) {
 
         Usuario cliente = usuarioRepo.findByCorreo(correoCliente)
                 .orElseThrow();
@@ -58,9 +75,19 @@ public class SolicitudService {
         Proveedor proveedor = proveedorRepo.findById(request.idProveedor())
                 .orElseThrow();
 
+        EmpresaCompradora empresa = null;
+
+        if (request.idEmpresa() != null) {
+
+            empresa = empresaRepo.findById(request.idEmpresa())
+                    .orElseThrow(() ->
+                            new RuntimeException("Empresa no encontrada"));
+        }
+
         Solicitud sol = new Solicitud();
 
         sol.setUsuario(cliente);
+        sol.setEmpresaCompradora(empresa);
         sol.setProveedor(proveedor);
         sol.setDireccionEnvio(request.direccionEnvio());
         sol.setEstado(EstadoSolicitud.PAGO_PENDIENTE);
@@ -72,255 +99,444 @@ public class SolicitudService {
         sol.setCodigoRecepcion(generarCodigoRecepcion());
 
         BigDecimal total = BigDecimal.ZERO;
+
         int maxDiasEntrega = 0;
 
         Solicitud guardada = solicitudRepo.save(sol);
 
         for (var itemReq : request.items()) {
 
-            ProveedorProducto pp = provProdRepo.buscarPorProveedorYProducto(
-                    request.idProveedor(),
-                    itemReq.idProducto()
-            ).orElseThrow();
+            ProveedorProducto pp = provProdRepo
+                    .buscarPorProveedorYProducto(
+                            request.idProveedor(),
+                            itemReq.idProducto()
+                    ).orElseThrow();
 
-            BigDecimal cantidad = BigDecimal.valueOf(itemReq.cantidad());
-            BigDecimal totalItem = pp.getPrecio().multiply(cantidad);
+            BigDecimal cantidad =
+                    BigDecimal.valueOf(itemReq.cantidad());
+
+            BigDecimal totalItem =
+                    pp.getPrecio().multiply(cantidad);
 
             total = total.add(totalItem);
 
-            if (pp.getTiempoEntregaDias() != null &&
-                    pp.getTiempoEntregaDias() > maxDiasEntrega) {
-                maxDiasEntrega = pp.getTiempoEntregaDias();
+            if (
+                    pp.getTiempoEntregaDias() != null &&
+                    pp.getTiempoEntregaDias() > maxDiasEntrega
+            ) {
+                maxDiasEntrega =
+                        pp.getTiempoEntregaDias();
             }
 
-            DetalleSolicitud detalle = new DetalleSolicitud();
+            DetalleSolicitud detalle =
+                    new DetalleSolicitud();
+
             detalle.setSolicitud(guardada);
+
             detalle.setProveedorProducto(pp);
+
             detalle.setCantidad(itemReq.cantidad());
+
             detalle.setPrecioUnitario(pp.getPrecio());
-            detalle.setTiempoEntregaDias(pp.getTiempoEntregaDias());
-            detalle.setGarantiaMeses(pp.getGarantiaMeses());
+
+            detalle.setTiempoEntregaDias(
+                    pp.getTiempoEntregaDias()
+            );
+
+            detalle.setGarantiaMeses(
+                    pp.getGarantiaMeses()
+            );
 
             detalleRepo.save(detalle);
         }
 
-        total = total.setScale(2, RoundingMode.HALF_UP);
+        total = total.setScale(
+                2,
+                RoundingMode.HALF_UP
+        );
 
-        BigDecimal subtotal = total.divide(BigDecimal.valueOf(1.18), 2, RoundingMode.HALF_UP);
-        BigDecimal igv = total.subtract(subtotal).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal subtotal = total.divide(
+                BigDecimal.valueOf(1.18),
+                2,
+                RoundingMode.HALF_UP
+        );
+
+        BigDecimal igv = total.subtract(subtotal)
+                .setScale(2, RoundingMode.HALF_UP);
 
         guardada.setSubtotal(subtotal);
         guardada.setIgv(igv);
         guardada.setTotal(total);
 
-        LocalDateTime fechaEntrega = ahora.plusDays(maxDiasEntrega);
+        LocalDateTime fechaEntrega =
+                ahora.plusDays(maxDiasEntrega);
 
-        guardada.setFechaLimiteEntrega(fechaEntrega);
-        guardada.setFechaEntrega(fechaEntrega);
+        guardada.setFechaLimiteEntrega(
+                fechaEntrega
+        );
 
-        Solicitud finalizada = solicitudRepo.save(guardada);
+        guardada.setFechaEntrega(
+                fechaEntrega
+        );
 
-        SolicitudHistorial historial = new SolicitudHistorial();
+        Solicitud finalizada =
+                solicitudRepo.save(guardada);
+
+        SolicitudHistorial historial =
+                new SolicitudHistorial();
+
         historial.setSolicitud(finalizada);
-        historial.setEstado(EstadoSolicitud.CREADA.name());
-        historial.setIdUsuario(cliente.getIdUsuario());
-        historial.setDescripcion("Solicitud registrada correctamente");
+
+        historial.setEstado(
+                EstadoSolicitud.CREADA.name()
+        );
+
+        historial.setIdUsuario(
+                cliente.getIdUsuario()
+        );
+
+        historial.setDescripcion(
+                "Solicitud registrada correctamente"
+        );
+
         historial.setFecha(LocalDateTime.now());
 
         historialRepo.save(historial);
 
         try {
-            emailService.enviarCorreoCliente(finalizada);
-            emailService.enviarCorreoProveedor(finalizada);
+
+            emailService.enviarCorreoCliente(
+                    finalizada
+            );
+
+            emailService.enviarCorreoProveedor(
+                    finalizada
+            );
+
         } catch (Exception e) {
+
             e.printStackTrace();
         }
 
         return finalizada;
     }
 
-    public List<SolicitudResponse> listarMisSolicitudes(Integer idUsuario) {
+    public List<SolicitudResponse> listarMisSolicitudes(
+            Integer idUsuario
+    ) {
 
-        List<Solicitud> solicitudes = solicitudRepo.findByUsuarioOptimized(idUsuario);
+        List<Solicitud> solicitudes =
+                solicitudRepo.findByUsuarioOptimized(idUsuario);
 
         return solicitudes.stream().map(s -> {
 
-            SolicitudResponse dto = new SolicitudResponse();
+            SolicitudResponse dto =
+                    new SolicitudResponse();
 
-            dto.setIdSolicitud(s.getIdSolicitud());
-            dto.setIdProveedor(s.getProveedor().getIdProveedor());
-            dto.setNombreProveedor(s.getProveedor().getRazonSocial());
-            dto.setTotal(s.getTotal());
-            dto.setEstado(formatearEstado(s.getEstado()));
-            dto.setFechaCreacion(s.getFechaCreacion());
+            dto.setIdSolicitud(
+                    s.getIdSolicitud()
+            );
+
+            dto.setIdProveedor(
+                    s.getProveedor().getIdProveedor()
+            );
+
+            dto.setNombreProveedor(
+                    s.getProveedor().getRazonSocial()
+            );
+
+            dto.setIdEmpresa(
+                    s.getEmpresaCompradora() != null
+                            ? s.getEmpresaCompradora().getIdEmpresa()
+                            : null
+            );
+
+            dto.setNombreEmpresa(
+                    s.getEmpresaCompradora() != null
+                            ? s.getEmpresaCompradora().getRazonSocial()
+                            : "Compra independiente"
+            );
+
+            dto.setRucEmpresa(
+                    s.getEmpresaCompradora() != null
+                            ? s.getEmpresaCompradora().getRuc()
+                            : null
+            );
+
+            dto.setTotal(
+                    s.getTotal()
+            );
+
+            dto.setEstado(
+                    formatearEstado(s.getEstado())
+            );
+
+            dto.setFechaCreacion(
+                    s.getFechaCreacion()
+            );
 
             return dto;
 
         }).collect(Collectors.toList());
     }
 
-    public TrackingResponse obtenerTracking(Integer idSolicitud) {
+    public TrackingResponse obtenerTracking(
+            Integer idSolicitud
+    ) {
 
-    Solicitud s = solicitudRepo.buscarTracking(idSolicitud)
-            .orElseThrow();
+        Solicitud s = solicitudRepo.buscarTracking(idSolicitud)
+                .orElseThrow();
 
-    TrackingResponse r = new TrackingResponse();
+        TrackingResponse r =
+                new TrackingResponse();
 
-    r.setIdSolicitud(s.getIdSolicitud());
-    r.setIdProveedor(s.getProveedor().getIdProveedor());
-    r.setProveedor(s.getProveedor().getRazonSocial());
-    r.setEstado(formatearEstado(s.getEstado()));
-    r.setTotal(s.getTotal());
-    r.setDireccion(s.getDireccionEnvio());
-    r.setCodigoRecepcion(s.getCodigoRecepcion());
-    r.setFechaEntrega(s.getFechaEntrega());
+        r.setIdSolicitud(
+                s.getIdSolicitud()
+        );
 
-    List<SolicitudHistorial> historiales =
-            historialRepo.findBySolicitud_IdSolicitudOrderByFechaAsc(
-                    idSolicitud
-            );
+        r.setIdProveedor(
+                s.getProveedor().getIdProveedor()
+        );
 
-    List<TrackingStepResponse> timeline = historiales.stream()
-            .map(h -> {
+        r.setProveedor(
+                s.getProveedor().getRazonSocial()
+        );
 
-                TrackingStepResponse step =
-                        new TrackingStepResponse();
+        r.setEstado(
+                formatearEstado(s.getEstado())
+        );
 
-                step.setEstado(
-                        formatearEstado(
-                                EstadoSolicitud.valueOf(h.getEstado())
-                        )
-                );
+        r.setTotal(
+                s.getTotal()
+        );
 
-                step.setDescripcion(h.getDescripcion());
+        r.setDireccion(
+                s.getDireccionEnvio()
+        );
 
-                step.setFecha(h.getFecha());
+        r.setCodigoRecepcion(
+                s.getCodigoRecepcion()
+        );
 
-                return step;
+        r.setFechaEntrega(
+                s.getFechaEntrega()
+        );
 
-            }).collect(Collectors.toList());
+        List<SolicitudHistorial> historiales =
+                historialRepo
+                        .findBySolicitud_IdSolicitudOrderByFechaAsc(
+                                idSolicitud
+                        );
 
-    r.setTimeline(timeline);
+        List<TrackingStepResponse> timeline =
+                historiales.stream()
+                        .map(h -> {
 
-    return r;
-}
- public Map<String, String> cancelarSolicitud(Integer idSolicitud, String correoUsuario) {
+                            TrackingStepResponse step =
+                                    new TrackingStepResponse();
 
-    Solicitud solicitud = solicitudRepo.findById(idSolicitud)
-            .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+                            step.setEstado(
+                                    formatearEstado(
+                                            EstadoSolicitud.valueOf(
+                                                    h.getEstado()
+                                            )
+                                    )
+                            );
 
-    Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                            step.setDescripcion(
+                                    h.getDescripcion()
+                            );
 
-    solicitud.setEstado(EstadoSolicitud.CANCELADA);
+                            step.setFecha(
+                                    h.getFecha()
+                            );
 
-    solicitudRepo.save(solicitud);
+                            return step;
 
-    SolicitudHistorial historial = new SolicitudHistorial();
-    historial.setSolicitud(solicitud);
-    historial.setIdUsuario(usuario.getIdUsuario());
-    historial.setEstado(EstadoSolicitud.CANCELADA.name());
-    historial.setDescripcion("Solicitud cancelada por el usuario");
-    historial.setFecha(LocalDateTime.now());
+                        }).collect(Collectors.toList());
 
-    historialRepo.save(historial);
+        r.setTimeline(timeline);
 
-    return Map.of(
-            "message", "Solicitud cancelada correctamente"
-    );
-}
+        return r;
+    }
+
+    public Map<String, String> cancelarSolicitud(
+            Integer idSolicitud,
+            String correoUsuario
+    ) {
+
+        Solicitud solicitud =
+                solicitudRepo.findById(idSolicitud)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Solicitud no encontrada"
+                                )
+                        );
+
+        Usuario usuario =
+                usuarioRepo.findByCorreo(correoUsuario)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Usuario no encontrado"
+                                )
+                        );
+
+        solicitud.setEstado(
+                EstadoSolicitud.CANCELADA
+        );
+
+        solicitudRepo.save(solicitud);
+
+        SolicitudHistorial historial =
+                new SolicitudHistorial();
+
+        historial.setSolicitud(solicitud);
+
+        historial.setIdUsuario(
+                usuario.getIdUsuario()
+        );
+
+        historial.setEstado(
+                EstadoSolicitud.CANCELADA.name()
+        );
+
+        historial.setDescripcion(
+                "Solicitud cancelada por el usuario"
+        );
+
+        historial.setFecha(
+                LocalDateTime.now()
+        );
+
+        historialRepo.save(historial);
+
+        return Map.of(
+                "message",
+                "Solicitud cancelada correctamente"
+        );
+    }
+
     private String generarCodigoRecepcion() {
 
-        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        String chars =
+                "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
         String codigo;
 
         do {
-            StringBuilder sb = new StringBuilder("NP");
+
+            StringBuilder sb =
+                    new StringBuilder("NP");
 
             for (int i = 0; i < 6; i++) {
-                int idx = (int) (Math.random() * chars.length());
-                sb.append(chars.charAt(idx));
+
+                int idx = (int)
+                        (Math.random() * chars.length());
+
+                sb.append(
+                        chars.charAt(idx)
+                );
             }
 
             codigo = sb.toString();
 
-        } while (solicitudRepo.existsByCodigoRecepcion(codigo));
+        } while (
+                solicitudRepo.existsByCodigoRecepcion(codigo)
+        );
 
         return codigo;
     }
 
-    private String formatearEstado(EstadoSolicitud estado) {
+    private String formatearEstado(
+            EstadoSolicitud estado
+    ) {
 
         return switch (estado) {
+
             case CREADA -> "Creada";
+
             case PAGO_PENDIENTE -> "Pago pendiente";
+
             case PAGO_VALIDANDO -> "Validando pago";
+
             case EN_CAMINO -> "En camino";
+
             case ENTREGADA -> "Entregado";
+
             case CANCELADA -> "Cancelada";
-            default -> throw new IllegalStateException("Unexpected value: " + (estado));
+
+            default -> throw new IllegalStateException(
+                    "Unexpected value: " + estado
+            );
         };
     }
-    
-    public List<SolicitudHistorialResponse> listarHistorial(Integer idUsuario) {
 
-    List<Solicitud> solicitudes = solicitudRepo.findByUsuarioOptimized(idUsuario);
+    public List<SolicitudHistorialResponse> listarHistorial(
+            Integer idUsuario
+    ) {
 
-    return solicitudes.stream()
+        List<Solicitud> solicitudes =
+                solicitudRepo.findByUsuarioOptimized(idUsuario);
 
-            .filter(s ->
-                    s.getEstado() == EstadoSolicitud.CANCELADA ||
-                    s.getEstado() == EstadoSolicitud.ENTREGADA ||
-                    s.getEstado() == EstadoSolicitud.COMPLETADA
-            )
+        return solicitudes.stream()
 
-            .map(s -> {
+                .filter(s ->
+                        s.getEstado() == EstadoSolicitud.CANCELADA ||
+                        s.getEstado() == EstadoSolicitud.ENTREGADA ||
+                        s.getEstado() == EstadoSolicitud.COMPLETADA
+                )
 
-                SolicitudHistorial historialActual =
-                        historialRepo
-                                .findTopBySolicitud_IdSolicitudAndEstadoOrderByFechaDesc(
-                                        s.getIdSolicitud(),
-                                        s.getEstado().name()
-                                )
-                                .orElse(null);
+                .map(s -> {
 
-                SolicitudHistorialResponse dto =
-                        new SolicitudHistorialResponse();
+                    SolicitudHistorial historialActual =
+                            historialRepo
+                                    .findTopBySolicitud_IdSolicitudAndEstadoOrderByFechaDesc(
+                                            s.getIdSolicitud(),
+                                            s.getEstado().name()
+                                    )
+                                    .orElse(null);
 
-                dto.setIdSolicitud(s.getIdSolicitud());
+                    SolicitudHistorialResponse dto =
+                            new SolicitudHistorialResponse();
 
-                dto.setIdProveedor(
-                        s.getProveedor().getIdProveedor()
-                );
+                    dto.setIdSolicitud(
+                            s.getIdSolicitud()
+                    );
 
-                dto.setNombreProveedor(
-                        s.getProveedor().getRazonSocial()
-                );
+                    dto.setIdProveedor(
+                            s.getProveedor().getIdProveedor()
+                    );
 
-                dto.setTotal(s.getTotal());
+                    dto.setNombreProveedor(
+                            s.getProveedor().getRazonSocial()
+                    );
 
-                dto.setEstado(
-                        formatearEstado(s.getEstado())
-                );
+                    dto.setTotal(
+                            s.getTotal()
+                    );
 
-                dto.setFechaCreacion(
-                        s.getFechaCreacion()
-                );
+                    dto.setEstado(
+                            formatearEstado(s.getEstado())
+                    );
 
-                dto.setDescripcionEstado(
-                        historialActual != null
-                                ? historialActual.getDescripcion()
-                                : "Sin descripción"
-                );
+                    dto.setFechaCreacion(
+                            s.getFechaCreacion()
+                    );
 
-                dto.setFechaActualizacionEstado(
-                        historialActual != null
-                                ? historialActual.getFecha()
-                                : s.getFechaCreacion()
-                );
+                    dto.setDescripcionEstado(
+                            historialActual != null
+                                    ? historialActual.getDescripcion()
+                                    : "Sin descripción"
+                    );
 
-                return dto;
+                    dto.setFechaActualizacionEstado(
+                            historialActual != null
+                                    ? historialActual.getFecha()
+                                    : s.getFechaCreacion()
+                    );
 
-            }).toList();
-}
+                    return dto;
+
+                }).toList();
+    }
 }

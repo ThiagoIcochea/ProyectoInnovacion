@@ -18,6 +18,10 @@ public class Solicitud {
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_empresa")
+    private EmpresaCompradora empresaCompradora;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_proveedor", nullable = false)
     private Proveedor proveedor;
 
@@ -96,8 +100,6 @@ public class Solicitud {
         SISTEMA
     }
 
-    // Getters y Setters
-
     public Integer getIdSolicitud() {
         return idSolicitud;
     }
@@ -112,6 +114,14 @@ public class Solicitud {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public EmpresaCompradora getEmpresaCompradora() {
+        return empresaCompradora;
+    }
+
+    public void setEmpresaCompradora(EmpresaCompradora empresaCompradora) {
+        this.empresaCompradora = empresaCompradora;
     }
 
     public Proveedor getProveedor() {
