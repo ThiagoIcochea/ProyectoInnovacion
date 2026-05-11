@@ -1,4 +1,5 @@
 <div class="quotation-page" *ngIf="provider">
+
   <div class="page-title">
     <a routerLink="/app/rfq/results" class="back-button">←</a>
     <div>
@@ -12,7 +13,7 @@
     <div class="supplier-icon">◎</div>
     <div class="supplier-info">
       <h2>{{ provider.nombreProveedor }}</h2>
-      <p>⭐ {{ provider.scoreFinal | number:'1.1-1' }} · Proveedor Rankeado #1</p>
+      <p>⭐ {{ provider.scoreFinal | number:'1.1-1' }}</p>
       <div class="supplier-badges">
         <span>Socio de Negocio Verificado</span>
         <span>Garantía Local</span>
@@ -25,13 +26,16 @@
   </section>
 
   <div class="quotation-grid">
+
     <section class="detail-card">
+
       <div class="card-header">
         <h2>Productos incluidos</h2>
-        <p>Precios unitarios calculados según stock actual del proveedor.</p>
+        <p>Precios calculados automáticamente.</p>
       </div>
 
       <div class="quotation-table">
+
         <div class="quotation-table__head">
           <div>Producto</div>
           <div>Cant.</div>
@@ -44,65 +48,57 @@
             <div class="product-thumb"></div>
             <div>
               <strong>{{ product.nombreProducto }}</strong>
-              <span>Ref: SKU-{{ product.idProducto || 'GEN' }}</span>
+              <span>SKU-{{ product.idProducto }}</span>
             </div>
           </div>
           <div>{{ product.cantidad }}</div>
-          <div>S/ {{ product.precioUnitario | number:'1.2-2' }}</div>
-          <div class="subtotal">S/ {{ product.subtotal | number:'1.2-2' }}</div>
+          <div>S/ {{ product.precioUnitario }}</div>
+          <div>S/ {{ product.subtotal }}</div>
         </div>
+
       </div>
     </section>
 
     <aside class="summary-card">
+
       <h2>Resumen de Cotización</h2>
+
       <div class="summary-list">
+
         <div>
-          <span>Subtotal (Neto)</span>
-          <strong>S/ {{ subtotal | number:'1.2-2' }}</strong>
+          <span>Subtotal</span>
+          <strong>S/ {{ subtotal }}</strong>
         </div>
+
         <div>
-          <span>IGV (18.00%)</span>
-          <strong>S/ {{ igv | number:'1.2-2' }}</strong>
+          <span>IGV (18%)</span>
+          <strong>S/ {{ igv }}</strong>
         </div>
+
         <div>
-          <span>Costo de envío</span>
-          <strong class="text-success">Incluido</strong>
+          <span>Total</span>
+          <strong>S/ {{ total }}</strong>
         </div>
-        <div class="total-row">
-          <span>Total a pagar</span>
-          <strong>S/ {{ total | number:'1.2-2' }}</strong>
-        </div>
+
+      </div>
+
+      <!-- 🔥 BLOQUE NUEVO: RUC OBLIGATORIO -->
+      <div class="ruc-box">
+        <label>RUC de la empresa compradora</label>
+        <input
+          type="text"
+          [(ngModel)]="rucEmpresa"
+          placeholder="Ingrese RUC (11 dígitos)"
+          maxlength="11"
+        />
       </div>
 
       <button (click)="confirmarOrden()" class="btn-primary">
         Aceptar y Proceder al Pago
       </button>
-      <button class="btn-secondary">Solicitar Revisión</button>
+
     </aside>
+
   </div>
 
-  <section class="terms-card">
-    <div class="card-header">
-      <h2>Términos y condiciones</h2>
-    </div>
-    <div class="terms-grid">
-      <div class="term-box">
-        <span>Tiempo de entrega</span>
-        <strong>{{ provider.tiempoEntregaPromedio }} días hábiles</strong>
-      </div>
-      <div class="term-box">
-        <span>Garantía</span>
-        <strong>Según fabricante (mín. 12 meses)</strong>
-      </div>
-      <div class="term-box">
-        <span>Moneda</span>
-        <strong>Soles Peruanos (PEN)</strong>
-      </div>
-      <div class="term-box">
-        <span>Forma de Pago</span>
-        <strong>Contado / Transferencia</strong>
-      </div>
-    </div>
-  </section>
 </div>
