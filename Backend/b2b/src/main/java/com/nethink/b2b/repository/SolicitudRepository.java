@@ -21,13 +21,14 @@ ORDER BY s.fechaCreacion DESC
 """)
 List<Solicitud> findByUsuarioOptimized(@Param("idUsuario") Integer idUsuario);
 
-    @Query("""
-        SELECT s
-        FROM Solicitud s
-        LEFT JOIN FETCH s.proveedor p
-        WHERE s.idSolicitud = :idSolicitud
-    """)
-    Optional<Solicitud> buscarTracking(@Param("idSolicitud") Integer idSolicitud);
+@Query("""
+    SELECT s
+    FROM Solicitud s
+    LEFT JOIN FETCH s.proveedor
+    LEFT JOIN FETCH s.empresaCompradora
+    WHERE s.idSolicitud = :idSolicitud
+""")
+Optional<Solicitud> buscarTracking(@Param("idSolicitud") Integer idSolicitud);
    boolean existsByCodigoRecepcion(String codigoRecepcion);
    
    @Modifying

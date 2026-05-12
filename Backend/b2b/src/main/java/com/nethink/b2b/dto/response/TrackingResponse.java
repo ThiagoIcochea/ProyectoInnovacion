@@ -1,5 +1,6 @@
 package com.nethink.b2b.dto.response;
 
+import com.nethink.b2b.entity.EmpresaCompradora;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +18,18 @@ public class TrackingResponse {
     private List<TrackingStepResponse> timeline;
     
     private Integer idProveedor;
+    
+    private EmpresaCompradora empresaCompradora;
+
+    public EmpresaCompradora getEmpresaCompradora() {
+        return empresaCompradora;
+    }
+
+    public void setEmpresaCompradora(EmpresaCompradora empresaCompradora) {
+        this.empresaCompradora = empresaCompradora;
+    }
+    
+ 
 
 public Integer getIdProveedor() {
     return idProveedor;

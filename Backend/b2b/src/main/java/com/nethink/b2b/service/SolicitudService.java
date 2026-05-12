@@ -289,6 +289,7 @@ public class SolicitudService {
 
         TrackingResponse r =
                 new TrackingResponse();
+        r.setEmpresaCompradora(s.getEmpresaCompradora());
 
         r.setIdSolicitud(
                 s.getIdSolicitud()
