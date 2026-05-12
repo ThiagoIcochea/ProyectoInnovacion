@@ -61,7 +61,7 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
   cargarSolicitud(): void {
 
     this.http.get<any>(
-      `http://localhost:8080/api/solicitudes/${this.solicitudId}/tracking`,
+      `https://proyectoinnovacion.onrender.com/api/solicitudes/${this.solicitudId}/tracking`,
       { headers: this.headers() }
     ).subscribe(res => {
 

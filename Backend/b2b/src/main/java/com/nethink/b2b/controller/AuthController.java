@@ -1,6 +1,7 @@
 package com.nethink.b2b.controller;
 
 import com.nethink.b2b.dto.request.LoginRequest;
+import com.nethink.b2b.dto.request.RegisterProviderRequest;
 import com.nethink.b2b.dto.response.LoginResponse;
 import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.service.AuthService;
@@ -18,4 +19,6 @@ public class AuthController {
     public LoginResponse login(@RequestBody LoginRequest request) {
         return service.login(request.getCorreo(), request.getPassword());
     }
+    
+  
 }

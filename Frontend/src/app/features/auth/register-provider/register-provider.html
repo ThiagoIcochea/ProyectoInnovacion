@@ -28,104 +28,105 @@
       </div>
 
       <form class="auth-form">
-        <div class="section-title">1. Datos de la Empresa</div>
+
+        <div class="section-title">1. Datos de Usuario</div>
+
+        <div class="form-grid form-grid--2">
+          <div class="form-group">
+            <label>Nombres</label>
+            <input id="nombres" type="text" [(ngModel)]="nombres" name="nombres"/>
+          </div>
+
+          <div class="form-group">
+            <label>Apellidos</label>
+            <input id="apellidos" type="text" [(ngModel)]="apellidos" name="apellidos"/>
+          </div>
+        </div>
 
         <div class="form-group">
-          <label for="razonSocial">Razón Social</label>
-          <input
-            id="razonSocial"
-            type="text"
-            placeholder="Ej. Global Tech Solutions S.A.C."
-          />
+          <label>Correo</label>
+          <input id="correo" type="email" [(ngModel)]="correo" name="correo"/>
         </div>
 
         <div class="form-grid form-grid--2">
           <div class="form-group">
-            <label for="ruc">RUC</label>
-            <input id="ruc" type="text" placeholder="Ingresa 11 dígitos" />
+            <label>Contraseña</label>
+            <input id="password" type="password" [(ngModel)]="password" name="password"/>
           </div>
 
           <div class="form-group">
-            <label for="telefonoEmpresa">Teléfono</label>
-            <input
-              id="telefonoEmpresa"
-              type="text"
-              placeholder="Ej. +51 999 999 999"
-            />
+            <label>WhatsApp</label>
+            <input id="whatsapp" type="text" [(ngModel)]="whatsapp" name="whatsapp"/>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="correoEmpresa">Correo Electrónico</label>
-          <input
-            id="correoEmpresa"
-            type="email"
-            placeholder="contacto@tuempresa.com"
-          />
+          <label>Teléfono</label>
+          <input id="telefono" type="text" [(ngModel)]="telefono" name="telefono"/>
         </div>
 
         <div class="form-group">
-          <label for="direccionEmpresa">Dirección de Domicilio</label>
-          <input
-            id="direccionEmpresa"
-            type="text"
-            placeholder="Av. Principal 123, Distrito, Ciudad, País"
-          />
+          <label>Dirección</label>
+          <input id="direccion" type="text" [(ngModel)]="direccion" name="direccion"/>
         </div>
 
-        <div class="section-title">2. Configuración de API (Catálogo y Stock)</div>
+        <div class="section-title">2. Datos de la Empresa</div>
+
+        <div class="form-group">
+          <label>Razón Social</label>
+          <input id="razonSocial" type="text" [(ngModel)]="razonSocial" name="razonSocial"/>
+        </div>
+
+        <div class="form-grid form-grid--2">
+          <div class="form-group">
+            <label>RUC</label>
+            <input id="ruc" type="text" [(ngModel)]="ruc" name="ruc"/>
+          </div>
+
+          <div class="form-group">
+            <label>Descripción</label>
+            <input id="descripcion" type="text" [(ngModel)]="descripcion" name="descripcion"/>
+          </div>
+        </div>
+
+        <div class="section-title">3. Configuración de API</div>
 
         <div class="info-box">
-          Para poder recomendarte en las solicitudes RFQ que hagan match con tu
-          inventario, necesitamos conectarnos a tu API de productos. El sistema
-          consultará disponibilidad en tiempo real.
+          Conectamos tu catálogo para mostrar tu inventario en RFQ en tiempo real.
         </div>
 
         <div class="form-group">
-          <label for="endpoint">Endpoint URL</label>
-          <input
-            id="endpoint"
-            type="text"
-            placeholder="https://api.tuempresa.com/v1/inventory"
-          />
+          <label>Endpoint URL</label>
+          <input id="apiUrl" type="text" [(ngModel)]="apiUrl" name="apiUrl"/>
         </div>
 
         <div class="form-grid form-grid--2">
           <div class="form-group">
-            <label for="tipoConexion">Tipo de Conexión</label>
-            <select id="tipoConexion">
-              <option>REST API</option>
-              <option>GraphQL</option>
-              <option>Webhook</option>
+            <label>Tipo de Conexión</label>
+            <select [(ngModel)]="apiTipo" name="apiTipo">
+              <option value="REST">REST</option>
+              <option value="GRAPHQL">GraphQL</option>
+              <option value="WEBHOOK">Webhook</option>
             </select>
-          </div>
-
-          <div class="form-group">
-            <label for="puerto">Puerto (si aplica)</label>
-            <input id="puerto" type="text" placeholder="Ej. 443 o 8080" />
           </div>
         </div>
 
         <div class="form-group">
-          <label for="apiKey">API Key / Token de Autenticación</label>
-          <input
-            id="apiKey"
-            type="text"
-            placeholder="Ingresa tu API Key o Bearer Token"
-          />
+          <label>API Token</label>
+          <input id="apiToken" type="text" [(ngModel)]="apiToken" name="apiToken"/>
         </div>
 
         <label class="checkbox-row">
           <input type="checkbox" />
           <span>
-            He leído y acepto los
-            <a href="#">Términos y Condiciones</a>
-            y autorizo el uso de la API según las
-            <a href="#">Políticas de Privacidad</a>.
+            Acepto términos y políticas de privacidad
           </span>
         </label>
 
-        <button type="button" class="btn-primary">Registrar mi Empresa</button>
+        <button type="button" class="btn-primary" (click)="register()">
+          Registrar mi Empresa
+        </button>
+
       </form>
 
       <div class="auth-form-footer">
