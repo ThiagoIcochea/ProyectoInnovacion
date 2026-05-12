@@ -4,7 +4,8 @@ WORKDIR /app
 
 COPY . .
 
-RUN mvn clean package -DskipTests
+# EVITAR tests y carga pesada
+RUN mvn clean package -DskipTests -Dmaven.test.skip=true
 
 FROM eclipse-temurin:17-jdk
 
