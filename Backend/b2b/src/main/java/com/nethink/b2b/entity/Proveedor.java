@@ -37,9 +37,9 @@ public class Proveedor {
     private LocalDateTime fechaRegistro;
 
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_usuario", insertable = false, updatable = false)
-    private Usuario usuario;
+@ManyToOne(fetch = FetchType.EAGER)
+@JoinColumn(name = "id_usuario")
+private Usuario usuario;
 
     public Proveedor() {
     }
