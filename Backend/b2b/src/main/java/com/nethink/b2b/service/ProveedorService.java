@@ -2,11 +2,12 @@ package com.nethink.b2b.service;
 
 import com.nethink.b2b.dto.request.RegisterProviderRequest;
 import com.nethink.b2b.dto.response.SunatResponse;
-import com.nethink.b2b.entity.Proveedor;
-import com.nethink.b2b.entity.Usuario;
+import com.nethink.b2b.entity.*;
 import com.nethink.b2b.entity.enums.EstadoUsuario;
 import com.nethink.b2b.repository.ProveedorRepository;
+import com.nethink.b2b.repository.RolRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
+import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,9 @@ public class ProveedorService {
 
     @Autowired
     private ProveedorRepository proveedorRepository;
+
+    @Autowired
+    private RolRepository rolRepository;
 
     @Autowired
     private SunatService sunatService;
@@ -40,6 +44,9 @@ public class ProveedorService {
             throw new RuntimeException("RUC inválido en SUNAT");
         }
 
+        Rol rolProveedor = rolRepository.findById(3)
+                .orElseThrow(() -> new RuntimeException("Rol proveedor no existe"));
+
         Usuario user = new Usuario();
         user.setNombres(req.getNombres());
         user.setApellidos(req.getApellidos());
@@ -49,6 +56,8 @@ public class ProveedorService {
         user.setPassword(req.getPassword());
         user.setDireccion(req.getDireccion());
         user.setEstado(EstadoUsuario.ACTIVO);
+        user.setFechaRegistro(LocalDateTime.now());
+        user.setRol(rolProveedor);
 
         usuarioRepository.save(user);
 
@@ -60,6 +69,7 @@ public class ProveedorService {
         prov.setApiUrl(req.getApiUrl());
         prov.setApiTipo(req.getApiTipo());
         prov.setApiToken(req.getApiToken());
+        prov.setFechaRegistro(LocalDateTime.now());
         prov.setEstado("ACTIVO");
 
         proveedorRepository.save(prov);

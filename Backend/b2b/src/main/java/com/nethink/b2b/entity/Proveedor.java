@@ -36,8 +36,6 @@ public class Proveedor {
     @Column(name = "fecha_registro")
     private LocalDateTime fechaRegistro;
 
-    @Column(name = "id_usuario")
-    private Integer idUsuario;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_usuario", insertable = false, updatable = false)
@@ -118,14 +116,7 @@ public class Proveedor {
         this.fechaRegistro = fechaRegistro;
     }
 
-    public Integer getIdUsuario() {
-        return idUsuario;
-    }
-
-    public void setIdUsuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
-    }
-
+ 
     public Usuario getUsuario() {
         return usuario;
     }
