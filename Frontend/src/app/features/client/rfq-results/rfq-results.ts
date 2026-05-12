@@ -32,7 +32,7 @@ export class RfqResultsComponent implements OnInit {
   }
 
   seleccionarProveedor(provider: any): void {
-    // Guardamos el objeto completo (incluyendo el array 'items' del backend)
+   
     localStorage.setItem('selected_provider', JSON.stringify(provider));
     this.router.navigate(['/app/rfq/quotation']);
   }

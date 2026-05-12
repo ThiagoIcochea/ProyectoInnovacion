@@ -80,7 +80,7 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
   cargarMetodosPago(id: number): void {
 
     this.http.get<any[]>(
-      `http://localhost:8080/api/solicitudes/proveedor/${id}/metodos-pago`,
+      `https://proyectoinnovacion.onrender.com/api/solicitudes/proveedor/${id}/metodos-pago`,
       { headers: this.headers() }
     ).subscribe(res => this.metodosPago = res);
   }
@@ -198,7 +198,7 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
   formData.append('monto', String(this.totalSolicitud));
 
   this.http.post(
-    `http://localhost:8080/api/solicitudes/${this.solicitudId}/pagar`,
+    `https://proyectoinnovacion.onrender.com/api/solicitudes/${this.solicitudId}/pagar`,
     formData,
     { headers: this.headers() }
   ).subscribe({

@@ -28,7 +28,7 @@ export class LoginComponent {
       password: this.password
     };
 
-    this.http.post('http://localhost:8080/api/auth/login', body)
+    this.http.post('https://proyectoinnovacion.onrender.com/api/auth/login', body)
       .subscribe({
         next: (res: any) => {
 

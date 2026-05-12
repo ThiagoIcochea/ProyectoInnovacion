@@ -23,7 +23,7 @@ export class DashboardComponent implements OnInit {
   precioMin: number | null = null;
   precioMax: number | null = null;
 
-  private API = 'http://localhost:8080/api';
+  private API = 'https://proyectoinnovacion.onrender.com/api';
   private intervaloPublicidad: any;
 
   constructor(

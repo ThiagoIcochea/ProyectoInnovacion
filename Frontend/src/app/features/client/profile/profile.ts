@@ -52,7 +52,7 @@ export class ProfileComponent implements OnInit {
 
   cargarPerfil(): void {
 
-    this.http.get<any>('http://localhost:8080/api/usuarios/perfil', {
+    this.http.get<any>('https://proyectoinnovacion.onrender.com/api/usuarios/perfil', {
       headers: this.headers()
     }).subscribe({
 
@@ -127,7 +127,7 @@ export class ProfileComponent implements OnInit {
     }
 
     this.http.put(
-      'http://localhost:8080/api/usuarios/perfil',
+      'https://proyectoinnovacion.onrender.com/api/usuarios/perfil',
       formData,
       { headers: this.headers() }
     ).subscribe({

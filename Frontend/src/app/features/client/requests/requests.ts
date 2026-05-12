@@ -40,7 +40,7 @@ export class RequestsComponent implements OnInit {
   cargarSolicitudes(): void {
 
     this.http.get<any[]>(
-      'http://localhost:8080/api/solicitudes/mis-solicitudes',
+      'https://proyectoinnovacion.onrender.com/api/solicitudes/mis-solicitudes',
       { headers: this.headers() }
     )
     .subscribe({

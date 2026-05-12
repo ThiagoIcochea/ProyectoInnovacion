@@ -40,7 +40,7 @@ export class RequestTrackingComponent implements OnInit {
   cargarTracking(id: string): void {
 
     this.http.get<any>(
-      `http://localhost:8080/api/solicitudes/${id}/tracking`,
+      `https://proyectoinnovacion.onrender.com/api/solicitudes/${id}/tracking`,
       { headers: this.headers() }
     ).subscribe({
 
@@ -95,7 +95,7 @@ export class RequestTrackingComponent implements OnInit {
     const id = this.tracking.idSolicitud;
 
     this.http.put(
-      `http://localhost:8080/api/solicitudes/${id}/cancelar`,
+      `https://proyectoinnovacion.onrender.com/api/solicitudes/${id}/cancelar`,
       {},
       { headers: this.headers() }
     ).subscribe({

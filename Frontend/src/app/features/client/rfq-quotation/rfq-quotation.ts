@@ -73,7 +73,7 @@ export class RfqQuotationComponent implements OnInit {
     };
 
     this.http.post<any>(
-      'http://localhost:8080/api/empresas',
+      'https://proyectoinnovacion.onrender.com/api/empresas',
       empresaBody,
       { headers }
     ).subscribe({
@@ -95,7 +95,7 @@ export class RfqQuotationComponent implements OnInit {
         };
 
         this.http.post<any>(
-          'http://localhost:8080/api/solicitudes/crear',
+          'https://proyectoinnovacion.onrender.com/api/solicitudes/crear',
           solicitudBody,
           { headers }
         ).subscribe({

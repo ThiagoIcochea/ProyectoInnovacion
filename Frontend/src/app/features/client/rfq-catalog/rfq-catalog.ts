@@ -27,7 +27,7 @@ export class RfqCatalogComponent implements OnInit {
   currentPage: number = 1;
   pageSize: number = 8;
 
-  private readonly API_BASE = 'http://localhost:8080/api';
+  private readonly API_BASE = 'https://proyectoinnovacion.onrender.com/api';
 
   constructor(
     private http: HttpClient,
