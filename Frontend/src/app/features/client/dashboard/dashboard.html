@@ -18,18 +18,23 @@
         </a>
       </div>
 
-      <div class="promo-card" *ngIf="recommendedProducts.length > 0">
+      <div class="promo-card" *ngIf="publicidades.length > 0">
 
-        <span>Más solicitado</span>
+        <span>{{ publicidades[currentPublicidadIndex]?.origen }}</span>
 
         <div class="promo-card__icon">▣</div>
 
-        <h3>{{ recommendedProducts[0]?.producto }}</h3>
+        <h3>{{ publicidades[currentPublicidadIndex]?.titulo }}</h3>
 
-        <p>{{ recommendedProducts[0]?.descripcion }}</p>
+        <p>{{ publicidades[currentPublicidadIndex]?.enlace }}</p>
 
-        <button (click)="agregarAlCarrito(recommendedProducts[0])">
-          Agregar
+        <img
+          [src]="publicidades[currentPublicidadIndex]?.imagen"
+          style="width:100%; height:120px; object-fit:cover; border-radius:10px; margin:10px 0;"
+        >
+
+        <button (click)="irPublicidad(publicidades[currentPublicidadIndex])">
+          Ver más
         </button>
 
       </div>
@@ -79,11 +84,9 @@
         <p>{{ product.descripcion }}</p>
 
         <div class="specs" *ngIf="product.especificaciones?.length">
-
           <small *ngFor="let s of product.especificaciones">
             {{ s.nombre }}: {{ s.valor }}
           </small>
-
         </div>
 
         <div style="margin-top:10px;">
@@ -117,30 +120,19 @@
 
     <div class="request-list">
 
-      <div class="request-item"
-           *ngFor="let item of requestItems">
+      <div class="request-item" *ngFor="let item of requestItems">
 
         <div class="request-item__content">
 
           <strong>{{ item.name }}</strong>
 
           <div class="qty-control">
-
-            <button (click)="disminuir(item)">
-              -
-            </button>
-
+            <button (click)="disminuir(item)">-</button>
             <span>{{ item.qty }}</span>
-
-            <button (click)="aumentar(item)">
-              +
-            </button>
-
+            <button (click)="aumentar(item)">+</button>
           </div>
 
-          <button
-            style="margin-top:8px;"
-            (click)="eliminar(item)">
+          <button (click)="eliminar(item)">
             Eliminar
           </button>
 
@@ -153,52 +145,25 @@
     <div class="filters">
 
       <label>Prioridad</label>
-
       <select [(ngModel)]="prioridad">
-
-        <option value="BALANCEADO">
-          Balanceado
-        </option>
-
-        <option value="PRECIO">
-          Mejor Precio
-        </option>
-
-        <option value="TIEMPO">
-          Entrega Rápida
-        </option>
-
-        <option value="CALIDAD">
-          Calidad
-        </option>
-
+        <option value="BALANCEADO">Balanceado</option>
+        <option value="PRECIO">Mejor Precio</option>
+        <option value="TIEMPO">Entrega Rápida</option>
+        <option value="CALIDAD">Calidad</option>
       </select>
 
       <label>Presupuesto mínimo</label>
-
-      <input
-        type="number"
-        [(ngModel)]="precioMin"
-        placeholder="Monto mínimo"
-      >
+      <input type="number" [(ngModel)]="precioMin">
 
       <label>Presupuesto máximo</label>
-
-      <input
-        type="number"
-        [(ngModel)]="precioMax"
-        placeholder="Monto máximo"
-      >
+      <input type="number" [(ngModel)]="precioMax">
 
     </div>
 
-    <button
-      class="request-panel__button"
-      (click)="buscarProveedoresRFQ()"
-      [disabled]="requestItems.length === 0">
-
+    <button class="request-panel__button"
+            (click)="buscarProveedoresRFQ()"
+            [disabled]="requestItems.length === 0">
       Buscar Proveedores →
-
     </button>
 
   </aside>

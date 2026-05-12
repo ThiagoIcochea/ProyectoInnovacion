@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -16,21 +16,25 @@ export class DashboardComponent implements OnInit {
   recommendedProducts: any[] = [];
   requestItems: any[] = [];
 
-  prioridad: string = 'BALANCEADO';
+  publicidades: any[] = [];
+  currentPublicidadIndex: number = 0;
 
+  prioridad: string = 'BALANCEADO';
   precioMin: number | null = null;
   precioMax: number | null = null;
 
   private API = 'http://localhost:8080/api';
+  private intervaloPublicidad: any;
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.cargarCarrito();
-    this.cargarRecomendados();
+    this.cargarTodo();
   }
 
   getHeaders() {
@@ -41,49 +45,88 @@ export class DashboardComponent implements OnInit {
     };
   }
 
+  cargarTodo(): void {
+    this.cargarRecomendados();
+    this.cargarPublicidad();
+  }
+
   cargarRecomendados(): void {
 
     this.http.get<any[]>(
       `${this.API}/recomendados/productos`,
       this.getHeaders()
     ).subscribe({
-
-      next: (data: any[]) => {
-
-        this.recommendedProducts = Array.isArray(data)
-          ? data
-          : [];
-
+      next: (data) => {
+        this.recommendedProducts = Array.isArray(data) ? data : [];
+        this.cdr.detectChanges();
       },
-
       error: () => {
         this.recommendedProducts = [];
+        this.cdr.detectChanges();
       }
-
     });
   }
 
-  cargarCarrito(): void {
+  cargarPublicidad(): void {
 
-    const carrito = localStorage.getItem('rfq_cart');
+    this.http.get<any[]>(
+      `${this.API}/publicidad/activas`,
+      this.getHeaders()
+    ).subscribe({
+      next: (data) => {
 
-    if (carrito) {
+        this.publicidades = Array.isArray(data) ? data : [];
+        this.currentPublicidadIndex = 0;
 
-      this.requestItems = JSON.parse(carrito);
+        this.cdr.detectChanges();
 
-    } else {
+        if (this.publicidades.length > 0) {
+          this.iniciarCarrusel();
+        }
 
-      this.requestItems = [];
+      },
+      error: () => {
+        this.publicidades = [];
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
+  iniciarCarrusel(): void {
+
+    if (this.intervaloPublicidad) {
+      clearInterval(this.intervaloPublicidad);
+    }
+
+    this.intervaloPublicidad = setInterval(() => {
+
+      if (this.publicidades.length > 1) {
+
+        this.currentPublicidadIndex++;
+
+        if (this.currentPublicidadIndex >= this.publicidades.length) {
+          this.currentPublicidadIndex = 0;
+        }
+
+        this.cdr.detectChanges();
+      }
+
+    }, 20000);
+  }
+
+  irPublicidad(pub: any): void {
+    if (pub?.enlace) {
+      window.open(pub.enlace, '_blank');
     }
   }
 
-  guardarCarrito(): void {
+  cargarCarrito(): void {
+    const carrito = localStorage.getItem('rfq_cart');
+    this.requestItems = carrito ? JSON.parse(carrito) : [];
+  }
 
-    localStorage.setItem(
-      'rfq_cart',
-      JSON.stringify(this.requestItems)
-    );
+  guardarCarrito(): void {
+    localStorage.setItem('rfq_cart', JSON.stringify(this.requestItems));
   }
 
   agregarAlCarrito(product: any): void {
@@ -93,67 +136,50 @@ export class DashboardComponent implements OnInit {
     );
 
     if (existe) {
-
       existe.qty++;
-
     } else {
-
       this.requestItems.push({
         idProducto: product.idProducto,
         name: product.producto,
         qty: 1
       });
-
     }
 
     this.guardarCarrito();
   }
 
   aumentar(item: any): void {
-
     item.qty++;
-
     this.guardarCarrito();
   }
 
   disminuir(item: any): void {
-
     if (item.qty > 1) {
-
       item.qty--;
-
     } else {
-
       this.eliminar(item);
-
     }
-
     this.guardarCarrito();
   }
 
   eliminar(item: any): void {
-
     this.requestItems = this.requestItems.filter(
       x => x.idProducto !== item.idProducto
     );
-
     this.guardarCarrito();
   }
 
   buscarProveedoresRFQ(): void {
 
     const request = {
-
       items: this.requestItems.map(i => ({
         idProducto: i.idProducto,
         cantidad: i.qty
       })),
-
       filtro: {
         precioMin: this.precioMin,
         precioMax: this.precioMax
       },
-
       prioridad: this.prioridad
     };
 
@@ -163,26 +189,15 @@ export class DashboardComponent implements OnInit {
       this.getHeaders()
     ).subscribe({
 
-      next: (res: any) => {
-
+      next: (res) => {
         this.router.navigate(
           ['/app/rfq/results'],
-          {
-            state: {
-              proveedores: res
-            }
-          }
+          { state: { proveedores: res } }
         );
-
       },
 
-      error: (err) => {
-
-        console.error(err);
-
-        alert(
-          'No se encontraron proveedores compatibles.'
-        );
+      error: () => {
+        alert('No se encontraron proveedores compatibles.');
       }
 
     });
