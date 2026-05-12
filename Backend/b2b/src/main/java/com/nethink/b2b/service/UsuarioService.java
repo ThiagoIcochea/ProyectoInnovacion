@@ -1,31 +1,35 @@
 package com.nethink.b2b.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.nethink.b2b.dto.request.ProfileUpdateRequest;
 import com.nethink.b2b.dto.response.ProfileResponse;
 import com.nethink.b2b.entity.PreferenciaUsuario;
 import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.repository.PreferenciaUsuarioRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
-import java.io.IOException;
-import java.nio.file.*;
-import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepo;
     private final PreferenciaUsuarioRepository prefRepo;
-
-    private final String UPLOAD_DIR = "C:/uploads/b2b/perfil/";
+    private final Cloudinary cloudinary;
 
     public UsuarioService(
             UsuarioRepository usuarioRepo,
-            PreferenciaUsuarioRepository prefRepo
+            PreferenciaUsuarioRepository prefRepo,
+            Cloudinary cloudinary
     ) {
         this.usuarioRepo = usuarioRepo;
         this.prefRepo = prefRepo;
+        this.cloudinary = cloudinary;
     }
 
     public ProfileResponse obtenerPerfil(String correo) {
@@ -78,9 +82,9 @@ public class UsuarioService {
 
         if (foto != null && !foto.isEmpty()) {
             try {
-                usuario.setFotoPerfil(guardarArchivo(foto));
+                usuario.setFotoPerfil(subirACloudinary(foto));
             } catch (IOException e) {
-                throw new RuntimeException("Error guardando archivo", e);
+                throw new RuntimeException("Error subiendo archivo a Cloudinary", e);
             }
         } else if (fotoUrl != null && !fotoUrl.isEmpty()) {
             usuario.setFotoPerfil(fotoUrl);
@@ -100,24 +104,15 @@ public class UsuarioService {
         prefRepo.save(pref);
     }
 
-    private String guardarArchivo(MultipartFile archivo) throws IOException {
+    private String subirACloudinary(MultipartFile archivo) throws IOException {
 
-        Path uploadPath = Paths.get(UPLOAD_DIR);
-
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-
-        String fileName = System.currentTimeMillis() + "_" + archivo.getOriginalFilename();
-
-        Path filePath = uploadPath.resolve(fileName);
-
-        Files.copy(
-                archivo.getInputStream(),
-                filePath,
-                StandardCopyOption.REPLACE_EXISTING
+        Map uploadResult = cloudinary.uploader().upload(
+                archivo.getBytes(),
+                ObjectUtils.asMap(
+                        "folder", "b2b/perfil"
+                )
         );
 
-        return "http://localhost:8080/files/perfil/" + fileName;
+        return uploadResult.get("secure_url").toString();
     }
 }

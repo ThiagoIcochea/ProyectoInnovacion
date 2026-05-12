@@ -1,5 +1,7 @@
 package com.nethink.b2b.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.nethink.b2b.entity.Pago;
 import com.nethink.b2b.entity.Solicitud;
 import com.nethink.b2b.entity.SolicitudHistorial;
@@ -13,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.*;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 public class PagoService {
@@ -23,24 +25,22 @@ public class PagoService {
     private final SolicitudRepository solicitudRepo;
     private final SolicitudHistorialRepository historialRepo;
     private final UsuarioRepository usuarioRepo;
-
-    private final String UPLOAD_DIR = "C:/uploads/b2b/comprobantes/";
+    private final Cloudinary cloudinary;
 
     public PagoService(
             PagoRepository pagoRepo,
             SolicitudRepository solicitudRepo,
             SolicitudHistorialRepository historialRepo,
-            UsuarioRepository usuarioRepo
+            UsuarioRepository usuarioRepo,
+            Cloudinary cloudinary
     ) {
         this.pagoRepo = pagoRepo;
         this.solicitudRepo = solicitudRepo;
         this.historialRepo = historialRepo;
         this.usuarioRepo = usuarioRepo;
+        this.cloudinary = cloudinary;
     }
 
-    // =========================
-    // MÉTODO PRINCIPAL LIMPIO
-    // =========================
     @Transactional
     public Pago registrarPago(
             Integer idSolicitud,
@@ -53,22 +53,19 @@ public class PagoService {
     ) throws IOException {
 
         Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        String urlPublica = guardarArchivo(archivo);
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-       
+        String urlPublica = subirACloudinary(archivo);
+
         Solicitud sol = solicitudRepo.findById(idSolicitud)
-                .orElseThrow(() ->
-                        new RuntimeException("Solicitud no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
 
-       
         solicitudRepo.actualizarPago(
                 idSolicitud,
                 Solicitud.EstadoSolicitud.PAGO_VALIDANDO,
                 direccionConfirmada
         );
 
-      
         Pago pago = new Pago();
         pago.setIdSolicitud(idSolicitud);
         pago.setEntidad(entidad);
@@ -81,7 +78,6 @@ public class PagoService {
 
         Pago pagoGuardado = pagoRepo.save(pago);
 
-      
         SolicitudHistorial historial = new SolicitudHistorial();
         historial.setSolicitud(sol);
         historial.setEstado("PAGO_VALIDANDO");
@@ -94,26 +90,15 @@ public class PagoService {
         return pagoGuardado;
     }
 
+    private String subirACloudinary(MultipartFile archivo) throws IOException {
 
-    private String guardarArchivo(MultipartFile archivo) throws IOException {
-
-        Path uploadPath = Paths.get(UPLOAD_DIR);
-
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-
-        String fileName =
-                System.currentTimeMillis() + "_" + archivo.getOriginalFilename();
-
-        Path filePath = uploadPath.resolve(fileName);
-
-        Files.copy(
-                archivo.getInputStream(),
-                filePath,
-                StandardCopyOption.REPLACE_EXISTING
+        Map uploadResult = cloudinary.uploader().upload(
+                archivo.getBytes(),
+                ObjectUtils.asMap(
+                        "folder", "b2b/comprobantes"
+                )
         );
 
-        return "http://localhost:8080/files/comprobantes/" + fileName;
+        return uploadResult.get("secure_url").toString();
     }
 }
