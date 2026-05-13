@@ -1,6 +1,7 @@
 package com.nethink.b2b.service;
 
 import com.nethink.b2b.entity.Solicitud;
+import com.nethink.b2b.entity.Usuario;
 import com.resend.Resend;
 import com.resend.services.emails.model.CreateEmailOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,10 +84,7 @@ public class EmailServiceImpl implements EmailService {
                     .html(html)
                     .build();
 
-            var response = resend.emails().send(params);
-
-            System.out.println("CORREO CLIENTE: " + solicitud.getUsuario().getCorreo());
-            System.out.println("RESEND RESPONSE CLIENTE: " + response);
+            resend.emails().send(params);
 
         } catch (Exception e) {
             System.out.println("Error enviando correo cliente: " + e.getMessage());
@@ -150,13 +148,145 @@ public class EmailServiceImpl implements EmailService {
                     .html(html)
                     .build();
 
-            var response = resend.emails().send(params);
-
-            System.out.println("CORREO PROVEEDOR: " + correoProveedor);
-            System.out.println("RESEND RESPONSE PROVEEDOR: " + response);
+            resend.emails().send(params);
 
         } catch (Exception e) {
             System.out.println("Error enviando correo proveedor: " + e.getMessage());
+        }
+    }
+
+    @Async
+    public void enviarCorreoRegistroCliente(Usuario usuario) {
+
+        try {
+
+            Resend resend = getResendClient();
+
+            String html = """
+                    <div style='font-family:Arial,sans-serif;background:#f4f6f9;padding:40px'>
+                        <div style='max-width:700px;margin:auto;background:white;border-radius:12px;overflow:hidden'>
+
+                            <div style='background:#2563eb;padding:30px;text-align:center;color:white'>
+                                <h1 style='margin:0'>Bienvenido a NETHINK B2B</h1>
+                            </div>
+
+                            <div style='padding:40px'>
+
+                                <h2 style='color:#0f172a'>
+                                    Hola %s %s
+                                </h2>
+
+                                <p style='font-size:15px;color:#475569'>
+                                    Tu cuenta de cliente fue creada correctamente.
+                                </p>
+
+                                <div style='background:#eff6ff;padding:20px;border-radius:10px;margin-top:20px'>
+                                    <p><b>Correo:</b> %s</p>
+                                    <p><b>Estado:</b> %s</p>
+                                    <p><b>Fecha registro:</b> %s</p>
+                                </div>
+
+                                <p style='margin-top:30px;color:#64748b'>
+                                    Ya puedes ingresar a la plataforma y generar solicitudes RFQ.
+                                </p>
+
+                            </div>
+
+                            <div style='background:#f8fafc;padding:20px;text-align:center;color:#94a3b8;font-size:13px'>
+                                © 2026 NETHINK B2B
+                            </div>
+
+                        </div>
+                    </div>
+                    """.formatted(
+                    usuario.getNombres(),
+                    usuario.getApellidos(),
+                    usuario.getCorreo(),
+                    usuario.getEstado(),
+                    usuario.getFechaRegistro()
+            );
+
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                    .to(usuario.getCorreo())
+                    .subject("Registro exitoso - NETHINK B2B")
+                    .html(html)
+                    .build();
+
+            resend.emails().send(params);
+
+        } catch (Exception e) {
+            System.out.println("Error correo registro cliente: " + e.getMessage());
+        }
+    }
+
+    @Async
+    public void enviarCorreoRegistroProveedor(
+            Usuario usuario,
+            String razonSocial,
+            String ruc
+    ) {
+
+        try {
+
+            Resend resend = getResendClient();
+
+            String html = """
+                    <div style='font-family:Arial,sans-serif;background:#f4f6f9;padding:40px'>
+                        <div style='max-width:700px;margin:auto;background:white;border-radius:12px;overflow:hidden'>
+
+                            <div style='background:#dc2626;padding:30px;text-align:center;color:white'>
+                                <h1 style='margin:0'>Proveedor registrado</h1>
+                            </div>
+
+                            <div style='padding:40px'>
+
+                                <h2 style='color:#0f172a'>
+                                    Bienvenido %s
+                                </h2>
+
+                                <p style='font-size:15px;color:#475569'>
+                                    Tu empresa fue registrada correctamente en NETHINK B2B.
+                                </p>
+
+                                <div style='background:#fef2f2;padding:20px;border-radius:10px;margin-top:20px'>
+                                    <p><b>Empresa:</b> %s</p>
+                                    <p><b>RUC:</b> %s</p>
+                                    <p><b>Correo:</b> %s</p>
+                                    <p><b>Estado:</b> %s</p>
+                                </div>
+
+                                <p style='margin-top:30px;color:#64748b'>
+                                    Ya puedes publicar productos y recibir solicitudes RFQ.
+                                </p>
+
+                            </div>
+
+                            <div style='background:#f8fafc;padding:20px;text-align:center;color:#94a3b8;font-size:13px'>
+                                © 2026 NETHINK B2B
+                            </div>
+
+                        </div>
+                    </div>
+                    """.formatted(
+                    usuario.getNombres(),
+                    razonSocial,
+                    ruc,
+                    usuario.getCorreo(),
+                    usuario.getEstado()
+            );
+
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                    .to(usuario.getCorreo())
+                    .subject("Proveedor registrado - NETHINK B2B")
+                    .html(html)
+                    .build();
+
+            resend.emails().send(params);
+
+        } catch (Exception e) {
+            System.out.println("Error correo registro proveedor: " + e.getMessage());
         }
     }
 }

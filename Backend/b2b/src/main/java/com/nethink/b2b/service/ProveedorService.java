@@ -26,6 +26,9 @@ public class ProveedorService {
 
     @Autowired
     private SunatService sunatService;
+    
+    @Autowired
+    private EmailService emailService;
 
     @Transactional
     public void registerProvider(RegisterProviderRequest req) {
@@ -73,5 +76,7 @@ public class ProveedorService {
         prov.setEstado("ACTIVO");
 
         proveedorRepository.save(prov);
+        
+        emailService.enviarCorreoRegistroProveedor(user, prov.getRazonSocial(), prov.getRuc());
     }
 }

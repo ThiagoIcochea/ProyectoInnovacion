@@ -26,17 +26,20 @@ public class UsuarioService {
     private final PreferenciaUsuarioRepository prefRepo;
     private final Cloudinary cloudinary;
     private final RolRepository rolRepository;
+    private final EmailService emailService;
 
     public UsuarioService(
             UsuarioRepository usuarioRepo,
             PreferenciaUsuarioRepository prefRepo,
             Cloudinary cloudinary,
-            RolRepository rolRepository
+            RolRepository rolRepository,
+            EmailService emailService
     ) {
         this.usuarioRepo = usuarioRepo;
         this.prefRepo = prefRepo;
         this.cloudinary = cloudinary;
         this.rolRepository = rolRepository;
+        this.emailService=emailService;
     }
 
     public void registrarCliente(RegisterClientRequest req) {
@@ -64,8 +67,11 @@ public class UsuarioService {
         usuario.setEstado(EstadoUsuario.ACTIVO);
 
         usuario.setFechaRegistro(LocalDateTime.now());
+        
 
         usuarioRepo.save(usuario);
+        
+        emailService.enviarCorreoRegistroCliente(usuario);
     }
 
     public ProfileResponse obtenerPerfil(String correo) {
