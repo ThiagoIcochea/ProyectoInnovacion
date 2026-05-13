@@ -1,17 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-register-provider',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './register-provider.html',
   styleUrl: './register-provider.scss'
 })
-export class RegisterProviderComponent {
+export class RegisterProviderComponent implements OnInit {
 
   nombres = '';
   apellidos = '';
@@ -33,15 +32,13 @@ export class RegisterProviderComponent {
 
   constructor(private http: HttpClient) {}
 
-  private headers(): HttpHeaders {
+  headers() {
     return new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`
     });
   }
 
-  /* =========================
-     🔥 AGREGADO: METODOS PAGO
-  ========================= */
+  /* ================= METODOS DE PAGO ================= */
 
   metodosPago: any[] = [];
   showPagoModal = false;
@@ -59,6 +56,12 @@ export class RegisterProviderComponent {
   }
 
   addMetodoPago() {
+
+    if (!this.tipoPago || !this.entidadPago || !this.numeroCuenta) {
+      alert('Completa todos los campos');
+      return;
+    }
+
     this.metodosPago.push({
       tipo: this.tipoPago,
       entidad: this.entidadPago,
@@ -71,17 +74,15 @@ export class RegisterProviderComponent {
     this.showPagoModal = false;
   }
 
-  /* =========================
-     🔥 AGREGADO: CERTIFICACIONES
-  ========================= */
+  /* ================= CERTIFICACIONES ================= */
 
   certificaciones: any[] = [];
-  certificacionesSeleccionadas: any[] = [];
+  selectedCerts: any = {};
 
   fechaObtencionMap: any = {};
   fechaExpiracionMap: any = {};
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.http.get<any>('https://proyectoinnovacion.onrender.com/api/certificaciones')
       .subscribe(res => this.certificaciones = res);
   }
@@ -89,21 +90,26 @@ export class RegisterProviderComponent {
   toggleCertificacion(event: any, id: number) {
 
     if (event.target.checked) {
-
-      this.certificacionesSeleccionadas.push({
-        idCertificacion: id,
-        fechaObtencion: this.fechaObtencionMap[id],
-        fechaExpiracion: this.fechaExpiracionMap[id]
-      });
-
+      this.selectedCerts[id] = true;
     } else {
-
-      this.certificacionesSeleccionadas =
-        this.certificacionesSeleccionadas.filter(c => c.idCertificacion !== id);
+      delete this.selectedCerts[id];
+      delete this.fechaObtencionMap[id];
+      delete this.fechaExpiracionMap[id];
     }
   }
 
-  register(): void {
+  register() {
+
+    if (this.metodosPago.length < 1) {
+      alert('Debes agregar al menos 1 método de pago');
+      return;
+    }
+
+    const certificacionesPayload = Object.keys(this.selectedCerts).map(id => ({
+      idCertificacion: Number(id),
+      fechaObtencion: this.fechaObtencionMap[id],
+      fechaExpiracion: this.fechaExpiracionMap[id]
+    }));
 
     const payload = {
       nombres: this.nombres,
@@ -122,9 +128,8 @@ export class RegisterProviderComponent {
       apiTipo: this.apiTipo,
       apiToken: this.apiToken,
 
-
       metodosPago: this.metodosPago,
-      certificaciones: this.certificacionesSeleccionadas
+      certificaciones: certificacionesPayload
     };
 
     this.http.post(
@@ -133,10 +138,7 @@ export class RegisterProviderComponent {
       { headers: this.headers() }
     ).subscribe({
       next: () => alert('Proveedor registrado correctamente'),
-      error: (err) => {
-        console.error(err);
-        alert('Error al registrar proveedor');
-      }
+      error: err => console.error(err)
     });
   }
 }

@@ -1,5 +1,6 @@
 <div class="auth-page">
   <div class="auth-shell auth-shell--provider">
+
     <section class="auth-side auth-side--provider">
       <div class="auth-brand">NetProcure</div>
 
@@ -25,7 +26,6 @@
 
       <div class="auth-form-header">
         <h2>Registro de Proveedor</h2>
-        <p>Completa la información de tu empresa y configura tu integración.</p>
       </div>
 
       <form class="auth-form">
@@ -92,21 +92,17 @@
 
         <div class="section-title">3. Configuración de API</div>
 
-        <div class="info-box">
-          Conectamos tu catálogo para mostrar tu inventario en RFQ en tiempo real.
-        </div>
-
         <div class="form-group">
           <label>Endpoint URL</label>
           <input type="text" [(ngModel)]="apiUrl" name="apiUrl"/>
         </div>
 
         <div class="form-group">
-          <label>Tipo de Conexión</label>
+          <label>Tipo de API</label>
           <select [(ngModel)]="apiTipo" name="apiTipo">
             <option value="REST">REST</option>
-            <option value="GRAPHQL">GraphQL</option>
-            <option value="WEBHOOK">Webhook</option>
+            <option value="GRAPHQL">GRAPHQL</option>
+            <option value="WEBHOOK">WEBHOOK</option>
           </select>
         </div>
 
@@ -115,9 +111,7 @@
           <input type="text" [(ngModel)]="apiToken" name="apiToken"/>
         </div>
 
-        <!-- ========================= -->
-        <!-- 🔥 METODOS DE PAGO (AGREGADO) -->
-        <!-- ========================= -->
+        <!-- ================= METODOS DE PAGO ================= -->
 
         <div class="section-title">4. Métodos de Pago</div>
 
@@ -125,19 +119,46 @@
           Agregar método de pago
         </button>
 
+        <div *ngIf="metodosPago.length < 1" style="color:red">
+          Debes agregar al menos 1 método de pago
+        </div>
+
         <div *ngFor="let mp of metodosPago">
           {{ mp.tipo }} - {{ mp.entidad }} - {{ mp.numeroCuenta }}
         </div>
 
-        <!-- MODAL -->
         <div *ngIf="showPagoModal" class="modal">
           <div class="modal-content">
 
             <h3>Nuevo método de pago</h3>
 
-            <input placeholder="Tipo" [(ngModel)]="tipoPago" name="tipoPago"/>
-            <input placeholder="Entidad" [(ngModel)]="entidadPago" name="entidadPago"/>
-            <input placeholder="Cuenta" [(ngModel)]="numeroCuenta" name="numeroCuenta"/>
+            <label>Tipo</label>
+            <select [(ngModel)]="tipoPago" name="tipoPago">
+              <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+              <option value="DEPOSITO">DEPOSITO</option>
+              <option value="YAPE">YAPE</option>
+              <option value="PLIN">PLIN</option>
+              <option value="CHEQUE">CHEQUE</option>
+            </select>
+
+            <label>Entidad</label>
+            <select [(ngModel)]="entidadPago" name="entidadPago">
+
+              <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="BCP">BCP</option>
+              <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="BBVA">BBVA</option>
+              <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="INTERBANK">INTERBANK</option>
+              <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="SCOTIABANK">SCOTIABANK</option>
+
+              <option *ngIf="tipoPago === 'DEPOSITO'" value="AGENTE">AGENTE</option>
+              <option *ngIf="tipoPago === 'DEPOSITO'" value="BANCO">BANCO</option>
+
+              <option *ngIf="tipoPago === 'YAPE'" value="YAPE">YAPE</option>
+              <option *ngIf="tipoPago === 'PLIN'" value="PLIN">PLIN</option>
+
+            </select>
+
+            <label>Número de cuenta</label>
+            <input type="text" [(ngModel)]="numeroCuenta" name="numeroCuenta"/>
 
             <button type="button" (click)="addMetodoPago()">Guardar</button>
             <button type="button" (click)="closePagoModal()">Cerrar</button>
@@ -145,32 +166,30 @@
           </div>
         </div>
 
-        <!-- ========================= -->
-        <!-- 🔥 CERTIFICACIONES (AGREGADO) -->
-        <!-- ========================= -->
+        <!-- ================= CERTIFICACIONES ================= -->
 
         <div class="section-title">5. Certificaciones</div>
 
         <div *ngFor="let c of certificaciones">
 
           <label>
-            <input type="checkbox"
-                   (change)="toggleCertificacion($event, c.idCertificacion)">
-
+            <input type="checkbox" (change)="toggleCertificacion($event, c.idCertificacion)">
             {{ c.nombre }}
-
           </label>
 
-          <div *ngIf="certificacionesSeleccionadas.find(x => x.idCertificacion === c.idCertificacion)">
+          <div *ngIf="selectedCerts[c.idCertificacion]">
 
-            <input type="date" [(ngModel)]="fechaObtencionMap[c.idCertificacion]" name="fo{{c.idCertificacion}}">
-            <input type="date" [(ngModel)]="fechaExpiracionMap[c.idCertificacion]" name="fe{{c.idCertificacion}}">
+            <input type="date"
+                   [(ngModel)]="fechaObtencionMap[c.idCertificacion]"
+                   name="fo{{c.idCertificacion}}"/>
+
+            <input type="date"
+                   [(ngModel)]="fechaExpiracionMap[c.idCertificacion]"
+                   name="fe{{c.idCertificacion}}"/>
 
           </div>
 
         </div>
-
-        <!-- BOTÓN -->
 
         <button type="button" (click)="register()">
           Registrar proveedor
