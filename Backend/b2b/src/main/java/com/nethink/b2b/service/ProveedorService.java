@@ -87,7 +87,7 @@ public class ProveedorService {
         prov.setFechaRegistro(LocalDateTime.now());
         prov.setEstado("ACTIVO");
 
-        proveedorRepository.save(prov);
+       prov = proveedorRepository.save(prov);
 
         if (req.getMetodosPago() != null) {
             for (MetodoPagoRequest mp : req.getMetodosPago()) {

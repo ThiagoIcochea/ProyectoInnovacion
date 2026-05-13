@@ -22,6 +22,7 @@
     </section>
 
     <section class="auth-form-panel auth-form-panel--scroll">
+
       <div class="auth-form-header">
         <h2>Registro de Proveedor</h2>
         <p>Completa la información de tu empresa y configura tu integración.</p>
@@ -34,58 +35,58 @@
         <div class="form-grid form-grid--2">
           <div class="form-group">
             <label>Nombres</label>
-            <input id="nombres" type="text" [(ngModel)]="nombres" name="nombres"/>
+            <input type="text" [(ngModel)]="nombres" name="nombres"/>
           </div>
 
           <div class="form-group">
             <label>Apellidos</label>
-            <input id="apellidos" type="text" [(ngModel)]="apellidos" name="apellidos"/>
+            <input type="text" [(ngModel)]="apellidos" name="apellidos"/>
           </div>
         </div>
 
         <div class="form-group">
           <label>Correo</label>
-          <input id="correo" type="email" [(ngModel)]="correo" name="correo"/>
+          <input type="email" [(ngModel)]="correo" name="correo"/>
         </div>
 
         <div class="form-grid form-grid--2">
           <div class="form-group">
             <label>Contraseña</label>
-            <input id="password" type="password" [(ngModel)]="password" name="password"/>
+            <input type="password" [(ngModel)]="password" name="password"/>
           </div>
 
           <div class="form-group">
             <label>WhatsApp</label>
-            <input id="whatsapp" type="text" [(ngModel)]="whatsapp" name="whatsapp"/>
+            <input type="text" [(ngModel)]="whatsapp" name="whatsapp"/>
           </div>
         </div>
 
         <div class="form-group">
           <label>Teléfono</label>
-          <input id="telefono" type="text" [(ngModel)]="telefono" name="telefono"/>
+          <input type="text" [(ngModel)]="telefono" name="telefono"/>
         </div>
 
         <div class="form-group">
           <label>Dirección</label>
-          <input id="direccion" type="text" [(ngModel)]="direccion" name="direccion"/>
+          <input type="text" [(ngModel)]="direccion" name="direccion"/>
         </div>
 
         <div class="section-title">2. Datos de la Empresa</div>
 
         <div class="form-group">
           <label>Razón Social</label>
-          <input id="razonSocial" type="text" [(ngModel)]="razonSocial" name="razonSocial"/>
+          <input type="text" [(ngModel)]="razonSocial" name="razonSocial"/>
         </div>
 
         <div class="form-grid form-grid--2">
           <div class="form-group">
             <label>RUC</label>
-            <input id="ruc" type="text" [(ngModel)]="ruc" name="ruc"/>
+            <input type="text" [(ngModel)]="ruc" name="ruc"/>
           </div>
 
           <div class="form-group">
             <label>Descripción</label>
-            <input id="descripcion" type="text" [(ngModel)]="descripcion" name="descripcion"/>
+            <input type="text" [(ngModel)]="descripcion" name="descripcion"/>
           </div>
         </div>
 
@@ -97,42 +98,85 @@
 
         <div class="form-group">
           <label>Endpoint URL</label>
-          <input id="apiUrl" type="text" [(ngModel)]="apiUrl" name="apiUrl"/>
+          <input type="text" [(ngModel)]="apiUrl" name="apiUrl"/>
         </div>
 
-        <div class="form-grid form-grid--2">
-          <div class="form-group">
-            <label>Tipo de Conexión</label>
-            <select [(ngModel)]="apiTipo" name="apiTipo">
-              <option value="REST">REST</option>
-              <option value="GRAPHQL">GraphQL</option>
-              <option value="WEBHOOK">Webhook</option>
-            </select>
-          </div>
+        <div class="form-group">
+          <label>Tipo de Conexión</label>
+          <select [(ngModel)]="apiTipo" name="apiTipo">
+            <option value="REST">REST</option>
+            <option value="GRAPHQL">GraphQL</option>
+            <option value="WEBHOOK">Webhook</option>
+          </select>
         </div>
 
         <div class="form-group">
           <label>API Token</label>
-          <input id="apiToken" type="text" [(ngModel)]="apiToken" name="apiToken"/>
+          <input type="text" [(ngModel)]="apiToken" name="apiToken"/>
         </div>
 
-        <label class="checkbox-row">
-          <input type="checkbox" />
-          <span>
-            Acepto términos y políticas de privacidad
-          </span>
-        </label>
+        <!-- ========================= -->
+        <!-- 🔥 METODOS DE PAGO (AGREGADO) -->
+        <!-- ========================= -->
 
-        <button type="button" class="btn-primary" (click)="register()">
-          Registrar mi Empresa
+        <div class="section-title">4. Métodos de Pago</div>
+
+        <button type="button" (click)="openPagoModal()">
+          Agregar método de pago
+        </button>
+
+        <div *ngFor="let mp of metodosPago">
+          {{ mp.tipo }} - {{ mp.entidad }} - {{ mp.numeroCuenta }}
+        </div>
+
+        <!-- MODAL -->
+        <div *ngIf="showPagoModal" class="modal">
+          <div class="modal-content">
+
+            <h3>Nuevo método de pago</h3>
+
+            <input placeholder="Tipo" [(ngModel)]="tipoPago" name="tipoPago"/>
+            <input placeholder="Entidad" [(ngModel)]="entidadPago" name="entidadPago"/>
+            <input placeholder="Cuenta" [(ngModel)]="numeroCuenta" name="numeroCuenta"/>
+
+            <button type="button" (click)="addMetodoPago()">Guardar</button>
+            <button type="button" (click)="closePagoModal()">Cerrar</button>
+
+          </div>
+        </div>
+
+        <!-- ========================= -->
+        <!-- 🔥 CERTIFICACIONES (AGREGADO) -->
+        <!-- ========================= -->
+
+        <div class="section-title">5. Certificaciones</div>
+
+        <div *ngFor="let c of certificaciones">
+
+          <label>
+            <input type="checkbox"
+                   (change)="toggleCertificacion($event, c.idCertificacion)">
+
+            {{ c.nombre }}
+
+          </label>
+
+          <div *ngIf="certificacionesSeleccionadas.find(x => x.idCertificacion === c.idCertificacion)">
+
+            <input type="date" [(ngModel)]="fechaObtencionMap[c.idCertificacion]" name="fo{{c.idCertificacion}}">
+            <input type="date" [(ngModel)]="fechaExpiracionMap[c.idCertificacion]" name="fe{{c.idCertificacion}}">
+
+          </div>
+
+        </div>
+
+        <!-- BOTÓN -->
+
+        <button type="button" (click)="register()">
+          Registrar proveedor
         </button>
 
       </form>
-
-      <div class="auth-form-footer">
-        <span>¿Ya tienes cuenta como proveedor?</span>
-        <a routerLink="/login">Inicia sesión aquí</a>
-      </div>
     </section>
   </div>
 </div>

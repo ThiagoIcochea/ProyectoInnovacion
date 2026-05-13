@@ -39,6 +39,70 @@ export class RegisterProviderComponent {
     });
   }
 
+  /* =========================
+     🔥 AGREGADO: METODOS PAGO
+  ========================= */
+
+  metodosPago: any[] = [];
+  showPagoModal = false;
+
+  tipoPago = '';
+  entidadPago = '';
+  numeroCuenta = '';
+
+  openPagoModal() {
+    this.showPagoModal = true;
+  }
+
+  closePagoModal() {
+    this.showPagoModal = false;
+  }
+
+  addMetodoPago() {
+    this.metodosPago.push({
+      tipo: this.tipoPago,
+      entidad: this.entidadPago,
+      numeroCuenta: this.numeroCuenta
+    });
+
+    this.tipoPago = '';
+    this.entidadPago = '';
+    this.numeroCuenta = '';
+    this.showPagoModal = false;
+  }
+
+  /* =========================
+     🔥 AGREGADO: CERTIFICACIONES
+  ========================= */
+
+  certificaciones: any[] = [];
+  certificacionesSeleccionadas: any[] = [];
+
+  fechaObtencionMap: any = {};
+  fechaExpiracionMap: any = {};
+
+  ngOnInit() {
+    this.http.get<any>('https://proyectoinnovacion.onrender.com/api/certificaciones')
+      .subscribe(res => this.certificaciones = res);
+  }
+
+  toggleCertificacion(event: any, id: number) {
+
+    if (event.target.checked) {
+
+      this.certificacionesSeleccionadas.push({
+        idCertificacion: id,
+        fechaObtencion: this.fechaObtencionMap[id],
+        fechaExpiracion: this.fechaExpiracionMap[id]
+      });
+
+    } else {
+
+      this.certificacionesSeleccionadas =
+        this.certificacionesSeleccionadas.filter(c => c.idCertificacion !== id);
+    }
+  }
+
   register(): void {
 
     const payload = {
@@ -56,25 +120,23 @@ export class RegisterProviderComponent {
 
       apiUrl: this.apiUrl,
       apiTipo: this.apiTipo,
-      apiToken: this.apiToken
+      apiToken: this.apiToken,
+
+
+      metodosPago: this.metodosPago,
+      certificaciones: this.certificacionesSeleccionadas
     };
 
     this.http.post(
       `${this.baseUrl}/register`,
       payload,
       { headers: this.headers() }
-    )
-    .subscribe({
-
-      next: () => {
-        alert('Proveedor registrado correctamente');
-      },
-
+    ).subscribe({
+      next: () => alert('Proveedor registrado correctamente'),
       error: (err) => {
-        console.error('Error al registrar proveedor:', err);
+        console.error(err);
         alert('Error al registrar proveedor');
       }
-
     });
   }
 }
