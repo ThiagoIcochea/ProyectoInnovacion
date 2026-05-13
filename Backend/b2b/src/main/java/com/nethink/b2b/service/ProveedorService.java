@@ -1,13 +1,16 @@
 package com.nethink.b2b.service;
 
 import com.nethink.b2b.dto.request.RegisterProviderRequest;
+import com.nethink.b2b.dto.request.MetodoPagoRequest;
+import com.nethink.b2b.dto.request.CertificacionRequest;
 import com.nethink.b2b.dto.response.SunatResponse;
 import com.nethink.b2b.entity.*;
 import com.nethink.b2b.entity.enums.EstadoUsuario;
-import com.nethink.b2b.repository.ProveedorRepository;
-import com.nethink.b2b.repository.RolRepository;
-import com.nethink.b2b.repository.UsuarioRepository;
+import com.nethink.b2b.repository.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,9 +29,18 @@ public class ProveedorService {
 
     @Autowired
     private SunatService sunatService;
-    
+
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private MetodoPagoRepository metodoPagoRepository;
+
+    @Autowired
+    private CertificacionRepository certificacionRepository;
+
+    @Autowired
+    private ProveedorCertificacionRepository proveedorCertificacionRepository;
 
     @Transactional
     public void registerProvider(RegisterProviderRequest req) {
@@ -76,7 +88,40 @@ public class ProveedorService {
         prov.setEstado("ACTIVO");
 
         proveedorRepository.save(prov);
-        
-        emailService.enviarCorreoRegistroProveedor(user, prov.getRazonSocial(), prov.getRuc());
+
+        if (req.getMetodosPago() != null) {
+            for (MetodoPagoRequest mp : req.getMetodosPago()) {
+
+                MetodoPago metodo = new MetodoPago();
+                metodo.setIdProveedor(prov.getIdProveedor());
+                metodo.setTipo(mp.getTipo());
+                metodo.setEntidad(mp.getEntidad());
+                metodo.setNumeroCuenta(mp.getNumeroCuenta());
+
+                metodoPagoRepository.save(metodo);
+            }
+        }
+
+        if (req.getCertificaciones() != null) {
+            for (CertificacionRequest c : req.getCertificaciones()) {
+
+                Certificacion cert = certificacionRepository.findById(c.getIdCertificacion())
+                        .orElseThrow(() -> new RuntimeException("Certificación no existe"));
+
+                ProveedorCertificacion pc = new ProveedorCertificacion();
+                pc.setProveedor(prov);
+                pc.setCertificacion(cert);
+                pc.setFechaObtencion(c.getFechaObtencion());
+                pc.setFechaExpiracion(c.getFechaExpiracion());
+
+                proveedorCertificacionRepository.save(pc);
+            }
+        }
+
+        emailService.enviarCorreoRegistroProveedor(
+                user,
+                prov.getRazonSocial(),
+                prov.getRuc()
+        );
     }
 }
