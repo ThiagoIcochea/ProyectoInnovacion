@@ -3,10 +3,14 @@ package com.nethink.b2b.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.nethink.b2b.dto.request.ProfileUpdateRequest;
+import com.nethink.b2b.dto.request.RegisterClientRequest;
 import com.nethink.b2b.dto.response.ProfileResponse;
 import com.nethink.b2b.entity.PreferenciaUsuario;
+import com.nethink.b2b.entity.Rol;
 import com.nethink.b2b.entity.Usuario;
+import com.nethink.b2b.entity.enums.EstadoUsuario;
 import com.nethink.b2b.repository.PreferenciaUsuarioRepository;
+import com.nethink.b2b.repository.RolRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,15 +25,47 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepo;
     private final PreferenciaUsuarioRepository prefRepo;
     private final Cloudinary cloudinary;
+    private final RolRepository rolRepository;
 
     public UsuarioService(
             UsuarioRepository usuarioRepo,
             PreferenciaUsuarioRepository prefRepo,
-            Cloudinary cloudinary
+            Cloudinary cloudinary,
+            RolRepository rolRepository
     ) {
         this.usuarioRepo = usuarioRepo;
         this.prefRepo = prefRepo;
         this.cloudinary = cloudinary;
+        this.rolRepository = rolRepository;
+    }
+
+    public void registrarCliente(RegisterClientRequest req) {
+
+        if (usuarioRepo.findByCorreo(req.getCorreo()).isPresent()) {
+            throw new RuntimeException("Correo ya registrado");
+        }
+
+        Rol rol = rolRepository.findById(2)
+                .orElseThrow(() -> new RuntimeException("Rol CLIENTE no encontrado"));
+
+        Usuario usuario = new Usuario();
+
+        usuario.setNombres(req.getNombres());
+        usuario.setApellidos(req.getApellidos());
+        usuario.setCorreo(req.getCorreo());
+        usuario.setTelefono(req.getTelefono());
+        usuario.setWhatsapp(req.getWhatsapp());
+        usuario.setPassword(req.getPassword());
+        usuario.setDireccion(req.getDireccion());
+        usuario.setFotoPerfil(req.getFotoPerfil());
+
+        usuario.setRol(rol);
+
+        usuario.setEstado(EstadoUsuario.ACTIVO);
+
+        usuario.setFechaRegistro(LocalDateTime.now());
+
+        usuarioRepo.save(usuario);
     }
 
     public ProfileResponse obtenerPerfil(String correo) {

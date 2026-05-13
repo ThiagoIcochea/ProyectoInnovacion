@@ -1,6 +1,7 @@
 package com.nethink.b2b.controller;
 
 import com.nethink.b2b.dto.request.ProfileUpdateRequest;
+import com.nethink.b2b.dto.request.RegisterClientRequest;
 import com.nethink.b2b.dto.response.ProfileResponse;
 import com.nethink.b2b.service.UsuarioService;
 import java.security.Principal;
@@ -19,6 +20,16 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<?> register(
+            @RequestBody RegisterClientRequest request
+    ) {
+
+        usuarioService.registrarCliente(request);
+
+        return ResponseEntity.ok("Cliente registrado correctamente");
+    }
+
     @GetMapping("/perfil")
     public ResponseEntity<ProfileResponse> perfil(
             Principal principal
@@ -29,23 +40,22 @@ public class UsuarioController {
                 )
         );
     }
-    
-@PutMapping(value = "/perfil", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public ResponseEntity<?> actualizarPerfil(
-        Principal principal,
-        @ModelAttribute ProfileUpdateRequest req,
-        @RequestParam(value = "foto", required = false) MultipartFile foto,
-        @RequestParam(value = "fotoUrl", required = false) String fotoUrl
-) {
 
-    usuarioService.actualizarPerfil(
-            principal.getName(),
-            req,
-            foto,
-            fotoUrl
-    );
+    @PutMapping(value = "/perfil", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> actualizarPerfil(
+            Principal principal,
+            @ModelAttribute ProfileUpdateRequest req,
+            @RequestParam(value = "foto", required = false) MultipartFile foto,
+            @RequestParam(value = "fotoUrl", required = false) String fotoUrl
+    ) {
 
-    return ResponseEntity.ok().build();
-}
-        
+        usuarioService.actualizarPerfil(
+                principal.getName(),
+                req,
+                foto,
+                fotoUrl
+        );
+
+        return ResponseEntity.ok().build();
+    }
 }
