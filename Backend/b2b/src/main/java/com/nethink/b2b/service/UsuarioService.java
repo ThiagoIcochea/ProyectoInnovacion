@@ -121,6 +121,7 @@ public class UsuarioService {
         usuario.setTelefono(req.getTelefono());
         usuario.setWhatsapp(req.getWhatsapp());
         usuario.setDireccion(req.getDireccion());
+        usuario.setCorreo(req.getCorreo());
 
         if (foto != null && !foto.isEmpty()) {
             try {
