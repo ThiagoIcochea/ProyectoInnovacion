@@ -121,7 +121,16 @@ public class UsuarioService {
         usuario.setTelefono(req.getTelefono());
         usuario.setWhatsapp(req.getWhatsapp());
         usuario.setDireccion(req.getDireccion());
-        usuario.setCorreo(req.getCorreo());
+        if (!usuario.getCorreo().equals(req.getCorreo())) {
+
+    boolean existe = usuarioRepo.findByCorreo(req.getCorreo()).isPresent();
+
+    if (existe) {
+        throw new RuntimeException("El correo ya está registrado por otro usuario");
+    }
+
+    usuario.setCorreo(req.getCorreo());
+    }
 
         if (foto != null && !foto.isEmpty()) {
             try {
