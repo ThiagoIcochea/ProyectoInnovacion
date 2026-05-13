@@ -2,8 +2,10 @@
   <aside class="sidebar">
     <div class="sidebar__brand">
       <div class="sidebar__logo">N</div>
+
       <div>
         <strong>NetProcure</strong>
+
         <span>
           {{ isAdmin ? 'Panel Admin' : isProvider ? 'Proveedor B2B' : 'Cliente B2B' }}
         </span>
@@ -12,6 +14,7 @@
 
     <ng-container *ngIf="isClient">
       <nav class="sidebar__nav">
+
         <a
           [routerLink]="['/app/dashboard']"
           routerLinkActive="active"
@@ -51,13 +54,18 @@
           class="sidebar__link">
           Perfil
         </a>
+
       </nav>
     </ng-container>
 
     <ng-container *ngIf="isProvider">
-      <div class="sidebar__badge">Proveedor</div>
+
+      <div class="sidebar__badge">
+        Proveedor
+      </div>
 
       <nav class="sidebar__nav">
+
         <a
           [routerLink]="['/app/provider/dashboard']"
           routerLinkActive="active"
@@ -72,7 +80,10 @@
           [routerLinkActiveOptions]="{ exact: true }"
           class="sidebar__link">
           Solicitudes
-          <span class="sidebar__count">12</span>
+
+          <span class="sidebar__count">
+            12
+          </span>
         </a>
 
         <a
@@ -81,7 +92,10 @@
           [routerLinkActiveOptions]="{ exact: true }"
           class="sidebar__link">
           Pagos
-          <span class="sidebar__count">3</span>
+
+          <span class="sidebar__count">
+            3
+          </span>
         </a>
 
         <a
@@ -107,13 +121,18 @@
           class="sidebar__link">
           Configuración API
         </a>
+
       </nav>
     </ng-container>
 
     <ng-container *ngIf="isAdmin">
-      <div class="sidebar__badge sidebar__badge--admin">Admin</div>
+
+      <div class="sidebar__badge sidebar__badge--admin">
+        Admin
+      </div>
 
       <nav class="sidebar__nav">
+
         <a
           [routerLink]="['/app/admin/dashboard']"
           routerLinkActive="active"
@@ -177,38 +196,67 @@
           class="sidebar__link">
           Configuración General
         </a>
+
       </nav>
     </ng-container>
   </aside>
 
   <div class="app-content">
+
     <header class="topbar">
+
       <div class="topbar__search">
         Buscar dentro del sistema...
       </div>
 
       <div class="topbar__actions" *ngIf="isProvider">
-        <span class="api-pill">API conectada</span>
+        <span class="api-pill">
+          API conectada
+        </span>
       </div>
 
       <div class="topbar__user">
+
         <div>
           <strong>
-            {{ isAdmin ? 'Admin System' : isProvider ? 'Global Tech Solutions' : 'TechCorp S.A.' }}
+            {{ nombreCompleto }}
           </strong>
+
           <span>
-            {{ isAdmin ? 'Superadmin' : isProvider ? 'Proveedor verificado' : 'Administrador IT' }}
+            {{ nombreRol }}
           </span>
         </div>
 
-        <div class="topbar__avatar">
-          {{ isAdmin ? 'AD' : isProvider ? 'GT' : 'TC' }}
-        </div>
+        <ng-container *ngIf="fotoPerfilValida; else avatarIniciales">
+
+          <div class="topbar__avatar">
+
+            <img
+              [src]="fotoPerfil"
+              alt="Foto Perfil"
+              class="topbar__avatar-img"
+              (error)="imagenError()"
+            />
+
+          </div>
+
+        </ng-container>
+
+        <ng-template #avatarIniciales>
+
+          <div class="topbar__avatar">
+            {{ iniciales }}
+          </div>
+
+        </ng-template>
+
       </div>
+
     </header>
 
     <main class="app-main">
       <router-outlet></router-outlet>
     </main>
+
   </div>
 </div>

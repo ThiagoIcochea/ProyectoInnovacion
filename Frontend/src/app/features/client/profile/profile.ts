@@ -1,6 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -31,9 +35,16 @@ export class ProfileComponent implements OnInit {
   };
 
   previewFoto: string | null = null;
+
   archivoFoto: File | null = null;
+
   fotoUrl: string = '';
+
   modoImagen: string = 'archivo';
+
+  mostrarIniciales: boolean = false;
+
+  iniciales: string = '';
 
   constructor(
     private http: HttpClient,
@@ -52,9 +63,12 @@ export class ProfileComponent implements OnInit {
 
   cargarPerfil(): void {
 
-    this.http.get<any>('https://proyectoinnovacion.onrender.com/api/usuarios/perfil', {
-      headers: this.headers()
-    }).subscribe({
+    this.http.get<any>(
+      'https://proyectoinnovacion.onrender.com/api/usuarios/perfil',
+      {
+        headers: this.headers()
+      }
+    ).subscribe({
 
       next: (res) => {
 
@@ -67,11 +81,19 @@ export class ProfileComponent implements OnInit {
           };
         }
 
+        this.generarIniciales();
+
         if (this.usuario.fotoPerfil) {
+
           this.previewFoto =
             this.usuario.fotoPerfil + '?t=' + Date.now();
+
+          this.mostrarIniciales = false;
+
         } else {
+
           this.previewFoto = null;
+          this.mostrarIniciales = true;
         }
 
         this.cdr.detectChanges();
@@ -83,9 +105,33 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  generarIniciales(): void {
+
+    const nombres = this.usuario.nombres || '';
+    const apellidos = this.usuario.apellidos || '';
+
+    const n1 = nombres.charAt(0).toUpperCase();
+    const a1 = apellidos.charAt(0).toUpperCase();
+
+    this.iniciales = `${n1}${a1}`.trim();
+
+    if (!this.iniciales) {
+      this.iniciales = 'U';
+    }
+  }
+
+  onImageError(): void {
+
+    this.previewFoto = null;
+    this.mostrarIniciales = true;
+
+    this.cdr.detectChanges();
+  }
+
   seleccionarFoto(event: any): void {
 
     const file = event.target.files[0];
+
     if (!file) return;
 
     this.archivoFoto = file;
@@ -93,7 +139,11 @@ export class ProfileComponent implements OnInit {
     const reader = new FileReader();
 
     reader.onload = () => {
+
       this.previewFoto = reader.result as string;
+
+      this.mostrarIniciales = false;
+
       this.cdr.detectChanges();
     };
 
@@ -111,25 +161,49 @@ export class ProfileComponent implements OnInit {
     formData.append('whatsapp', this.usuario.whatsapp || '');
     formData.append('direccion', this.usuario.direccion || '');
 
-    formData.append('notificaciones', String(this.usuario.preferencias.notificaciones));
-    formData.append('entregaRapida', String(this.usuario.preferencias.entregaRapida));
+    formData.append(
+      'notificaciones',
+      String(this.usuario.preferencias.notificaciones)
+    );
+
+    formData.append(
+      'entregaRapida',
+      String(this.usuario.preferencias.entregaRapida)
+    );
 
     if (this.usuario.rol === 'PROVEEDOR') {
-      formData.append('razonSocial', this.usuario.razonSocial || '');
-      formData.append('ruc', this.usuario.ruc || '');
-      formData.append('descripcion', this.usuario.descripcion || '');
+
+      formData.append(
+        'razonSocial',
+        this.usuario.razonSocial || ''
+      );
+
+      formData.append(
+        'ruc',
+        this.usuario.ruc || ''
+      );
+
+      formData.append(
+        'descripcion',
+        this.usuario.descripcion || ''
+      );
     }
 
     if (this.archivoFoto) {
+
       formData.append('foto', this.archivoFoto);
+
     } else if (this.fotoUrl) {
+
       formData.append('fotoUrl', this.fotoUrl);
     }
 
     this.http.put(
       'https://proyectoinnovacion.onrender.com/api/usuarios/perfil',
       formData,
-      { headers: this.headers() }
+      {
+        headers: this.headers()
+      }
     ).subscribe({
 
       next: () => {
