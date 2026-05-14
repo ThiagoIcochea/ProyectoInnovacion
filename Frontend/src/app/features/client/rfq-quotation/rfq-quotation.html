@@ -5,7 +5,10 @@
     <div>
       <span>Lista para aprobación (Paso 3 de 3)</span>
       <h1>Detalle de Cotización</h1>
-      <p>Cotización ID: #COT-2026-{{ provider.idProveedor }}-{{ provider.totalCotizacion | number:'1.0-0' }}</p>
+      <p>
+        Cotización ID:
+        #COT-2026-{{ provider.idProveedor }}-{{ provider.totalCotizacion | number:'1.0-0' }}
+      </p>
     </div>
   </div>
 
@@ -14,11 +17,13 @@
     <div class="supplier-info">
       <h2>{{ provider.nombreProveedor }}</h2>
       <p>⭐ {{ provider.scoreFinal | number:'1.1-1' }}</p>
+
       <div class="supplier-badges">
         <span>Socio de Negocio Verificado</span>
         <span>Garantía Local</span>
       </div>
     </div>
+
     <div class="validity-box">
       <span>Válido hasta</span>
       <strong>{{ fechaValidez }}</strong>
@@ -44,6 +49,7 @@
         </div>
 
         <div class="quotation-table__row" *ngFor="let product of products">
+
           <div class="product-cell">
             <div class="product-thumb"></div>
             <div>
@@ -51,9 +57,11 @@
               <span>SKU-{{ product.idProducto }}</span>
             </div>
           </div>
+
           <div>{{ product.cantidad }}</div>
           <div>S/ {{ product.precioUnitario }}</div>
           <div>S/ {{ product.subtotal }}</div>
+
         </div>
 
       </div>
@@ -64,7 +72,6 @@
       <h2>Resumen de Cotización</h2>
 
       <div class="summary-list">
-
         <div>
           <span>Subtotal</span>
           <strong>S/ {{ subtotal }}</strong>
@@ -79,10 +86,8 @@
           <span>Total</span>
           <strong>S/ {{ total }}</strong>
         </div>
-
       </div>
 
-      <!-- 🔥 BLOQUE NUEVO: RUC OBLIGATORIO -->
       <div class="ruc-box">
         <label>RUC de la empresa compradora</label>
         <input
@@ -100,5 +105,4 @@
     </aside>
 
   </div>
-
 </div>

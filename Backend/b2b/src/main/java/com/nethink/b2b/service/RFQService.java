@@ -109,6 +109,8 @@ itemDetalle.setPrecioBase(precioBase);
 itemDetalle.setPrecioUnitario(precioFinal);
 itemDetalle.setSubtotal(subtotal);
 
+
+
 // 🔥 DETALLE DE DESCUENTO
 if (mejor != null) {
 
@@ -127,6 +129,7 @@ if (mejor != null) {
     itemDetalle.setTipoDescuento("NINGUNO");
     itemDetalle.setValorDescuento(0.0);
 }
+itemsDetalle.add(itemDetalle);
                 } else {
                     cumpleStock = false;
                     break;

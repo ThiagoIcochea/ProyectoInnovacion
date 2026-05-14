@@ -39,15 +39,23 @@ export class RfqQuotationComponent implements OnInit {
     }
 
     this.provider = JSON.parse(data);
-    this.products = this.provider.items || [];
 
-    this.total = Number(this.provider.totalCotizacion);
+    // 🔥 FIX CLAVE: fallback inteligente
+    this.products =
+      this.provider.items ??
+      this.provider.itemsDetalle ??
+      this.provider.productos ??
+      [];
+
+    console.log('PROVIDER:', this.provider);
+    console.log('ITEMS:', this.products);
+
+    this.total = Number(this.provider.totalCotizacion || 0);
     this.subtotal = Number((this.total / 1.18).toFixed(2));
     this.igv = Number((this.total - this.subtotal).toFixed(2));
 
     const fecha = new Date();
     fecha.setDate(fecha.getDate() + 7);
-
     this.fechaValidez = fecha.toLocaleDateString('es-PE');
   }
 
@@ -68,13 +76,9 @@ export class RfqQuotationComponent implements OnInit {
       Authorization: `Bearer ${token}`
     });
 
-    const empresaBody = {
-      ruc: this.rucEmpresa
-    };
-
     this.http.post<any>(
       'https://proyectoinnovacion.onrender.com/api/empresas',
-      empresaBody,
+      { ruc: this.rucEmpresa },
       { headers }
     ).subscribe({
 
@@ -87,6 +91,8 @@ export class RfqQuotationComponent implements OnInit {
           igv: this.igv,
           total: this.total,
           direccionEnvio: 'Sede Central Cliente',
+
+          // 🔥 importante: usar products seguro
           items: this.products.map(p => ({
             idProducto: p.idProducto,
             cantidad: Number(p.cantidad),
@@ -94,24 +100,18 @@ export class RfqQuotationComponent implements OnInit {
           }))
         };
 
-        this.http.post<any>(
+        this.http.post(
           'https://proyectoinnovacion.onrender.com/api/solicitudes/crear',
           solicitudBody,
           { headers }
         ).subscribe({
 
-          next: (res) => {
-
-            localStorage.setItem(
-              'current_solicitud_id',
-              String(res.idSolicitud)
-            );
-
+          next: (res: any) => {
+            localStorage.setItem('current_solicitud_id', String(res.idSolicitud));
             localStorage.removeItem('rfq_cart');
             localStorage.removeItem('selected_provider');
 
             this.loading = false;
-
             this.router.navigate(['/app/rfq/payment']);
           },
 
