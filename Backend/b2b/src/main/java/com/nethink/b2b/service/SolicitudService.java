@@ -7,6 +7,7 @@ import com.nethink.b2b.dto.response.TrackingResponse;
 import com.nethink.b2b.dto.response.TrackingStepResponse;
 import com.nethink.b2b.entity.DetalleSolicitud;
 import com.nethink.b2b.entity.EmpresaCompradora;
+import com.nethink.b2b.entity.InventarioReserva;
 import com.nethink.b2b.entity.Proveedor;
 import com.nethink.b2b.entity.ProveedorProducto;
 import com.nethink.b2b.entity.Solicitud;
@@ -15,6 +16,7 @@ import com.nethink.b2b.entity.SolicitudHistorial;
 import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.repository.DetalleSolicitudRepository;
 import com.nethink.b2b.repository.EmpresaCompradoraRepository;
+import com.nethink.b2b.repository.InventarioReservaRepository;
 import com.nethink.b2b.repository.ProveedorProductoRepository;
 import com.nethink.b2b.repository.ProveedorRepository;
 import com.nethink.b2b.repository.SolicitudHistorialRepository;
@@ -42,6 +44,8 @@ public class SolicitudService {
     private final EmpresaCompradoraRepository empresaRepo;
     private final SolicitudHistorialRepository historialRepo;
     private final EmailService emailService;
+    private final InventarioReservaService reservaService;
+    private final InventarioReservaRepository reservaRepo;
 
     public SolicitudService(
             SolicitudRepository solicitudRepo,
@@ -51,7 +55,9 @@ public class SolicitudService {
             ProveedorRepository proveedorRepo,
             EmpresaCompradoraRepository empresaRepo,
             SolicitudHistorialRepository historialRepo,
-            EmailService emailService
+            EmailService emailService,
+            InventarioReservaService reservaService,
+            InventarioReservaRepository reservaRepo
     ) {
         this.solicitudRepo = solicitudRepo;
         this.detalleRepo = detalleRepo;
@@ -61,6 +67,8 @@ public class SolicitudService {
         this.empresaRepo = empresaRepo;
         this.historialRepo = historialRepo;
         this.emailService = emailService;
+        this.reservaService=reservaService;
+        this.reservaRepo= reservaRepo;
     }
 
     @Transactional
@@ -106,12 +114,32 @@ public class SolicitudService {
 
         for (var itemReq : request.items()) {
 
-            ProveedorProducto pp = provProdRepo
-                    .buscarPorProveedorYProducto(
-                            request.idProveedor(),
-                            itemReq.idProducto()
-                    ).orElseThrow();
+ProveedorProducto pp = provProdRepo
+        .buscarPorProveedorYProducto(
+                request.idProveedor(),
+                itemReq.idProducto()
+        ).orElseThrow();
 
+
+int cantidadReq = itemReq.cantidad();
+
+if (pp.getStock() == null || pp.getStock() < cantidadReq) {
+    throw new RuntimeException(
+            "Stock insuficiente para producto: " +
+            pp.getProducto().getNombre()
+    );
+}
+
+
+pp.setStock(pp.getStock() - cantidadReq);
+provProdRepo.save(pp);
+
+
+reservaService.crearReserva(
+        guardada,
+        pp,
+        cantidadReq
+);
             BigDecimal cantidad =
                     BigDecimal.valueOf(itemReq.cantidad());
 
@@ -387,6 +415,24 @@ public class SolicitudService {
         );
 
         solicitudRepo.save(solicitud);
+        
+         List<InventarioReserva> reservas =
+            reservaRepo.findBySolicitud_IdSolicitud(idSolicitud);
+
+  
+    for (InventarioReserva r : reservas) {
+
+        ProveedorProducto pp = r.getProveedorProducto();
+
+        pp.setStock(pp.getStock() + r.getCantidad());
+
+        provProdRepo.save(pp);
+
+        r.setEstado("CANCELADO");
+        r.setFechaActualizacion(LocalDateTime.now());
+
+        reservaRepo.save(r);
+    }
 
         SolicitudHistorial historial =
                 new SolicitudHistorial();

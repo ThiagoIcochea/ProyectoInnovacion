@@ -23,7 +23,7 @@ public class CatalogoSchedulerService {
         this.proveedorRepo = proveedorRepo;
     }
 
-    @Scheduled(fixedRate = 120000)
+    @Scheduled(fixedRate = 60000)
     public void sincronizarCatalogos() {
 
         System.out.println(

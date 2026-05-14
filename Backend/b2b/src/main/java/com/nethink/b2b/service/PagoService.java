@@ -26,19 +26,22 @@ public class PagoService {
     private final SolicitudHistorialRepository historialRepo;
     private final UsuarioRepository usuarioRepo;
     private final Cloudinary cloudinary;
+    private final InventarioReservaService inventarioReservaService;
 
     public PagoService(
             PagoRepository pagoRepo,
             SolicitudRepository solicitudRepo,
             SolicitudHistorialRepository historialRepo,
             UsuarioRepository usuarioRepo,
-            Cloudinary cloudinary
+            Cloudinary cloudinary,
+            InventarioReservaService inventarioReservaService
     ) {
         this.pagoRepo = pagoRepo;
         this.solicitudRepo = solicitudRepo;
         this.historialRepo = historialRepo;
         this.usuarioRepo = usuarioRepo;
         this.cloudinary = cloudinary;
+        this.inventarioReservaService= inventarioReservaService;
     }
 
     @Transactional
@@ -65,7 +68,7 @@ public class PagoService {
                 Solicitud.EstadoSolicitud.PAGO_VALIDANDO,
                 direccionConfirmada
         );
-
+        inventarioReservaService.confirmarReserva(sol.getIdSolicitud());
         Pago pago = new Pago();
         pago.setIdSolicitud(idSolicitud);
         pago.setEntidad(entidad);
