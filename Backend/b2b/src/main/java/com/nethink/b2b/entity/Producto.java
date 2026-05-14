@@ -2,6 +2,7 @@ package com.nethink.b2b.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,16 +14,25 @@ public class Producto {
     @Column(name = "id_producto")
     private Integer idProducto;
 
+    @Column(name = "sku_global")
+    private String skuGlobal;
+
     private String nombre;
 
     @ManyToOne
     @JoinColumn(name = "id_marca")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) 
+    @JsonIgnoreProperties({
+            "hibernateLazyInitializer",
+            "handler"
+    })
     private Marca marca;
 
     @ManyToOne
     @JoinColumn(name = "id_categoria")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) 
+    @JsonIgnoreProperties({
+            "hibernateLazyInitializer",
+            "handler"
+    })
     private Categoria categoria;
 
     private String descripcion;
@@ -45,6 +55,14 @@ public class Producto {
 
     public void setIdProducto(Integer idProducto) {
         this.idProducto = idProducto;
+    }
+
+    public String getSkuGlobal() {
+        return skuGlobal;
+    }
+
+    public void setSkuGlobal(String skuGlobal) {
+        this.skuGlobal = skuGlobal;
     }
 
     public String getNombre() {
@@ -99,7 +117,9 @@ public class Producto {
         return fechaActualizacion;
     }
 
-    public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
+    public void setFechaActualizacion(
+            LocalDateTime fechaActualizacion
+    ) {
         this.fechaActualizacion = fechaActualizacion;
     }
 

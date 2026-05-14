@@ -1,6 +1,8 @@
 package com.nethink.b2b.controller;
 
 import com.nethink.b2b.dto.response.CatalogoResponse;
+import com.nethink.b2b.entity.Proveedor;
+import com.nethink.b2b.repository.ProveedorRepository;
 import com.nethink.b2b.service.SyncCatalogoService;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,15 +13,31 @@ import java.util.List;
 public class CatalogoSyncController {
 
     private final SyncCatalogoService syncService;
+    private final ProveedorRepository proveedorRepo;
 
-    public CatalogoSyncController(SyncCatalogoService syncService) {
+    public CatalogoSyncController(
+            SyncCatalogoService syncService,
+            ProveedorRepository proveedorRepo
+    ) {
+
         this.syncService = syncService;
+        this.proveedorRepo = proveedorRepo;
     }
 
-    @PostMapping("/sync")
-    public String sincronizar(@RequestBody List<CatalogoResponse> data) {
+    @PostMapping("/sync/{idProveedor}")
+    public String sincronizar(
+            @PathVariable Integer idProveedor,
+            @RequestBody List<CatalogoResponse> data
+    ) {
 
-        data.forEach(syncService::sync);
+        Proveedor proveedor =
+                proveedorRepo.findById(idProveedor)
+                        .orElseThrow();
+
+        for (CatalogoResponse dto : data) {
+
+            syncService.sync(dto, proveedor);
+        }
 
         return "Sincronización completada";
     }
