@@ -65,6 +65,9 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
       { headers: this.headers() }
     ).subscribe(res => {
 
+      console.log('TRACKING TOTAL:', res.total);
+console.log('RFQ TOTAL:', this.provider?.totalCotizacion);
+
       this.provider = {
         nombreProveedor: res.proveedor,
         idProveedor: res.idProveedor

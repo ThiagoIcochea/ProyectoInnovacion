@@ -5,6 +5,7 @@ import com.nethink.b2b.dto.response.SolicitudHistorialResponse;
 import com.nethink.b2b.dto.response.SolicitudResponse;
 import com.nethink.b2b.dto.response.TrackingResponse;
 import com.nethink.b2b.dto.response.TrackingStepResponse;
+import com.nethink.b2b.entity.DescuentoVolumen;
 import com.nethink.b2b.entity.DetalleSolicitud;
 import com.nethink.b2b.entity.EmpresaCompradora;
 import com.nethink.b2b.entity.InventarioReserva;
@@ -14,6 +15,7 @@ import com.nethink.b2b.entity.Solicitud;
 import com.nethink.b2b.entity.Solicitud.EstadoSolicitud;
 import com.nethink.b2b.entity.SolicitudHistorial;
 import com.nethink.b2b.entity.Usuario;
+import com.nethink.b2b.repository.DescuentoVolumenRepository;
 import com.nethink.b2b.repository.DetalleSolicitudRepository;
 import com.nethink.b2b.repository.EmpresaCompradoraRepository;
 import com.nethink.b2b.repository.InventarioReservaRepository;
@@ -26,6 +28,7 @@ import com.nethink.b2b.repository.UsuarioRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,6 +49,7 @@ public class SolicitudService {
     private final EmailService emailService;
     private final InventarioReservaService reservaService;
     private final InventarioReservaRepository reservaRepo;
+    private final DescuentoVolumenRepository descuentoVolumenRepo;
 
     public SolicitudService(
             SolicitudRepository solicitudRepo,
@@ -57,7 +61,8 @@ public class SolicitudService {
             SolicitudHistorialRepository historialRepo,
             EmailService emailService,
             InventarioReservaService reservaService,
-            InventarioReservaRepository reservaRepo
+            InventarioReservaRepository reservaRepo,
+            DescuentoVolumenRepository descuentoVolumenRepo
     ) {
         this.solicitudRepo = solicitudRepo;
         this.detalleRepo = detalleRepo;
@@ -69,6 +74,7 @@ public class SolicitudService {
         this.emailService = emailService;
         this.reservaService=reservaService;
         this.reservaRepo= reservaRepo;
+        this.descuentoVolumenRepo= descuentoVolumenRepo;
     }
 
     @Transactional
@@ -142,8 +148,29 @@ reservaService.crearReserva(
             BigDecimal cantidad =
                     BigDecimal.valueOf(itemReq.cantidad());
 
-            BigDecimal totalItem =
-                    pp.getPrecio().multiply(cantidad);
+          double precioBase = pp.getPrecio().doubleValue();
+double precioFinal = precioBase;
+
+/* volumen */
+List<DescuentoVolumen> volumenes =
+        descuentoVolumenRepo.findByProveedorProducto_IdProvProd(pp.getIdProvProd());
+
+DescuentoVolumen mejor = volumenes.stream()
+        .filter(v -> cantidadReq >= v.getCantidadMin())
+        .max(Comparator.comparingInt(DescuentoVolumen::getCantidadMin))
+        .orElse(null);
+
+if (mejor != null) {
+    precioFinal = mejor.getPrecioUnitario().doubleValue();
+} else {
+    if (pp.getPorcentajeDescuento() != null && pp.getPorcentajeDescuento() > 0) {
+        precioFinal -= precioBase * pp.getPorcentajeDescuento() / 100;
+    }
+}
+
+BigDecimal totalItem =
+        BigDecimal.valueOf(precioFinal)
+                .multiply(BigDecimal.valueOf(cantidadReq));
 
             total = total.add(totalItem);
 
@@ -164,7 +191,7 @@ reservaService.crearReserva(
 
             detalle.setCantidad(itemReq.cantidad());
 
-            detalle.setPrecioUnitario(pp.getPrecio());
+           detalle.setPrecioUnitario(BigDecimal.valueOf(precioFinal));
 
             detalle.setTiempoEntregaDias(
                     pp.getTiempoEntregaDias()
