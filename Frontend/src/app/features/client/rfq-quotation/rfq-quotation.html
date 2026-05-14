@@ -59,7 +59,24 @@
           </div>
 
           <div>{{ product.cantidad }}</div>
-          <div>S/ {{ product.precioUnitario }}</div>
+
+          <div>
+
+            <div>
+              <strong>S/ {{ product.precioUnitario }}</strong>
+            </div>
+
+            <div *ngIf="product.precioBase && product.precioBase !== product.precioUnitario">
+              <s>S/ {{ product.precioBase }}</s>
+            </div>
+
+            <div *ngIf="product.tipoDescuento">
+              {{ product.tipoDescuento }} - {{ product.valorDescuento }}
+              <span *ngIf="product.tipoDescuento === 'PRODUCTO'">%</span>
+            </div>
+
+          </div>
+
           <div>S/ {{ product.subtotal }}</div>
 
         </div>

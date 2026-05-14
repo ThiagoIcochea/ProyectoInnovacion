@@ -40,15 +40,11 @@ export class RfqQuotationComponent implements OnInit {
 
     this.provider = JSON.parse(data);
 
-    // 🔥 FIX CLAVE: fallback inteligente
     this.products =
       this.provider.items ??
       this.provider.itemsDetalle ??
       this.provider.productos ??
       [];
-
-    console.log('PROVIDER:', this.provider);
-    console.log('ITEMS:', this.products);
 
     this.total = Number(this.provider.totalCotizacion || 0);
     this.subtotal = Number((this.total / 1.18).toFixed(2));
@@ -91,8 +87,6 @@ export class RfqQuotationComponent implements OnInit {
           igv: this.igv,
           total: this.total,
           direccionEnvio: 'Sede Central Cliente',
-
-          // 🔥 importante: usar products seguro
           items: this.products.map(p => ({
             idProducto: p.idProducto,
             cantidad: Number(p.cantidad),
