@@ -4,7 +4,9 @@ import com.nethink.b2b.dto.request.ItemRFQRequest;
 import com.nethink.b2b.dto.request.RFQRequest;
 import com.nethink.b2b.dto.response.ItemCotizadoResponse;
 import com.nethink.b2b.dto.response.RFQProveedorResponse;
+import com.nethink.b2b.entity.DescuentoVolumen;
 import com.nethink.b2b.entity.ProveedorProducto;
+import com.nethink.b2b.repository.DescuentoVolumenRepository;
 import com.nethink.b2b.repository.ProveedorProductoRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +19,13 @@ public class RFQService {
     private final ProveedorProductoRepository provProdRepo;
     private final ScoringService scoringService;
     private final InventarioReservaService inventarioReSer;
+    private final DescuentoVolumenRepository descuentoVolumenRepo;
 
-    public RFQService(ProveedorProductoRepository provProdRepo, ScoringService scoringService,InventarioReservaService inventarioReSer) {
+    public RFQService(ProveedorProductoRepository provProdRepo, ScoringService scoringService,InventarioReservaService inventarioReSer, DescuentoVolumenRepository descuentoVolumenRepo) {
         this.provProdRepo = provProdRepo;
         this.scoringService = scoringService;
         this.inventarioReSer=  inventarioReSer;
+        this.descuentoVolumenRepo= descuentoVolumenRepo;
     }
 
     public List<RFQProveedorResponse> buscarYCalificarProveedores(RFQRequest request) {
@@ -56,20 +60,73 @@ public class RFQService {
                         .findFirst().orElse(null);
 
                 if (pp != null && inventarioReSer.calcularStockDisponible(pp) >= itemReq.getCantidad()) {
-                    double precioUnitario = pp.getPrecio().doubleValue();
-                 double subtotal = precioUnitario * itemReq.getCantidad();
-                     totalCotizacion += subtotal;
+                    
+                    double precioBase = pp.getPrecio().doubleValue();
+double precioFinal = precioBase;
+
+/* =========================
+   1. DESCUENTO VOLUMEN (PRIORIDAD 1)
+   ========================= */
+List<DescuentoVolumen> volumenes =
+        descuentoVolumenRepo.findByProveedorProducto_IdProvProd(pp.getIdProvProd());
+
+DescuentoVolumen mejor = volumenes.stream()
+        .filter(v -> itemReq.getCantidad() >= v.getCantidadMin())
+        .max(Comparator.comparingInt(DescuentoVolumen::getCantidadMin))
+        .orElse(null);
+
+if (mejor != null) {
+
+    // SI HAY VOLUMEN → ESTE GANA
+    precioFinal = mejor.getPrecioUnitario().doubleValue();
+
+} else {
+
+    /* =========================
+       2. DESCUENTO PRODUCTO
+       ========================= */
+    if (pp.getPorcentajeDescuento() != null && pp.getPorcentajeDescuento() > 0) {
+        precioFinal -= precioBase * pp.getPorcentajeDescuento() / 100;
+    }
+}
+
+/* =========================
+   3. SUBTOTAL
+   ========================= */
+double subtotal = precioFinal * itemReq.getCantidad();
+totalCotizacion += subtotal;
                     
                     if (pp.getTiempoEntregaDias() > tiempoMaximo) tiempoMaximo = pp.getTiempoEntregaDias();
 
                     ItemCotizadoResponse itemDetalle = new ItemCotizadoResponse();
                     itemDetalle.setIdProducto(pp.getProducto().getIdProducto());
-                    itemDetalle.setProducto(pp.getProducto().getNombre());
-                    itemDetalle.setNombreProducto(pp.getProducto().getNombre());
-                    itemDetalle.setCantidad(itemReq.getCantidad());
-                    itemDetalle.setPrecioUnitario(precioUnitario);
-                    itemDetalle.setSubtotal(subtotal);
-                    itemsDetalle.add(itemDetalle);
+itemDetalle.setProducto(pp.getProducto().getNombre());
+itemDetalle.setNombreProducto(pp.getProducto().getNombre());
+itemDetalle.setCantidad(itemReq.getCantidad());
+
+// 🔵 precios base y final
+itemDetalle.setPrecioBase(precioBase);
+itemDetalle.setPrecioUnitario(precioFinal);
+itemDetalle.setSubtotal(subtotal);
+
+// 🔥 DETALLE DE DESCUENTO
+if (mejor != null) {
+
+    itemDetalle.setTipoDescuento("VOLUMEN");
+    itemDetalle.setValorDescuento(
+        mejor.getPrecioUnitario().doubleValue()
+    );
+
+} else if (pp.getPorcentajeDescuento() != null && pp.getPorcentajeDescuento() > 0) {
+
+    itemDetalle.setTipoDescuento("PRODUCTO");
+    itemDetalle.setValorDescuento(pp.getPorcentajeDescuento());
+
+} else {
+
+    itemDetalle.setTipoDescuento("NINGUNO");
+    itemDetalle.setValorDescuento(0.0);
+}
                 } else {
                     cumpleStock = false;
                     break;

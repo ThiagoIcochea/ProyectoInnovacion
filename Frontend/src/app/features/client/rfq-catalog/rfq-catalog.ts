@@ -113,12 +113,17 @@ export class RfqCatalogComponent implements OnInit {
   agregarProducto(product: any): void {
     const existe = this.requestItems.find(x => x.idProducto === product.idProducto);
     if (!existe) {
-      this.requestItems.push({
-        idProducto: product.idProducto,
-        name: product.producto,
-        detail: `${product.marca} • ${product.descripcion?.substring(0,30)}...`,
-        qty: 1
-      });
+    this.requestItems.push({
+  idProducto: product.idProducto,
+  name: product.producto,
+  detail: `${product.marca} • ${product.descripcion?.substring(0,30)}...`,
+  qty: 1,
+
+
+  precioReferencia: product.precioUnitario ?? null,
+  categoria: product.categoria,
+  marca: product.marca
+});
     } else {
       existe.qty++;
     }
