@@ -53,4 +53,15 @@ public class InventarioReservaService {
             reservaRepo.save(r);
         }
     }
+    
+    public Integer calcularStockDisponible(ProveedorProducto pp) {
+
+    int stockApi = pp.getStock(); 
+
+    int reservado = reservaRepo.sumarReservasActivas(
+            pp.getIdProvProd()
+    );
+
+    return stockApi - reservado;
+}
 }

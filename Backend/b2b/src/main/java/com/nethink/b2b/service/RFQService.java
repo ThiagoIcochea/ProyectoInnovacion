@@ -16,10 +16,12 @@ public class RFQService {
 
     private final ProveedorProductoRepository provProdRepo;
     private final ScoringService scoringService;
+    private final InventarioReservaService inventarioReSer;
 
-    public RFQService(ProveedorProductoRepository provProdRepo, ScoringService scoringService) {
+    public RFQService(ProveedorProductoRepository provProdRepo, ScoringService scoringService,InventarioReservaService inventarioReSer) {
         this.provProdRepo = provProdRepo;
         this.scoringService = scoringService;
+        this.inventarioReSer=  inventarioReSer;
     }
 
     public List<RFQProveedorResponse> buscarYCalificarProveedores(RFQRequest request) {
@@ -53,7 +55,7 @@ public class RFQService {
                         .filter(p -> p.getProducto().getIdProducto().equals(itemReq.getIdProducto()))
                         .findFirst().orElse(null);
 
-                if (pp != null && pp.getStock() >= itemReq.getCantidad()) {
+                if (pp != null && inventarioReSer.calcularStockDisponible(pp) >= itemReq.getCantidad()) {
                     double precioUnitario = pp.getPrecio().doubleValue();
                  double subtotal = precioUnitario * itemReq.getCantidad();
                      totalCotizacion += subtotal;

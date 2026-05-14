@@ -123,15 +123,14 @@ ProveedorProducto pp = provProdRepo
 
 int cantidadReq = itemReq.cantidad();
 
-if (pp.getStock() == null || pp.getStock() < cantidadReq) {
-    throw new RuntimeException(
-            "Stock insuficiente para producto: " +
-            pp.getProducto().getNombre()
-    );
+int disponible = reservaService.calcularStockDisponible(pp);
+
+if (disponible < cantidadReq) {
+    throw new RuntimeException("Stock insuficiente para producto: " + pp.getProducto().getNombre());
 }
 
 
-pp.setStock(pp.getStock() - cantidadReq);
+
 provProdRepo.save(pp);
 
 
@@ -422,12 +421,7 @@ reservaService.crearReserva(
   
     for (InventarioReserva r : reservas) {
 
-        ProveedorProducto pp = r.getProveedorProducto();
-
-        pp.setStock(pp.getStock() + r.getCantidad());
-
-        provProdRepo.save(pp);
-
+       
         r.setEstado("CANCELADO");
         r.setFechaActualizacion(LocalDateTime.now());
 
