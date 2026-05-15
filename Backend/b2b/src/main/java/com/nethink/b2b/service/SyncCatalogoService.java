@@ -21,6 +21,7 @@ public class SyncCatalogoService {
     private final ProductoImagenRepository imagenRepo;
     private final ProveedorProductoRepository proveedorProductoRepo;
     private final DescuentoVolumenRepository descuentoRepo;
+    private final ApiConfiguracionService apiConfSer;
 
     private final RestTemplate restTemplate;
 
@@ -31,7 +32,8 @@ public class SyncCatalogoService {
             ProductoEspecificacionRepository specRepo,
             ProductoImagenRepository imagenRepo,
             ProveedorProductoRepository proveedorProductoRepo,
-            DescuentoVolumenRepository descuentoRepo
+            DescuentoVolumenRepository descuentoRepo,
+            ApiConfiguracionService apiConfSer
     ) {
         this.productoRepo = productoRepo;
         this.marcaRepo = marcaRepo;
@@ -41,6 +43,7 @@ public class SyncCatalogoService {
         this.proveedorProductoRepo = proveedorProductoRepo;
         this.descuentoRepo = descuentoRepo;
         this.restTemplate = new RestTemplate();
+        this.apiConfSer= apiConfSer;
     }
 
     private String normalizarUrlProveedor(Proveedor proveedor) {
@@ -85,6 +88,7 @@ public class SyncCatalogoService {
 
         } catch (Exception e) {
             System.out.println("No se pudo conectar con proveedor: " + proveedor.getRazonSocial());
+            apiConfSer.probarConexion(proveedor.getUsuario().getCorreo());
             e.printStackTrace();
         }
     }
