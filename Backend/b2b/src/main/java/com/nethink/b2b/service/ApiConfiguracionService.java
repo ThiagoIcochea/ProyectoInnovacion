@@ -84,63 +84,94 @@ public class ApiConfiguracionService {
         proveedorRepo.save(proveedor);
     }
 
-    public ApiConfiguracionResponse probarConexion(String correo) {
+   public ApiConfiguracionResponse probarConexion(String correo) {
 
-        Proveedor proveedor =
-                proveedorRepo.findByUsuario_Correo(correo)
-                        .orElseThrow();
+    Proveedor proveedor =
+            proveedorRepo.findByUsuario_Correo(correo)
+                    .orElseThrow();
 
-        LogsApi log = new LogsApi();
+    LogsApi log = new LogsApi();
 
-        log.setProveedor(proveedor);
-        log.setEndpoint(proveedor.getApiUrl());
+    log.setProveedor(proveedor);
+    log.setEndpoint(proveedor.getApiUrl());
 
-        long inicio = System.currentTimeMillis();
+    long inicio = System.currentTimeMillis();
 
-        try {
+    try {
 
-            HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-            if (proveedor.getApiToken() != null
-                    && !proveedor.getApiToken().isBlank()) {
+        if (proveedor.getApiToken() != null
+                && !proveedor.getApiToken().isBlank()) {
 
-                headers.setBearerAuth(proveedor.getApiToken());
+            headers.setBearerAuth(proveedor.getApiToken());
+        }
+
+        ResponseEntity<String> response;
+
+        if ("GRAPHQL".equalsIgnoreCase(proveedor.getApiTipo())) {
+
+            String query = """
+            {
+              "query": "query { __typename }"
             }
+            """;
+
+            HttpEntity<String> entity =
+                    new HttpEntity<>(query, headers);
+
+            response = restTemplate.exchange(
+                    proveedor.getApiUrl(),
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+
+            log.setMetodoHttp("POST");
+
+        } else {
 
             HttpEntity<String> entity =
                     new HttpEntity<>(headers);
 
-            ResponseEntity<String> response =
-                    restTemplate.exchange(
-                            proveedor.getApiUrl(),
-                            HttpMethod.GET,
-                            entity,
-                            String.class
-                    );
-
-            long fin = System.currentTimeMillis();
-
-            log.setMetodoHttp("GET");
-            log.setCodigoRespuesta(
-                    String.valueOf(response.getStatusCode().value())
+            response = restTemplate.exchange(
+                    proveedor.getApiUrl(),
+                    HttpMethod.GET,
+                    entity,
+                    String.class
             );
-            log.setTiempoRespuestaMs((int) (fin - inicio));
-            log.setEstado(LogsApi.Estado.OK);
-            log.setDescripcion("Conexión exitosa");
-
-        } catch (Exception e) {
-
-            long fin = System.currentTimeMillis();
 
             log.setMetodoHttp("GET");
-            log.setCodigoRespuesta("500");
-            log.setTiempoRespuestaMs((int) (fin - inicio));
-            log.setEstado(LogsApi.Estado.ERROR);
-            log.setDescripcion(e.getMessage());
         }
 
-        logsApiRepo.save(log);
+        long fin = System.currentTimeMillis();
 
-        return obtenerConfiguracion(correo);
+        log.setCodigoRespuesta(
+                String.valueOf(response.getStatusCode().value())
+        );
+
+        log.setTiempoRespuestaMs((int) (fin - inicio));
+
+        log.setEstado(LogsApi.Estado.OK);
+
+        log.setDescripcion("Conexión exitosa");
+
+    } catch (Exception e) {
+
+        long fin = System.currentTimeMillis();
+
+        log.setCodigoRespuesta("500");
+
+        log.setTiempoRespuestaMs((int) (fin - inicio));
+
+        log.setEstado(LogsApi.Estado.ERROR);
+
+        log.setDescripcion(e.getMessage());
     }
+
+    logsApiRepo.save(log);
+
+    return obtenerConfiguracion(correo);
+}
 }

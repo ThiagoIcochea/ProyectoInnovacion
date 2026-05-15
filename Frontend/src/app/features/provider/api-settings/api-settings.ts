@@ -57,11 +57,10 @@ implements OnInit {
 
   cargarConfiguracion(): void {
 
-    const correo =
-      localStorage.getItem('correo');
+   
 
     this.http.get<any>(
-      `${this.API_URL}?correo=${correo}`,
+      `${this.API_URL}`,
       {
         headers: this.headers()
       }
@@ -97,7 +96,7 @@ implements OnInit {
     };
 
     this.http.put(
-      `${this.API_URL}?correo=${correo}`,
+      `${this.API_URL}`,
       body,
       {
         headers: this.headers()
@@ -126,11 +125,10 @@ implements OnInit {
 
   probarConexion(): void {
 
-    const correo =
-      localStorage.getItem('correo');
+   
 
     this.http.post<any>(
-      `${this.API_URL}/probar?correo=${correo}`,
+      `${this.API_URL}/probar`,
       {},
       {
         headers: this.headers()

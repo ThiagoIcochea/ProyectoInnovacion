@@ -3,6 +3,7 @@ package com.nethink.b2b.controller;
 import com.nethink.b2b.dto.request.ApiConfiguracionRequest;
 import com.nethink.b2b.dto.response.ApiConfiguracionResponse;
 import com.nethink.b2b.service.ApiConfiguracionService;
+import java.security.Principal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,23 +20,23 @@ public class ApiConfiguracionController {
 
     @GetMapping
     public ApiConfiguracionResponse obtener(
-            @RequestParam String correo
+            Principal principal
     ) {
-        return service.obtenerConfiguracion(correo);
+        return service.obtenerConfiguracion(principal.getName());
     }
 
     @PutMapping
     public void actualizar(
-            @RequestParam String correo,
+            Principal principal,
             @RequestBody ApiConfiguracionRequest request
     ) {
-        service.actualizarConfiguracion(correo, request);
+        service.actualizarConfiguracion(principal.getName(), request);
     }
 
     @PostMapping("/probar")
     public ApiConfiguracionResponse probar(
-            @RequestParam String correo
+            Principal principal
     ) {
-        return service.probarConexion(correo);
+        return service.probarConexion(principal.getName());
     }
 }
