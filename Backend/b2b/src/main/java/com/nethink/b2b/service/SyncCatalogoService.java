@@ -1,5 +1,6 @@
 package com.nethink.b2b.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nethink.b2b.dto.response.*;
 import com.nethink.b2b.entity.*;
 import com.nethink.b2b.repository.*;
@@ -88,33 +89,56 @@ public class SyncCatalogoService {
         }
     }
 
-    private List<CatalogoResponse> consumirRest(Proveedor proveedor) {
+   private List<CatalogoResponse> consumirRest(Proveedor proveedor) {
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
 
-        if (proveedor.getApiToken() != null && !proveedor.getApiToken().isBlank()) {
-            headers.setBearerAuth(proveedor.getApiToken());
-        }
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        String url = normalizarUrlProveedor(proveedor);
-
-        ResponseEntity<CatalogoWrapperResponse> response =
-                restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        entity,
-                        CatalogoWrapperResponse.class
-                );
-
-        if (response.getBody() == null || response.getBody().getRecord() == null) {
-            return Collections.emptyList();
-        }
-
-        return response.getBody().getRecord().getCatalogo();
+    if (proveedor.getApiToken() != null && !proveedor.getApiToken().isBlank()) {
+        headers.setBearerAuth(proveedor.getApiToken());
     }
+
+    HttpEntity<String> entity = new HttpEntity<>(headers);
+
+    String url = normalizarUrlProveedor(proveedor);
+
+    ResponseEntity<Map> response =
+            restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    Map.class
+            );
+
+    if (response.getBody() == null) return Collections.emptyList();
+
+    Object data = response.getBody();
+
+    Object catalogoObj = null;
+
+    if (data instanceof Map<?, ?> map) {
+
+        if (map.containsKey("record")) {
+            // SOLO JSONBIN
+            Map record = (Map) map.get("record");
+            catalogoObj = record.get("catalogo");
+        } else if (map.containsKey("catalogo")) {
+            // API normal con wrapper catalogo
+            catalogoObj = map.get("catalogo");
+        } else {
+            // API directa: array raíz
+            catalogoObj = map;
+        }
+    }
+
+    if (catalogoObj == null) return Collections.emptyList();
+
+    return new ObjectMapper()
+            .convertValue(
+                    catalogoObj,
+                    new com.fasterxml.jackson.core.type.TypeReference<List<CatalogoResponse>>() {}
+            );
+}
 
     private List<CatalogoResponse> consumirGraphQL(Proveedor proveedor) {
 
