@@ -1,3 +1,4 @@
+// Backend touchpoint: profile data loader and updater; RUC fields are provider-only.
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {
@@ -6,6 +7,7 @@ import {
   OnInit
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-profile',
@@ -52,12 +54,12 @@ export class ProfileComponent implements OnInit {
   ) {}
 
   get esProveedor(): boolean {
-    return (this.usuario.rol || localStorage.getItem('rol') || '').toUpperCase() === 'PROVEEDOR';
+    return (this.usuario.rol || localStorage.getItem(APP_STORAGE_KEYS.role) || '').toUpperCase() === 'PROVEEDOR';
   }
 
   get rolTexto(): string {
 
-    const rol = (this.usuario.rol || localStorage.getItem('rol') || '').toUpperCase();
+    const rol = (this.usuario.rol || localStorage.getItem(APP_STORAGE_KEYS.role) || '').toUpperCase();
 
     if (rol === 'ADMIN') {
       return 'Administrador';
@@ -76,14 +78,14 @@ export class ProfileComponent implements OnInit {
 
   private headers(): HttpHeaders {
     return new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`
+      Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token)}`
     });
   }
 
   cargarPerfil(): void {
 
     this.http.get<any>(
-      'https://proyectoinnovacion.onrender.com/api/usuarios/perfil',
+      `${APP_API_BASE_URL}/usuarios/perfil`,
       {
         headers: this.headers()
       }
@@ -218,7 +220,7 @@ export class ProfileComponent implements OnInit {
     }
 
     this.http.put(
-      'https://proyectoinnovacion.onrender.com/api/usuarios/perfil',
+      `${APP_API_BASE_URL}/usuarios/perfil`,
       formData,
       {
         headers: this.headers()

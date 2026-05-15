@@ -1,3 +1,4 @@
+/* Backend touchpoint: admin product catalog and supplier detail panel. */
 .admin-products-page {
   display: flex;
   flex-direction: column;
@@ -45,7 +46,6 @@
 
 .products-table {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .card-header {

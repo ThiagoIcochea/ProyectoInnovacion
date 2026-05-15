@@ -1,3 +1,4 @@
+// Backend touchpoint: route map for all app flows; update this file when new backend-backed screens are added.
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './layout/main-layout/main-layout';
 

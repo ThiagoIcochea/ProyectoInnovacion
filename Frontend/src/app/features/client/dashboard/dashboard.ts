@@ -1,8 +1,10 @@
+// Backend touchpoint: client dashboard consumes recommendations, ads and request data.
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-client-dashboard',
@@ -23,7 +25,7 @@ export class DashboardComponent implements OnInit {
   precioMin: number | null = null;
   precioMax: number | null = null;
 
-  private API = 'https://proyectoinnovacion.onrender.com/api';
+  private API = APP_API_BASE_URL;
   private intervaloPublicidad: any;
 
   constructor(
@@ -40,7 +42,7 @@ export class DashboardComponent implements OnInit {
   getHeaders() {
     return {
       headers: new HttpHeaders({
-        Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+        Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token) || ''}`
       })
     };
   }
@@ -121,12 +123,12 @@ export class DashboardComponent implements OnInit {
   }
 
   cargarCarrito(): void {
-    const carrito = localStorage.getItem('rfq_cart');
+    const carrito = localStorage.getItem(APP_STORAGE_KEYS.rfqCart);
     this.requestItems = carrito ? JSON.parse(carrito) : [];
   }
 
   guardarCarrito(): void {
-    localStorage.setItem('rfq_cart', JSON.stringify(this.requestItems));
+    localStorage.setItem(APP_STORAGE_KEYS.rfqCart, JSON.stringify(this.requestItems));
   }
 
   agregarAlCarrito(product: any): void {

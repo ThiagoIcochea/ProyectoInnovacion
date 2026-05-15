@@ -1,3 +1,4 @@
+// Backend touchpoint: main shell that loads the active user profile, role labels and logout cleanup.
 import { CommonModule } from '@angular/common';
 import {
   HttpClient,
@@ -16,6 +17,7 @@ import {
   RouterLinkActive,
   RouterOutlet
 } from '@angular/router';
+import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-main-layout',
@@ -70,7 +72,7 @@ export class MainLayoutComponent implements OnInit {
 
   get nombreRol(): string {
 
-    const rol = (this.usuario?.rol || localStorage.getItem('rol') || '').toUpperCase();
+    const rol = (this.usuario?.rol || localStorage.getItem(APP_STORAGE_KEYS.role) || '').toUpperCase();
 
     if (rol === 'ADMIN') {
       return 'Administrador';
@@ -130,26 +132,26 @@ export class MainLayoutComponent implements OnInit {
 
   logout(): void {
 
-    localStorage.removeItem('token');
-    localStorage.removeItem('rol');
-    localStorage.removeItem('rfq_cart');
-    localStorage.removeItem('selected_provider');
-    localStorage.removeItem('current_solicitud_id');
+    localStorage.removeItem(APP_STORAGE_KEYS.token);
+    localStorage.removeItem(APP_STORAGE_KEYS.role);
+    localStorage.removeItem(APP_STORAGE_KEYS.rfqCart);
+    localStorage.removeItem(APP_STORAGE_KEYS.selectedProvider);
+    localStorage.removeItem(APP_STORAGE_KEYS.currentSolicitudId);
 
-    this.router.navigate(['/login']);
+    this.router.navigate([APP_ROUTE_PATHS.login]);
   }
 
   private headers(): HttpHeaders {
 
     return new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`
+      Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token)}`
     });
   }
 
   cargarPerfil(): void {
 
     this.http.get<any>(
-      'https://proyectoinnovacion.onrender.com/api/usuarios/perfil',
+      `${APP_API_BASE_URL}/usuarios/perfil`,
       {
         headers: this.headers()
       }

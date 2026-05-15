@@ -1,3 +1,4 @@
+<!-- Backend touchpoint: provider API credentials and synchronization status. -->
 <div class="api-settings-page">
   <div class="page-header">
     <div>
@@ -15,13 +16,13 @@
 
       <div class="form-grid">
         <div class="form-group">
-          <label>Endpoint URL</label>
-          <input type="text" value="https://api.globaltech.com/v1/inventory" />
+          <label for="endpointUrl">Endpoint URL</label>
+          <input id="endpointUrl" type="text" value="https://api.globaltech.com/v1/inventory" aria-label="Endpoint URL" />
         </div>
 
         <div class="form-group">
-          <label>Tipo de conexión</label>
-          <select>
+          <label for="tipoConexion">Tipo de conexión</label>
+          <select id="tipoConexion" aria-label="Tipo de conexión">
             <option>REST API</option>
             <option>GraphQL</option>
             <option>Webhook</option>
@@ -29,13 +30,13 @@
         </div>
 
         <div class="form-group">
-          <label>Puerto</label>
-          <input type="text" value="443" />
+          <label for="puertoApi">Puerto</label>
+          <input id="puertoApi" type="text" value="443" aria-label="Puerto" />
         </div>
 
         <div class="form-group">
-          <label>API Key / Token</label>
-          <input type="password" value="12345678901234567890" />
+          <label for="apiToken">API Key / Token</label>
+          <input id="apiToken" type="password" value="12345678901234567890" aria-label="API Key o Token" />
         </div>
       </div>
 

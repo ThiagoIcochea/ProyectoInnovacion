@@ -1,6 +1,8 @@
+// Backend touchpoint: provider matching results and selection state for quotation.
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
+import { APP_STORAGE_KEYS, APP_ROUTE_PATHS } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-rfq-results',
@@ -21,19 +23,19 @@ export class RfqResultsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const savedCart = localStorage.getItem('rfq_cart');
+    const savedCart = localStorage.getItem(APP_STORAGE_KEYS.rfqCart);
     if (savedCart) {
       this.summaryItems = JSON.parse(savedCart);
     }
 
     if (this.providers.length === 0) {
-      this.router.navigate(['/app/rfq/catalog']);
+      this.router.navigate([APP_ROUTE_PATHS.rfqCatalog]);
     }
   }
 
   seleccionarProveedor(provider: any): void {
    
-    localStorage.setItem('selected_provider', JSON.stringify(provider));
-    this.router.navigate(['/app/rfq/quotation']);
+    localStorage.setItem(APP_STORAGE_KEYS.selectedProvider, JSON.stringify(provider));
+    this.router.navigate([APP_ROUTE_PATHS.rfqQuotation]);
   }
 }

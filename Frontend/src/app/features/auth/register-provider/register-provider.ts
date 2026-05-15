@@ -1,7 +1,9 @@
+// Backend touchpoint: provider registration payload, payment methods and certifications.
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-register-provider',
@@ -28,13 +30,13 @@ export class RegisterProviderComponent implements OnInit {
   apiTipo = 'REST';
   apiToken = '';
 
-  private baseUrl = 'https://proyectoinnovacion.onrender.com/api/provider';
+  private baseUrl = `${APP_API_BASE_URL}/provider`;
 
   constructor(private http: HttpClient) {}
 
   headers() {
     return new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`
+      Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token)}`
     });
   }
 
@@ -83,7 +85,7 @@ export class RegisterProviderComponent implements OnInit {
   fechaExpiracionMap: any = {};
 
   ngOnInit(): void {
-    this.http.get<any>('https://proyectoinnovacion.onrender.com/api/certificaciones')
+    this.http.get<any>(`${APP_API_BASE_URL}/certificaciones`)
       .subscribe(res => this.certificaciones = res);
   }
 

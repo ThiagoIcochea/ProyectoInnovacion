@@ -1,3 +1,4 @@
+/* Backend touchpoint: visual shell for the auth entry page; adjust if login fields change. */
 :host {
   display: block;
   min-height: 100vh;
@@ -88,6 +89,7 @@
   border-radius: 18px;
   padding: 2rem;
   box-shadow: 0 18px 50px rgba(2, 6, 23, 0.3);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 

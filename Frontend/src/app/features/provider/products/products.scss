@@ -1,3 +1,4 @@
+/* Backend touchpoint: provider product catalog, stock indicators and table layout. */
 .provider-products-page {
   display: flex;
   flex-direction: column;
@@ -120,7 +121,6 @@
 
 .products-table {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .products-table__head,

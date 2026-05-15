@@ -1,3 +1,4 @@
+/* Backend touchpoint: client dashboard layout and cards fed by recommendation data. */
 .dashboard-page {
   display: grid;
   grid-template-columns: 1fr 360px;
@@ -110,6 +111,14 @@
   }
 }
 
+.promo-card__image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin: 10px 0;
+}
+
 .promo-card__icon {
   color: #60a5fa;
   font-size: 2rem;
@@ -192,6 +201,22 @@
   }
 }
 
+.product-card__preview {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+  border-radius: 10px;
+}
+
+.product-card__preview--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111827;
+  color: #9ca3af;
+}
+
 .product-card__tags {
   display: flex;
   gap: 0.5rem;
@@ -215,6 +240,10 @@
   background: #111827;
   color: #e5e7eb;
   cursor: pointer;
+}
+
+.product-card__meta {
+  margin-top: 10px;
 }
 
 .request-panel {
@@ -327,7 +356,7 @@
 
   .request-panel {
     position: static;
-    min-height: auto;
+    min-height: 0;
   }
 
   .product-grid,
