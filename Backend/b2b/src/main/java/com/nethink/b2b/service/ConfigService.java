@@ -52,7 +52,7 @@ public class ConfigService {
                         config.getClave(),
                         config.getValor(),
                         testeable,
-                        "ACTIVO",
+                        config.getEstado(),
                         config.getTipo()
                 );
             })

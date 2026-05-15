@@ -131,7 +131,7 @@ public class EmailServiceImpl implements EmailService {
                         </div>
                     </div>
                     """.formatted(
-                    solicitud.getCodigoRecepcion(),
+                    "RFQ-2026"+solicitud.getIdSolicitud(),
                     solicitud.getTotal(),
                     solicitud.getUsuario().getNombres(),
                     solicitud.getUsuario().getApellidos()

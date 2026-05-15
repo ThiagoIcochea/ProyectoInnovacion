@@ -62,12 +62,7 @@ implements OnInit {
 
       next: (res) => {
 
-        this.integrations = res.map(item => ({
-
-          ...item,
-
-          status: 'Activo'
-        }));
+        this.integrations = res;
 
         this.cdr.detectChanges();
       },
@@ -97,17 +92,17 @@ implements OnInit {
 
       next: (res) => {
 
-        item.status =
+        item.estado =
           res === 'OK'
-          ? 'Conectado'
-          : 'Error';
+          ? 'ACTIVO'
+          : 'INACTIVO';
 
         this.cdr.detectChanges();
       },
 
       error: () => {
 
-        item.status = 'Error';
+        item.estado = 'INACTIVO';
 
         this.cdr.detectChanges();
       }
