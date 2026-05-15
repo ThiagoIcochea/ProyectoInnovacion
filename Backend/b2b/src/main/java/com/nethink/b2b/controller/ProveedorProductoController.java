@@ -2,6 +2,7 @@ package com.nethink.b2b.controller;
 
 import com.nethink.b2b.dto.response.ProveedorProductoResponse;
 import com.nethink.b2b.service.ProveedorProductoService;
+import java.security.Principal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,8 +19,8 @@ public class ProveedorProductoController {
 
     @GetMapping("/mis-productos")
     public List<ProveedorProductoResponse> listar(
-            @RequestParam String correo
+            Principal principal
     ) {
-        return service.listarProductosPorProveedor(correo);
+        return service.listarProductosPorProveedor(principal.getName());
     }
 }

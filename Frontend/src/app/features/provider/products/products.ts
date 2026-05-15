@@ -40,10 +40,10 @@ export class ProviderProductsComponent implements OnInit {
 
   cargarProductos() {
 
-    const correo = localStorage.getItem('correo');
+    
 
     this.http.get<any[]>(
-      `${this.API_URL}/mis-productos?correo=${correo}`,
+      `${this.API_URL}/mis-productos`,
       { headers: this.headers() }
     )
     .subscribe({
