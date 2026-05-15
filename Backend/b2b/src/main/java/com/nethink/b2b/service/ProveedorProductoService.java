@@ -44,85 +44,112 @@ public class ProveedorProductoService {
         this.proveedorRepo = proveedorRepo;
     }
 
-    public List<ProveedorProductoResponse> listarProductosPorProveedor(String correo) {
-       Proveedor proveedor =
-        proveedorRepo.findByUsuario_Correo(correo)
-                .orElseThrow();
-        List<ProveedorProducto> lista =
-                proveedorProductoRepo.findByProveedor_IdProveedor(proveedor.getIdProveedor());
+   public List<ProveedorProductoResponse> listarProductosPorProveedor(String correo) {
 
-        List<ProveedorProductoResponse> response = new ArrayList<>();
+    Proveedor proveedor =
+            proveedorRepo.findByUsuario_Correo(correo)
+                    .orElseThrow();
 
-        for (ProveedorProducto pp : lista) {
-
-            Producto p = pp.getProducto();
-
-            ProveedorProductoResponse dto = new ProveedorProductoResponse();
-
-            dto.setIdProvProd(pp.getIdProvProd());
-            dto.setPrecio(pp.getPrecio().doubleValue());
-            dto.setStock(pp.getStock());
-            dto.setGarantiaMeses(pp.getGarantiaMeses());
-            dto.setTiempoEntregaDias(pp.getTiempoEntregaDias());
-            dto.setEnOferta(pp.getEnOferta());
-            dto.setPorcentajeDescuento(pp.getPorcentajeDescuento());
-            dto.setEstado(pp.getEstado());
-
-            dto.setIdProducto(p.getIdProducto());
-            dto.setNombre(p.getNombre());
-            dto.setDescripcion(p.getDescripcion());
-            dto.setSkuGlobal(p.getSkuGlobal());
-            dto.setFuente(p.getFuente());
-            dto.setApiOrigen(p.getApiOrigen());
-            dto.setEstadoProducto(p.getEstado());
-
-            dto.setIdMarca(p.getMarca().getIdMarca());
-            dto.setMarca(p.getMarca().getNombre());
-
-            dto.setIdCategoria(p.getCategoria().getIdCategoria());
-            dto.setCategoria(p.getCategoria().getNombre());
-
-            dto.setStockDisponible(
-                    reservaService.calcularStockDisponible(pp)
+    List<ProveedorProducto> lista =
+            proveedorProductoRepo.findProductosCompletosPorProveedor(
+                    proveedor.getIdProveedor()
             );
 
-            dto.setEspecificaciones(
-                    specRepo.findByProducto_IdProducto(p.getIdProducto())
-                            .stream()
-                            .map(e -> {
-                                EspecificacionResponse r = new EspecificacionResponse();
-                                r.setNombre(e.getNombre());
-                                r.setValor(e.getValor());
-                                return r;
-                            }).toList()
-            );
+    List<ProveedorProductoResponse> response = new ArrayList<>();
 
-            dto.setImagenes(
-                    imagenRepo.findByProducto_IdProducto(p.getIdProducto())
-                            .stream()
-                            .map(i -> {
-                                ImagenResponse r = new ImagenResponse();
-                                r.setUrl(i.getUrl());
-                                r.setPrincipal(i.getPrincipal());
-                                r.setOrden(i.getOrden());
-                                return r;
-                            }).toList()
-            );
+    for (ProveedorProducto pp : lista) {
 
-            dto.setDescuentosVolumen(
-                    descuentoRepo.findByProveedorProducto_IdProvProd(pp.getIdProvProd())
-                            .stream()
-                            .map(d -> {
-                                DescuentoVolumenResponse r = new DescuentoVolumenResponse();
-                                r.setCantidadMin(d.getCantidadMin());
-                                r.setPrecioUnitario(d.getPrecioUnitario());
-                                return r;
-                            }).toList()
-            );
+        Producto p = pp.getProducto();
 
-            response.add(dto);
-        }
+        ProveedorProductoResponse dto = new ProveedorProductoResponse();
 
-        return response;
+        dto.setIdProvProd(pp.getIdProvProd());
+
+        dto.setPrecio(
+                pp.getPrecio() != null
+                        ? pp.getPrecio().doubleValue()
+                        : 0.0
+        );
+
+        dto.setStock(pp.getStock());
+        dto.setGarantiaMeses(pp.getGarantiaMeses());
+        dto.setTiempoEntregaDias(pp.getTiempoEntregaDias());
+        dto.setEnOferta(pp.getEnOferta());
+        dto.setPorcentajeDescuento(pp.getPorcentajeDescuento());
+        dto.setEstado(pp.getEstado());
+
+        dto.setIdProducto(p.getIdProducto());
+        dto.setNombre(p.getNombre());
+        dto.setDescripcion(p.getDescripcion());
+        dto.setSkuGlobal(p.getSkuGlobal());
+        dto.setFuente(p.getFuente());
+        dto.setApiOrigen(p.getApiOrigen());
+        dto.setEstadoProducto(p.getEstado());
+
+        dto.setIdMarca(p.getMarca().getIdMarca());
+        dto.setMarca(p.getMarca().getNombre());
+
+        dto.setIdCategoria(p.getCategoria().getIdCategoria());
+        dto.setCategoria(p.getCategoria().getNombre());
+
+        dto.setStockDisponible(
+                reservaService.calcularStockDisponible(pp)
+        );
+
+        dto.setEspecificaciones(
+                specRepo.findByProducto_IdProducto(p.getIdProducto())
+                        .stream()
+                        .map(e -> {
+                            EspecificacionResponse r =
+                                    new EspecificacionResponse();
+
+                            r.setNombre(e.getNombre());
+                            r.setValor(e.getValor());
+
+                            return r;
+                        })
+                        .toList()
+        );
+
+        dto.setImagenes(
+                imagenRepo.findByProducto_IdProducto(p.getIdProducto())
+                        .stream()
+                        .map(i -> {
+                            ImagenResponse r =
+                                    new ImagenResponse();
+
+                            r.setUrl(i.getUrl());
+                            r.setPrincipal(i.getPrincipal());
+                            r.setOrden(i.getOrden());
+
+                            return r;
+                        })
+                        .toList()
+        );
+
+        dto.setDescuentosVolumen(
+                descuentoRepo.findByProveedorProducto_IdProvProd(
+                                pp.getIdProvProd()
+                        )
+                        .stream()
+                        .map(d -> {
+                            DescuentoVolumenResponse r =
+                                    new DescuentoVolumenResponse();
+
+                            r.setCantidadMin(d.getCantidadMin());
+
+                            r.setPrecioUnitario(
+                                    d.getPrecioUnitario()
+                            );
+
+                            return r;
+                        })
+                        .toList()
+        );
+
+        response.add(dto);
     }
+
+    return response;
+}
 }

@@ -9,4 +9,6 @@ public interface DescuentoVolumenRepository extends JpaRepository<DescuentoVolum
 
     List<DescuentoVolumen> findByProveedorProducto_IdProvProd(Integer idProvProd);
     void deleteByProveedorProducto_IdProvProd(Integer idProvProd);
+    List<DescuentoVolumen>
+findByProveedorProducto_IdProvProdIn(List<Integer> ids);
 }

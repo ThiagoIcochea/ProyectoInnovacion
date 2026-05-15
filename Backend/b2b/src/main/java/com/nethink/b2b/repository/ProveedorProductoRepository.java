@@ -69,4 +69,15 @@ public interface ProveedorProductoRepository
     findByProducto_IdProducto(
             Integer idProducto
     );
+    @Query("""
+    SELECT pp
+    FROM ProveedorProducto pp
+    JOIN FETCH pp.producto p
+    JOIN FETCH p.marca
+    JOIN FETCH p.categoria
+    WHERE pp.proveedor.idProveedor = :idProveedor
+""")
+List<ProveedorProducto> findProductosCompletosPorProveedor(
+        @Param("idProveedor") Integer idProveedor
+);
 }
