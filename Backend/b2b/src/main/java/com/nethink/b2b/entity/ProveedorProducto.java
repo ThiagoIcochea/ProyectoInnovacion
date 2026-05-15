@@ -12,6 +12,7 @@ public class ProveedorProducto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_prov_prod")
     private Integer idProvProd;
+    
 
     @ManyToOne
     @JoinColumn(name = "id_proveedor")
@@ -34,6 +35,9 @@ public class ProveedorProducto {
 
     @Column(name = "porcentaje_descuento")
     private Double porcentajeDescuento;
+    
+    @Column(name = "estado")
+    private String estado;
 
     @Column(name = "ultima_actualizacion_stock")
     private LocalDateTime ultimaActualizacionStock;
@@ -119,4 +123,12 @@ public class ProveedorProducto {
     public void setUltimaActualizacionStock(LocalDateTime ultimaActualizacionStock) {
         this.ultimaActualizacionStock = ultimaActualizacionStock;
     }
+    
+    public String getEstado() {
+    return estado;
+}
+
+public void setEstado(String estado) {
+    this.estado = estado;
+}
 }
