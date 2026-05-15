@@ -38,6 +38,11 @@ export class MainLayoutComponent implements OnInit {
     fotoPerfil: ''
   };
 
+  estadoApi: string = 'Desconectada';
+
+  private API_URL =
+  'https://proyectoinnovacion.onrender.com/api/proveedor-api';
+
   constructor(
     public router: Router,
     private http: HttpClient,
@@ -46,6 +51,9 @@ export class MainLayoutComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarPerfil();
+  if (this.isProvider) {
+    this.cargarEstadoApi();
+  }
   }
 
   get isAdmin(): boolean {
@@ -142,4 +150,34 @@ export class MainLayoutComponent implements OnInit {
       }
     });
   }
+
+  cargarEstadoApi(): void {
+
+  this.http.get<any>(
+    this.API_URL,
+    {
+      headers: this.headers()
+    }
+  )
+  .subscribe({
+
+    next: (res) => {
+
+      this.estadoApi =
+        res.estadoConexion || 'Desconectada';
+
+      this.cdr.detectChanges();
+    },
+
+    error: (err) => {
+
+      console.error(
+        'Error obteniendo estado API',
+        err
+      );
+
+      this.estadoApi = 'Desconectada';
+    }
+  });
+}
 }

@@ -160,6 +160,8 @@
   padding: 2rem;
 }
 
+
+
 .sidebar__badge {
   width: fit-content;
   margin-bottom: 1.5rem;
@@ -201,6 +203,18 @@
   color: #22c55e;
   font-weight: 800;
   font-size: 0.85rem;
+}
+
+.api-pill.api-pill--ok {
+  background: rgba(34, 197, 94, 0.14);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  color: #22c55e;
+}
+
+.api-pill.api-pill--error {
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  color: #f87171;
 }
 
 .sidebar__badge--admin {
