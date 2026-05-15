@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-provider-products',
@@ -8,31 +9,72 @@ import { Component } from '@angular/core';
   templateUrl: './products.html',
   styleUrl: './products.scss'
 })
-export class ProviderProductsComponent {
-  products = [
-    {
-      sku: 'C9300-48P-E',
-      name: 'Cisco Catalyst 9300 48-port PoE+',
-      category: 'Switch',
-      stock: 24,
-      price: 'US$ 3,600.00',
-      status: 'Activo'
-    },
-    {
-      sku: 'UAP-AC-PRO-US',
-      name: 'Ubiquiti UniFi UAP-AC-PRO',
-      category: 'Access Point',
-      stock: 80,
-      price: 'US$ 300.00',
-      status: 'Activo'
-    },
-    {
-      sku: 'ISR-4321-SEC',
-      name: 'Cisco ISR 4321 Sec Bundle',
-      category: 'Router',
-      stock: 6,
-      price: 'US$ 1,250.00',
-      status: 'Bajo stock'
+export class ProviderProductsComponent implements OnInit {
+
+  products: any[] = [];
+
+  activos = 0;
+  stockDisponibleCount = 0;
+  bajoStockCount = 0;
+
+  private API_URL = 'https://proyectoinnovacion.onrender.com/api/proveedor-productos';
+
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.cargarProductos();
+  }
+
+  private headers(): HttpHeaders {
+    return new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    });
+  }
+
+  cargarProductos() {
+
+    const correo = localStorage.getItem('correo');
+
+    this.http.get<any[]>(
+      `${this.API_URL}/mis-productos?correo=${correo}`,
+      { headers: this.headers() }
+    )
+    .subscribe({
+
+      next: (data) => {
+        this.products = data;
+        this.calcularResumen();
+        this.cdr.detectChanges();
+      },
+
+      error: (err) => {
+        console.error('Error cargando productos:', err);
+      }
+    });
+  }
+
+  calcularResumen() {
+
+    this.activos = 0;
+    this.stockDisponibleCount = 0;
+    this.bajoStockCount = 0;
+
+    for (let p of this.products) {
+
+      if (p.estado === 'ACTIVO') {
+        this.activos++;
+      }
+
+      if (p.stockDisponible > 0) {
+        this.stockDisponibleCount++;
+      }
+
+      if (p.stock < 10) {
+        this.bajoStockCount++;
+      }
     }
-  ];
+  }
 }

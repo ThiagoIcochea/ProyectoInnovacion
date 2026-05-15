@@ -16,8 +16,10 @@ public class ProveedorProductoController {
         this.service = service;
     }
 
-    @GetMapping("/{idProveedor}")
-    public List<ProveedorProductoResponse> listar(@PathVariable Integer idProveedor) {
-        return service.listarProductosPorProveedor(idProveedor);
+    @GetMapping("/mis-productos")
+    public List<ProveedorProductoResponse> listar(
+            @RequestParam String correo
+    ) {
+        return service.listarProductosPorProveedor(correo);
     }
 }

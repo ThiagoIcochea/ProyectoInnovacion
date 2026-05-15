@@ -23,4 +23,5 @@ public interface ProveedorRepository
     List<Proveedor> findByApiUrlIsNotNullAndEstado(
             String estado
     );
+    Optional<Proveedor> findByUsuario_Correo(String correo);
 }

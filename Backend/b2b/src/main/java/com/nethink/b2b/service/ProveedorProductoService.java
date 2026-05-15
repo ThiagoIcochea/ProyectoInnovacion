@@ -5,11 +5,14 @@ import com.nethink.b2b.dto.response.EspecificacionResponse;
 import com.nethink.b2b.dto.response.ImagenResponse;
 import com.nethink.b2b.dto.response.ProveedorProductoResponse;
 import com.nethink.b2b.entity.Producto;
+import com.nethink.b2b.entity.Proveedor;
 import com.nethink.b2b.entity.ProveedorProducto;
 import com.nethink.b2b.repository.DescuentoVolumenRepository;
 import com.nethink.b2b.repository.ProductoEspecificacionRepository;
 import com.nethink.b2b.repository.ProductoImagenRepository;
+
 import com.nethink.b2b.repository.ProveedorProductoRepository;
+import com.nethink.b2b.repository.ProveedorRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,25 +26,30 @@ public class ProveedorProductoService {
     private final ProductoEspecificacionRepository specRepo;
     private final ProductoImagenRepository imagenRepo;
     private final DescuentoVolumenRepository descuentoRepo;
+    private final ProveedorRepository  proveedorRepo;
 
     public ProveedorProductoService(
             ProveedorProductoRepository proveedorProductoRepo,
             InventarioReservaService reservaService,
             ProductoEspecificacionRepository specRepo,
             ProductoImagenRepository imagenRepo,
-            DescuentoVolumenRepository descuentoRepo
+            DescuentoVolumenRepository descuentoRepo,
+            ProveedorRepository proveedorRepo
     ) {
         this.proveedorProductoRepo = proveedorProductoRepo;
         this.reservaService = reservaService;
         this.specRepo = specRepo;
         this.imagenRepo = imagenRepo;
         this.descuentoRepo = descuentoRepo;
+        this.proveedorRepo = proveedorRepo;
     }
 
-    public List<ProveedorProductoResponse> listarProductosPorProveedor(Integer idProveedor) {
-
+    public List<ProveedorProductoResponse> listarProductosPorProveedor(String correo) {
+       Proveedor proveedor =
+        proveedorRepo.findByUsuario_Correo(correo)
+                .orElseThrow();
         List<ProveedorProducto> lista =
-                proveedorProductoRepo.findByProveedor_IdProveedor(idProveedor);
+                proveedorProductoRepo.findByProveedor_IdProveedor(proveedor.getIdProveedor());
 
         List<ProveedorProductoResponse> response = new ArrayList<>();
 
