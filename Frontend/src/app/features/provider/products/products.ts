@@ -1,17 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-provider-products',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './products.html',
   styleUrl: './products.scss'
 })
 export class ProviderProductsComponent implements OnInit {
 
   products: any[] = [];
+  filteredProducts: any[] = [];
+
+  search = '';
 
   activos = 0;
   stockDisponibleCount = 0;
@@ -45,8 +49,12 @@ export class ProviderProductsComponent implements OnInit {
     .subscribe({
 
       next: (data) => {
+
         this.products = data;
-        this.calcularResumen();
+        this.filteredProducts = data;
+
+        this.calcularResumenFiltrado();
+
         this.cdr.detectChanges();
       },
 
@@ -56,13 +64,28 @@ export class ProviderProductsComponent implements OnInit {
     });
   }
 
-  calcularResumen() {
+  filtrarProductos() {
+
+    const texto = this.search.toLowerCase();
+
+    this.filteredProducts = this.products.filter(p =>
+
+      p.skuGlobal?.toLowerCase().includes(texto) ||
+      p.nombre?.toLowerCase().includes(texto) ||
+      p.categoria?.toLowerCase().includes(texto)
+
+    );
+
+    this.calcularResumenFiltrado();
+  }
+
+  calcularResumenFiltrado() {
 
     this.activos = 0;
     this.stockDisponibleCount = 0;
     this.bajoStockCount = 0;
 
-    for (let p of this.products) {
+    for (let p of this.filteredProducts) {
 
       if (p.estado === 'ACTIVO') {
         this.activos++;

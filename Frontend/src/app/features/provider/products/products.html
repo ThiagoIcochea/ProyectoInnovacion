@@ -29,7 +29,14 @@
   <section class="products-card">
     <div class="products-card__header">
       <h2>Inventario conectado</h2>
-      <div class="search-box">Buscar por SKU, producto o categoría...</div>
+
+      <input
+        type="text"
+        class="search-box"
+        placeholder="Buscar por SKU, producto o categoría..."
+        [(ngModel)]="search"
+        (input)="filtrarProductos()"
+      />
     </div>
 
     <div class="products-table">
@@ -44,7 +51,7 @@
         <div>Estado</div>
       </div>
 
-      <div class="products-table__row" *ngFor="let p of products">
+      <div class="products-table__row" *ngFor="let p of filteredProducts">
         <div class="sku">{{ p.skuGlobal }}</div>
         <div>{{ p.nombre }}</div>
         <div>{{ p.categoria }}</div>
@@ -56,6 +63,7 @@
           <span *ngIf="p.porcentajeDescuento > 0">
             {{ p.porcentajeDescuento }}%
           </span>
+
           <span *ngIf="!p.porcentajeDescuento || p.porcentajeDescuento == 0">
             -
           </span>
@@ -67,6 +75,7 @@
               {{ d.cantidadMin }}+ → S/ {{ d.precioUnitario }}
             </div>
           </div>
+
           <span *ngIf="!p.descuentosVolumen?.length">-</span>
         </div>
 
