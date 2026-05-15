@@ -14,6 +14,8 @@ import com.nethink.b2b.repository.ProductoImagenRepository;
 import com.nethink.b2b.repository.ProveedorProductoRepository;
 import com.nethink.b2b.repository.ProveedorRepository;
 import org.springframework.stereotype.Service;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +46,7 @@ public class ProveedorProductoService {
         this.proveedorRepo = proveedorRepo;
     }
 
-   public List<ProveedorProductoResponse> listarProductosPorProveedor(String correo) {
+  public List<ProveedorProductoResponse> listarProductosPorProveedor(String correo) {
 
     Proveedor proveedor =
             proveedorRepo.findByUsuario_Correo(correo)
@@ -55,13 +57,79 @@ public class ProveedorProductoService {
                     proveedor.getIdProveedor()
             );
 
+    List<Integer> productosIds = lista.stream()
+            .map(pp -> pp.getProducto().getIdProducto())
+            .distinct()
+            .toList();
+
+    List<Integer> provProdIds = lista.stream()
+            .map(ProveedorProducto::getIdProvProd)
+            .distinct()
+            .toList();
+
+    Map<Integer, List<EspecificacionResponse>> specsMap =
+            specRepo.findByProducto_IdProductoIn(productosIds)
+                    .stream()
+                    .collect(Collectors.groupingBy(
+                            e -> e.getProducto().getIdProducto(),
+                            Collectors.mapping(e -> {
+
+                                EspecificacionResponse r =
+                                        new EspecificacionResponse();
+
+                                r.setNombre(e.getNombre());
+                                r.setValor(e.getValor());
+
+                                return r;
+
+                            }, Collectors.toList())
+                    ));
+
+    Map<Integer, List<ImagenResponse>> imagenesMap =
+            imagenRepo.findByProducto_IdProductoIn(productosIds)
+                    .stream()
+                    .collect(Collectors.groupingBy(
+                            i -> i.getProducto().getIdProducto(),
+                            Collectors.mapping(i -> {
+
+                                ImagenResponse r =
+                                        new ImagenResponse();
+
+                                r.setUrl(i.getUrl());
+                                r.setPrincipal(i.getPrincipal());
+                                r.setOrden(i.getOrden());
+
+                                return r;
+
+                            }, Collectors.toList())
+                    ));
+
+    Map<Integer, List<DescuentoVolumenResponse>> descuentosMap =
+            descuentoRepo.findByProveedorProducto_IdProvProdIn(provProdIds)
+                    .stream()
+                    .collect(Collectors.groupingBy(
+                            d -> d.getProveedorProducto().getIdProvProd(),
+                            Collectors.mapping(d -> {
+
+                                DescuentoVolumenResponse r =
+                                        new DescuentoVolumenResponse();
+
+                                r.setCantidadMin(d.getCantidadMin());
+                                r.setPrecioUnitario(d.getPrecioUnitario());
+
+                                return r;
+
+                            }, Collectors.toList())
+                    ));
+
     List<ProveedorProductoResponse> response = new ArrayList<>();
 
     for (ProveedorProducto pp : lista) {
 
         Producto p = pp.getProducto();
 
-        ProveedorProductoResponse dto = new ProveedorProductoResponse();
+        ProveedorProductoResponse dto =
+                new ProveedorProductoResponse();
 
         dto.setIdProvProd(pp.getIdProvProd());
 
@@ -97,54 +165,24 @@ public class ProveedorProductoService {
         );
 
         dto.setEspecificaciones(
-                specRepo.findByProducto_IdProducto(p.getIdProducto())
-                        .stream()
-                        .map(e -> {
-                            EspecificacionResponse r =
-                                    new EspecificacionResponse();
-
-                            r.setNombre(e.getNombre());
-                            r.setValor(e.getValor());
-
-                            return r;
-                        })
-                        .toList()
+                specsMap.getOrDefault(
+                        p.getIdProducto(),
+                        new ArrayList<>()
+                )
         );
 
         dto.setImagenes(
-                imagenRepo.findByProducto_IdProducto(p.getIdProducto())
-                        .stream()
-                        .map(i -> {
-                            ImagenResponse r =
-                                    new ImagenResponse();
-
-                            r.setUrl(i.getUrl());
-                            r.setPrincipal(i.getPrincipal());
-                            r.setOrden(i.getOrden());
-
-                            return r;
-                        })
-                        .toList()
+                imagenesMap.getOrDefault(
+                        p.getIdProducto(),
+                        new ArrayList<>()
+                )
         );
 
         dto.setDescuentosVolumen(
-                descuentoRepo.findByProveedorProducto_IdProvProd(
-                                pp.getIdProvProd()
-                        )
-                        .stream()
-                        .map(d -> {
-                            DescuentoVolumenResponse r =
-                                    new DescuentoVolumenResponse();
-
-                            r.setCantidadMin(d.getCantidadMin());
-
-                            r.setPrecioUnitario(
-                                    d.getPrecioUnitario()
-                            );
-
-                            return r;
-                        })
-                        .toList()
+                descuentosMap.getOrDefault(
+                        pp.getIdProvProd(),
+                        new ArrayList<>()
+                )
         );
 
         response.add(dto);
