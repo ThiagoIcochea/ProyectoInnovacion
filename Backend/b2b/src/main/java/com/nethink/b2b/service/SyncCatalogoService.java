@@ -338,7 +338,7 @@ public class SyncCatalogoService {
 
         if (imagenes == null) return;
 
-        int orden = 1;
+        
 
         for (ImagenResponse img : imagenes) {
 
@@ -346,7 +346,7 @@ public class SyncCatalogoService {
             imagen.setProducto(producto);
             imagen.setUrl(img.getUrl());
             imagen.setPrincipal(Boolean.TRUE.equals(img.getPrincipal()));
-            imagen.setOrden(orden++);
+            imagen.setOrden(imagen.getOrden());
             imagenRepo.save(imagen);
         }
     }

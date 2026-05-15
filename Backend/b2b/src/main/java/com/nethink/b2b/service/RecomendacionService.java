@@ -101,6 +101,7 @@ public class RecomendacionService {
 
                                 im.setUrl(i.getUrl());
                                 im.setPrincipal(i.getPrincipal());
+                                im.setOrden(i.getOrden());
 
                                 return im;
                             }).toList();

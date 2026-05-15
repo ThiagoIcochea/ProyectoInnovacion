@@ -76,6 +76,7 @@ public class CatalogoService {
                         ImagenResponse ir = new ImagenResponse();
                         ir.setUrl(img.getUrl());
                         ir.setPrincipal(img.getPrincipal());
+                        ir.setOrden(img.getOrden());
                         return ir;
                     }).toList();
 
