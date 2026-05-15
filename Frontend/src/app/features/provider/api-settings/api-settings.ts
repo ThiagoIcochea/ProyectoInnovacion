@@ -85,8 +85,7 @@ implements OnInit {
 
   guardarConfiguracion(): void {
 
-    const correo =
-      localStorage.getItem('correo');
+   
 
     const body = {
 

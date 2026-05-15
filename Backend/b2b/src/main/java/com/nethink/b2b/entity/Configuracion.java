@@ -4,6 +4,7 @@
  */
 package com.nethink.b2b.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,6 +27,11 @@ public class Configuracion {
 
     private String valor;
     
+    
+
+    
+    private String tipo;
+    
    
 
     public Integer getId() {
@@ -40,7 +46,9 @@ public class Configuracion {
         return valor;
     }
 
- 
+   public String getTipo(){
+       return tipo;
+   }
 
     public void setId(Integer id) {
         this.id = id;
@@ -52,5 +60,9 @@ public class Configuracion {
 
     public void setValor(String valor) {
         this.valor = valor;
+    }
+    
+    public void setTipo(String  tipo){
+        this.tipo = tipo;
     }
 }
