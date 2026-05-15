@@ -19,9 +19,7 @@ public class ConfiguracionController {
     @Autowired
     private ConfigService service;
 
-    // =========================
-    // LISTAR CONFIGURACIONES
-    // =========================
+
     @GetMapping
     public ResponseEntity<List<ConfiguracionResponse>> listar() {
 
@@ -30,9 +28,7 @@ public class ConfiguracionController {
         );
     }
 
-    // =========================
-    // OBTENER POR CLAVE
-    // =========================
+
     @GetMapping("/{clave}")
     public String get(@PathVariable String clave) {
 

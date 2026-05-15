@@ -73,7 +73,7 @@ public class ConfigService {
     repo.save(config);
 }
     
-    public String probarConexion(Integer id) {
+   public String probarConexion(Integer id) {
 
     Configuracion config =
             repo.findById(id)
@@ -89,7 +89,6 @@ public class ConfigService {
 
         org.springframework.http.ResponseEntity<String> response;
 
-    
         if (
             tipo.equals("API")
             || tipo.equals("IA")
@@ -102,10 +101,7 @@ public class ConfigService {
                     String.class
             );
 
-        }
-
-       
-        else if (
+        } else if (
             tipo.equals("URL")
         ) {
 
@@ -114,21 +110,38 @@ public class ConfigService {
                     String.class
             );
 
-        }
+        } else {
 
-        // No testeable
-        else {
+            config.setEstado("INACTIVO");
+
+            repo.save(config);
 
             return "NO_TESTEABLE";
         }
 
-        if (response.getStatusCode().is2xxSuccessful()) {
+        int status =
+                response.getStatusCode().value();
+
+        if (status >= 200 && status < 400) {
+
+            config.setEstado("ACTIVO");
+
+            repo.save(config);
+
             return "OK";
         }
+
+        config.setEstado("INACTIVO");
+
+        repo.save(config);
 
         return "ERROR";
 
     } catch (Exception e) {
+
+        config.setEstado("INACTIVO");
+
+        repo.save(config);
 
         return "ERROR";
     }

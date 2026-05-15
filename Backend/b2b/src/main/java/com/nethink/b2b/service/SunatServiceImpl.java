@@ -7,14 +7,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class SunatServiceImpl implements SunatService {
 
     private final RestTemplate restTemplate;
+    @Autowired
+    private  ConfigService configService;
 
-    @Value("${decolecta.api.token}")
-    private String token;
+  
+    
 
     public SunatServiceImpl(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -22,12 +25,14 @@ public class SunatServiceImpl implements SunatService {
 
     @Override
     public SunatResponse consultarRuc(String ruc) {
+        
+        String apiKey = configService.getValor("DECOLECTA_API_TOKEN");
 
         String url = "https://api.decolecta.com/v1/sunat/ruc?numero=" + ruc;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(token);
+        headers.setBearerAuth(apiKey);
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 

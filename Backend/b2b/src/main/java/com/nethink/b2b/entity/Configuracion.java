@@ -32,6 +32,8 @@ public class Configuracion {
     
     private String tipo;
     
+    private String estado;
+    
    
 
     public Integer getId() {
@@ -49,6 +51,10 @@ public class Configuracion {
    public String getTipo(){
        return tipo;
    }
+   
+   public String getEstado(){
+       return estado;
+   }
 
     public void setId(Integer id) {
         this.id = id;
@@ -64,5 +70,9 @@ public class Configuracion {
     
     public void setTipo(String  tipo){
         this.tipo = tipo;
+    }
+    
+    public void setEstado(String estado){
+        this.estado = estado;
     }
 }
