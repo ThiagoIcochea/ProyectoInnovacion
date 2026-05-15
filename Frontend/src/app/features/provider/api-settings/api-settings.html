@@ -1,176 +1,81 @@
 <div class="api-settings-page">
-
   <div class="page-header">
     <div>
       <span>Integración</span>
       <h1>Configuración API</h1>
-      <p>
-        Conecta tu inventario para sincronizar catálogo,
-        stock y precios en tiempo real.
-      </p>
+      <p>Conecta tu inventario para sincronizar catálogo, stock y precios en tiempo real.</p>
     </div>
 
-    <div
-      class="status-pill"
-      [class.text-warning]="config.estadoConexion === 'ERROR'"
-    >
-      {{
-        config.estadoConexion === 'OK'
-          ? 'API conectada'
-          : 'API con errores'
-      }}
-    </div>
+    <div class="status-pill">API conectada</div>
   </div>
 
   <div class="api-grid">
-
     <section class="api-card">
-
       <h2>Credenciales de conexión</h2>
 
       <div class="form-grid">
-
         <div class="form-group">
           <label>Endpoint URL</label>
-
-          <input
-            type="text"
-            [(ngModel)]="config.apiUrl"
-          />
+          <input type="text" value="https://api.globaltech.com/v1/inventory" />
         </div>
 
         <div class="form-group">
           <label>Tipo de conexión</label>
-
-          <select [(ngModel)]="config.apiTipo">
-
-            <option value="REST">
-              REST
-            </option>
-
-            <option value="GRAPHQL">
-              GRAPHQL
-            </option>
-
+          <select>
+            <option>REST API</option>
+            <option>GraphQL</option>
+            <option>Webhook</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label>API Key / Token</label>
-
-          <input
-            type="password"
-            [(ngModel)]="config.apiToken"
-          />
+          <label>Puerto</label>
+          <input type="text" value="443" />
         </div>
 
         <div class="form-group">
-          <label>Estado proveedor</label>
-
-          <input
-            type="text"
-            [value]="config.estadoProveedor"
-            disabled
-          />
+          <label>API Key / Token</label>
+          <input type="password" value="12345678901234567890" />
         </div>
-
       </div>
 
       <div class="actions">
-
-        <button
-          class="btn-secondary"
-          (click)="probarConexion()"
-        >
-          Probar conexión
-        </button>
-
-        <button
-          class="btn-primary"
-          (click)="guardarConfiguracion()"
-        >
-          Guardar configuración
-        </button>
-
+        <button class="btn-secondary">Probar conexión</button>
+        <button class="btn-primary">Guardar configuración</button>
       </div>
-
     </section>
 
     <aside class="sync-card">
-
       <h2>Estado de sincronización</h2>
 
       <div class="sync-status">
-
-        <div class="sync-icon">
-          {{
-            config.estadoConexion === 'OK'
-              ? '✓'
-              : '!'
-          }}
-        </div>
-
+        <div class="sync-icon">✓</div>
         <div>
-
-          <strong>
-            {{
-              config.estadoConexion === 'OK'
-                ? 'Sincronización activa'
-                : 'Sincronización con errores'
-            }}
-          </strong>
-
-          <span>
-            Última actualización:
-            {{ config.fechaUltimaConexion || '-' }}
-          </span>
-
+          <strong>Sincronización activa</strong>
+          <span>Última actualización: hoy, 09:45 AM</span>
         </div>
       </div>
 
       <div class="sync-list">
-
         <div>
-          <span>Endpoint</span>
-          <strong>
-            {{ config.endpoint || '-' }}
-          </strong>
+          <span>Productos sincronizados</span>
+          <strong>128</strong>
         </div>
 
         <div>
-          <span>Método HTTP</span>
-          <strong>
-            {{ config.metodoHttp || '-' }}
-          </strong>
+          <span>Stock actualizado</span>
+          <strong>96%</strong>
         </div>
 
         <div>
-          <span>Código respuesta</span>
-
-          <strong
-            [class.text-warning]="config.estadoConexion === 'ERROR'"
-          >
-            {{ config.codigoRespuesta || '-' }}
-          </strong>
+          <span>Errores recientes</span>
+          <strong class="text-warning">02</strong>
         </div>
-
-        <div>
-          <span>Tiempo respuesta</span>
-          <strong>
-            {{ config.tiempoRespuestaMs || 0 }} ms
-          </strong>
-        </div>
-
       </div>
 
       <div class="info-box">
-
-        {{ config.descripcion || 'Sin información reciente.' }}
-
+        NetProcure consultará esta API para validar disponibilidad antes de mostrarte como proveedor compatible.
       </div>
-
     </aside>
-
   </div>
-
 </div>

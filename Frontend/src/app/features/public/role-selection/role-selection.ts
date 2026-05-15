@@ -24,4 +24,10 @@ export class RoleSelectionComponent {
       route: '/register-provider'
     }
   ];
+
+  selectedRole = this.roles[0];
+
+  seleccionarRol(role: (typeof this.roles)[number]): void {
+    this.selectedRole = role;
+  }
 }

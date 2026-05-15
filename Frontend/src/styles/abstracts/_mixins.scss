@@ -1,3 +1,7 @@
+@use './colors' as *;
+@use './radius' as *;
+@use './shadows' as *;
+
 @mixin card {
   background: $bg-card;
   border: 1px solid $border;

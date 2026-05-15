@@ -57,19 +57,6 @@
 }
 
 .avatar-container {
-  width: 85px;
-  height: 85px;
-}
-
-.avatar-image {
-  width: 85px;
-  height: 85px;
-  border-radius: 12px;
-  object-fit: cover;
-  display: block;
-}
-
-.avatar-container {
   width: 120px;
   height: 120px;
   border-radius: 50%;
@@ -138,6 +125,26 @@
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
     }
   }
+
+  textarea,
+  select {
+    border-radius: 12px;
+    border: 1px solid #374151;
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 0.85rem 1rem;
+    outline: none;
+
+    &:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+    }
+  }
+
+  textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
 }
 
 .btn-primary {
@@ -184,6 +191,10 @@
   input {
     accent-color: #3b82f6;
   }
+}
+
+.profile-header .avatar-container {
+  flex-shrink: 0;
 }
 
 @media (max-width: 1100px) {

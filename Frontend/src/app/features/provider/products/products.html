@@ -12,31 +12,24 @@
   <div class="summary-grid">
     <div class="summary-card">
       <span>Productos activos</span>
-      <strong>{{ activos }}</strong>
+      <strong>128</strong>
     </div>
 
     <div class="summary-card">
       <span>Con stock disponible</span>
-      <strong>{{ stockDisponibleCount }}</strong>
+      <strong>96</strong>
     </div>
 
     <div class="summary-card">
       <span>Bajo stock</span>
-      <strong>{{ bajoStockCount }}</strong>
+      <strong>12</strong>
     </div>
   </div>
 
   <section class="products-card">
     <div class="products-card__header">
       <h2>Inventario conectado</h2>
-
-      <input
-        type="text"
-        class="search-box"
-        placeholder="Buscar por SKU, producto o categoría..."
-        [(ngModel)]="search"
-        (input)="filtrarProductos()"
-      />
+      <div class="search-box">Buscar por SKU, producto o categoría...</div>
     </div>
 
     <div class="products-table">
@@ -46,46 +39,23 @@
         <div>Categoría</div>
         <div>Stock</div>
         <div>Precio</div>
-        <div>Descuento</div>
-        <div>Volumen</div>
         <div>Estado</div>
+        <div>Acción</div>
       </div>
 
-      <div class="products-table__row" *ngFor="let p of filteredProducts">
-        <div class="sku">{{ p.skuGlobal }}</div>
-        <div>{{ p.nombre }}</div>
-        <div>{{ p.categoria }}</div>
-        <div>{{ p.stock }}</div>
-
-        <div>S/ {{ p.precio | number:'1.2-2' }}</div>
-
+      <div class="products-table__row" *ngFor="let product of products">
+        <div class="sku">{{ product.sku }}</div>
+        <div>{{ product.name }}</div>
+        <div>{{ product.category }}</div>
+        <div>{{ product.stock }}</div>
+        <div>{{ product.price }}</div>
         <div>
-          <span *ngIf="p.porcentajeDescuento > 0">
-            {{ p.porcentajeDescuento }}%
-          </span>
-
-          <span *ngIf="!p.porcentajeDescuento || p.porcentajeDescuento == 0">
-            -
+          <span class="status" [class.warning]="product.status === 'Bajo stock'">
+            {{ product.status }}
           </span>
         </div>
-
         <div>
-          <div *ngIf="p.descuentosVolumen?.length > 0">
-            <div *ngFor="let d of p.descuentosVolumen">
-              {{ d.cantidadMin }}+ → S/ {{ d.precioUnitario }}
-            </div>
-          </div>
-
-          <span *ngIf="!p.descuentosVolumen?.length">-</span>
-        </div>
-
-        <div>
-          <span
-            class="status"
-            [class.warning]="p.stock < 10"
-          >
-            {{ p.stock < 10 ? 'Bajo stock' : 'Activo' }}
-          </span>
+          <button class="btn-secondary">Editar</button>
         </div>
       </div>
     </div>

@@ -25,6 +25,8 @@
     font-weight: 600;
     color: #60a5fa;
     font-size: 1.05rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   h1 {
@@ -48,6 +50,7 @@
 }
 
 .role-card {
+  appearance: none;
   background: #1e293b;
   border: 1px solid #374151;
   border-radius: 16px;
@@ -58,12 +61,24 @@
   flex-direction: column;
   gap: 1rem;
   transition: all 0.25s ease;
+  text-align: left;
+
+  &:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 3px;
+  }
 
   &:hover {
     background: #273449;
     transform: translateY(-4px);
     border-color: #3b82f6;
     box-shadow: 0 10px 30px rgba(2, 6, 23, 0.4);
+  }
+
+  &.is-selected {
+    border-color: #60a5fa;
+    background: rgba(59, 130, 246, 0.16);
+    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.35);
   }
 
   h3 {
@@ -88,6 +103,24 @@
   margin-top: auto;
   color: #60a5fa;
   font-weight: 600;
+}
+
+.role-continue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  background: #3b82f6;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 800;
+  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.28);
+
+  &:hover {
+    background: #2563eb;
+  }
 }
 
 @media (max-width: 900px) {

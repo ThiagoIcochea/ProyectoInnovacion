@@ -3,7 +3,7 @@
   <div class="page-header">
     <div>
       <h1>{{ usuario.nombres }} {{ usuario.apellidos }}</h1>
-      <p>Administra la información de tu cuenta</p>
+      <p>Administra la información de tu cuenta · {{ rolTexto }}</p>
     </div>
   </div>
 
@@ -19,6 +19,8 @@
             *ngIf="previewFoto"
             [src]="previewFoto"
             class="avatar-image"
+            (error)="onImageError()"
+            alt="Foto de perfil"
           >
 
           <div *ngIf="!previewFoto" class="avatar">
@@ -30,71 +32,73 @@
       </div>
 
       <div class="form-group full">
-        <label>Foto de perfil</label>
+        <label for="modoImagen">Foto de perfil</label>
 
-        <select [(ngModel)]="modoImagen">
+        <select id="modoImagen" [(ngModel)]="modoImagen" aria-label="Foto de perfil">
           <option value="archivo">Subir desde mi computadora</option>
           <option value="url">Usar URL de imagen</option>
         </select>
       </div>
 
       <div class="form-group full" *ngIf="modoImagen === 'archivo'">
-        <input type="file" accept="image/*" (change)="seleccionarFoto($event)">
+        <input type="file" accept="image/*" (change)="seleccionarFoto($event)" aria-label="Seleccionar foto de perfil">
       </div>
 
       <div class="form-group full" *ngIf="modoImagen === 'url'">
         <input
+          id="fotoUrl"
           type="text"
           placeholder="https://..."
           [(ngModel)]="fotoUrl"
+          aria-label="URL de foto de perfil"
         >
       </div>
 
       <div class="form-grid">
 
         <div class="form-group">
-          <label>Nombres</label>
-          <input type="text" [(ngModel)]="usuario.nombres">
+          <label for="nombres">Nombres</label>
+          <input id="nombres" type="text" [(ngModel)]="usuario.nombres" aria-label="Nombres">
         </div>
 
         <div class="form-group">
-          <label>Apellidos</label>
-          <input type="text" [(ngModel)]="usuario.apellidos">
+          <label for="apellidos">Apellidos</label>
+          <input id="apellidos" type="text" [(ngModel)]="usuario.apellidos" aria-label="Apellidos">
         </div>
 
         <div class="form-group">
-          <label>Correo</label>
-          <input type="email" [(ngModel)]="usuario.correo">
+          <label for="correo">Correo</label>
+          <input id="correo" type="email" [(ngModel)]="usuario.correo" aria-label="Correo electrónico">
         </div>
 
         <div class="form-group">
-          <label>Teléfono</label>
-          <input type="text" [(ngModel)]="usuario.telefono">
+          <label for="telefono">Teléfono</label>
+          <input id="telefono" type="text" [(ngModel)]="usuario.telefono" aria-label="Teléfono">
         </div>
 
         <div class="form-group">
-          <label>WhatsApp</label>
-          <input type="text" [(ngModel)]="usuario.whatsapp">
+          <label for="whatsapp">WhatsApp</label>
+          <input id="whatsapp" type="text" [(ngModel)]="usuario.whatsapp" aria-label="WhatsApp">
         </div>
 
         <div class="form-group full">
-          <label>Dirección</label>
-          <input type="text" [(ngModel)]="usuario.direccion">
+          <label for="direccion">Dirección</label>
+          <input id="direccion" type="text" [(ngModel)]="usuario.direccion" aria-label="Dirección">
         </div>
 
-        <div class="form-group" *ngIf="usuario.rol === 'PROVEEDOR'">
-          <label>Razón Social</label>
-          <input type="text" [(ngModel)]="usuario.razonSocial">
+        <div class="form-group" *ngIf="esProveedor">
+          <label for="razonSocial">Razón Social</label>
+          <input id="razonSocial" type="text" [(ngModel)]="usuario.razonSocial" aria-label="Razón social">
         </div>
 
-        <div class="form-group" *ngIf="usuario.rol === 'PROVEEDOR'">
-          <label>RUC</label>
-          <input type="text" [(ngModel)]="usuario.ruc">
+        <div class="form-group" *ngIf="esProveedor">
+          <label for="ruc">RUC</label>
+          <input id="ruc" type="text" [(ngModel)]="usuario.ruc" aria-label="RUC">
         </div>
 
-        <div class="form-group full" *ngIf="usuario.rol === 'PROVEEDOR'">
-          <label>Descripción</label>
-          <textarea rows="4" [(ngModel)]="usuario.descripcion"></textarea>
+        <div class="form-group full" *ngIf="esProveedor">
+          <label for="descripcion">Descripción</label>
+          <textarea id="descripcion" rows="4" [(ngModel)]="usuario.descripcion" aria-label="Descripción"></textarea>
         </div>
 
       </div>
@@ -115,7 +119,7 @@
           <span>Recibir alertas de cotizaciones y estados</span>
         </div>
 
-        <input type="checkbox" [(ngModel)]="usuario.preferencias.notificaciones">
+        <input type="checkbox" [(ngModel)]="usuario.preferencias.notificaciones" aria-label="Notificaciones RFQ">
       </div>
 
       <div class="setting-row">
@@ -124,7 +128,7 @@
           <span>Priorizar proveedores con menor tiempo</span>
         </div>
 
-        <input type="checkbox" [(ngModel)]="usuario.preferencias.entregaRapida">
+        <input type="checkbox" [(ngModel)]="usuario.preferencias.entregaRapida" aria-label="Entrega rápida">
       </div>
 
     </aside>

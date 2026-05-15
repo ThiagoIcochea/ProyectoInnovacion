@@ -1,7 +1,8 @@
 .catalog-page {
   display: grid;
-  grid-template-columns: 250px 1fr 330px;
+  grid-template-columns: minmax(240px, 250px) minmax(0, 1fr) minmax(300px, 330px);
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .filters-panel,
@@ -15,6 +16,13 @@
 .filters-panel {
   padding: 1.25rem;
   align-self: start;
+  min-width: 0;
+}
+
+.filter-header h3,
+.catalog-header h1,
+.request-panel__header h2 {
+  overflow-wrap: anywhere;
 }
 
 .filter-section {
@@ -61,6 +69,27 @@
   }
 }
 
+.category-item-group {
+  margin-bottom: 0.9rem;
+}
+
+.specs-inline-input {
+  margin-left: 0.25rem;
+  margin-bottom: 0.85rem;
+}
+
+.mini-input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #374151;
+  background: #0f172a;
+  color: #e5e7eb;
+  padding: 0 0.85rem;
+  outline: none;
+}
+
 .price-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -86,6 +115,23 @@
   color: #e5e7eb;
   border-radius: 10px;
   cursor: pointer;
+}
+
+.price-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+
+  input {
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid #374151;
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 0 0.8rem;
+    outline: none;
+    min-width: 0;
+  }
 }
 
 .catalog-content {
@@ -132,13 +178,14 @@
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.25rem;
 }
 
 .product-card {
   overflow: hidden;
   transition: 0.2s ease;
+  min-width: 0;
 
   &:hover {
     background: #273449;
@@ -163,6 +210,7 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
 
   span {
     color: #9ca3af;
@@ -185,6 +233,7 @@
   color: #e5e7eb;
   margin: 0.75rem 0 0.35rem;
   font-size: 1.05rem;
+  overflow-wrap: anywhere;
 }
 
 .product-card p {
@@ -194,10 +243,32 @@
   font-size: 0.9rem;
 }
 
+.specs-mini-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.75rem 0;
+}
+
+.spec-pill {
+  display: inline-flex;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.12);
+  color: #bfdbfe;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.description {
+  overflow-wrap: anywhere;
+}
+
 .product-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 
   span {
     color: #9ca3af;
@@ -221,6 +292,7 @@
   position: sticky;
   top: 96px;
   padding: 1.25rem;
+  min-width: 0;
 }
 
 .request-panel__header {
@@ -258,6 +330,7 @@
   background: #111827;
   border: 1px solid #374151;
   border-radius: 14px;
+  min-width: 0;
 }
 
 .request-thumb {
@@ -272,14 +345,63 @@
 }
 
 .request-info {
+  min-width: 0;
+
   strong {
     color: #e5e7eb;
     display: block;
+    overflow-wrap: anywhere;
   }
 
   small {
     color: #9ca3af;
   }
+}
+
+.request-top {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.btn-remove {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.12);
+  color: #fecaca;
+  cursor: pointer;
+}
+
+.request-config {
+  margin: 1.25rem 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.config-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+
+  label {
+    color: #e5e7eb;
+    font-weight: 700;
+  }
+}
+
+.priority-select {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #374151;
+  background: #0f172a;
+  color: #e5e7eb;
+  padding: 0 0.8rem;
+  outline: none;
 }
 
 .qty-row {
@@ -369,5 +491,54 @@
 
   .product-grid {
     grid-template-columns: 1fr;
+  }
+
+  .price-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .request-top {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 900px) {
+  .catalog-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-card {
+    min-width: 0;
+  }
+
+  .product-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .catalog-content,
+  .filters-panel,
+  .request-panel {
+    padding-inline: 0;
+  }
+
+  .check-row {
+    grid-template-columns: auto 1fr;
+  }
+
+  .product-body {
+    padding: 0.9rem;
+  }
+
+  .media-frame--product {
+    aspect-ratio: 16 / 11;
   }
 }

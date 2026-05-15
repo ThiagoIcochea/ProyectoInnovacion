@@ -2,7 +2,9 @@
   min-height: 100vh;
   display: grid;
   grid-template-columns: 280px 1fr;
-  background: #0f172a;
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 28%),
+    linear-gradient(180deg, #0b1120 0%, #0f172a 100%);
   color: #e5e7eb;
 }
 
@@ -10,6 +12,9 @@
   background: #111827;
   border-right: 1px solid #374151;
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .sidebar__brand {
@@ -31,19 +36,26 @@
 }
 
 .sidebar__logo {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
-  background: #3b82f6;
+  background: linear-gradient(135deg, #2563eb, #38bdf8);
   display: grid;
   place-items: center;
   font-weight: 700;
+  color: #eff6ff;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
 }
 
 .sidebar__nav {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
+  flex: 1;
 }
 
 .sidebar__link {
@@ -76,15 +88,53 @@
 .topbar {
   height: 76px;
   border-bottom: 1px solid #374151;
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(15, 23, 42, 0.92);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2rem;
+  gap: 1rem;
+}
+
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 0;
+
+  strong {
+    display: block;
+    color: #f8fafc;
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+
+  span {
+    display: block;
+    color: #93c5fd;
+    font-size: 0.78rem;
+  }
+}
+
+.topbar__brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(56, 189, 248, 0.9));
+  color: #eff6ff;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
 }
 
 .topbar__search {
-  width: 420px;
+  width: min(420px, 100%);
+  flex: 1;
   height: 42px;
   border-radius: 10px;
   background: #1e293b;
@@ -99,6 +149,7 @@
   display: flex;
   align-items: center;
   gap: 0.9rem;
+  margin-left: auto;
 
   strong {
     display: block;
@@ -158,9 +209,12 @@
 
 .app-main {
   padding: 2rem;
+  min-width: 0;
 }
 
-
+.app-main > * {
+  min-width: 0;
+}
 
 .sidebar__badge {
   width: fit-content;
@@ -205,20 +259,107 @@
   font-size: 0.85rem;
 }
 
-.api-pill.api-pill--ok {
-  background: rgba(34, 197, 94, 0.14);
-  border: 1px solid rgba(34, 197, 94, 0.22);
-  color: #22c55e;
-}
-
-.api-pill.api-pill--error {
-  background: rgba(239, 68, 68, 0.14);
-  border: 1px solid rgba(239, 68, 68, 0.22);
-  color: #f87171;
-}
-
 .sidebar__badge--admin {
   background: rgba(239, 68, 68, 0.14);
   color: #f87171;
   border: 1px solid rgba(239, 68, 68, 0.22);
+}
+
+.sidebar__footer {
+  margin-top: auto;
+  padding-top: 1.25rem;
+}
+
+.sidebar__logout {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.1);
+  color: #fecaca;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  font-weight: 800;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.16);
+  }
+}
+
+.sidebar__logout-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (max-width: 1100px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    min-height: initial;
+  }
+
+  .topbar {
+    height: auto;
+    padding: 1rem 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .topbar__brand,
+  .topbar__search,
+  .topbar__user {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    padding: 1rem;
+  }
+
+  .topbar {
+    padding: 0.85rem 1rem;
+  }
+
+  .app-main {
+    padding: 1rem;
+  }
+
+  .topbar__search {
+    display: none;
+  }
+
+  .topbar__brand strong {
+    font-size: 0.98rem;
+  }
+
+  .sidebar__link {
+    padding: 0.8rem 0.9rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .sidebar__brand,
+  .topbar__brand,
+  .topbar__user {
+    gap: 0.65rem;
+  }
+
+  .sidebar__nav {
+    gap: 0.4rem;
+  }
+
+  .sidebar__logout {
+    height: 42px;
+  }
 }

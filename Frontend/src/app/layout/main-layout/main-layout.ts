@@ -38,11 +38,6 @@ export class MainLayoutComponent implements OnInit {
     fotoPerfil: ''
   };
 
-  estadoApi: string = 'Desconectada';
-
-  private API_URL =
-  'https://proyectoinnovacion.onrender.com/api/proveedor-api';
-
   constructor(
     public router: Router,
     private http: HttpClient,
@@ -51,9 +46,6 @@ export class MainLayoutComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarPerfil();
-  if (this.isProvider) {
-    this.cargarEstadoApi();
-  }
   }
 
   get isAdmin(): boolean {
@@ -78,15 +70,30 @@ export class MainLayoutComponent implements OnInit {
 
   get nombreRol(): string {
 
-    if (this.usuario?.rol === 'ADMIN') {
+    const rol = (this.usuario?.rol || localStorage.getItem('rol') || '').toUpperCase();
+
+    if (rol === 'ADMIN') {
       return 'Administrador';
     }
 
-    if (this.usuario?.rol === 'PROVEEDOR') {
+    if (rol === 'PROVEEDOR') {
       return 'Proveedor';
     }
 
     return 'Cliente';
+  }
+
+  get panelActual(): string {
+
+    if (this.isAdmin) {
+      return 'Panel Administrativo';
+    }
+
+    if (this.isProvider) {
+      return 'Panel Proveedor';
+    }
+
+    return 'Panel Cliente';
   }
 
   get fotoPerfil(): string {
@@ -121,6 +128,17 @@ export class MainLayoutComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  logout(): void {
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('rol');
+    localStorage.removeItem('rfq_cart');
+    localStorage.removeItem('selected_provider');
+    localStorage.removeItem('current_solicitud_id');
+
+    this.router.navigate(['/login']);
+  }
+
   private headers(): HttpHeaders {
 
     return new HttpHeaders({
@@ -150,34 +168,4 @@ export class MainLayoutComponent implements OnInit {
       }
     });
   }
-
-  cargarEstadoApi(): void {
-
-  this.http.get<any>(
-    this.API_URL,
-    {
-      headers: this.headers()
-    }
-  )
-  .subscribe({
-
-    next: (res) => {
-
-      this.estadoApi =
-        res.estadoConexion || 'Desconectada';
-
-      this.cdr.detectChanges();
-    },
-
-    error: (err) => {
-
-      console.error(
-        'Error obteniendo estado API',
-        err
-      );
-
-      this.estadoApi = 'Desconectada';
-    }
-  });
-}
 }

@@ -51,6 +51,25 @@ export class ProfileComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
+  get esProveedor(): boolean {
+    return (this.usuario.rol || localStorage.getItem('rol') || '').toUpperCase() === 'PROVEEDOR';
+  }
+
+  get rolTexto(): string {
+
+    const rol = (this.usuario.rol || localStorage.getItem('rol') || '').toUpperCase();
+
+    if (rol === 'ADMIN') {
+      return 'Administrador';
+    }
+
+    if (rol === 'PROVEEDOR') {
+      return 'Proveedor';
+    }
+
+    return 'Cliente';
+  }
+
   ngOnInit(): void {
     this.cargarPerfil();
   }
@@ -171,7 +190,7 @@ export class ProfileComponent implements OnInit {
       String(this.usuario.preferencias.entregaRapida)
     );
 
-    if (this.usuario.rol === 'PROVEEDOR') {
+    if (this.esProveedor) {
 
       formData.append(
         'razonSocial',

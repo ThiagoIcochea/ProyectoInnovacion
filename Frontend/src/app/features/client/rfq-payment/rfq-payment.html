@@ -21,6 +21,7 @@
           [(ngModel)]="direccionEntrega"
           placeholder="Ubicación detectada automáticamente"
           class="full-input"
+          aria-label="Ubicación de entrega"
           readonly
         >
 
@@ -61,18 +62,18 @@
         <h3>3. Datos de la Operación</h3>
 
         <div class="form-row">
-          <label>Nro. de Operación:</label>
-          <input type="text" [(ngModel)]="codigoOperacion">
+          <label for="codigoOperacion">Nro. de Operación:</label>
+          <input id="codigoOperacion" type="text" [(ngModel)]="codigoOperacion" aria-label="Número de operación">
         </div>
 
         <div class="form-row">
-          <label>Comprobante de pago:</label>
-          <input type="file" (change)="onFileSelected($event)" accept="image/*">
+          <label for="comprobantePago">Comprobante de pago:</label>
+          <input id="comprobantePago" type="file" (change)="onFileSelected($event)" accept="image/*" aria-label="Comprobante de pago">
         </div>
 
         <div class="preview-box" *ngIf="previewUrl">
           <p>Vista previa:</p>
-          <img [src]="previewUrl" class="voucher-preview">
+          <img [src]="previewUrl" class="voucher-preview" alt="Vista previa del comprobante de pago">
         </div>
 
       </div>
@@ -92,7 +93,7 @@
       <div class="summary-row total-big">
         <span>Total a pagar:</span>
         <strong>
-          S/ {{ totalSolicitud || provider?.totalCotizacion || 0 | number:'1.2-2' }}
+          S/ {{ (totalSolicitud || provider?.totalCotizacion || 0) | number:'1.2-2' }}
         </strong>
       </div>
 

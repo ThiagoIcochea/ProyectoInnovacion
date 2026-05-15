@@ -10,8 +10,12 @@
           <small>{{ cat.cantidad }}</small>
         </label>
         <div class="specs-inline-input" *ngIf="selectedCategories.includes(cat.id)">
-          <input type="text" [(ngModel)]="specsPorCategoria[cat.id]" 
-                 placeholder="Espec. para {{cat.nombre}}..." class="mini-input">
+          <input
+            type="text"
+            [(ngModel)]="specsPorCategoria[cat.id]"
+            [attr.aria-label]="'Especificación para ' + cat.nombre"
+            placeholder="Espec. para {{cat.nombre}}..."
+            class="mini-input">
         </div>
       </div>
     </div>
@@ -37,8 +41,14 @@
 
     <div class="product-grid">
       <div class="product-card" *ngFor="let product of paginatedProducts">
-        <div class="product-image-container">
-          <img [src]="product.imagenes?.[0]?.url || 'assets/no-image.png'" class="product-img">
+        <div class="media-frame media-frame--product">
+          <img
+            [src]="product.imagenes?.[0]?.url || '/no-image.svg'"
+            alt="Imagen de producto"
+            title="Imagen de producto"
+            class="media-frame__img"
+            loading="lazy"
+            decoding="async">
         </div>
         <div class="product-body">
           <div class="product-meta">
@@ -93,8 +103,8 @@
 
     <div class="request-config">
       <div class="config-item">
-        <label>Prioridad:</label>
-        <select [(ngModel)]="prioridad" class="priority-select">
+        <label for="prioridad">Prioridad:</label>
+        <select id="prioridad" [(ngModel)]="prioridad" class="priority-select" aria-label="Prioridad de búsqueda">
           <option value="BALANCEADO">Balanceado</option>
           <option value="PRECIO">Precio</option>
           <option value="TIEMPO">Tiempo</option>
@@ -105,8 +115,8 @@
       <div class="config-item">
         <label>Presupuesto:</label>
         <div class="price-inputs">
-          <input type="number" [(ngModel)]="precioMin" placeholder="Min">
-          <input type="number" [(ngModel)]="precioMax" placeholder="Max">
+          <input type="number" [(ngModel)]="precioMin" placeholder="Min" aria-label="Presupuesto mínimo">
+          <input type="number" [(ngModel)]="precioMax" placeholder="Max" aria-label="Presupuesto máximo">
         </div>
       </div>
     </div>

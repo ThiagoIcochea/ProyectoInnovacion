@@ -74,21 +74,19 @@
             <strong>S/ {{ tracking.total }}</strong>
           </div>
 
-     <div *ngIf="tracking">
+          <div>
+            <span>Empresa</span>
+            <strong>
+              {{ tracking.empresaCompradora?.razonSocial || 'Sin nombre' }}
+            </strong>
+          </div>
 
-  <div>
-    <span>Empresa</span>
-    <strong>
-      {{ tracking.empresaCompradora?.razonSocial || 'Sin nombre' }}
-    </strong>
-
-    <span>RUC</span>
-    <strong>
-      {{ tracking.empresaCompradora?.ruc || 'Sin RUC' }}
-    </strong>
-  </div>
-
-</div>
+          <div>
+            <span>RUC</span>
+            <strong>
+              {{ tracking.empresaCompradora?.ruc || 'Sin RUC' }}
+            </strong>
+          </div>
 
           <div>
             <span>Entrega</span>
@@ -109,6 +107,12 @@
             </strong>
           </div>
 
+        </div>
+
+        <div class="delivery-code-card" *ngIf="tracking.estado !== 'Pago pendiente'">
+          <span>Código de recepción</span>
+          <strong>{{ tracking.codigoRecepcion || 'Pendiente' }}</strong>
+          <p>Usa este código para verificar la entrega una vez que el pedido llegue a destino.</p>
         </div>
 
         <div class="actions-box" *ngIf="tracking.estado === 'Pago pendiente'">

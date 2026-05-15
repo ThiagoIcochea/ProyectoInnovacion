@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .page-title {
@@ -66,6 +67,7 @@
   grid-template-columns: auto 1fr auto;
   gap: 1rem;
   align-items: center;
+  min-width: 0;
 }
 
 .supplier-icon {
@@ -80,9 +82,12 @@
 }
 
 .supplier-info {
+  min-width: 0;
+
   h2 {
     color: #e5e7eb;
     margin: 0 0 0.35rem;
+    overflow-wrap: anywhere;
   }
 
   p {
@@ -130,6 +135,7 @@
 .summary-card,
 .terms-card {
   padding: 1.5rem;
+  min-width: 0;
 }
 
 .card-header {
@@ -175,16 +181,19 @@
   padding: 1rem;
   border-bottom: 1px solid rgba(55, 65, 81, 0.6);
   color: #e5e7eb;
+  min-width: 0;
 }
 
 .product-cell {
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  min-width: 0;
 
   strong {
     display: block;
     color: #e5e7eb;
+    overflow-wrap: anywhere;
   }
 
   span {
@@ -255,6 +264,7 @@
   strong {
     color: #e5e7eb;
     text-align: right;
+    word-break: break-word;
   }
 }
 
@@ -360,5 +370,6 @@
     border: 1px solid #334155;
     border-radius: 12px;
     margin-bottom: 1rem;
+    padding: 1rem;
   }
 }

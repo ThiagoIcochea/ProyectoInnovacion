@@ -34,72 +34,72 @@
 
         <div class="form-grid form-grid--2">
           <div class="form-group">
-            <label>Nombres</label>
-            <input type="text" [(ngModel)]="nombres" name="nombres"/>
+            <label for="nombres">Nombres</label>
+            <input id="nombres" type="text" [(ngModel)]="nombres" name="nombres" title="Nombres" aria-label="Nombres"/>
           </div>
 
           <div class="form-group">
-            <label>Apellidos</label>
-            <input type="text" [(ngModel)]="apellidos" name="apellidos"/>
+            <label for="apellidos">Apellidos</label>
+            <input id="apellidos" type="text" [(ngModel)]="apellidos" name="apellidos" title="Apellidos" aria-label="Apellidos"/>
           </div>
         </div>
 
         <div class="form-group">
-          <label>Correo</label>
-          <input type="email" [(ngModel)]="correo" name="correo"/>
+          <label for="correo">Correo</label>
+          <input id="correo" type="email" [(ngModel)]="correo" name="correo" title="Correo" aria-label="Correo"/>
         </div>
 
         <div class="form-grid form-grid--2">
           <div class="form-group">
-            <label>Contraseña</label>
-            <input type="password" [(ngModel)]="password" name="password"/>
+            <label for="password">Contraseña</label>
+            <input id="password" type="password" [(ngModel)]="password" name="password" title="Contraseña" aria-label="Contraseña"/>
           </div>
 
           <div class="form-group">
-            <label>WhatsApp</label>
-            <input type="text" [(ngModel)]="whatsapp" name="whatsapp"/>
+            <label for="whatsapp">WhatsApp</label>
+            <input id="whatsapp" type="text" [(ngModel)]="whatsapp" name="whatsapp" title="WhatsApp" aria-label="WhatsApp"/>
           </div>
         </div>
 
         <div class="form-group">
-          <label>Teléfono</label>
-          <input type="text" [(ngModel)]="telefono" name="telefono"/>
+          <label for="telefono">Teléfono</label>
+          <input id="telefono" type="text" [(ngModel)]="telefono" name="telefono" title="Teléfono" aria-label="Teléfono"/>
         </div>
 
         <div class="form-group">
-          <label>Dirección</label>
-          <input type="text" [(ngModel)]="direccion" name="direccion"/>
+          <label for="direccion">Dirección</label>
+          <input id="direccion" type="text" [(ngModel)]="direccion" name="direccion" title="Dirección" aria-label="Dirección"/>
         </div>
 
         <div class="section-title">2. Datos de la Empresa</div>
 
         <div class="form-group">
-          <label>Razón Social</label>
-          <input type="text" [(ngModel)]="razonSocial" name="razonSocial"/>
+          <label for="razonSocial">Razón Social</label>
+          <input id="razonSocial" type="text" [(ngModel)]="razonSocial" name="razonSocial" title="Razón social" aria-label="Razón social"/>
         </div>
 
         <div class="form-grid form-grid--2">
           <div class="form-group">
-            <label>RUC</label>
-            <input type="text" [(ngModel)]="ruc" name="ruc"/>
+            <label for="ruc">RUC</label>
+            <input id="ruc" type="text" [(ngModel)]="ruc" name="ruc" title="RUC" aria-label="RUC"/>
           </div>
 
           <div class="form-group">
-            <label>Descripción</label>
-            <input type="text" [(ngModel)]="descripcion" name="descripcion"/>
+            <label for="descripcion">Descripción</label>
+            <input id="descripcion" type="text" [(ngModel)]="descripcion" name="descripcion" title="Descripción" aria-label="Descripción"/>
           </div>
         </div>
 
         <div class="section-title">3. Configuración de API</div>
 
         <div class="form-group">
-          <label>Endpoint URL</label>
-          <input type="text" [(ngModel)]="apiUrl" name="apiUrl"/>
+          <label for="apiUrl">Endpoint URL</label>
+          <input id="apiUrl" type="text" [(ngModel)]="apiUrl" name="apiUrl" title="Endpoint URL" aria-label="Endpoint URL"/>
         </div>
 
         <div class="form-group">
-          <label>Tipo de API</label>
-          <select [(ngModel)]="apiTipo" name="apiTipo">
+          <label for="apiTipo">Tipo de API</label>
+          <select id="apiTipo" [(ngModel)]="apiTipo" name="apiTipo" title="Tipo de API" aria-label="Tipo de API">
             <option value="REST">REST</option>
             <option value="GRAPHQL">GRAPHQL</option>
             <option value="WEBHOOK">WEBHOOK</option>
@@ -107,8 +107,8 @@
         </div>
 
         <div class="form-group">
-          <label>API Token</label>
-          <input type="text" [(ngModel)]="apiToken" name="apiToken"/>
+          <label for="apiToken">API Token</label>
+          <input id="apiToken" type="text" [(ngModel)]="apiToken" name="apiToken" title="API Token" aria-label="API Token"/>
         </div>
 
         <!-- ================= METODOS DE PAGO ================= -->
@@ -119,7 +119,7 @@
           Agregar método de pago
         </button>
 
-        <div *ngIf="metodosPago.length < 1" style="color:red">
+        <div *ngIf="metodosPago.length < 1" class="warning-text">
           Debes agregar al menos 1 método de pago
         </div>
 
@@ -132,8 +132,8 @@
 
             <h3>Nuevo método de pago</h3>
 
-            <label>Tipo</label>
-            <select [(ngModel)]="tipoPago" name="tipoPago">
+            <label for="tipoPago">Tipo</label>
+            <select id="tipoPago" [(ngModel)]="tipoPago" name="tipoPago" title="Tipo de pago" aria-label="Tipo de pago">
               <option value="TRANSFERENCIA">TRANSFERENCIA</option>
               <option value="DEPOSITO">DEPOSITO</option>
               <option value="YAPE">YAPE</option>
@@ -141,8 +141,8 @@
               <option value="CHEQUE">CHEQUE</option>
             </select>
 
-            <label>Entidad</label>
-            <select [(ngModel)]="entidadPago" name="entidadPago">
+            <label for="entidadPago">Entidad</label>
+            <select id="entidadPago" [(ngModel)]="entidadPago" name="entidadPago" title="Entidad de pago" aria-label="Entidad de pago">
 
               <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="BCP">BCP</option>
               <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="BBVA">BBVA</option>
@@ -157,8 +157,8 @@
 
             </select>
 
-            <label>Número de cuenta</label>
-            <input type="text" [(ngModel)]="numeroCuenta" name="numeroCuenta"/>
+            <label for="numeroCuenta">Número de cuenta</label>
+            <input id="numeroCuenta" type="text" [(ngModel)]="numeroCuenta" name="numeroCuenta" title="Número de cuenta" aria-label="Número de cuenta"/>
 
             <button type="button" (click)="addMetodoPago()">Guardar</button>
             <button type="button" (click)="closePagoModal()">Cerrar</button>
@@ -172,20 +172,29 @@
 
         <div *ngFor="let c of certificaciones">
 
-          <label>
-            <input type="checkbox" (change)="toggleCertificacion($event, c.idCertificacion)">
+          <label [attr.for]="'cert-' + c.idCertificacion">
+              <input
+              [id]="'cert-' + c.idCertificacion"
+              type="checkbox"
+              title="Seleccionar certificación"
+              aria-label="Seleccionar certificación"
+              (change)="toggleCertificacion($event, c.idCertificacion)">
             {{ c.nombre }}
           </label>
 
           <div *ngIf="selectedCerts[c.idCertificacion]">
 
-            <input type="date"
+                 <input type="date"
                    [(ngModel)]="fechaObtencionMap[c.idCertificacion]"
-                   name="fo{{c.idCertificacion}}"/>
+                   [name]="'fo' + c.idCertificacion"
+                   aria-label="Fecha de obtención"
+                   title="Fecha de obtención"/>
 
             <input type="date"
                    [(ngModel)]="fechaExpiracionMap[c.idCertificacion]"
-                   name="fe{{c.idCertificacion}}"/>
+                   [name]="'fe' + c.idCertificacion"
+                   aria-label="Fecha de expiración"
+                   title="Fecha de expiración"/>
 
           </div>
 

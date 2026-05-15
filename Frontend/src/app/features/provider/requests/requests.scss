@@ -139,6 +139,7 @@
 
 .request-detail-card {
   overflow: hidden;
+  padding-bottom: 1rem;
 }
 
 .detail-header {
@@ -175,6 +176,7 @@
   border-radius: 14px;
   display: flex;
   gap: 1rem;
+  align-items: center;
 
   h3 {
     color: #e5e7eb;
@@ -243,6 +245,7 @@
 .products-table__row {
   color: #e5e7eb;
   border-top: 1px solid rgba(55, 65, 81, 0.6);
+  align-items: start;
 
   ul {
     margin: 0;
@@ -255,6 +258,7 @@
   display: flex;
   gap: 0.8rem;
   align-items: center;
+  min-width: 0;
 
   strong {
     color: #e5e7eb;
@@ -283,34 +287,14 @@
   text-align: center;
 }
 
-.action-bar {
-  padding: 1.25rem 1.5rem;
-  border-top: 1px solid #374151;
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  background: #162033;
-}
-
-.btn-danger,
-.btn-primary {
-  height: 46px;
-  border-radius: 12px;
-  padding: 0 1.2rem;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.btn-danger {
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
-}
-
-.btn-primary {
-  background: #3b82f6;
-  border: none;
-  color: white;
+.workflow-note {
+  margin: 0 1.5rem 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.18);
+  color: #bfdbfe;
+  line-height: 1.6;
 }
 
 @media (max-width: 1200px) {
@@ -326,7 +310,7 @@
     grid-template-columns: 1fr;
   }
 
-  .action-bar {
-    flex-direction: column;
+  .workflow-note {
+    margin-inline: 1rem;
   }
 }

@@ -1,10 +1,10 @@
-@import './abstracts/colors';
-@import './abstracts/spacing';
-@import './abstracts/typography';
-@import './abstracts/radius';
-@import './abstracts/shadows';
-@import './abstracts/mixins';
+@use './abstracts/colors';
+@use './abstracts/spacing';
+@use './abstracts/typography';
+@use './abstracts/radius';
+@use './abstracts/shadows';
+@use './abstracts/mixins';
 
-@import './base/reset';
-@import './base/globals';
-@import './base/utilities';
+@use './base/reset';
+@use './base/globals';
+@use './base/utilities';

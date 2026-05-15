@@ -1,13 +1,18 @@
 <div class="app-shell">
   <aside class="sidebar">
     <div class="sidebar__brand">
-      <div class="sidebar__logo">N</div>
+      <div class="sidebar__logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+          <path d="M4 7.5L12 3l8 4.5v9L12 21l-8-4.5z" fill="currentColor" opacity="0.2"></path>
+          <path d="M7 9h10v2H7zm0 4h10v2H7z" fill="currentColor"></path>
+        </svg>
+      </div>
 
       <div>
-        <strong>NetProcure</strong>
+        <strong>Nethink S.A.C</strong>
 
         <span>
-          {{ isAdmin ? 'Panel Admin' : isProvider ? 'Proveedor B2B' : 'Cliente B2B' }}
+          {{ panelActual }}
         </span>
       </div>
     </div>
@@ -199,25 +204,46 @@
 
       </nav>
     </ng-container>
+
+    <div class="sidebar__footer">
+      <button type="button" class="sidebar__logout" (click)="logout()">
+        <span class="sidebar__logout-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+            <path d="M10 17v-2H4V9h6V7l4 5-4 5z" fill="currentColor"></path>
+            <path d="M14 5h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </span>
+        <span>Cerrar Sesión</span>
+      </button>
+    </div>
   </aside>
 
   <div class="app-content">
 
     <header class="topbar">
 
+      <div class="topbar__brand">
+        <div class="topbar__brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+            <path d="M4 7.5L12 3l8 4.5v9L12 21l-8-4.5z" fill="currentColor" opacity="0.2"></path>
+            <path d="M7 9h10v2H7zm0 4h10v2H7z" fill="currentColor"></path>
+          </svg>
+        </div>
+
+        <div>
+          <strong>Nethink S.A.C</strong>
+          <span>Gestión B2B de RFQ y operaciones</span>
+        </div>
+      </div>
+
       <div class="topbar__search">
         Buscar dentro del sistema...
       </div>
 
       <div class="topbar__actions" *ngIf="isProvider">
- <span
-  class="api-pill"
-  [class.api-pill--ok]="estadoApi === 'OK'"
-  [class.api-pill--error]="estadoApi !== 'OK'">
-
-  API {{ estadoApi }}
-
-</span>
+        <span class="api-pill">
+          API conectada
+        </span>
       </div>
 
       <div class="topbar__user">
@@ -262,6 +288,5 @@
     <main class="app-main">
       <router-outlet></router-outlet>
     </main>
-
   </div>
 </div>

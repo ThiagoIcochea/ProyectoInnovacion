@@ -1,20 +1,27 @@
 <div class="role-page">
   <div class="role-header">
-    <div class="brand">NetProcure</div>
-    <h1>Selecciona tu rol</h1>
-    <p>Elige cómo deseas registrarte dentro de la plataforma.</p>
+    <div class="brand">Nethink S.A.C</div>
+    <h1>Selecciona un único rol de acceso</h1>
+    <p>Elige cómo deseas registrarte dentro de la plataforma. El primer rol queda seleccionado por defecto.</p>
   </div>
 
   <div class="role-grid">
-    <a
+    <button
+      type="button"
       class="role-card"
       *ngFor="let role of roles"
-      [routerLink]="role.route"
+      [class.is-selected]="selectedRole.route === role.route"
+      (click)="seleccionarRol(role)"
     >
       <div class="role-card__icon">{{ role.icon }}</div>
       <h3>{{ role.title }}</h3>
       <p>{{ role.description }}</p>
-      <div class="role-card__action">Registrarme →</div>
-    </a>
+      <div class="role-card__action" *ngIf="selectedRole.route === role.route">Seleccionado</div>
+      <div class="role-card__action" *ngIf="selectedRole.route !== role.route">Elegir rol</div>
+    </button>
   </div>
+
+  <a class="role-continue" [routerLink]="selectedRole.route">
+    Continuar como {{ selectedRole.title }} →
+  </a>
 </div>
