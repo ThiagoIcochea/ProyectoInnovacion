@@ -175,10 +175,4 @@ export class RfqCatalogComponent implements OnInit {
       });
       
   }
-   // rfq-catalog.component.ts
-getImageAlt(productName: string): string {
-  return `Imagen de ${productName || 'producto'}`;
-}
-
-
 }
