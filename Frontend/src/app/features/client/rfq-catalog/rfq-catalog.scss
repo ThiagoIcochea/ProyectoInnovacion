@@ -1,7 +1,12 @@
 .catalog-page {
   display: grid;
-  grid-template-columns: 250px 1fr 330px;
+  grid-template-columns: 250px minmax(0, 1fr) 330px;
   gap: 1.5rem;
+}
+
+.request-overlay,
+.request-panel__fab {
+  display: none;
 }
 
 .filters-panel,
@@ -74,6 +79,7 @@
   color: #e5e7eb;
   padding: 0 0.75rem;
   outline: none;
+  box-sizing: border-box;
 }
 
 .price-row {
@@ -89,6 +95,7 @@
     color: #e5e7eb;
     padding: 0 0.8rem;
     outline: none;
+    box-sizing: border-box;
   }
 }
 
@@ -142,10 +149,10 @@
     background: #0f172a;
     color: #e5e7eb;
     padding: 0 0.8rem;
+    box-sizing: border-box;
   }
 }
 
-/* 💡 Corregido con auto-fill: Se adapta dinámicamente según el tamaño disponible */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -175,7 +182,6 @@
   overflow: hidden;
 }
 
-/* 💡 Imagen Responsiva Automatizada */
 .product-img {
   width: 100%;
   height: 100%;
@@ -268,31 +274,77 @@
 
 .request-panel {
   align-self: start;
+  justify-self: stretch;
   position: sticky;
   top: 96px;
+  width: 100%;
+  max-width: 380px;
+  min-width: 0;
   padding: 1.25rem;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .request-panel__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.85rem;
   margin-bottom: 1rem;
+}
+
+.request-panel__title-group {
+  min-width: 0;
+}
+
+.request-panel__step {
+  width: fit-content;
+  background: rgba(59, 130, 246, 0.16);
+  color: #60a5fa;
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+
+.request-panel__title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
 
   h2 {
-    color: #e5e7eb;
     margin: 0;
+    color: #e5e7eb;
     font-size: 1.25rem;
+    line-height: 1.15;
   }
 
-  span {
-    color: #60a5fa;
-    background: rgba(59, 130, 246, 0.14);
-    border-radius: 999px;
-    padding: 0.35rem 0.65rem;
-    font-weight: 800;
-    font-size: 0.82rem;
+  p {
+    margin: 0.25rem 0 0;
+    color: #9ca3af;
+    font-size: 0.9rem;
+    line-height: 1.4;
   }
+}
+
+.request-panel__counter {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.14);
+  font-weight: 800;
+  font-size: 0.82rem;
+  white-space: nowrap;
 }
 
 .request-list {
@@ -322,6 +374,8 @@
 }
 
 .request-info {
+  min-width: 0;
+
   strong {
     color: #e5e7eb;
     display: block;
@@ -370,6 +424,7 @@
     background: #1e293b;
     color: #e5e7eb;
     cursor: pointer;
+    box-sizing: border-box;
   }
 
   strong {
@@ -389,6 +444,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
 
   label {
     color: #9ca3af;
@@ -396,21 +452,30 @@
   }
 }
 
+.config-item--full {
+  width: 100%;
+}
+
 .priority-select {
+  width: 100%;
   height: 40px;
   border-radius: 10px;
   border: 1px solid #374151;
   background: #0f172a;
   color: #e5e7eb;
   padding: 0 0.8rem;
+  box-sizing: border-box;
 }
 
 .price-inputs {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.6rem;
+  width: 100%;
+  min-width: 0;
 
   input {
+    width: 100%;
     height: 40px;
     border-radius: 10px;
     border: 1px solid #374151;
@@ -418,6 +483,7 @@
     color: #e5e7eb;
     padding: 0 0.8rem;
     outline: none;
+    box-sizing: border-box;
   }
 }
 
@@ -456,7 +522,12 @@
 
 .primary-action {
   display: flex;
-  height: 46px;
+  width: 100%;
+  min-height: 48px;
+  height: auto;
+  padding: 0.9rem 1rem;
+  line-height: 1.2;
+  text-align: center;
   justify-content: center;
   align-items: center;
   border-radius: 12px;
@@ -466,6 +537,7 @@
   font-weight: 800;
   border: none;
   cursor: pointer;
+  box-sizing: border-box;
 
   &:hover {
     background: #2563eb;
@@ -477,35 +549,109 @@
   }
 }
 
-/* ==========================================================================
-   DISEÑO RESPONSIVO OPTIMIZADO
-   ========================================================================== */
-
-/* 1. Ajuste para Laptops comunes y Tablets grandes (Medianas) */
 @media (max-width: 1300px) {
   .catalog-page {
-    grid-template-columns: 240px 1fr; /* Mantiene filtros e inventario juntos */
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding-bottom: 96px;
+  }
+
+  .request-overlay,
+  .request-panel__fab {
+    display: flex;
   }
 
   .request-panel {
-    position: static;
-    grid-column: span 2; /* El panel de solicitudes se acomoda abajo limpiamente */
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    top: auto;
+    z-index: 999;
+    max-width: none;
+    max-height: 76vh;
+    overflow-y: auto;
+    transform: translateY(calc(100% + 24px));
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.28s ease, opacity 0.2s ease, box-shadow 0.28s ease;
+    box-shadow: 0 22px 60px rgba(2, 6, 23, 0.5);
+    border-radius: 18px;
   }
-}
 
-/* 2. Ajuste para Tablets y Celulares (Pantallas pequeñas) */
-@media (max-width: 900px) {
-  .catalog-page {
-    grid-template-columns: 1fr; /* Todo pasa a un layout de una columna estable */
+  .request-panel.is-open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
   }
 
-  .request-panel {
-    grid-column: span 1;
+  .request-panel__fab {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 1000;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 52px;
+    padding: 0 1rem;
+    border: 1px solid rgba(79, 140, 255, 0.24);
+    border-radius: 999px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #ffffff;
+    font-weight: 800;
+    box-shadow: 0 14px 32px rgba(37, 99, 235, 0.34);
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+
+  .request-panel__fab-text {
+    white-space: nowrap;
+  }
+
+  .request-panel__fab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 0.5rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 800;
+  }
+
+  .request-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 998;
+    background: rgba(2, 6, 23, 0.52);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .request-overlay.is-open {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .catalog-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .request-panel__fab {
+    right: 12px;
+    bottom: 12px;
+    padding: 0 0.9rem;
+  }
+
+  .price-inputs {
+    grid-template-columns: 1fr;
   }
 }

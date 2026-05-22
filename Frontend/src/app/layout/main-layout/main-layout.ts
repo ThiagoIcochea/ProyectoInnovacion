@@ -39,6 +39,7 @@ export class MainLayoutComponent implements OnInit {
   };
 
   estadoApi: string = 'Desconectada';
+  menuMovilAbierto = false;
 
   private API_URL =
   'https://proyectoinnovacion.onrender.com/api/proveedor-api';
@@ -54,6 +55,14 @@ export class MainLayoutComponent implements OnInit {
   if (this.isProvider) {
     this.cargarEstadoApi();
   }
+  }
+
+  toggleMenuMovil(): void {
+    this.menuMovilAbierto = !this.menuMovilAbierto;
+  }
+
+  cerrarMenuMovil(): void {
+    this.menuMovilAbierto = false;
   }
 
   get isAdmin(): boolean {
