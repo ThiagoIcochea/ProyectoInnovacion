@@ -2,6 +2,7 @@
   display: grid;
   grid-template-columns: 250px minmax(0, 1fr) 330px;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .request-overlay,
@@ -20,6 +21,13 @@
 .filters-panel {
   padding: 1.25rem;
   align-self: start;
+  min-width: 0;
+}
+
+.filter-header h3,
+.catalog-header h1,
+.request-panel__header h2 {
+  overflow-wrap: anywhere;
 }
 
 .filter-section {
@@ -110,6 +118,23 @@
   cursor: pointer;
 }
 
+.price-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+
+  input {
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid #374151;
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 0 0.8rem;
+    outline: none;
+    min-width: 0;
+  }
+}
+
 .catalog-content {
   min-width: 0;
 }
@@ -162,6 +187,7 @@
 .product-card {
   overflow: hidden;
   transition: 0.2s ease;
+  min-width: 0;
 
   &:hover {
     background: #273449;
@@ -197,6 +223,7 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
 
   .brand-label {
     color: #9ca3af;
@@ -220,6 +247,7 @@
   color: #e5e7eb;
   margin: 0.75rem 0 0.35rem;
   font-size: 1.05rem;
+  overflow-wrap: anywhere;
 }
 
 .specs-mini-grid {
@@ -360,6 +388,7 @@
   background: #111827;
   border: 1px solid #374151;
   border-radius: 14px;
+  min-width: 0;
 }
 
 .request-thumb {
@@ -379,6 +408,7 @@
   strong {
     color: #e5e7eb;
     display: block;
+    overflow-wrap: anywhere;
   }
 
   small {

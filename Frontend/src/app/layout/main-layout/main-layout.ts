@@ -1,3 +1,4 @@
+// Backend touchpoint: main shell that loads the active user profile, role labels and logout cleanup.
 import { CommonModule } from '@angular/common';
 import {
   HttpClient,
@@ -16,6 +17,7 @@ import {
   RouterLinkActive,
   RouterOutlet
 } from '@angular/router';
+import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-main-layout',
@@ -52,9 +54,6 @@ export class MainLayoutComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarPerfil();
-  if (this.isProvider) {
-    this.cargarEstadoApi();
-  }
   }
 
   toggleMenuMovil(): void {
@@ -87,15 +86,30 @@ export class MainLayoutComponent implements OnInit {
 
   get nombreRol(): string {
 
-    if (this.usuario?.rol === 'ADMIN') {
+    const rol = (this.usuario?.rol || localStorage.getItem(APP_STORAGE_KEYS.role) || '').toUpperCase();
+
+    if (rol === 'ADMIN') {
       return 'Administrador';
     }
 
-    if (this.usuario?.rol === 'PROVEEDOR') {
+    if (rol === 'PROVEEDOR') {
       return 'Proveedor';
     }
 
     return 'Cliente';
+  }
+
+  get panelActual(): string {
+
+    if (this.isAdmin) {
+      return 'Panel Administrativo';
+    }
+
+    if (this.isProvider) {
+      return 'Panel Proveedor';
+    }
+
+    return 'Panel Cliente';
   }
 
   get fotoPerfil(): string {
@@ -130,17 +144,28 @@ export class MainLayoutComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  logout(): void {
+
+    localStorage.removeItem(APP_STORAGE_KEYS.token);
+    localStorage.removeItem(APP_STORAGE_KEYS.role);
+    localStorage.removeItem(APP_STORAGE_KEYS.rfqCart);
+    localStorage.removeItem(APP_STORAGE_KEYS.selectedProvider);
+    localStorage.removeItem(APP_STORAGE_KEYS.currentSolicitudId);
+
+    this.router.navigate([APP_ROUTE_PATHS.login]);
+  }
+
   private headers(): HttpHeaders {
 
     return new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`
+      Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token)}`
     });
   }
 
   cargarPerfil(): void {
 
     this.http.get<any>(
-      'https://proyectoinnovacion.onrender.com/api/usuarios/perfil',
+      `${APP_API_BASE_URL}/usuarios/perfil`,
       {
         headers: this.headers()
       }
@@ -159,34 +184,4 @@ export class MainLayoutComponent implements OnInit {
       }
     });
   }
-
-  cargarEstadoApi(): void {
-
-  this.http.get<any>(
-    this.API_URL,
-    {
-      headers: this.headers()
-    }
-  )
-  .subscribe({
-
-    next: (res) => {
-
-      this.estadoApi =
-        res.estadoConexion || 'Desconectada';
-
-      this.cdr.detectChanges();
-    },
-
-    error: (err) => {
-
-      console.error(
-        'Error obteniendo estado API',
-        err
-      );
-
-      this.estadoApi = 'Desconectada';
-    }
-  });
-}
 }

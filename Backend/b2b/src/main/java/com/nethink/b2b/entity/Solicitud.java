@@ -3,6 +3,7 @@ package com.nethink.b2b.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List; 
 
 @Entity
 @Table(name = "solicitudes")
@@ -24,6 +25,10 @@ public class Solicitud {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_proveedor", nullable = false)
     private Proveedor proveedor;
+    
+    // se añadió esto val
+    @OneToMany(mappedBy = "solicitud", fetch = FetchType.LAZY)
+    private List<DetalleSolicitud> detalles;
 
     @Column(name = "direccion_envio", columnDefinition = "TEXT")
     private String direccionEnvio;
@@ -259,4 +264,16 @@ public class Solicitud {
     public void setVersion(Long version) {
         this.version = version;
     }
+    
+    // se añadio set y get de detalle solicitud
+    public List<DetalleSolicitud> getDetalles() {
+      return detalles;
+   }
+
+    public void setDetalles(List<DetalleSolicitud> detalles) {
+      this.detalles = detalles;
+   }  
+    
+    
+    
 }

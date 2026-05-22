@@ -1,7 +1,9 @@
+// Backend touchpoint: open requests list and summary counters for active RFQs.
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-requests',
@@ -33,14 +35,14 @@ export class RequestsComponent implements OnInit {
 
   private headers(): HttpHeaders {
     return new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`
+      Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token)}`
     });
   }
 
   cargarSolicitudes(): void {
 
     this.http.get<any[]>(
-      'https://proyectoinnovacion.onrender.com/api/solicitudes/mis-solicitudes',
+      `${APP_API_BASE_URL}/solicitudes/mis-solicitudes`,
       { headers: this.headers() }
     )
     .subscribe({

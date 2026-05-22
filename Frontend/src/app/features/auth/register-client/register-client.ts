@@ -1,8 +1,10 @@
+// Backend touchpoint: client registration payload sent to /api/usuarios/register.
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
+import { APP_API_BASE_URL, APP_ROUTE_PATHS } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-register-client',
@@ -43,7 +45,7 @@ export class RegisterClientComponent {
     }
 
     this.http.post(
-      'https://proyectoinnovacion.onrender.com/api/usuarios/register',
+      `${APP_API_BASE_URL}/usuarios/register`,
       this.form,
       {
         responseType: 'text'
@@ -55,7 +57,7 @@ export class RegisterClientComponent {
 
         alert(res);
 
-        this.router.navigate(['/login']);
+        this.router.navigate([APP_ROUTE_PATHS.login]);
       },
 
       error: (err) => {

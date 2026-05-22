@@ -1,3 +1,4 @@
+// Backend touchpoint: role selection drives which registration flow the user enters.
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -24,4 +25,10 @@ export class RoleSelectionComponent {
       route: '/register-provider'
     }
   ];
+
+  selectedRole = this.roles[0];
+
+  seleccionarRol(role: (typeof this.roles)[number]): void {
+    this.selectedRole = role;
+  }
 }

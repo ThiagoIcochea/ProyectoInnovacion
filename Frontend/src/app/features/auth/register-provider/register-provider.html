@@ -1,3 +1,4 @@
+<!-- Backend touchpoint: provider registration flow, including RUC, API and payment data. -->
 <div class="auth-page">
   <div class="auth-shell auth-shell--provider">
 
@@ -250,8 +251,13 @@
 
         <div *ngFor="let c of certificaciones">
 
-          <label>
-            <input type="checkbox" (change)="toggleCertificacion($event, c.idCertificacion)">
+          <label [attr.for]="'cert-' + c.idCertificacion">
+              <input
+              [id]="'cert-' + c.idCertificacion"
+              type="checkbox"
+              title="Seleccionar certificación"
+              aria-label="Seleccionar certificación"
+              (change)="toggleCertificacion($event, c.idCertificacion)">
             {{ c.nombre }}
           </label>
 

@@ -1,6 +1,8 @@
+// Backend touchpoint: request history mapping and status filters for closed RFQs.
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-history',
@@ -27,14 +29,14 @@ export class HistoryComponent implements OnInit {
 
   private headers(): HttpHeaders {
     return new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`
+      Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token)}`
     });
   }
 
   cargarHistorial(): void {
 
     this.http.get<any[]>(
-      'https://proyectoinnovacion.onrender.com/api/solicitudes/mis-solicitudes/historial',
+      `${APP_API_BASE_URL}/solicitudes/mis-solicitudes/historial`,
       { headers: this.headers() }
     )
     .subscribe({

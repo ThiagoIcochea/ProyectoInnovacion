@@ -1,7 +1,9 @@
+/* Backend touchpoint: provider scoring cards and summary panel for RFQ results. */
 .results-page {
   display: grid;
   grid-template-columns: 1fr 330px;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .results-main {
@@ -106,6 +108,7 @@
 
 .provider-card {
   padding: 1.25rem;
+  min-width: 0;
 }
 
 .provider-card__top {
@@ -127,10 +130,13 @@
 }
 
 .provider-info {
+  min-width: 0;
+
   h2 {
     margin: 0 0 0.35rem;
     color: #e5e7eb;
     font-size: 1.25rem;
+    overflow-wrap: anywhere;
   }
 
   p {
@@ -194,6 +200,7 @@
   strong {
     color: #e5e7eb;
     font-size: 1.2rem;
+    word-break: break-word;
   }
 }
 
@@ -239,6 +246,7 @@
   top: 96px;
   align-self: start;
   padding: 1.5rem;
+  min-width: 0;
 
   h2 {
     color: #e5e7eb;
@@ -276,11 +284,13 @@
   background: #111827;
   border: 1px solid #374151;
   border-radius: 14px;
+  min-width: 0;
 
   strong {
     color: #e5e7eb;
     display: block;
     font-size: 0.9rem;
+    overflow-wrap: anywhere;
   }
 
   span {

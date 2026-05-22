@@ -25,6 +25,14 @@ import com.nethink.b2b.repository.SolicitudHistorialRepository;
 import com.nethink.b2b.repository.SolicitudRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
 
+//se añadio esto val
+import com.nethink.b2b.dto.response.SolicitudResponse;
+import com.nethink.b2b.dto.response.DetalleSolicitudResponse;
+import com.nethink.b2b.dto.response.EspecificacionResponse;
+import com.nethink.b2b.entity.ProductoEspecificacion;
+import com.nethink.b2b.repository.ProductoEspecificacionRepository; 
+
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -32,6 +40,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+// se añadio esto val
+import java.util.ArrayList; 
+
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,10 +62,14 @@ public class SolicitudService {
     private final InventarioReservaService reservaService;
     private final InventarioReservaRepository reservaRepo;
     private final DescuentoVolumenRepository descuentoVolumenRepo;
+    
+    private final ProductoEspecificacionRepository especificacionRepo; 
+     
 
     public SolicitudService(
             SolicitudRepository solicitudRepo,
             DetalleSolicitudRepository detalleRepo,
+            
             ProveedorProductoRepository provProdRepo,
             UsuarioRepository usuarioRepo,
             ProveedorRepository proveedorRepo,
@@ -62,7 +78,8 @@ public class SolicitudService {
             EmailService emailService,
             InventarioReservaService reservaService,
             InventarioReservaRepository reservaRepo,
-            DescuentoVolumenRepository descuentoVolumenRepo
+            DescuentoVolumenRepository descuentoVolumenRepo,
+            ProductoEspecificacionRepository especificaRepo 
     ) {
         this.solicitudRepo = solicitudRepo;
         this.detalleRepo = detalleRepo;
@@ -75,6 +92,7 @@ public class SolicitudService {
         this.reservaService=reservaService;
         this.reservaRepo= reservaRepo;
         this.descuentoVolumenRepo= descuentoVolumenRepo;
+        this.especificacionRepo=especificaRepo; 
     }
 
     @Transactional
@@ -607,4 +625,169 @@ BigDecimal totalItem =
 
                 }).toList();
     }
+    
+    
+    
+    // se añadio lista de solicitudes que tienen los proveedores
+    
+    
+    
+    public List<SolicitudResponse> listarSolicitudesProveedor(
+        Integer idProveedor) {
+
+    List<Solicitud> solicitudes =
+            solicitudRepo.listarSolicitudes(idProveedor);
+
+    List<SolicitudResponse> response =
+            new ArrayList<>();
+
+    for (Solicitud s : solicitudes) {
+
+        SolicitudResponse dto =
+                new SolicitudResponse();
+
+        // =====================================
+        // DATOS SOLICITUD
+        // =====================================
+
+        dto.setIdSolicitud(
+                s.getIdSolicitud());
+
+        dto.setTotal(
+                s.getTotal());
+
+        dto.setEstado(
+                s.getEstado().name());
+
+        dto.setFechaCreacion(
+                s.getFechaCreacion());
+
+        // =====================================
+        // DATOS PROVEEDOR
+        // =====================================
+
+        dto.setIdProveedor(
+                s.getProveedor()
+                 .getIdProveedor());
+
+        dto.setNombreProveedor(
+                s.getProveedor()
+                 .getRazonSocial());
+
+        // =====================================
+        // DATOS EMPRESA
+        // =====================================
+
+        if (s.getEmpresaCompradora() != null) {
+    dto.setIdEmpresa(s.getEmpresaCompradora().getIdEmpresa());
+    dto.setNombreEmpresa(s.getEmpresaCompradora().getRazonSocial());
+    dto.setRucEmpresa(s.getEmpresaCompradora().getRuc());
+}
+
+        // =====================================
+        // DATOS CLIENTE
+        // =====================================
+
+        if (s.getUsuario() != null) {
+    dto.setNombreCliente(
+            s.getUsuario().getNombres()
+            + " "
+            + s.getUsuario().getApellidos()
+    );
+    dto.setCorreoCliente(s.getUsuario().getCorreo());
+    dto.setTelefonoCliente(
+        s.getUsuario().getTelefono());
+}
+
+        // =====================================
+        // DETALLES
+        // =====================================
+
+        List<DetalleSolicitud> detalles =
+                detalleRepo.listarDetalles(
+                        s.getIdSolicitud());
+
+        List<DetalleSolicitudResponse> detalleDTOs =
+                new ArrayList<>();
+
+        for (DetalleSolicitud d : detalles) {
+
+            DetalleSolicitudResponse det =
+                    new DetalleSolicitudResponse();
+
+            det.setCantidad(
+                    d.getCantidad());
+
+            det.setNombreProducto(
+                    d.getProveedorProducto()
+                     .getProducto()
+                     .getNombre());
+
+            det.setCategoria(
+                    d.getProveedorProducto()
+                     .getProducto()
+                     .getCategoria()
+                     .getNombre());
+            
+            det.setMarca(
+                    d.getProveedorProducto()
+                      .getProducto()
+                      .getMarca() != null
+                       ? d.getProveedorProducto().getProducto().getMarca().getNombre()
+                       : null
+                        );
+            
+
+            
+            
+            Integer idProducto =
+        d.getProveedorProducto().getProducto().getIdProducto();
+
+    List<ProductoEspecificacion> specs =
+        especificacionRepo.listarPorProducto(idProducto);
+
+    List<EspecificacionResponse> specsResponse = new ArrayList<>();
+
+    for (ProductoEspecificacion pe : specs) {
+
+        EspecificacionResponse especi = new EspecificacionResponse();
+        especi.setNombre(pe.getNombre());
+        especi.setValor(pe.getValor());
+
+        specsResponse.add(especi);
+        
+    }
+            
+            
+           det.setEspecificaciones(specsResponse);       
+            
+            
+            
+            
+            detalleDTOs.add(det);
+        }
+
+        dto.setDetalles(
+        detalleDTOs != null ? detalleDTOs : new ArrayList<>()
+);
+
+        response.add(dto);
+    }
+
+    return response;
+}
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }

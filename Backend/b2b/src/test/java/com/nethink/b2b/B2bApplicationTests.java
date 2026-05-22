@@ -8,6 +8,8 @@ class B2bApplicationTests {
 
 	@Test
 	void contextLoads() {
+            
+            
 	}
 
 }

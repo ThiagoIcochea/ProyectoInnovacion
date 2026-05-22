@@ -1,3 +1,4 @@
+/* Backend touchpoint: admin provider table and verification/status chips. */
 .admin-providers-page {
   display: flex;
   flex-direction: column;
@@ -85,7 +86,7 @@
 .providers-table__head,
 .providers-table__row {
   display: grid;
-  grid-template-columns: 1.4fr 1.5fr 0.7fr 0.9fr 0.7fr 1fr 0.8fr;
+  grid-template-columns: 1.4fr 1.5fr 0.7fr 0.9fr 0.7fr 1fr;
   gap: 1rem;
   padding: 1rem 1.5rem;
   align-items: center;
@@ -102,6 +103,7 @@
 .providers-table__row {
   color: #e5e7eb;
   border-top: 1px solid rgba(55, 65, 81, 0.6);
+  min-width: 0;
 
   &:hover {
     background: rgba(39, 52, 73, 0.45);
@@ -146,21 +148,6 @@
 .api-status.error {
   background: rgba(239, 68, 68, 0.14);
   color: #ef4444;
-}
-
-.btn-secondary {
-  height: 38px;
-  border-radius: 10px;
-  padding: 0 0.85rem;
-  background: #111827;
-  color: #e5e7eb;
-  border: 1px solid #374151;
-  cursor: pointer;
-  font-weight: 800;
-
-  &:hover {
-    background: #273449;
-  }
 }
 
 @media (max-width: 1100px) {

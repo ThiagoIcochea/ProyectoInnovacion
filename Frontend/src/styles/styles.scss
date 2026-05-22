@@ -8,6 +8,6 @@
 @import './abstracts/shadows';
 @import './abstracts/mixins';
 
-@import './base/reset';
-@import './base/globals';
-@import './base/utilities';
+@use './base/reset';
+@use './base/globals';
+@use './base/utilities';

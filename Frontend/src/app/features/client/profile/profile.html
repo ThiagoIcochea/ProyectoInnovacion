@@ -1,9 +1,10 @@
+<!-- Backend touchpoint: profile fields rendered here depend on the active user role. -->
 <div class="profile-page">
 
   <div class="page-header">
     <div>
       <h1>{{ usuario.nombres }} {{ usuario.apellidos }}</h1>
-      <p>Administra la información de tu cuenta</p>
+      <p>Administra la información de tu cuenta · {{ rolTexto }}</p>
     </div>
   </div>
 

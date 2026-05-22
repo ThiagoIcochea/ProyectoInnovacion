@@ -1,3 +1,4 @@
+/* Backend touchpoint: tracking timeline, summary column and CTA state styling. */
 .tracking-page {
   display: flex;
   flex-direction: column;
@@ -73,6 +74,15 @@
 .tracking-card,
 .order-summary {
   padding: 1.5rem;
+}
+
+.loading-box {
+  padding: 1rem 1.25rem;
+  border-radius: 14px;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.18);
+  color: #bfdbfe;
+  font-weight: 700;
 }
 
 .card-header {
@@ -206,6 +216,7 @@
   strong {
     color: #e5e7eb;
     text-align: right;
+    word-break: break-word;
   }
 }
 

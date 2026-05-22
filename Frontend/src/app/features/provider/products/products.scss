@@ -1,7 +1,9 @@
+/* Backend touchpoint: provider product catalog, stock indicators and table layout. */
 .provider-products-page {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .page-header {
@@ -117,6 +119,10 @@
   padding: 0 1rem;
 }
 
+.products-table {
+  overflow-x: auto;
+}
+
 .products-table__head,
 .products-table__row {
   display: grid;
@@ -124,6 +130,7 @@
   gap: 1rem;
   padding: 1rem 1.5rem;
   align-items: center;
+  min-width: 820px;
 }
 
 .products-table__head {
@@ -181,5 +188,20 @@
 
   .products-table__row {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
   }
 }

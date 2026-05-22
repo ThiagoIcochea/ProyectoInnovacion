@@ -3,6 +3,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-rfq-catalog',
@@ -28,7 +29,7 @@ export class RfqCatalogComponent implements OnInit {
   currentPage: number = 1;
   pageSize: number = 8;
 
-  private readonly API_BASE = 'https://proyectoinnovacion.onrender.com/api';
+  private readonly API_BASE = APP_API_BASE_URL;
 
   constructor(
     private http: HttpClient,
@@ -43,24 +44,20 @@ export class RfqCatalogComponent implements OnInit {
   }
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`,
+    const token = localStorage.getItem(APP_STORAGE_KEYS.token);
+    return new HttpHeaders({ 
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     });
   }
 
   cargarCarritoLocal(): void {
-    const saved = localStorage.getItem('rfq_cart');
-
-    if (saved) {
-      this.requestItems = JSON.parse(saved);
-    }
+    const saved = localStorage.getItem(APP_STORAGE_KEYS.rfqCart);
+    if (saved) this.requestItems = JSON.parse(saved);
   }
 
   guardarCarritoLocal(): void {
-    localStorage.setItem('rfq_cart', JSON.stringify(this.requestItems));
+    localStorage.setItem(APP_STORAGE_KEYS.rfqCart, JSON.stringify(this.requestItems));
   }
 
   cargarFiltrosDisponibles(): void {

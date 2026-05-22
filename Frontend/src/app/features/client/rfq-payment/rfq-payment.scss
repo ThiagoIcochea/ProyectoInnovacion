@@ -1,7 +1,9 @@
+/* Backend touchpoint: payment confirmation layout, map area and voucher upload state. */
 .payment-page {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .page-title {
@@ -25,8 +27,9 @@
 
 .payment-grid {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .payment-main,
@@ -71,6 +74,31 @@
 .methods-list {
   display: flex;
   flex-direction: column;
+  gap: 0.75rem;
+}
+
+.step-section,
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.step-section + .step-section,
+.step-section + .upload-section,
+.upload-section + .step-section {
+  margin-top: 1.5rem;
+}
+
+.step-section h3,
+.upload-section h3,
+.payment-summary h3 {
+  color: #e5e7eb;
+  margin: 0;
+}
+
+.methods-list {
+  display: grid;
   gap: 0.75rem;
 }
 
@@ -190,6 +218,7 @@
 
   strong {
     color: #e5e7eb;
+    word-break: break-word;
   }
 }
 
@@ -202,7 +231,7 @@
 
 .confirm-btn {
   width: 100%;
-  margin-top: 1rem;
+  margin-top: 1.25rem;
   height: 44px;
   border-radius: 10px;
   background: #3b82f6;

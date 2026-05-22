@@ -1,7 +1,9 @@
+/* Backend touchpoint: admin product catalog and supplier detail panel. */
 .admin-products-page {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .page-header {
@@ -42,6 +44,10 @@
   overflow: hidden;
 }
 
+.products-table {
+  overflow-x: auto;
+}
+
 .card-header {
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid #374151;
@@ -75,6 +81,7 @@
   gap: 1rem;
   padding: 1rem 1.5rem;
   align-items: center;
+  min-width: 760px;
 }
 
 .products-table__head {
@@ -257,6 +264,20 @@
   }
 
   .products-table__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+  }
+
+  .detail-card {
+    padding: 1rem;
+  }
+
+  .detail-summary {
     grid-template-columns: 1fr;
   }
 }

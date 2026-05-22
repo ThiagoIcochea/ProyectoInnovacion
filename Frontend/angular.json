@@ -24,16 +24,19 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "allowedCommonJsDependencies": [
+              "leaflet"
+            ],
             "assets": [
               {
                 "glob": "**/*",
                 "input": "public"
               }
             ],
-         "styles": [
-  "src/styles/styles.scss",
-  "node_modules/leaflet/dist/leaflet.css"
-]
+            "styles": [
+              "src/styles/styles.scss",
+              "node_modules/leaflet/dist/leaflet.css"
+            ]
           },
           "configurations": {
             "production": {
@@ -45,8 +48,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "12kB",
-                  "maximumError": "20kB"
+                  "maximumWarning": "8kB",
+                  "maximumError": "16kB"
                 }
               ],
               "outputHashing": "all"

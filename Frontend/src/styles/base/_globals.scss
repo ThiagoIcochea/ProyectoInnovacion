@@ -1,3 +1,6 @@
+@use '../abstracts/colors' as *;
+@use '../abstracts/typography' as *;
+
 body {
   font-family: $body-font;
   background:

@@ -9,6 +9,9 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 
 
+import io.jsonwebtoken.Claims;
+
+
 @Component
 public class JwtUtil {
 
@@ -33,14 +36,29 @@ public String generateToken(String correo, String rol) {
             .compact();
 }
 
+
+//public Claims parseToken(String token) {
+ //   return Jwts.parser()
+ //           .verifyWith(key)
+ //           .build()
+ //           .parseSignedClaims(token)
+ //           .getPayload();
+//}
+
+
+
+
+
+
+
 public String extractCorreo(String token) {
     try {
-        return Jwts.parser()
-                .verifyWith(key)
+       return Jwts.parser()
+               .verifyWith(key)
                 .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+               .parseSignedClaims(token)
+               .getPayload()
+               .getSubject();
     } catch (Exception e) {
         throw new RuntimeException("Token inválido");
     }
@@ -56,7 +74,7 @@ public String extractRol(String token) {
 }
 
 public boolean isTokenValid(String token) {
-    try {
+   try {
         Jwts.parser()
                 .verifyWith(key)
                 .build()
@@ -68,4 +86,13 @@ public boolean isTokenValid(String token) {
         throw new RuntimeException("Token inválido");
     }
 }
+
+
+
+
+
+
+
+
+
 }

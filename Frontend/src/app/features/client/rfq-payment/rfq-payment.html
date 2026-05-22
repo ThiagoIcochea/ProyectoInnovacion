@@ -1,3 +1,4 @@
+<!-- Backend touchpoint: delivery address, payment method and voucher upload are handled here. -->
 <div class="payment-page">
 
   <div class="page-title">
@@ -22,6 +23,7 @@
           [(ngModel)]="direccionEntrega"
           placeholder="Ubicación detectada automáticamente"
           class="full-input"
+          aria-label="Ubicación de entrega"
           readonly
           aria-label="Dirección de entrega"
         >
@@ -105,7 +107,7 @@
       <div class="summary-row total-big">
         <span>Total a pagar:</span>
         <strong>
-          S/ {{ totalSolicitud || provider?.totalCotizacion || 0 | number:'1.2-2' }}
+          S/ {{ (totalSolicitud || provider?.totalCotizacion || 0) | number:'1.2-2' }}
         </strong>
       </div>
 

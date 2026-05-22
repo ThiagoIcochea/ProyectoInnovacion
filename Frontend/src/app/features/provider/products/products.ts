@@ -1,103 +1,38 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-provider-products',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule],
   templateUrl: './products.html',
   styleUrl: './products.scss'
 })
-export class ProviderProductsComponent implements OnInit {
-
-  products: any[] = [];
-  filteredProducts: any[] = [];
-
-  search = '';
-
-  activos = 0;
-  stockDisponibleCount = 0;
-  bajoStockCount = 0;
-
-  private API_URL = 'https://proyectoinnovacion.onrender.com/api/proveedor-productos';
-
-  constructor(
-    private http: HttpClient,
-    private cdr: ChangeDetectorRef
-  ) {}
-
-  ngOnInit(): void {
-    this.cargarProductos();
-  }
-
-  private headers(): HttpHeaders {
-    return new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    });
-  }
-
-  cargarProductos() {
-
-    
-
-    this.http.get<any[]>(
-      `${this.API_URL}/mis-productos`,
-      { headers: this.headers() }
-    )
-    .subscribe({
-
-      next: (data) => {
-
-        this.products = data;
-        this.filteredProducts = data;
-
-        this.calcularResumenFiltrado();
-
-        this.cdr.detectChanges();
-      },
-
-      error: (err) => {
-        console.error('Error cargando productos:', err);
-      }
-    });
-  }
-
-  filtrarProductos() {
-
-    const texto = this.search.toLowerCase();
-
-    this.filteredProducts = this.products.filter(p =>
-
-      p.skuGlobal?.toLowerCase().includes(texto) ||
-      p.nombre?.toLowerCase().includes(texto) ||
-      p.categoria?.toLowerCase().includes(texto)
-
-    );
-
-    this.calcularResumenFiltrado();
-  }
-
-  calcularResumenFiltrado() {
-
-    this.activos = 0;
-    this.stockDisponibleCount = 0;
-    this.bajoStockCount = 0;
-
-    for (let p of this.filteredProducts) {
-
-      if (p.estado === 'ACTIVO') {
-        this.activos++;
-      }
-
-      if (p.stockDisponible > 0) {
-        this.stockDisponibleCount++;
-      }
-
-      if (p.stock < 10) {
-        this.bajoStockCount++;
-      }
+export class ProviderProductsComponent {
+  products = [
+    {
+      sku: 'C9300-48P-E',
+      name: 'Cisco Catalyst 9300 48-port PoE+',
+      category: 'Switch',
+      stock: 24,
+      price: 'US$ 3,600.00',
+      status: 'Activo'
+    },
+    {
+      sku: 'UAP-AC-PRO-US',
+      name: 'Ubiquiti UniFi UAP-AC-PRO',
+      category: 'Access Point',
+      stock: 80,
+      price: 'US$ 300.00',
+      status: 'Activo'
+    },
+    {
+      sku: 'ISR-4321-SEC',
+      name: 'Cisco ISR 4321 Sec Bundle',
+      category: 'Router',
+      stock: 6,
+      price: 'US$ 1,250.00',
+      status: 'Bajo stock'
     }
-  }
+  ];
 }

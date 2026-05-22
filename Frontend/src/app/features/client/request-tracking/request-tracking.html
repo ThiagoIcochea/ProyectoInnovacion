@@ -1,3 +1,4 @@
+<!-- Backend touchpoint: tracking timeline and order summary are driven by the tracking endpoint. -->
 <div class="tracking-page">
 
   <div *ngIf="loading" class="loading-box">
@@ -109,6 +110,12 @@
             </strong>
           </div>
 
+        </div>
+
+        <div class="delivery-code-card" *ngIf="tracking.estado !== 'Pago pendiente'">
+          <span>Código de recepción</span>
+          <strong>{{ tracking.codigoRecepcion || 'Pendiente' }}</strong>
+          <p>Usa este código para verificar la entrega una vez que el pedido llegue a destino.</p>
         </div>
 
         <div class="actions-box" *ngIf="tracking.estado === 'Pago pendiente'">

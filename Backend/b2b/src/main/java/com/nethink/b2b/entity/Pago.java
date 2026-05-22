@@ -13,8 +13,15 @@ public class Pago {
     @Column(name = "id_pago")
     private Integer idPago;
 
-    @Column(name = "id_solicitud")
-    private Integer idSolicitud;
+    //@Column(name = "id_solicitud")
+    //private Integer idSolicitud;
+    
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_solicitud")
+    private Solicitud solicitud; 
+    
+    
 
     private String metodo;
     private String entidad;
@@ -44,8 +51,11 @@ public class Pago {
     // Getters y Setters
     public Integer getIdPago() { return idPago; }
     public void setIdPago(Integer idPago) { this.idPago = idPago; }
-    public Integer getIdSolicitud() { return idSolicitud; }
-    public void setIdSolicitud(Integer idSolicitud) { this.idSolicitud = idSolicitud; }
+    //public Integer getIdSolicitud() { return idSolicitud; }
+    //public void setIdSolicitud(Integer idSolicitud) { this.idSolicitud = idSolicitud; }
+    
+    public Solicitud getSolicitud() { return solicitud; }
+    public void setSolicitud(Solicitud solicitud) { this.solicitud = solicitud; }
     public String getMetodo() { return metodo; }
     public void setMetodo(String metodo) { this.metodo = metodo; }
     public String getEntidad() { return entidad; }

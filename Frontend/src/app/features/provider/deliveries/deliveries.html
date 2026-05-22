@@ -1,3 +1,4 @@
+<!-- Backend touchpoint: logistics and delivery progress are reflected in this screen. -->
 <div class="provider-deliveries-page">
   <div class="page-header">
     <div>
@@ -119,15 +120,15 @@
           <div class="update-box">
             <h3>Actualizar estado</h3>
 
-            <label>Nuevo estado</label>
-            <select>
+            <label for="nuevoEstado">Nuevo estado</label>
+            <select id="nuevoEstado" aria-label="Nuevo estado">
               <option>En preparación</option>
               <option>En camino</option>
               <option>Entregado</option>
             </select>
 
-            <label>Código de entrega</label>
-            <input type="text" placeholder="Ej. NP-482913" />
+            <label for="codigoEntrega">Código de entrega</label>
+            <input id="codigoEntrega" type="text" placeholder="Ej. NP-482913" aria-label="Código de entrega" />
 
             <button>Actualizar tracking</button>
           </div>

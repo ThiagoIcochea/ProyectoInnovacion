@@ -1,3 +1,4 @@
+// Backend touchpoint: admin provider inventory and verification overview.
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 

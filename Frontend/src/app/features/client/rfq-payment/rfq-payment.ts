@@ -1,9 +1,11 @@
+// Backend touchpoint: payment flow loads tracking data, payment methods and confirms payment.
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import * as L from 'leaflet';
+import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-rfq-payment',
@@ -37,10 +39,10 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
 
-    const id = localStorage.getItem('current_solicitud_id');
+    const id = localStorage.getItem(APP_STORAGE_KEYS.currentSolicitudId);
 
     if (!id) {
-      this.router.navigate(['/app/requests']);
+      this.router.navigate([APP_ROUTE_PATHS.clientRequests]);
       return;
     }
 
@@ -52,16 +54,25 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
     setTimeout(() => this.initMap(), 300);
   }
 
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    if (!this.map) {
+      return;
+    }
+
+    setTimeout(() => this.map.invalidateSize(), 120);
+  }
+
   private headers(): HttpHeaders {
     return new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`
+      Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token)}`
     });
   }
 
   cargarSolicitud(): void {
 
     this.http.get<any>(
-      `https://proyectoinnovacion.onrender.com/api/solicitudes/${this.solicitudId}/tracking`,
+      `${APP_API_BASE_URL}/solicitudes/${this.solicitudId}/tracking`,
       { headers: this.headers() }
     ).subscribe(res => {
 
@@ -83,12 +94,16 @@ console.log('RFQ TOTAL:', this.provider?.totalCotizacion);
   cargarMetodosPago(id: number): void {
 
     this.http.get<any[]>(
-      `https://proyectoinnovacion.onrender.com/api/solicitudes/proveedor/${id}/metodos-pago`,
+      `${APP_API_BASE_URL}/solicitudes/proveedor/${id}/metodos-pago`,
       { headers: this.headers() }
     ).subscribe(res => this.metodosPago = res);
   }
 
   initMap(): void {
+
+    if (this.map) {
+      this.map.remove();
+    }
 
     this.map = L.map('map');
 
@@ -109,6 +124,7 @@ console.log('RFQ TOTAL:', this.provider?.totalCotizacion);
           this.marker = L.marker([lat, lng]).addTo(this.map);
 
           this.obtenerDireccion(lat, lng);
+          this.map.invalidateSize();
         },
 
         () => {
@@ -134,6 +150,8 @@ console.log('RFQ TOTAL:', this.provider?.totalCotizacion);
 
       this.obtenerDireccion(lat, lng);
     });
+
+    setTimeout(() => this.map.invalidateSize(), 0);
   }
 
   obtenerDireccion(lat: number, lng: number): void {
@@ -201,14 +219,14 @@ console.log('RFQ TOTAL:', this.provider?.totalCotizacion);
   formData.append('monto', String(this.totalSolicitud));
 
   this.http.post(
-    `https://proyectoinnovacion.onrender.com/api/solicitudes/${this.solicitudId}/pagar`,
+    `${APP_API_BASE_URL}/solicitudes/${this.solicitudId}/pagar`,
     formData,
     { headers: this.headers() }
   ).subscribe({
 
     next: () => {
       this.procesandoPago = false;
-      this.router.navigate(['/app/requests']);
+      this.router.navigate([APP_ROUTE_PATHS.clientRequests]);
     },
 
     error: (err) => {

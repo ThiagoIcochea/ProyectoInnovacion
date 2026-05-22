@@ -1,8 +1,10 @@
+// Backend touchpoint: quotation confirmation, company lookup and order creation.
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-rfq-quotation',
@@ -31,10 +33,10 @@ export class RfqQuotationComponent implements OnInit {
 
   ngOnInit(): void {
 
-    const data = localStorage.getItem('selected_provider');
+    const data = localStorage.getItem(APP_STORAGE_KEYS.selectedProvider);
 
     if (!data) {
-      this.router.navigate(['/app/rfq/results']);
+      this.router.navigate([APP_ROUTE_PATHS.rfqResults]);
       return;
     }
 
@@ -66,14 +68,14 @@ export class RfqQuotationComponent implements OnInit {
 
     this.loading = true;
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem(APP_STORAGE_KEYS.token);
 
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
     });
 
     this.http.post<any>(
-      'https://proyectoinnovacion.onrender.com/api/empresas',
+      `${APP_API_BASE_URL}/empresas`,
       { ruc: this.rucEmpresa },
       { headers }
     ).subscribe({
@@ -95,18 +97,18 @@ export class RfqQuotationComponent implements OnInit {
         };
 
         this.http.post(
-          'https://proyectoinnovacion.onrender.com/api/solicitudes/crear',
+          `${APP_API_BASE_URL}/solicitudes/crear`,
           solicitudBody,
           { headers }
         ).subscribe({
 
           next: (res: any) => {
-            localStorage.setItem('current_solicitud_id', String(res.idSolicitud));
-            localStorage.removeItem('rfq_cart');
-            localStorage.removeItem('selected_provider');
+            localStorage.setItem(APP_STORAGE_KEYS.currentSolicitudId, String(res.idSolicitud));
+            localStorage.removeItem(APP_STORAGE_KEYS.rfqCart);
+            localStorage.removeItem(APP_STORAGE_KEYS.selectedProvider);
 
             this.loading = false;
-            this.router.navigate(['/app/rfq/payment']);
+            this.router.navigate([APP_ROUTE_PATHS.rfqPayment]);
           },
 
           error: () => {

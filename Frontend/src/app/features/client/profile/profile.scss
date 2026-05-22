@@ -1,3 +1,4 @@
+/* Backend touchpoint: profile form layout; role-dependent fields are rendered in profile.html. */
 .profile-page {
   display: flex;
   flex-direction: column;
@@ -249,6 +250,10 @@
   input {
     accent-color: #3b82f6;
   }
+}
+
+.profile-header .avatar-container {
+  flex-shrink: 0;
 }
 
 @media (max-width: 1100px) {

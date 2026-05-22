@@ -1,7 +1,9 @@
+// Backend touchpoint: request tracking timeline, cancel action and payment handoff.
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-request-tracking',
@@ -33,14 +35,14 @@ export class RequestTrackingComponent implements OnInit {
 
   private headers(): HttpHeaders {
     return new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`
+      Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token)}`
     });
   }
 
   cargarTracking(id: string): void {
 
     this.http.get<any>(
-      `https://proyectoinnovacion.onrender.com/api/solicitudes/${id}/tracking`,
+      `${APP_API_BASE_URL}/solicitudes/${id}/tracking`,
       { headers: this.headers() }
     ).subscribe({
 
@@ -51,7 +53,7 @@ export class RequestTrackingComponent implements OnInit {
         this.tracking = res;
 
         localStorage.setItem(
-          'current_solicitud_id',
+          APP_STORAGE_KEYS.currentSolicitudId,
           String(res.idSolicitud)
         );
 
@@ -83,11 +85,11 @@ export class RequestTrackingComponent implements OnInit {
     }
 
     localStorage.setItem(
-      'current_solicitud_id',
+      APP_STORAGE_KEYS.currentSolicitudId,
       String(this.tracking.idSolicitud)
     );
 
-    this.router.navigate(['/app/rfq/payment']);
+    this.router.navigate([APP_ROUTE_PATHS.rfqPayment]);
   }
 
   cancelarSolicitud(): void {
@@ -95,7 +97,7 @@ export class RequestTrackingComponent implements OnInit {
     const id = this.tracking.idSolicitud;
 
     this.http.put(
-      `https://proyectoinnovacion.onrender.com/api/solicitudes/${id}/cancelar`,
+      `${APP_API_BASE_URL}/solicitudes/${id}/cancelar`,
       {},
       { headers: this.headers() }
     ).subscribe({
@@ -104,7 +106,7 @@ export class RequestTrackingComponent implements OnInit {
 
         console.log('CANCELADO:', res);
 
-        this.router.navigate(['/app/requests']);
+        this.router.navigate([APP_ROUTE_PATHS.clientRequests]);
       },
 
       error: (err) => {
