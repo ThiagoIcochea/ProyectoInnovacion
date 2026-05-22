@@ -1,77 +1,82 @@
 <div class="dashboard-page">
 
+  <button 
+    class="floating-cart-trigger" 
+    (click)="mostrarCarritoMovil = !mostrarCarritoMovil" 
+    [class.is-active]="mostrarCarritoMovil"
+    type="button"
+    aria-label="Abrir o cerrar carrito RFQ">
+    <span class="hamburger-box">
+      <span class="hamburger-inner"></span>
+    </span>
+    <span class="floating-cart-trigger__label">Mi RFQ</span>
+    <span class="badge-count" *ngIf="requestItems.length > 0">
+      {{ requestItems.length }}
+    </span>
+  </button>
+
+  <div
+    class="request-overlay"
+    [class.is-open]="mostrarCarritoMovil"
+    (click)="mostrarCarritoMovil = false">
+  </div>
+
   <section class="dashboard-main">
 
     <div class="hero-grid">
 
       <div class="hero-card">
         <span class="hero-card__badge">Cotización inteligente</span>
-
         <h1>Cotización Inteligente B2B</h1>
-
         <p>
           Agrega los equipos de red y el sistema encontrará proveedores con mejor precio, stock y tiempo de entrega.
         </p>
-
         <a routerLink="/app/rfq/catalog" class="hero-card__action">
           Iniciar RFQ →
         </a>
       </div>
 
       <div class="promo-card" *ngIf="publicidades.length > 0">
-
         <span>{{ publicidades[currentPublicidadIndex]?.origen }}</span>
-
         <div class="promo-card__icon">▣</div>
-
         <h3>{{ publicidades[currentPublicidadIndex]?.titulo }}</h3>
-
         <p>{{ publicidades[currentPublicidadIndex]?.enlace }}</p>
-
+        
         <img
           [src]="publicidades[currentPublicidadIndex]?.imagen"
           style="width:100%; height:120px; object-fit:cover; border-radius:10px; margin:10px 0;"
         >
-
+        
         <button (click)="irPublicidad(publicidades[currentPublicidadIndex])">
           Ver más
         </button>
-
       </div>
 
     </div>
 
     <div class="section-header">
-
       <div>
         <h2>Productos más recomendados</h2>
-
         <p>
           Ranking dinámico basado en pedidos reales, stock y actividad del sistema.
         </p>
       </div>
-
       <span>Top productos</span>
-
     </div>
 
     <div class="product-grid">
 
       <div class="product-card" *ngFor="let product of recommendedProducts">
-
         <div class="product-card__image">
-
           <img
             *ngIf="product.imagenes?.length"
             [src]="product.imagenes[0]?.url"
             style="width:100%; height:140px; object-fit:cover;"
           >
-
           <div *ngIf="!product.imagenes?.length"
                style="height:140px; display:flex; align-items:center; justify-content:center;">
             Sin imagen
           </div>
-
         </div>
 
         <div class="product-card__tags">
@@ -80,7 +85,6 @@
         </div>
 
         <h3>{{ product.producto }}</h3>
-
         <p>{{ product.descripcion }}</p>
 
         <div class="specs" *ngIf="product.especificaciones?.length">
@@ -93,39 +97,45 @@
           <strong>{{ product.vecesPedido }} pedidos</strong>
         </div>
 
-        <button class="product-card__button"
-                (click)="agregarAlCarrito(product)">
+        <button class="product-card__button" (click)="agregarAlCarrito(product)">
           Agregar al RFQ
         </button>
-
       </div>
 
     </div>
 
   </section>
 
-  <aside class="request-panel">
+  <aside class="request-panel" [class.is-open]="mostrarCarritoMovil">
 
     <div class="request-panel__step">
       RFQ Inteligente
     </div>
 
-    <h2>Carrito RFQ</h2>
+    <div class="request-panel__header-row">
+      <div>
+        <h2>Carrito RFQ</h2>
+        <p>{{ requestItems.length }} productos seleccionados</p>
+      </div>
 
-    <p>{{ requestItems.length }} productos seleccionados</p>
+      <button
+        type="button"
+        class="request-panel__close"
+        (click)="mostrarCarritoMovil = false"
+        aria-label="Cerrar carrito RFQ">
+        ✕
+      </button>
+    </div>
 
     <div class="alert-box">
       El sistema buscará proveedores que tengan stock disponible para todos los productos.
     </div>
 
     <div class="request-list">
-
       <div class="request-item" *ngFor="let item of requestItems">
-
         <div class="request-item__content">
-
           <strong>{{ item.name }}</strong>
-
+          
           <div class="qty-control">
             <button (click)="disminuir(item)">-</button>
             <span>{{ item.qty }}</span>
@@ -135,33 +145,38 @@
           <button (click)="eliminar(item)">
             Eliminar
           </button>
+        </div>
+      </div>
+    </div>
 
+    <div class="request-panel__form">
+      
+      <div class="form-group">
+        <label>Prioridad</label>
+        <select [(ngModel)]="prioridad">
+          <option value="BALANCEADO">Balanceado</option>
+          <option value="PRECIO">Mejor Precio</option>
+          <option value="TIEMPO">Entrega Rápida</option>
+          <option value="CALIDAD">Calidad</option>
+        </select>
+      </div>
+
+      <div class="budget-group">
+        <div class="form-group">
+          <label>Presupuesto mínimo</label>
+          <input type="number" [(ngModel)]="precioMin">
         </div>
 
+        <div class="form-group">
+          <label>Presupuesto máximo</label>
+          <input type="number" [(ngModel)]="precioMax">
+        </div>
       </div>
 
     </div>
 
-    <div class="filters">
-
-      <label>Prioridad</label>
-      <select [(ngModel)]="prioridad">
-        <option value="BALANCEADO">Balanceado</option>
-        <option value="PRECIO">Mejor Precio</option>
-        <option value="TIEMPO">Entrega Rápida</option>
-        <option value="CALIDAD">Calidad</option>
-      </select>
-
-      <label>Presupuesto mínimo</label>
-      <input type="number" [(ngModel)]="precioMin">
-
-      <label>Presupuesto máximo</label>
-      <input type="number" [(ngModel)]="precioMax">
-
-    </div>
-
     <button class="request-panel__button"
-            (click)="buscarProveedoresRFQ()"
+            (click)="buscarProveedoresRFQ(); mostrarCarritoMovil = false"
             [disabled]="requestItems.length === 0">
       Buscar Proveedores →
     </button>

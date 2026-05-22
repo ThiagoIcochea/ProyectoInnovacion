@@ -1,19 +1,23 @@
-$bg-app: #0f172a;
-$bg-surface: #111827;
-$bg-card: #1e293b;
-$bg-elevated: #273449;
+$bg-app: #0b1120;
+$bg-surface: #10192d;
+$bg-card: rgba(16, 25, 45, 0.92);
+$bg-elevated: #18253f;
 
-$primary: #3b82f6;
-$primary-light: #60a5fa;
+$primary: #4f8cff;
+$primary-light: #8bb8ff;
 $primary-dark: #2563eb;
 
-$text-primary: #e5e7eb;
-$text-secondary: #9ca3af;
-$text-muted: #6b7280;
+$text-primary: #edf2ff;
+$text-secondary: #a8b2cc;
+$text-muted: #7182a8;
 
-$border: #374151;
+$border: rgba(148, 163, 184, 0.18);
 
 $success: #22c55e;
 $warning: #f59e0b;
-$danger: #ef4444;
+$danger: #f43f5e;
 $info: #38bdf8;
+
+$surface-strong: #0f172a;
+$surface-soft: rgba(255, 255, 255, 0.03);
+$overlay: rgba(2, 6, 23, 0.7);

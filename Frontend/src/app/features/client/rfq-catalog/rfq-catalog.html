@@ -1,4 +1,19 @@
 <div class="catalog-page">
+  <div
+    class="request-overlay"
+    [class.is-open]="mostrarSolicitudMovil"
+    (click)="cerrarSolicitudMovil()">
+  </div>
+
+  <button
+    type="button"
+    class="request-panel__fab"
+    (click)="toggleSolicitudMovil()"
+    [attr.aria-expanded]="mostrarSolicitudMovil"
+    aria-label="Abrir o cerrar Mi Solicitud">
+    <span class="request-panel__fab-text">Mi Solicitud</span>
+    <span class="request-panel__fab-count">{{ requestItems.length }}</span>
+  </button>
 
   <aside class="filters-panel">
     <div class="filter-section">
@@ -125,10 +140,22 @@
     </div>
   </section>
 
-  <aside class="request-panel">
+  <aside class="request-panel" [class.is-open]="mostrarSolicitudMovil">
     <div class="request-panel__header">
-      <h2>Mi Solicitud</h2>
-      <span>{{ requestItems.length }} ítems</span>
+      <div class="request-panel__title-group">
+        <div class="request-panel__step">
+          RFQ Inteligente
+        </div>
+
+        <div class="request-panel__title-row">
+          <div>
+            <h2>Mi Solicitud</h2>
+            <p>{{ requestItems.length }} ítems seleccionados</p>
+          </div>
+
+          <span class="request-panel__counter">{{ requestItems.length }}</span>
+        </div>
+      </div>
     </div>
 
     <div class="request-list">
@@ -156,7 +183,7 @@
     </div>
 
     <div class="request-config">
-      <div class="config-item">
+      <div class="config-item config-item--full">
         <label for="prioridad">Prioridad:</label>
 
         <select
@@ -171,7 +198,7 @@
         </select>
       </div>
 
-      <div class="config-item">
+      <div class="config-item config-item--full">
         <label>Presupuesto:</label>
 
         <div class="price-inputs">

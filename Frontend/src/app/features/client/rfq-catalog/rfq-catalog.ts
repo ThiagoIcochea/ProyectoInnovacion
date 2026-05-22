@@ -15,6 +15,7 @@ export class RfqCatalogComponent implements OnInit {
   products: any[] = [];
   requestItems: any[] = [];
   filtros: any = { categorias: [], marcas: [] };
+  mostrarSolicitudMovil = false;
 
   selectedCategories: number[] = [];
   selectedBrands: number[] = [];
@@ -188,6 +189,14 @@ export class RfqCatalogComponent implements OnInit {
 
     this.guardarCarritoLocal();
     this.cdr.detectChanges();
+  }
+
+  toggleSolicitudMovil(): void {
+    this.mostrarSolicitudMovil = !this.mostrarSolicitudMovil;
+  }
+
+  cerrarSolicitudMovil(): void {
+    this.mostrarSolicitudMovil = false;
   }
 
   buscarProveedoresRFQ(): void {
