@@ -12,37 +12,43 @@
     <aside class="inbox-card">
       <div class="inbox-header">
         <h2>Bandeja de entrada</h2>
-        <span>12 nuevas</span>
+        
+        <span>{{(requests$ | async )?.length || 0 }} solicitudes</span>
       </div>
 
       <div class="search-box">Buscar por ID o cliente...</div>
 
-      <div class="inbox-list">
-        <button
+      <div class="inbox-list"> 
+        
+       <button
           class="inbox-item"
-          *ngFor="let request of requests; let i = index"
-          [class.active]="i === 0"
+          *ngFor="let request of (requests$ | async )"
+          [class.active]="selectedRequest?.idSolicitud === request.idSolicitud"
+          (click)="selectRequest(request)"
         >
           <div>
-            <strong>{{ request.id }}</strong>
-            <p>{{ request.client }}</p>
-            <small>{{ request.items }}</small>
+            <strong> {{ getRfQCode(request) }}</strong>
+            <p>{{ request.nombreEmpresa || 'Sin empresa' }}</p>
+            <small> Número de productos:  {{ request.detalles?.length ||  0    }}    </small>
           </div>
 
           <div class="inbox-meta">
-            <span>{{ request.time }}</span>
-            <em>{{ request.status }}</em>
+            <span>{{ getFecha(request.fechaCreacion) }}   {{ getHora(request.fechaCreacion)}}    </span>
+            <em>{{ request.estado }}</em>
           </div>
         </button>
-      </div>
+        
+      </div> 
+
     </aside>
 
-    <section class="request-detail-card">
+    
+<section class="request-detail-card">
       <div class="detail-header">
         <div>
-          <span class="status-pill">Nueva solicitud</span>
-          <h2>Solicitud RFQ-2026-0891</h2>
-          <p>Recibida el 24 Abr 2026, 10:45 AM</p>
+          <span class="status-pill"> {{selectedRequest?.estado}}</span>
+          <h2>Solicitud {{getRfQCode(selectedRequest)}}       </h2>
+          <p>  {{ getFechaCompleta(selectedRequest?.fechaCreacion) }}        </p>
         </div>
       </div>
 
@@ -50,8 +56,8 @@
         <div class="client-avatar">TN</div>
 
         <div>
-          <h3>TechNova S.A.</h3>
-          <p>contacto@technova.com · +51 987 654 321</p>
+          <h3> {{selectedRequest?.nombreEmpresa  || 'Cargando solicitud de empresa'      }}    </h3>
+          <p> {{selectedRequest?.correoCliente}} · +51 {{selectedRequest?.telefonoCliente     }}     </p>
           <span>Av. Principal 123, San Isidro, Lima, Perú</span>
         </div>
       </div>
@@ -68,23 +74,23 @@
           <div>Cant.</div>
         </div>
 
-        <div class="products-table__row" *ngFor="let product of products">
+        <div class="products-table__row" *ngFor="let product of productos">
           <div class="product-cell">
             <div class="product-thumb"></div>
 
             <div>
-              <strong>{{ product.name }}</strong>
-              <span>{{ product.brand }}</span>
+              <strong>{{ product.nombreProducto }}</strong>
+              <span>{{ product.marca }}</span>
             </div>
           </div>
 
           <div>
             <ul>
-              <li *ngFor="let spec of product.specs">{{ spec }}</li>
+              <li *ngFor="let spec of product.especificaciones">  {{spec.nombre}} {{spec.valor}}       </li>
             </ul>
           </div>
 
-          <div class="qty">{{ product.qty }}</div>
+          <div class="qty">{{ product.cantidad }}</div>
         </div>
       </div>
 
@@ -93,4 +99,32 @@
       </div>
     </section>
   </div>
+
+
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

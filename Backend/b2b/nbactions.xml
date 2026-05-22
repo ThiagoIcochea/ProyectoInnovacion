@@ -7,4 +7,11 @@
                 <goal>spring-boot:run</goal>
             </goals>
         </action>
+        <action>
+            <actionName>CUSTOM-Correrprograma</actionName>
+            <displayName>Correrprograma</displayName>
+            <goals>
+                <goal>spring-boot:run</goal>
+            </goals>
+        </action>
     </actions>

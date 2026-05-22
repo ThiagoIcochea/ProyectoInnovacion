@@ -11,6 +11,15 @@ import com.nethink.b2b.repository.SolicitudRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
 import com.nethink.b2b.service.PagoService;
 import com.nethink.b2b.service.SolicitudService;
+//se añadio val
+import com.nethink.b2b.entity.Proveedor; 
+
+
+import com.nethink.b2b.repository.ProveedorRepository;
+
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+
 
 import java.util.List;
 import java.security.Principal;
@@ -29,19 +38,24 @@ public class SolicitudController {
     private final PagoService pagoService;
     private final UsuarioRepository usuarioRepo;
     private final SolicitudRepository solicitudRepo;
+    private final ProveedorRepository proveedorRepo;  
 
     public SolicitudController(
             SolicitudService solicitudService,
             MetodoPagoRepository metodoPagoRepository,
             PagoService pagoService,
             UsuarioRepository usuarioRepo,
-            SolicitudRepository solicitudRepo
+            SolicitudRepository solicitudRepo,
+            ProveedorRepository proveedorRepo
+            
     ) {
         this.solicitudService = solicitudService;
         this.metodoPagoRepository = metodoPagoRepository;
         this.pagoService = pagoService;
         this.usuarioRepo = usuarioRepo;
         this.solicitudRepo = solicitudRepo;
+        this.proveedorRepo= proveedorRepo; 
+        
     }
 
     
@@ -142,4 +156,53 @@ public ResponseEntity<?> cancelar(
             )
     );
 }
+
+
+
+
+
+@GetMapping("/proveedor/mis-solicitudes")
+public ResponseEntity<List<SolicitudResponse>> listarMisSolicitudesProveedor(
+        Principal principal
+) {
+
+    Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    Proveedor proveedor = proveedorRepo.findByUsuario_Correo(principal.getName())
+            .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "El usuario no tiene un proveedor asociado")
+                );
+
+    return ResponseEntity.ok(
+            solicitudService.listarSolicitudesProveedor(
+                    proveedor.getIdProveedor()
+            )
+    );
+}
+
+
+//@GetMapping("/proveedor/{idProveedor}")
+//public ResponseEntity<List<SolicitudResponse>>
+//listarSolicitudesProveedor(
+//        @PathVariable Integer idProveedor
+//) {
+
+//    return ResponseEntity.ok(
+ //           solicitudService
+ //                   .listarSolicitudesProveedor(
+ //                           idProveedor
+ //                   )
+  //  );
+//}
+
+
+
+
+
+
+
+
+
 }

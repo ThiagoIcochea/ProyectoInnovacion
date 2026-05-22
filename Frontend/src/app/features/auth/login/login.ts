@@ -36,6 +36,7 @@ export class LoginComponent {
 
           localStorage.setItem(APP_STORAGE_KEYS.token, res.token);
           localStorage.setItem(APP_STORAGE_KEYS.role, res.rol);
+          
 
           setTimeout(() => {
             this.redirectByRole(res.rol);

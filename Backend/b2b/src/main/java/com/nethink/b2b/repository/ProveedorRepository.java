@@ -24,4 +24,5 @@ public interface ProveedorRepository
             String estado
     );
     Optional<Proveedor> findByUsuario_Correo(String correo);
+    
 }

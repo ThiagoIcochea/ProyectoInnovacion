@@ -8,6 +8,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+//se añadio para que detalle solicitud pueda gestionarse en la lista val
+import com.nethink.b2b.entity.DetalleSolicitud;
+
+
 
 @Repository
 public interface SolicitudRepository extends JpaRepository<Solicitud, Integer> {
@@ -43,4 +47,43 @@ void actualizarPago(
         @Param("estado") Solicitud.EstadoSolicitud estado,
         @Param("direccion") String direccion
 );
+
+
+// consulta de lista de solicitudes desde la perspectiva del proveedor
+
+@Query("""
+SELECT DISTINCT s
+FROM Solicitud s
+JOIN FETCH s.usuario
+JOIN FETCH s.proveedor
+JOIN FETCH s.empresaCompradora
+WHERE s.proveedor.idProveedor = :idProveedor
+""")
+List<Solicitud> listarSolicitudes(@Param("idProveedor") Integer idProveedor);
+
+
+
+//@Query("""
+    //SELECT s FROM Solicitud s
+   // LEFT JOIN FETCH s.usuario u
+   // LEFT JOIN FETCH s.empresaCompradora ec
+    //WHERE s.proveedor.idProveedor = :idProveedor
+//""")
+//List<Solicitud> listarSolicitudes(@Param("idProveedor") Integer idProveedor)        ;
+
+//consulta de los detalles de las solicitudes
+
+//@Query("""
+//    SELECT d FROM DetalleSolicitud d
+ //   LEFT JOIN FETCH d.proveedorProducto pp
+ //   LEFT JOIN FETCH pp.producto p
+ //   LEFT JOIN FETCH p.categoria
+//    WHERE d.solicitud.idSolicitud = :idSolicitud
+//""")
+//List<DetalleSolicitud> listarDetalles(@Param("idSolicitud") Integer idSolicitud);
+
+
+
+
+
 }

@@ -16,6 +16,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import io.jsonwebtoken.Claims;
+
+
+
+
+
+
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -28,6 +36,10 @@ protected void doFilterInternal(HttpServletRequest request,
                                 FilterChain filterChain)
         throws ServletException, IOException {
 
+    
+    //System.out.println("=== ENTRA JWT FILTER ===");
+//System.out.println("URI: " + request.getRequestURI());
+    
     String path = request.getRequestURI();
 
     if (path.startsWith("/files/")) {
@@ -40,25 +52,49 @@ protected void doFilterInternal(HttpServletRequest request,
     if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
         String token = authHeader.substring(7);
-
+//System.out.println("🔥 REQUEST EN FILTER");
         try {
             if (!jwtUtil.isTokenValid(token)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
+            
+            //var claims = jwtUtil.parseToken(token);
+
+//String correo = claims.getSubject();
+//String rol = claims.get("rol", String.class);
+ 
+//System.out.println("=== JWT DEBUG ===");
+//System.out.println("CORREO: " + correo);
+//System.out.println("ROL: " + rol);
+
+
 
             String correo = jwtUtil.extractCorreo(token);
             String rol = jwtUtil.extractRol(token);
 
             List<GrantedAuthority> authorities =
                     List.of(new SimpleGrantedAuthority("ROLE_" + rol));
+            
+            
+            System.out.println("AUTHORITIES: " + authorities);
+            
+            
 
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(correo, null, authorities);
+            
+            
+System.out.println("AUTH SETEADO CORRECTAMENTE");
+System.out.println("IS AUTHENTICATED: " + auth.isAuthenticated());
+            
 
             SecurityContextHolder.getContext().setAuthentication(auth);
 
         } catch (Exception e) {
+            
+            System.out.println("❌ ERROR JWT: " + e.getMessage());
+            
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

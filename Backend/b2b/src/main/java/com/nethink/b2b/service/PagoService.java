@@ -14,9 +14,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.nethink.b2b.dto.response.PagoResponse; 
+import java.util.ArrayList; 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
+//se añadio
+import java.util.List; 
 
 @Service
 public class PagoService {
@@ -27,6 +31,7 @@ public class PagoService {
     private final UsuarioRepository usuarioRepo;
     private final Cloudinary cloudinary;
     private final InventarioReservaService inventarioReservaService;
+    
 
     public PagoService(
             PagoRepository pagoRepo,
@@ -70,7 +75,7 @@ public class PagoService {
         );
         inventarioReservaService.confirmarReserva(sol.getIdSolicitud());
         Pago pago = new Pago();
-        pago.setIdSolicitud(idSolicitud);
+        pago.setSolicitud(sol);   // setIdSolicitud(idSolicitud) revisar con thiago
         pago.setEntidad(entidad);
         pago.setCodigoOperacion(codigoOp);
         pago.setMonto(sol.getTotal());
@@ -104,4 +109,161 @@ public class PagoService {
 
         return uploadResult.get("secure_url").toString();
     }
+    
+    
+    
+    
+    
+   
+
+    
+// lista de pagos de proveedor autenticado
+    public List<PagoResponse> listarPagosProveedor(Integer idProveedor    ) {
+
+        List<Pago> pagos = pagoRepo.listarPagosProveedor(idProveedor);
+
+        List<PagoResponse> response =
+                new ArrayList<>();
+
+        for (Pago p : pagos) {
+
+            PagoResponse dto =
+                    new PagoResponse();
+
+            // =====================================
+            // DATOS PAGO
+            // =====================================
+
+            dto.setIdPago(
+                    p.getIdPago());
+
+            //dto.setMonto(
+            //        p.getMonto());
+
+            dto.setMetodo(
+                    p.getMetodo());
+
+            dto.setEntidad(
+                    p.getEntidad());
+
+            dto.setCodigoOperacion(
+                    p.getCodigoOperacion());
+
+            dto.setEstado(
+                    p.getEstado().name());
+
+            dto.setFechaPago(
+                    p.getFechaPago());
+
+            dto.setComprobanteUrl(
+                    p.getComprobanteUrl());
+
+            // =====================================
+            // DATOS SOLICITUD
+            // =====================================
+
+            
+            Solicitud s= p.getSolicitud();
+            
+            dto.setIdSolicitud(
+                    p.getSolicitud()
+                     .getIdSolicitud());
+            
+            
+            
+            dto.setTotalSolicitud(
+                    p.getSolicitud()
+                     .getTotal());
+            
+            
+            dto.setFechaSolicitud(s.getFechaCreacion()); 
+                
+            
+            
+
+            //dto.setNombreClienteEmpresa(
+            //        p.getSolicitud()
+            //         .getNombreEmpresa());
+
+            //dto.setCorreoCliente(
+             //       p.getSolicitud()
+             //        .getCorreoCliente());
+
+            
+            if (s.getUsuario() != null) {
+
+                dto.setNombreClienteEmpresa(
+                        s.getUsuario().getNombres()
+                        + " "
+                        + s.getUsuario().getApellidos()
+                );
+
+                dto.setCorreoCliente(
+                        s.getUsuario().getCorreo()
+                );
+            }
+            
+
+            if (s.getEmpresaCompradora() != null) {
+
+                dto.setNombreEmpresa(
+                        s.getEmpresaCompradora()
+                         .getRazonSocial()
+                );
+
+                dto.setRucEmpresa(
+                        s.getEmpresaCompradora()
+                         .getRuc()
+                );
+            }
+            
+            
+            
+            
+            response.add(dto);
+        }
+
+        return response;
+    }
+
+    
+    
+    
+    // actualizar estado del pago desde proveedor
+    
+    
+    @Transactional
+public void aprobarPago(Integer idPago) {
+
+    Pago pago = pagoRepo.findById(idPago)
+            .orElseThrow(() ->
+                    new RuntimeException("Pago no encontrado"));
+
+    // =========================
+    // ACTUALIZAR PAGO
+    // =========================
+
+    pago.setEstado(
+            Pago.EstadoPago.VALIDANDO
+    );
+
+    // =========================
+    // ACTUALIZAR SOLICITUD
+    // =========================
+
+    Solicitud solicitud = pago.getSolicitud();
+
+    solicitud.setEstado(
+            Solicitud.EstadoSolicitud.PAGADA
+    );
+
+    pagoRepo.save(pago);
+
+}
+    
+    
+    
+    
+    
+    
 }

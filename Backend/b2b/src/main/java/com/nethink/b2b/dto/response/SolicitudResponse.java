@@ -2,6 +2,7 @@ package com.nethink.b2b.dto.response;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List  ; 
 
 public class SolicitudResponse {
 
@@ -20,6 +21,15 @@ public class SolicitudResponse {
     private BigDecimal total;
 
     private String estado;
+    
+    
+    //se agregó tres atributos para mostrarle al proveedor estos datos
+    private String nombreCliente;
+    private String correoCliente;
+    private List<DetalleSolicitudResponse> detalles;
+    
+    private String telefonoCliente;
+    
 
     private LocalDateTime fechaCreacion;
 
@@ -94,4 +104,63 @@ public class SolicitudResponse {
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
+    
+    // se añadio get y set de atributos nombrecliente, correodecliente y detalles de solicitud response  val
+    public String getNombreCliente(){
+      return nombreCliente; 
+    
+    }
+    
+    
+    public void setNombreCliente(String nombreCliente){
+    
+       this.nombreCliente=nombreCliente; 
+    
+    
+    }
+    
+    
+    public String getCorreoCliente(){
+    
+    return correoCliente; 
+    
+    } 
+    
+    
+    public void setCorreoCliente(String correoCliente){
+    
+    this.correoCliente=correoCliente; 
+    
+    
+    
+    }
+    
+    
+    public List <DetalleSolicitudResponse>  getDetalles(){
+    
+      return detalles; 
+    
+    
+    }
+    
+    
+    public void setDetalles(List<DetalleSolicitudResponse> detalles){
+      this.detalles=detalles; 
+    }
+    
+    
+    
+   public String getTelefonoCliente() {
+    return telefonoCliente;
+}
+
+public void setTelefonoCliente(String telefonoCliente) {
+    this.telefonoCliente = telefonoCliente;
+} 
+    
+    
+    
+    
+    
+    
 }
