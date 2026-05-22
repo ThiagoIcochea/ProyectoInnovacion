@@ -145,9 +145,10 @@
   }
 }
 
+/* 💡 Corregido con auto-fill: Se adapta dinámicamente según el tamaño disponible */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.25rem;
 }
 
@@ -162,6 +163,7 @@
 }
 
 .product-image-container {
+  width: 100%;
   height: 180px;
   background:
     linear-gradient(45deg, rgba(148, 163, 184, 0.12) 25%, transparent 25%),
@@ -170,22 +172,15 @@
   background-size: 22px 22px;
   display: grid;
   place-items: center;
+  overflow: hidden;
 }
 
+/* 💡 Imagen Responsiva Automatizada */
 .product-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-}
-
-.product-image {
-  height: 170px;
-  background:
-    linear-gradient(45deg, rgba(148, 163, 184, 0.12) 25%, transparent 25%),
-    linear-gradient(-45deg, rgba(148, 163, 184, 0.12) 25%, transparent 25%),
-    #162033;
-  background-size: 22px 22px;
 }
 
 .product-body {
@@ -482,16 +477,35 @@
   }
 }
 
+/* ==========================================================================
+   DISEÑO RESPONSIVO OPTIMIZADO
+   ========================================================================== */
+
+/* 1. Ajuste para Laptops comunes y Tablets grandes (Medianas) */
 @media (max-width: 1300px) {
   .catalog-page {
-    grid-template-columns: 1fr;
+    grid-template-columns: 240px 1fr; /* Mantiene filtros e inventario juntos */
   }
 
   .request-panel {
     position: static;
+    grid-column: span 2; /* El panel de solicitudes se acomoda abajo limpiamente */
+  }
+}
+
+/* 2. Ajuste para Tablets y Celulares (Pantallas pequeñas) */
+@media (max-width: 900px) {
+  .catalog-page {
+    grid-template-columns: 1fr; /* Todo pasa a un layout de una columna estable */
   }
 
-  .product-grid {
-    grid-template-columns: 1fr;
+  .request-panel {
+    grid-column: span 1;
+  }
+
+  .catalog-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 }

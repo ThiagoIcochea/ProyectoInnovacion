@@ -38,15 +38,13 @@
     <div class="product-grid">
       <div class="product-card" *ngFor="let product of paginatedProducts">
         <div class="product-image-container">
-          <img
-            [src]="product.imagenes?.[0]?.url || 'assets/no-image.png'"
-            class="product-img"
+        <img
+            [src]="product.imagenes?.[0]?.URL || 'activos/no-image.png'"
+            class="producto-img"
             loading="lazy"
             decoding="async"
-            alt="Imagen de producto"
-            title="Imagen de producto"
-          [attr.alt]="product.producto ? 'Imagen de ' + product.producto : 'Imagen de producto'"
-          [attr.title]="product.producto ? 'Imagen de ' + product.producto : 'Imagen de producto'"
+            [alt]="product.producto ? 'Imagen de ' + product.producto : 'Imagen de producto'"
+            [title]="product.producto ? 'Imagen de ' + product.producto : 'Imagen de producto'"
           >
         </div>
 
