@@ -122,7 +122,15 @@
             placeholder="Av. Principal 123"
           >
         </div>
-
+        <div class="form-group" *ngIf="usuario.rol === 'PROVEEDOR'">
+          <label for="ruc">RUC</label>
+          <input
+            id="ruc"
+            type="text"
+            [(ngModel)]="usuario.ruc"
+            placeholder="Número de RUC"
+          >
+        </div>
         <div class="form-group" *ngIf="usuario.rol === 'PROVEEDOR'">
           <label for="razonSocial">Razón Social</label>
           <input
@@ -132,7 +140,6 @@
             placeholder="Razón social"
           >
         </div>
-
 
         <div class="form-group full" *ngIf="usuario.rol === 'PROVEEDOR'">
           <label for="descripcion">Descripción</label>
