@@ -4,10 +4,10 @@
       <div class="sidebar__logo">N</div>
 
       <div>
-        <strong>NetProcure</strong>
+        <strong>Nethink S.A.C</strong>
 
         <span>
-          {{ isAdmin ? 'Panel Admin' : isProvider ? 'Proveedor B2B' : 'Cliente B2B' }}
+          {{ isAdmin ? 'Administrador' : isProvider ? 'Proveedor' : 'Cliente' }}
         </span>
       </div>
     </div>
@@ -199,6 +199,14 @@
 
       </nav>
     </ng-container>
+
+    <div class="sidebar__footer">
+      <a
+        [routerLink]="['/login']"
+        class="sidebar__link sidebar__link--logout">
+        Cerrar sesión
+      </a>
+    </div>
   </aside>
 
   <div class="app-content">
@@ -222,7 +230,7 @@
 
       <div class="topbar__user">
 
-        <div>
+        <div class="topbar__user-info">
           <strong>
             {{ nombreCompleto }}
           </strong>

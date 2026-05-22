@@ -29,27 +29,59 @@
   gap: 1.5rem;
 }
 
-.payment-methods,
+.payment-main,
 .payment-summary {
   background: #1e293b;
   border: 1px solid #374151;
   border-radius: 16px;
   padding: 1.5rem;
+  box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
 }
 
-.payment-methods h2,
-.payment-summary h2 {
+.step-section {
+  margin-bottom: 1.5rem;
+
+  h3 {
+    color: #e5e7eb;
+    margin: 0 0 0.75rem;
+  }
+}
+
+.map-box {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 220px;
+  max-height: 360px;
+  border-radius: 12px;
+  border: 1px solid #374151;
+  background: #0f172a;
+  margin-bottom: 0.75rem;
+}
+
+.full-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 0.9rem;
+  border-radius: 10px;
+  border: 1px solid #374151;
+  background: #0f172a;
   color: #e5e7eb;
-  margin-bottom: 1rem;
+}
+
+.methods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .method-card {
+  position: relative;
   padding: 1rem;
   border: 1px solid #374151;
   border-radius: 12px;
-  margin-bottom: 0.75rem;
   cursor: pointer;
   transition: 0.2s;
+  background: #111827;
 
   strong {
     color: #e5e7eb;
@@ -58,6 +90,10 @@
   p {
     color: #9ca3af;
     margin: 0.25rem 0 0;
+  }
+
+  small {
+    color: #9ca3af;
   }
 
   &:hover {
@@ -70,54 +106,97 @@
   }
 }
 
-.upload-box {
+.card-check {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #3b82f6;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.75rem;
+}
+
+.no-data {
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+.upload-section {
   margin-top: 1rem;
   padding: 1rem;
   border: 1px dashed #374151;
   border-radius: 12px;
-  text-align: center;
+  background: #111827;
+}
 
-  p {
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+
+  label {
     color: #9ca3af;
-    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
   }
 
-  button {
-    background: #3b82f6;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
+  input {
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid #374151;
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 0 0.9rem;
+    outline: none;
   }
 }
 
-.summary-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.preview-box {
+  margin-top: 0.75rem;
 
-  div {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  span {
+  p {
     color: #9ca3af;
+    margin: 0 0 0.5rem;
   }
+}
+
+.voucher-preview {
+  width: 100%;
+  max-height: 240px;
+  border-radius: 10px;
+  border: 1px solid #374151;
+  object-fit: cover;
+  display: block;
+}
+
+.payment-summary {
+  h3 {
+    color: #e5e7eb;
+    margin: 0 0 1rem;
+  }
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+  color: #9ca3af;
 
   strong {
     color: #e5e7eb;
   }
 }
 
-.total {
-  border-top: 1px solid #374151;
-  padding-top: 0.75rem;
-
+.total-big {
   strong {
     color: #60a5fa;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
 }
 
@@ -135,67 +214,28 @@
   &:hover {
     background: #2563eb;
   }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
-
-
-.payment-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
-}
-
-.map-box {
-  width: 100%;
-  height: 280px;
-  border-radius: 12px;
-  border: 1px solid #ddd;
-  margin-bottom: 10px;
-}
-
-.full-input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-.method-card {
-  padding: 12px;
-  border: 1px solid #ddd;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.method-card.active {
-  border-color: #007bff;
-  background: #f0f6ff;
-}
-
-.payment-summary {
-  padding: 15px;
-  border: 1px solid #eee;
-  border-radius: 12px;
-}
-
-.total-big {
-  font-size: 20px;
-  margin-top: 10px;
-}
-
-.confirm-btn {
-  width: 100%;
-  margin-top: 20px;
-  padding: 12px;
-  background: #28a745;
-  color: white;
-  border: none;
-  border-radius: 10px;
+.terms-note {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-top: 0.8rem;
 }
 
 @media (max-width: 1100px) {
   .payment-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .map-box {
+    aspect-ratio: 4 / 3;
   }
 }

@@ -61,6 +61,21 @@
   }
 }
 
+.specs-inline-input {
+  margin: 0 0 0.75rem 1.6rem;
+}
+
+.mini-input {
+  width: 100%;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px solid #374151;
+  background: #0f172a;
+  color: #e5e7eb;
+  padding: 0 0.75rem;
+  outline: none;
+}
+
 .price-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -146,6 +161,24 @@
   }
 }
 
+.product-image-container {
+  height: 180px;
+  background:
+    linear-gradient(45deg, rgba(148, 163, 184, 0.12) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(148, 163, 184, 0.12) 25%, transparent 25%),
+    #162033;
+  background-size: 22px 22px;
+  display: grid;
+  place-items: center;
+}
+
+.product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .product-image {
   height: 170px;
   background:
@@ -164,20 +197,21 @@
   justify-content: space-between;
   gap: 1rem;
 
-  span {
+  .brand-label {
     color: #9ca3af;
     text-transform: uppercase;
     font-weight: 800;
     font-size: 0.78rem;
   }
 
-  strong {
+  .category-badge {
     color: #22c55e;
     background: rgba(34, 197, 94, 0.12);
     padding: 0.25rem 0.55rem;
     border-radius: 999px;
     font-size: 0.72rem;
     text-transform: uppercase;
+    font-weight: 800;
   }
 }
 
@@ -187,6 +221,23 @@
   font-size: 1.05rem;
 }
 
+.specs-mini-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.spec-pill {
+  background: rgba(96, 165, 250, 0.12);
+  color: #93c5fd;
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
 .product-card p {
   color: #9ca3af;
   margin: 0 0 1rem;
@@ -194,26 +245,30 @@
   font-size: 0.9rem;
 }
 
+.description {
+  color: #9ca3af;
+}
+
 .product-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
 
-  span {
-    color: #9ca3af;
-    font-size: 0.85rem;
-  }
+.product-id {
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
 
-  button {
-    height: 34px;
-    padding: 0 0.85rem;
-    border: none;
-    border-radius: 9px;
-    background: #3b82f6;
-    color: #ffffff;
-    cursor: pointer;
-    font-weight: 700;
-  }
+.add-button {
+  height: 34px;
+  padding: 0 0.85rem;
+  border: none;
+  border-radius: 9px;
+  background: #3b82f6;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 700;
 }
 
 .request-panel {
@@ -282,6 +337,25 @@
   }
 }
 
+.request-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.btn-remove {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
 .qty-row {
   margin-top: 0.65rem;
   display: flex;
@@ -306,6 +380,49 @@
   strong {
     min-width: 28px;
     text-align: center;
+  }
+}
+
+.request-config {
+  margin: 1rem 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.config-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    color: #9ca3af;
+    font-size: 0.9rem;
+  }
+}
+
+.priority-select {
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #374151;
+  background: #0f172a;
+  color: #e5e7eb;
+  padding: 0 0.8rem;
+}
+
+.price-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+
+  input {
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid #374151;
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 0 0.8rem;
+    outline: none;
   }
 }
 
@@ -352,9 +469,16 @@
   color: #ffffff;
   text-decoration: none;
   font-weight: 800;
+  border: none;
+  cursor: pointer;
 
   &:hover {
     background: #2563eb;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 }
 

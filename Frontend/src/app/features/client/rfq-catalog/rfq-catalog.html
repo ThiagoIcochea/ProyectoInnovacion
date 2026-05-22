@@ -11,7 +11,7 @@
         </label>
         <div class="specs-inline-input" *ngIf="selectedCategories.includes(cat.id)">
           <input type="text" [(ngModel)]="specsPorCategoria[cat.id]" 
-                 placeholder="Espec. para {{cat.nombre}}..." class="mini-input">
+                placeholder="Espec. para {{cat.nombre}}..." class="mini-input">
         </div>
       </div>
     </div>
@@ -38,15 +38,26 @@
     <div class="product-grid">
       <div class="product-card" *ngFor="let product of paginatedProducts">
         <div class="product-image-container">
-          <img [src]="product.imagenes?.[0]?.url || 'assets/no-image.png'" class="product-img">
+          <img
+            [src]="product.imagenes?.[0]?.url || 'assets/no-image.png'"
+            class="product-img"
+            loading="lazy"
+            decoding="async"
+            alt="Imagen de producto"
+            title="Imagen de producto"
+          [attr.alt]="product.producto ? 'Imagen de ' + product.producto : 'Imagen de producto'"
+          [attr.title]="product.producto ? 'Imagen de ' + product.producto : 'Imagen de producto'"
+          >
         </div>
+
         <div class="product-body">
           <div class="product-meta">
             <span class="brand-label">{{ product.marca }}</span>
             <span class="category-badge">{{ product.categoria }}</span>
           </div>
+
           <h3>{{ product.producto }}</h3>
-          
+
           <div class="specs-mini-grid" *ngIf="product.especificaciones?.length">
             <span class="spec-pill" *ngFor="let s of product.especificaciones.slice(0,3)">
               {{ s.nombre }}: {{ s.valor }}
@@ -54,6 +65,7 @@
           </div>
 
           <p class="description">{{ product.descripcion }}</p>
+
           <div class="product-footer">
             <span class="product-id">#{{ product.idProducto }}</span>
             <button class="add-button" (click)="agregarProducto(product)">+ Agregar</button>
@@ -93,8 +105,8 @@
 
     <div class="request-config">
       <div class="config-item">
-        <label>Prioridad:</label>
-        <select [(ngModel)]="prioridad" class="priority-select">
+        <label for="prioridad">Prioridad:</label>
+        <select id="prioridad" [(ngModel)]="prioridad" class="priority-select">
           <option value="BALANCEADO">Balanceado</option>
           <option value="PRECIO">Precio</option>
           <option value="TIEMPO">Tiempo</option>
@@ -105,8 +117,18 @@
       <div class="config-item">
         <label>Presupuesto:</label>
         <div class="price-inputs">
-          <input type="number" [(ngModel)]="precioMin" placeholder="Min">
-          <input type="number" [(ngModel)]="precioMax" placeholder="Max">
+          <input
+            type="number"
+            [(ngModel)]="precioMin"
+            placeholder="Min"
+            aria-label="Presupuesto mínimo"
+          >
+          <input
+            type="number"
+            [(ngModel)]="precioMax"
+            placeholder="Max"
+            aria-label="Presupuesto máximo"
+          >
         </div>
       </div>
     </div>

@@ -4,6 +4,12 @@
   gap: 1.5rem;
 }
 
+.loading-box {
+  color: #e5e7eb;
+  padding: 2rem;
+  font-size: 1.1rem;
+}
+
 .page-title {
   display: flex;
   align-items: flex-start;
@@ -203,6 +209,17 @@
   }
 }
 
+.summary-list .company-block {
+  display: grid;
+  justify-content: stretch;
+  gap: 0.35rem;
+  text-align: left;
+}
+
+.summary-list .company-block strong {
+  text-align: left;
+}
+
 .info-box {
   margin-top: 1rem;
   padding: 1rem;
@@ -250,10 +267,4 @@
     font-size: 0.9rem;
     line-height: 1.5;
   }
-
-  .loading-box {
-  color: white;
-  padding: 2rem;
-  font-size: 1.2rem;
-}
 }
