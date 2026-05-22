@@ -261,9 +261,14 @@
       </div>
 
       <div class="topbar__actions" *ngIf="isProvider">
-        <span class="api-pill">
-          API conectada
-        </span>
+        <span
+  class="api-pill"
+  [class.api-pill--ok]="estadoApi === 'OK'"
+  [class.api-pill--error]="estadoApi !== 'OK'">
+
+  API {{ estadoApi }}
+
+</span>
       </div>
 
       <div class="topbar__user">
