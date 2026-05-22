@@ -20,6 +20,7 @@
             [src]="previewFoto"
             class="avatar-image"
             alt="Foto de perfil"
+            (error)="onImageError()"
           >
 
           <div *ngIf="!previewFoto" class="avatar">
@@ -30,35 +31,43 @@
 
       </div>
 
-      <div class="form-group full">
-        <label for="modoImagen">Foto de perfil</label>
+      <div class="photo-controls">
+        <div class="form-group full">
+          <label for="modoImagen">Foto de perfil</label>
 
-        <select id="modoImagen" [(ngModel)]="modoImagen">
-          <option value="archivo">Subir desde mi computadora</option>
-          <option value="url">Usar URL de imagen</option>
-        </select>
-      </div>
+          <select id="modoImagen" [(ngModel)]="modoImagen">
+            <option value="archivo">Subir desde mi computadora</option>
+            <option value="url">Usar URL de imagen</option>
+          </select>
+        </div>
 
-      <div class="form-group full" *ngIf="modoImagen === 'archivo'">
-        <input
-          id="fotoArchivo"
-          type="file"
-          accept="image/*"
-          (change)="seleccionarFoto($event)"
-          aria-label="Subir foto de perfil"
-          title="Subir foto de perfil"
-        >
-      </div>
+        <div class="upload-box" *ngIf="modoImagen === 'archivo'">
+          <input
+            id="fotoArchivo"
+            type="file"
+            accept="image/*"
+            (change)="seleccionarFoto($event)"
+            aria-label="Subir foto de perfil"
+            title="Subir foto de perfil"
+          >
 
-      <div class="form-group full" *ngIf="modoImagen === 'url'">
-        <input
-          id="fotoUrl"
-          type="text"
-          placeholder="https://..."
-          [(ngModel)]="fotoUrl"
-          aria-label="URL de foto de perfil"
-          title="URL de foto de perfil"
-        >
+          <label class="upload-button" for="fotoArchivo">
+            Seleccionar imagen
+          </label>
+
+          <span>{{ nombreArchivoFoto || 'Ninguna imagen seleccionada' }}</span>
+        </div>
+
+        <div class="form-group full" *ngIf="modoImagen === 'url'">
+          <input
+            id="fotoUrl"
+            type="text"
+            placeholder="https://..."
+            [(ngModel)]="fotoUrl"
+            aria-label="URL de foto de perfil"
+            title="URL de foto de perfil"
+          >
+        </div>
       </div>
 
       <div class="form-grid">

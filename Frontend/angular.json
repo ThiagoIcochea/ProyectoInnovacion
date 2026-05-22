@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "netprocure-frontend": {
+    "nethink-frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -63,10 +63,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "netprocure-frontend:build:production"
+              "buildTarget": "nethink-frontend:build:production"
             },
             "development": {
-              "buildTarget": "netprocure-frontend:build:development"
+              "buildTarget": "nethink-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"

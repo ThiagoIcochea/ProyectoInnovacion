@@ -11,8 +11,8 @@ import { FormsModule } from '@angular/forms';
 })
 export class AdminSettingsComponent {
   config = {
-    systemName: 'NetProcure',
-    supportEmail: 'soporte@netprocure.com',
+    systemName: 'Nethink',
+    supportEmail: 'soporte@nethink.com',
     timezone: 'America/Lima',
     maintenanceMode: false,
     aiEnabled: true

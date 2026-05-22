@@ -38,6 +38,8 @@ export class ProfileComponent implements OnInit {
 
   archivoFoto: File | null = null;
 
+  nombreArchivoFoto: string = '';
+
   fotoUrl: string = '';
 
   modoImagen: string = 'archivo';
@@ -135,6 +137,7 @@ export class ProfileComponent implements OnInit {
     if (!file) return;
 
     this.archivoFoto = file;
+    this.nombreArchivoFoto = file.name;
 
     const reader = new FileReader();
 
@@ -209,6 +212,7 @@ export class ProfileComponent implements OnInit {
       next: () => {
 
         this.archivoFoto = null;
+        this.nombreArchivoFoto = '';
         this.fotoUrl = '';
 
         this.cargarPerfil();
