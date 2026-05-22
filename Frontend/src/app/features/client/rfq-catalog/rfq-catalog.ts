@@ -173,5 +173,12 @@ export class RfqCatalogComponent implements OnInit {
           alert('No se encontraron proveedores que cumplan con los requisitos de tu carrito.');
         }
       });
+      
   }
+   // rfq-catalog.component.ts
+getImageAlt(productName: string): string {
+  return `Imagen de ${productName || 'producto'}`;
+}
+
+
 }

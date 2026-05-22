@@ -155,7 +155,7 @@
 .quotation-table__head,
 .quotation-table__row {
   display: grid;
-  grid-template-columns: 2fr 0.6fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 0.6fr 1fr 1fr;
   gap: 1rem;
   align-items: center;
 }
@@ -258,6 +258,28 @@
   }
 }
 
+.ruc-box {
+  margin: 1rem 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    color: #9ca3af;
+    font-size: 0.9rem;
+  }
+
+  input {
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid #374151;
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 0 0.9rem;
+    outline: none;
+  }
+}
+
 .text-success {
   color: #22c55e !important;
 }
@@ -316,6 +338,27 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .quotation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-card {
+    position: static;
+  }
+}
+
+@media (max-width: 900px) {
+  .quotation-table__head {
+    display: none;
+  }
+
+  .quotation-table__row {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
 }
 
 .term-box {

@@ -17,11 +17,13 @@
         <div id="map" class="map-box"></div>
 
         <input
+          id="direccionEntrega"
           type="text"
           [(ngModel)]="direccionEntrega"
           placeholder="Ubicación detectada automáticamente"
           class="full-input"
           readonly
+          aria-label="Dirección de entrega"
         >
 
       </div>
@@ -61,18 +63,29 @@
         <h3>3. Datos de la Operación</h3>
 
         <div class="form-row">
-          <label>Nro. de Operación:</label>
-          <input type="text" [(ngModel)]="codigoOperacion">
+          <label for="codigoOperacion">Nro. de Operación:</label>
+          <input
+            id="codigoOperacion"
+            type="text"
+            [(ngModel)]="codigoOperacion"
+            placeholder="Ingresa el número de operación"
+          >
         </div>
 
         <div class="form-row">
-          <label>Comprobante de pago:</label>
-          <input type="file" (change)="onFileSelected($event)" accept="image/*">
+          <label for="comprobantePago">Comprobante de pago:</label>
+          <input
+            id="comprobantePago"
+            type="file"
+            (change)="onFileSelected($event)"
+            accept="image/*"
+            aria-label="Subir comprobante de pago"
+          >
         </div>
 
         <div class="preview-box" *ngIf="previewUrl">
           <p>Vista previa:</p>
-          <img [src]="previewUrl" class="voucher-preview">
+          <img [src]="previewUrl" class="voucher-preview" alt="Comprobante de pago">
         </div>
 
       </div>
