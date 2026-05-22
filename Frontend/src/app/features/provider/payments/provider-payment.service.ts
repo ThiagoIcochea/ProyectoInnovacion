@@ -19,7 +19,7 @@ import { Payment } from './payments.model';
 export class PagoService {
 
   private apiUrl =
-    'http://localhost:8080';
+    'https://proyectoinnovacion.onrender.com';
 
   constructor(
     private http: HttpClient

@@ -1,3 +1,7 @@
+@import '../abstracts/radius';
+@import '../abstracts/colors';
+@import '../abstracts/mixins';
+
 .page-header {
   display: flex;
   gap: 1rem;

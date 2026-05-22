@@ -1,5 +1,7 @@
 @use '../abstracts/colors' as *;
 @use '../abstracts/typography' as *;
+@use '../abstracts/radius' as *;
+@use '../abstracts/shadows' as *;
 
 body {
   font-family: $body-font;

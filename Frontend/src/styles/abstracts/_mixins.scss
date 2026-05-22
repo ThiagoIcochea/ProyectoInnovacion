@@ -1,6 +1,6 @@
-@use './colors' as *;
-@use './radius' as *;
-@use './shadows' as *;
+@import './colors';
+@import './radius' ;
+@import './shadows' ;
 
 @mixin card {
   background: $bg-card;
