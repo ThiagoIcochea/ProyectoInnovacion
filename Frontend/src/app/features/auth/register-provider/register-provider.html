@@ -185,62 +185,78 @@
 
         <!-- ================= METODOS DE PAGO ================= -->
 
-        <div class="section-title">4. Métodos de Pago</div>
+        <div class="payment-section">
+          <div class="section-title">4. Métodos de Pago</div>
 
-        <button type="button" (click)="openPagoModal()">
-          Agregar método de pago
-        </button>
+          <button type="button" class="provider-action-button provider-action-button--muted" (click)="openPagoModal()">
+            Agregar método de pago
+          </button>
 
-        <div *ngIf="metodosPago.length < 1" class="auth-warning">
-          Debes agregar al menos 1 método de pago
-        </div>
+          <div *ngIf="metodosPago.length < 1" class="auth-warning">
+            Debes agregar al menos 1 método de pago
+          </div>
 
-        <div *ngFor="let mp of metodosPago">
-          {{ mp.tipo }} - {{ mp.entidad }} - {{ mp.numeroCuenta }}
-        </div>
+          <div class="payment-list" *ngIf="metodosPago.length > 0">
+            <div class="payment-item" *ngFor="let mp of metodosPago">
+              <span class="payment-item__type">{{ mp.tipo }}</span>
+              <span class="payment-item__meta">{{ mp.entidad }}</span>
+              <span class="payment-item__account">{{ mp.numeroCuenta }}</span>
+            </div>
+          </div>
 
-        <div *ngIf="showPagoModal" class="modal">
-          <div class="modal-content">
+          <div *ngIf="showPagoModal" class="modal payment-modal">
+            <div class="modal-content payment-modal__content">
 
-            <h3>Nuevo método de pago</h3>
+              <h3>Nuevo método de pago</h3>
 
-            <label for="tipoPago">Tipo</label>
-            <select id="tipoPago" [(ngModel)]="tipoPago" name="tipoPago">
-              <option value="TRANSFERENCIA">TRANSFERENCIA</option>
-              <option value="DEPOSITO">DEPOSITO</option>
-              <option value="YAPE">YAPE</option>
-              <option value="PLIN">PLIN</option>
-              <option value="CHEQUE">CHEQUE</option>
-            </select>
+              <div class="payment-form-grid">
+                <div class="payment-field">
+                  <label for="tipoPago">Tipo</label>
+                  <select id="tipoPago" [(ngModel)]="tipoPago" name="tipoPago">
+                    <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+                    <option value="DEPOSITO">DEPOSITO</option>
+                    <option value="YAPE">YAPE</option>
+                    <option value="PLIN">PLIN</option>
+                    <option value="CHEQUE">CHEQUE</option>
+                  </select>
+                </div>
 
-            <label for="entidadPago">Entidad</label>
-            <select id="entidadPago" [(ngModel)]="entidadPago" name="entidadPago">
+                <div class="payment-field">
+                  <label for="entidadPago">Entidad</label>
+                  <select id="entidadPago" [(ngModel)]="entidadPago" name="entidadPago">
 
-              <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="BCP">BCP</option>
-              <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="BBVA">BBVA</option>
-              <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="INTERBANK">INTERBANK</option>
-              <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="SCOTIABANK">SCOTIABANK</option>
+                    <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="BCP">BCP</option>
+                    <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="BBVA">BBVA</option>
+                    <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="INTERBANK">INTERBANK</option>
+                    <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="SCOTIABANK">SCOTIABANK</option>
 
-              <option *ngIf="tipoPago === 'DEPOSITO'" value="AGENTE">AGENTE</option>
-              <option *ngIf="tipoPago === 'DEPOSITO'" value="BANCO">BANCO</option>
+                    <option *ngIf="tipoPago === 'DEPOSITO'" value="AGENTE">AGENTE</option>
+                    <option *ngIf="tipoPago === 'DEPOSITO'" value="BANCO">BANCO</option>
 
-              <option *ngIf="tipoPago === 'YAPE'" value="YAPE">YAPE</option>
-              <option *ngIf="tipoPago === 'PLIN'" value="PLIN">PLIN</option>
+                    <option *ngIf="tipoPago === 'YAPE'" value="YAPE">YAPE</option>
+                    <option *ngIf="tipoPago === 'PLIN'" value="PLIN">PLIN</option>
 
-            </select>
+                  </select>
+                </div>
 
-            <label for="numeroCuenta">Número de cuenta</label>
-            <input
-              id="numeroCuenta"
-              type="text"
-              [(ngModel)]="numeroCuenta"
-              name="numeroCuenta"
-              placeholder="N° de cuenta"
-            />
+                <div class="payment-field payment-field--full">
+                  <label for="numeroCuenta">Número de cuenta</label>
+                  <input
+                    id="numeroCuenta"
+                    type="text"
+                    [(ngModel)]="numeroCuenta"
+                    name="numeroCuenta"
+                    placeholder="N° de cuenta"
+                  />
+                </div>
+              </div>
 
-            <button type="button" (click)="addMetodoPago()">Guardar</button>
-            <button type="button" (click)="closePagoModal()">Cerrar</button>
+              <div class="modal-actions">
+                <button type="button" class="provider-action-button provider-action-button--primary" (click)="addMetodoPago()">Guardar</button>
+                <button type="button" class="provider-action-button provider-action-button--secondary" (click)="closePagoModal()">Cerrar</button>
+              </div>
 
+            </div>
           </div>
         </div>
 
@@ -277,7 +293,7 @@
 
         </div>
 
-        <button type="button" (click)="register()">
+        <button type="button" class="provider-submit-button" (click)="register()">
           Registrar proveedor
         </button>
 

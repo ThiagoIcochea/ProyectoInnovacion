@@ -125,6 +125,12 @@
   gap: 1rem;
 }
 
+.auth-form button {
+  border: 0;
+  outline: none;
+  cursor: pointer;
+}
+
 .section-title {
   margin-top: 0.5rem;
   color: #e5e7eb;
@@ -190,6 +196,179 @@
   color: #f87171;
   font-weight: 600;
   margin-bottom: 0.75rem;
+}
+
+.payment-section {
+  padding: 1.25rem;
+  border-radius: 20px;
+  border: 1px solid rgba(96, 165, 250, 0.14);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.82) 0%, rgba(15, 23, 42, 0.66) 100%),
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.14), transparent 32%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.provider-action-button--muted {
+  background: rgba(15, 23, 42, 0.82);
+  border-color: rgba(96, 165, 250, 0.28);
+}
+
+.payment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.payment-item {
+  display: grid;
+  grid-template-columns: minmax(110px, 1fr) minmax(90px, 1fr) minmax(160px, 1.4fr);
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(15, 23, 42, 0.72);
+  color: #e5e7eb;
+}
+
+.payment-item__type {
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+.payment-item__meta,
+.payment-item__account {
+  color: #cbd5e1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.payment-modal {
+  margin-top: 0.5rem;
+}
+
+.payment-modal__content {
+  max-width: 540px;
+  width: 100%;
+}
+
+.payment-modal__content h3 {
+  margin-bottom: 0.25rem;
+  color: #f8fafc;
+}
+
+.payment-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.payment-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.payment-field--full {
+  grid-column: 1 / -1;
+}
+
+.payment-field label {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.payment-field input,
+.payment-field select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 0.95rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.payment-field input::placeholder {
+  color: #64748b;
+}
+
+.payment-field input:focus,
+.payment-field select:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.16);
+  background: rgba(15, 23, 42, 1);
+}
+
+.provider-action-button,
+.provider-submit-button {
+  min-height: 48px;
+  width: 100%;
+  padding: 0 1.1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(96, 165, 250, 0.28);
+  background: rgba(30, 41, 59, 0.95);
+  color: #e5e7eb;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.provider-action-button:hover,
+.provider-submit-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(96, 165, 250, 0.5);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.28);
+}
+
+.provider-action-button:focus-visible,
+.provider-submit-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.provider-action-button--primary,
+.provider-submit-button {
+  border-color: transparent;
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  color: #ffffff;
+}
+
+.provider-action-button--primary:hover,
+.provider-submit-button:hover {
+  background: linear-gradient(135deg, #6bb0ff 0%, #2563eb 100%);
+}
+
+.provider-action-button--secondary {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.28);
+  color: #cbd5e1;
+}
+
+.provider-action-button--secondary:hover {
+  background: rgba(15, 23, 42, 0.88);
+}
+
+.modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.modal-actions .provider-action-button {
+  width: 100%;
 }
 
 .checkbox-row {
@@ -271,6 +450,24 @@
   }
 
   .form-grid--2 {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-section {
+    padding: 1rem;
+    border-radius: 18px;
+  }
+
+  .payment-item {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .payment-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions {
     grid-template-columns: 1fr;
   }
 }
