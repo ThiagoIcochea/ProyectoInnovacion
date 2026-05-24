@@ -544,6 +544,8 @@ BigDecimal totalItem =
             case PAGO_PENDIENTE -> "Pago pendiente";
 
             case PAGO_VALIDANDO -> "Validando pago";
+                
+            case PAGADA -> "Pagado" ;
 
             case EN_CAMINO -> "En camino";
 
