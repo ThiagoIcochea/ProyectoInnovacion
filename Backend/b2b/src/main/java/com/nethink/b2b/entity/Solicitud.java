@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List; 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 
 @Entity
 @Table(name = "solicitudes")
@@ -29,8 +27,7 @@ public class Solicitud {
     private Proveedor proveedor;
     
     // se añadió esto val
-    @OneToMany(mappedBy = "solicitud", fetch = FetchType.LAZY)
-    @JsonIgnore
+    @OneToMany(mappedBy = "solicitud", fetch = FetchType.EAGER)
     private List<DetalleSolicitud> detalles;
 
     @Column(name = "direccion_envio", columnDefinition = "TEXT")
