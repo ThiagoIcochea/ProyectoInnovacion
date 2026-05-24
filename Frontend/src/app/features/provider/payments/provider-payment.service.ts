@@ -39,10 +39,26 @@ export class PagoService {
 
 aprobarPago(idPago:number){
 
-  return this.http.put(
-    `${this.apiUrl}/api/pagos/${idPago}/aprobar`,
+  
+  
+  return this.http.put<{ mensaje: string }>(
+    `/api/pagos/${idPago}/aprobar`,
     {}
   );
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  /*return this.http.put(
+    `${this.apiUrl}/api/pagos/${idPago}/aprobar`,
+    {}
+  );*/
 
 }
 

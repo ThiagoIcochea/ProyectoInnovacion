@@ -50,6 +50,12 @@ public class Usuario {
 
     @Column(name = "fecha_registro")
     private LocalDateTime fechaRegistro;
+    
+    
+    
+    
+    
+    
 
     public Integer getIdUsuario() {
         return idUsuario;

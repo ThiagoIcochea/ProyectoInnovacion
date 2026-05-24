@@ -7,6 +7,8 @@ package com.nethink.b2b.controller;
 
 import java.util.List; 
 
+import java.util.Map; 
+
 import java.security.Principal;
 
 
@@ -23,6 +25,8 @@ import com.nethink.b2b.dto.response.PagoResponse;
 import com.nethink.b2b.entity.Proveedor;
 import com.nethink.b2b.repository.ProveedorRepository;
 import com.nethink.b2b.service.PagoService;
+import com.nethink.b2b.entity.Usuario; 
+import com.nethink.b2b.repository.UsuarioRepository; 
 
 
 
@@ -42,12 +46,14 @@ public class PagoController {
     
     private final PagoService pagoService; 
     private final ProveedorRepository proveedorRepo; 
+    private final UsuarioRepository usuarioRepo; 
     
     
-    public PagoController(PagoService pagoservice, ProveedorRepository proveedorRepo){
+    public PagoController(PagoService pagoService, ProveedorRepository proveedorRepo, UsuarioRepository usuarioRepo){
     
-    this.pagoService= pagoservice; 
-    this.proveedorRepo=proveedorRepo; 
+    this.pagoService= pagoService; 
+    this.proveedorRepo=proveedorRepo;
+    this.usuarioRepo=usuarioRepo;  
     
     
     }
@@ -78,12 +84,24 @@ listarMisPagos(Principal principal) {
     
  @PutMapping("/{idPago}/aprobar")
 public ResponseEntity<?> aprobarPago(
-        @PathVariable Integer idPago
+        @PathVariable Integer idPago, Principal principal
 ) {
 
-    pagoService.aprobarPago(idPago)  ;
+    
+    
+    
+    
+    Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
+            .orElseThrow(() ->
+                    new RuntimeException("Usuario no encontrado"));
 
-    return ResponseEntity.ok("Pago aprobado");
+    pagoService.aprobarPago(idPago, usuario.getIdUsuario());
+    
+    
+
+    return ResponseEntity.ok(
+          Map.of("mensaje","Pago aprobado" )
+    );
 }   
     
     

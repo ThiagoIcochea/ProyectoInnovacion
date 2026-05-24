@@ -39,7 +39,13 @@ export interface Payment{
 
      fechaPago:string     ;
 
+     fechaValidacion:String; 
+
+
+
      comprobanteUrl:string    ;
+
+      
 
 
 

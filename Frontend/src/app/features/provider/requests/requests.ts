@@ -193,8 +193,12 @@ getHora(date: string) {
 
 
 
-getFechaCompleta(date: string): string {
+getFechaCompleta(date?: string): string {
 
+  if (!date){
+   return ""; 
+ }
+  
   const fecha = new Date(date);
 
   const fechaTexto = fecha.toLocaleDateString('es-PE', {

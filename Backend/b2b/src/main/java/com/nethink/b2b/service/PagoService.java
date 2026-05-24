@@ -154,6 +154,8 @@ public class PagoService {
 
             dto.setFechaPago(
                     p.getFechaPago());
+            
+            dto.setFechaValidacion(p.getFechaValidacion()); 
 
             dto.setComprobanteUrl(
                     p.getComprobanteUrl());
@@ -233,7 +235,7 @@ public class PagoService {
     
     
     @Transactional
-public void aprobarPago(Integer idPago) {
+public void aprobarPago(Integer idPago, Integer idUsuario) {
 
     Pago pago = pagoRepo.findById(idPago)
             .orElseThrow(() ->
@@ -244,8 +246,16 @@ public void aprobarPago(Integer idPago) {
     // =========================
 
     pago.setEstado(
-            Pago.EstadoPago.VALIDANDO
+            Pago.EstadoPago.APROBADO
     );
+    
+    
+    pago.setValidado(true); 
+    
+    pago.setFechaValidacion( LocalDateTime.now());
+    
+    pago.setValidadoPor(idUsuario); 
+    
 
     // =========================
     // ACTUALIZAR SOLICITUD

@@ -6,7 +6,7 @@ import { PagoService } from './provider-payment.service';
 import { Payment } from './payments.model';
 
 import { Observable } from 'rxjs';
-
+import { tap } from 'rxjs/operators';
 
 
 @Component({
@@ -25,9 +25,17 @@ payments$!: Observable<Payment[]>;
 
   selectedPayment: Payment | null = null;
 
+  mostrarModal=false; 
+
   constructor(private pagoService: PagoService) {}
 
 ngOnInit(): void {
+
+  
+
+  const token = localStorage.getItem('token');
+
+  console.log("TOKEN JWT:", token);
 
     this.payments$ = this.pagoService.listarMisPagos();
 
@@ -38,7 +46,34 @@ ngOnInit(): void {
 
 seleccionarPago(pago: Payment): void {
     this.selectedPayment = pago;
+
+     console.log("seleccionpago", this.selectedPayment); 
+
+    
   }
+
+
+
+abrirModalAprobacion(): void {
+
+  if (!this.selectedPayment) return;
+
+  this.mostrarModal = true;
+
+}
+
+
+
+cerrarModal(): void {
+
+  this.mostrarModal = false;
+
+}
+
+
+
+
+
 
 
 
@@ -47,25 +82,49 @@ aprobarPago(): void {
 
     if (!this.selectedPayment) return;
 
+    const idPago = this.selectedPayment?.idPago;
+
+  if (!idPago) {
+    console.error("idPago no válido");
+    return;
+  }
+
     this.pagoService
-      .aprobarPago(this.selectedPayment.idPago)
+      .aprobarPago(idPago)
       .subscribe({
 
-        next: () => {
-
-          alert('Pago aprobado correctamente');
-
+        next: (resp) => {
+           console.log(resp.mensaje); 
+          //alert('Pago aprobado correctamente');
+            this.mostrarModal=false; 
           // recargar lista
           this.payments$ =
-            this.pagoService.listarMisPagos();
+            this.pagoService.listarMisPagos()
+
+            .pipe(
+
+              tap((pagos) => {
+
+                this.selectedPayment =
+                  pagos.length > 0
+                    ? pagos[0]
+                    : null;
+
+              })
+
+            );  
+
 
         },
 
         error: (err) => {
 
           console.error(err);
+          console.log("error al aprobar"); 
 
-          alert('Error al aprobar pago');
+          //this.mostrarModal=false; 
+
+          //alert('Error al aprobar pago');
 
         }
 

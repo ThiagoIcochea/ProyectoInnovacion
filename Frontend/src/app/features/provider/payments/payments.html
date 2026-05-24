@@ -45,9 +45,24 @@
     <section class="payment-detail-card">
       <div class="detail-header">
         <div>
-          <span class="status-pill">Pendiente de validación</span>
+          <span class="status-pill">  {{ selectedPayment?.estado}}        </span>
           <h2>Pago {{ getPagoCode(selectedPayment) }}   </h2>
           <p>Asociado a Cotización: {{ getCotCode(selectedPayment)  }}     </p>
+
+<p
+    *ngIf="
+      selectedPayment?.estado === 'APROBADO'
+      && selectedPayment?.fechaValidacion
+    "
+  >
+    Fecha validación:
+    {{
+      getFechaCompleta(
+        selectedPayment?.fechaValidacion
+      )
+    }}
+  </p>
+
         </div>
       </div>
 
@@ -107,7 +122,7 @@
 
             <div class="validation-actions">
               <button class="btn-danger">Rechazar pago</button>
-              <button class="btn-primary" (click)="aprobarPago()"    >Aprobar pago</button>
+              <button class="btn-primary" (click)="abrirModalAprobacion()"    >Aprobar pago</button>
             </div>
           </div>
         </div>
@@ -138,3 +153,49 @@
     </section>
   </div>
 </div>
+
+
+
+<div
+  class="modal-backdrop"
+  *ngIf="mostrarModal"
+>
+
+  <div class="modal-box">
+
+    <h3>Confirmar aprobación</h3>
+
+    <p>
+      ¿Deseas aprobar este pago?
+    </p>
+
+    <div class="modal-actions">
+
+      <button (click)="cerrarModal()">
+        Cancelar
+      </button>
+
+      <button (click)="aprobarPago()">
+        Aprobar
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

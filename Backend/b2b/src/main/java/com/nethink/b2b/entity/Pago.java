@@ -25,6 +25,9 @@ public class Pago {
 
     private String metodo;
     private String entidad;
+    
+    @Column(name = "fecha_validacion")
+    private LocalDateTime fechaValidacion; 
 
     @Column(name = "codigo_operacion")
     private String codigoOperacion;
@@ -38,6 +41,9 @@ public class Pago {
     private EstadoPago estado;
 
     private Boolean validado = false;
+    
+    @Column(name="validado_por")
+    private Integer validadoPor; // idusuario que actualiza estado de pago
 
     @Column(name = "comprobante_url")
     private String comprobanteUrl;
@@ -65,11 +71,15 @@ public class Pago {
     public BigDecimal getMonto() { return monto; }
     public void setMonto(BigDecimal monto) { this.monto = monto; }
     public LocalDateTime getFechaPago() { return fechaPago; }
-    public void setFechaPago(LocalDateTime fechaPago) { this.fechaPago = fechaPago; }
+    public void setFechaPago(LocalDateTime fechaPago) { this.fechaPago = fechaPago   ; }
     public EstadoPago getEstado() { return estado; }
     public void setEstado(EstadoPago estado) { this.estado = estado; }
     public Boolean getValidado() { return validado; }
     public void setValidado(Boolean validado) { this.validado = validado; }
+    public LocalDateTime getFechaValidacion(){  return fechaValidacion;  } 
+    public void setFechaValidacion(LocalDateTime  fechaValidacion){this.fechaValidacion=fechaValidacion; }
+    public Integer getValidadoPor(){return validadoPor; }
+    public void setValidadoPor(Integer validadoPor){this.validadoPor=validadoPor; }
     public String getComprobanteUrl() { return comprobanteUrl; }
     public void setComprobanteUrl(String comprobanteUrl) { this.comprobanteUrl = comprobanteUrl; }
 }
