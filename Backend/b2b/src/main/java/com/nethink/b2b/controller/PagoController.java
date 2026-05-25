@@ -80,10 +80,11 @@ listarMisPagos(Principal principal) {
     
 @PutMapping("/{idPago}/aprobar")
 public ResponseEntity<?> aprobarPago(
-        @PathVariable Integer idPago
+        @PathVariable Integer idPago,
+        Principal principal
 ) {
 
-    pagoService.aprobarPago(idPago);
+    pagoService.aprobarPago(idPago,principal.getName());
 
     Map<String, String> response =
             new HashMap<>();

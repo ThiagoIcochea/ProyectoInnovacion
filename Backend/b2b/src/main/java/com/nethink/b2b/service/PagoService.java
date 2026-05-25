@@ -233,11 +233,13 @@ public class PagoService {
     
     
     @Transactional
-public void aprobarPago(Integer idPago) {
+public void aprobarPago(Integer idPago, String correoUsuario) {
 
     Pago pago = pagoRepo.findById(idPago)
             .orElseThrow(() ->
                     new RuntimeException("Pago no encontrado"));
+         Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
     // =========================
     // ACTUALIZAR PAGO
@@ -258,6 +260,15 @@ public void aprobarPago(Integer idPago) {
     );
 
     pagoRepo.save(pago);
+    
+        SolicitudHistorial historial = new SolicitudHistorial();
+        historial.setSolicitud(solicitud);
+        historial.setEstado("PAGADA");
+        historial.setIdUsuario(usuario.getIdUsuario());
+        historial.setDescripcion("Pago aprobado");
+        historial.setFecha(LocalDateTime.now());
+
+        historialRepo.save(historial);
 
 }
     
