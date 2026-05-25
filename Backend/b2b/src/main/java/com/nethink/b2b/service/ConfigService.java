@@ -121,6 +121,9 @@ public class ConfigService {
 
         int status =
                 response.getStatusCode().value();
+        
+        System.out.println(response.getStatusCode());
+System.out.println(response.getBody());
 
         if (status >= 200 && status < 400) {
 
