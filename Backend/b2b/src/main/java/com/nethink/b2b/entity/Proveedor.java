@@ -29,6 +29,9 @@ public class Proveedor {
 
     @Column(name = "api_token")
     private String apiToken;
+    
+    @Column(name = "estado_api")
+private String estadoApi;
 
     @Column(name = "estado")
     private String estado;
@@ -98,6 +101,13 @@ private Usuario usuario;
 
     public void setApiToken(String apiToken) {
         this.apiToken = apiToken;
+    }
+    
+    public String getEstadoApi(){
+        return estadoApi;
+    }
+    public void setEstadoApi(String estadoApi){
+        this.estadoApi = estadoApi;
     }
 
     public String getEstado() {

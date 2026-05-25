@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class ApiConfiguracionService {
@@ -19,6 +20,9 @@ public class ApiConfiguracionService {
     private final ProveedorRepository proveedorRepo;
     private final LogsApiRepository logsApiRepo;
     private final RestTemplate restTemplate;
+    
+        @Autowired
+    private ProveedorRepository proveedorRepository;
 
     public ApiConfiguracionService(
             ProveedorRepository proveedorRepo,
@@ -154,7 +158,9 @@ public class ApiConfiguracionService {
         log.setTiempoRespuestaMs((int) (fin - inicio));
 
         log.setEstado(LogsApi.Estado.OK);
-
+        
+        proveedor.setEstadoApi("OK");
+        
         log.setDescripcion("Conexión exitosa");
 
     } catch (Exception e) {
@@ -166,11 +172,13 @@ public class ApiConfiguracionService {
         log.setTiempoRespuestaMs((int) (fin - inicio));
 
         log.setEstado(LogsApi.Estado.ERROR);
+        proveedor.setEstadoApi("ERROR");
 
         log.setDescripcion(e.getMessage());
     }
 
     logsApiRepo.save(log);
+    proveedor = proveedorRepository.save(proveedor);
 
     return obtenerConfiguracion(correo);
 }

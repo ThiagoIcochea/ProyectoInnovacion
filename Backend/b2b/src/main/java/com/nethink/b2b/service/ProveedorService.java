@@ -171,35 +171,7 @@ private LogsApiRepository logsApiRepository;
                      .getCorreo());
         }
 
-        Optional<LogsApi> ultimoLog =
-                logsApiRepository
-                .findTopByProveedor_IdProveedorOrderByFechaDesc(
-                        p.getIdProveedor()
-                );
-
-        if (ultimoLog.isPresent()) {
-
-            LogsApi log =
-                    ultimoLog.get();
-
-            dto.setEstadoApi(
-                    log.getEstado().name()
-            );
-
-            dto.setCodigoRespuesta(
-                    log.getCodigoRespuesta()
-            );
-
-            dto.setTiempoRespuestaMs(
-                    log.getTiempoRespuestaMs()
-            );
-
-        } else {
-
-            dto.setEstadoApi(
-                    "PENDIENTE"
-            );
-        }
+        dto.setEstadoApi(p.getEstadoApi());
 
         response.add(dto);
     }
