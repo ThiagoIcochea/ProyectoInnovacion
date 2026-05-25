@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-admin-rfqs',
   standalone: true,
   imports: [
     CommonModule,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule
   ],
   templateUrl: './rfqs.html',
   styleUrl: './rfqs.scss'
@@ -15,10 +17,9 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 export class AdminRfqsComponent implements OnInit {
 
   rfqs: any[] = [];
+  search: string = '';
 
-  constructor(
-    private http: HttpClient
-  ) {}
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.listarRfqs();
@@ -26,20 +27,39 @@ export class AdminRfqsComponent implements OnInit {
 
   listarRfqs(): void {
 
+    const token = localStorage.getItem('token');
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
     this.http.get<any[]>(
-      'https://proyectoinnovacion.onrender.com/api/solicitudes/admin/listar'
+      'https://proyectoinnovacion.onrender.com/api/solicitudes/admin/listar',
+      { headers }
     ).subscribe({
 
       next: (data) => {
-
         this.rfqs = data;
       },
 
       error: (err) => {
-
         console.error(err);
       }
+
     });
+  }
+
+  filtrarRfqs(): any[] {
+
+    if (!this.search) return this.rfqs;
+
+    const s = this.search.toLowerCase();
+
+    return this.rfqs.filter(rfq =>
+      rfq.idSolicitud?.toString().includes(s) ||
+      rfq.nombreCliente?.toLowerCase().includes(s) ||
+      rfq.nombreProveedor?.toLowerCase().includes(s)
+    );
   }
 
   formatearEstado(estado: string): string {
@@ -73,8 +93,6 @@ export class AdminRfqsComponent implements OnInit {
   }
 
   formatearFecha(fecha: string): string {
-
-    return new Date(fecha)
-      .toLocaleDateString('es-PE');
+    return new Date(fecha).toLocaleDateString('es-PE');
   }
 }
