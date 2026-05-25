@@ -273,7 +273,52 @@ public void aprobarPago(Integer idPago, Integer idUsuario) {
     
     
     
+@Transactional
+public void rechazarPago(Integer idPago, Integer idUsuario) {
+
+    Pago pago = pagoRepo.findById(idPago)
+            .orElseThrow(() ->
+                    new RuntimeException("Pago no encontrado"));
+
+    // =========================
+    // ACTUALIZAR PAGO
+    // =========================
+
+    pago.setEstado(
+            Pago.EstadoPago.RECHAZADO
+    );
     
+    
+    pago.setValidado(true); 
+    
+    pago.setFechaValidacion( LocalDateTime.now());
+    
+    pago.setValidadoPor(idUsuario); 
+    
+
+    // =========================
+    // ACTUALIZAR SOLICITUD
+    // =========================
+
+    Solicitud solicitud = pago.getSolicitud();
+
+    solicitud.setEstado(
+            Solicitud.EstadoSolicitud.RECHAZADA
+    );
+
+    pagoRepo.save(pago);
+
+} 
+
+
+
+
+
+
+
+
+
+
     
     
 }

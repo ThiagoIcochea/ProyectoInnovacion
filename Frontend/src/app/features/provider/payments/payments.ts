@@ -133,7 +133,59 @@ aprobarPago(): void {
   }
 
 
+rechazarPago(): void {
 
+    if (!this.selectedPayment) return;
+
+    const idPago = this.selectedPayment?.idPago;
+
+  if (!idPago) {
+    console.error("idPago no válido");
+    return;
+  }
+
+    this.pagoService
+      .rechazarPago(idPago)
+      .subscribe({
+
+        next: (resp) => {
+           console.log(resp.mensaje); 
+          //alert('Pago no aprobado');
+            this.mostrarModal=false; 
+          // recargar lista
+          this.payments$ =
+            this.pagoService.listarMisPagos()
+
+            .pipe(
+
+              tap((pagos) => {
+
+                this.selectedPayment =
+                  pagos.length > 0
+                    ? pagos[0]
+                    : null;
+
+              })
+
+            );  
+
+
+        },
+
+        error: (err) => {
+
+          console.error(err);
+          console.log("error al rechazar"); 
+
+          //this.mostrarModal=false; 
+
+          //alert('Error al rechazar pago');
+
+        }
+
+      });
+
+  }
 
 
 

@@ -42,25 +42,42 @@ aprobarPago(idPago:number){
   
   
   return this.http.put<{ mensaje: string }>(
-    `/api/pagos/${idPago}/aprobar`,
+    `${this.apiUrl}/api/pagos/${idPago}/aprobar`,
     {}
   );
 
-
-  
-  
-  
-  
-  
-  
-  
-  
   /*return this.http.put(
     `${this.apiUrl}/api/pagos/${idPago}/aprobar`,
     {}
   );*/
 
 }
+
+
+rechazarPago(idPago:number){
+
+  
+  
+  return this.http.put<{ mensaje: string }>(
+    `${this.apiUrl}/api/pagos/${idPago}/rechazar`,
+    {}
+  );
+
+  /*return this.http.put(
+    `${this.apiUrl}/api/pagos/${idPago}/aprobar`,
+    {}
+  );*/
+
+}
+
+
+
+
+
+
+
+
+
 
 
 
