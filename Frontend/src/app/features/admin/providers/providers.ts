@@ -44,11 +44,7 @@ implements OnInit {
 
     this.listarProviders();
 
-    setInterval(() => {
-
-      this.listarProviders();
-
-    }, 3000);
+   
   }
 
   private headers(): HttpHeaders {

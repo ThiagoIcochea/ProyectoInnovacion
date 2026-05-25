@@ -784,7 +784,87 @@ BigDecimal totalItem =
     
     
     
-    
+    public List<SolicitudResponse> listarTodasSolicitudes() {
+
+    List<Solicitud> solicitudes =
+            solicitudRepo.findAll();
+
+    List<SolicitudResponse> response =
+            new ArrayList<>();
+
+    for (Solicitud s : solicitudes) {
+
+        SolicitudResponse dto =
+                new SolicitudResponse();
+
+        dto.setIdSolicitud(
+                s.getIdSolicitud()
+        );
+
+        dto.setIdProveedor(
+                s.getProveedor()
+                 .getIdProveedor()
+        );
+
+        dto.setNombreProveedor(
+                s.getProveedor()
+                 .getRazonSocial()
+        );
+
+        if (s.getEmpresaCompradora() != null) {
+
+            dto.setIdEmpresa(
+                    s.getEmpresaCompradora()
+                     .getIdEmpresa()
+            );
+
+            dto.setNombreEmpresa(
+                    s.getEmpresaCompradora()
+                     .getRazonSocial()
+            );
+
+            dto.setRucEmpresa(
+                    s.getEmpresaCompradora()
+                     .getRuc()
+            );
+        }
+
+        if (s.getUsuario() != null) {
+
+            dto.setNombreCliente(
+                    s.getUsuario().getNombres()
+                    + " "
+                    + s.getUsuario().getApellidos()
+            );
+
+            dto.setCorreoCliente(
+                    s.getUsuario()
+                     .getCorreo()
+            );
+
+            dto.setTelefonoCliente(
+                    s.getUsuario()
+                     .getTelefono()
+            );
+        }
+
+        dto.setTotal(
+                s.getTotal()
+        );
+
+        dto.setEstado(
+                s.getEstado().name()
+        );
+
+        dto.setFechaCreacion(
+                s.getFechaCreacion()
+        );
+
+        response.add(dto);
+    }
+
+    return response;
+}
     
     
     

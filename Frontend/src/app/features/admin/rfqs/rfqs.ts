@@ -1,38 +1,80 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-admin-rfqs',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    HttpClientModule
+  ],
   templateUrl: './rfqs.html',
   styleUrl: './rfqs.scss'
 })
-export class AdminRfqsComponent {
-  rfqs = [
-    {
-      id: 'RFQ-2026-1045',
-      client: 'TechNova S.A.',
-      provider: 'Global Tech Solutions',
-      amount: '$12,450.00',
-      status: 'Completado',
-      date: '25 Abr 2026'
-    },
-    {
-      id: 'RFQ-2026-1042',
-      client: 'Corporación Andes',
-      provider: 'InfraLink Perú',
-      amount: '$8,900.00',
-      status: 'En proceso',
-      date: '24 Abr 2026'
-    },
-    {
-      id: 'RFQ-2026-1038',
-      client: 'Fintech Nexus',
-      provider: 'NetWorks Corp',
-      amount: '$4,150.00',
-      status: 'Cancelado',
-      date: '23 Abr 2026'
+export class AdminRfqsComponent implements OnInit {
+
+  rfqs: any[] = [];
+
+  constructor(
+    private http: HttpClient
+  ) {}
+
+  ngOnInit(): void {
+    this.listarRfqs();
+  }
+
+  listarRfqs(): void {
+
+    this.http.get<any[]>(
+      'https://proyectoinnovacion.onrender.com/api/solicitudes/admin/listar'
+    ).subscribe({
+
+      next: (data) => {
+
+        this.rfqs = data;
+      },
+
+      error: (err) => {
+
+        console.error(err);
+      }
+    });
+  }
+
+  formatearEstado(estado: string): string {
+
+    switch (estado) {
+
+      case 'PAGO_PENDIENTE':
+        return 'Pago pendiente';
+
+      case 'PAGO_VALIDANDO':
+        return 'Validando pago';
+
+      case 'PAGADA':
+        return 'Pagada';
+
+      case 'EN_CAMINO':
+        return 'En camino';
+
+      case 'ENTREGADA':
+        return 'Entregada';
+
+      case 'CANCELADA':
+        return 'Cancelada';
+
+      case 'COMPLETADA':
+        return 'Completada';
+
+      default:
+        return estado;
     }
-  ];
+  }
+
+  formatearFecha(fecha: string): string {
+
+    return new Date(fecha)
+      .toLocaleDateString('es-PE');
+  }
 }
