@@ -200,7 +200,13 @@ public ResponseEntity<List<SolicitudResponse>> listarMisSolicitudesProveedor(
 
 
 
+@GetMapping("/admin/listar")
+public ResponseEntity<List<SolicitudResponse>> listarTodas() {
 
+    return ResponseEntity.ok(
+            solicitudService.listarTodasSolicitudes()
+    );
+}
 
 
 
