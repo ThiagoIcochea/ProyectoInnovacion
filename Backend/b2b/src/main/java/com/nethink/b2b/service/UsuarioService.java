@@ -15,6 +15,11 @@ import com.nethink.b2b.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.nethink.b2b.dto.response.AdminUserResponse;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -167,4 +172,53 @@ public class UsuarioService {
 
         return uploadResult.get("secure_url").toString();
     }
+    
+    public List<AdminUserResponse> listarUsuarios() {
+
+    List<Usuario> usuarios =
+            usuarioRepo.findAll();
+
+    List<AdminUserResponse> response =
+            new ArrayList<>();
+
+    for (Usuario u : usuarios) {
+
+        AdminUserResponse dto =
+                new AdminUserResponse();
+
+        dto.setIdUsuario(
+                u.getIdUsuario()
+        );
+
+        dto.setNombreCompleto(
+                u.getNombres()
+                + " "
+                + u.getApellidos()
+        );
+
+        dto.setCorreo(
+                u.getCorreo()
+        );
+
+        dto.setRol(
+                u.getRol().getNombre()
+        );
+
+        dto.setEstado(
+                u.getEstado().name()
+        );
+
+        dto.setFechaRegistro(
+                u.getFechaRegistro()
+        );
+
+        dto.setFotoPerfil(
+                u.getFotoPerfil()
+        );
+
+        response.add(dto);
+    }
+
+    return response;
+}
 }

@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.nethink.b2b.dto.response.AdminUserResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -58,4 +60,13 @@ public class UsuarioController {
 
         return ResponseEntity.ok().build();
     }
+    
+    @GetMapping("/admin/listar")
+public ResponseEntity<List<AdminUserResponse>>
+listarUsuarios() {
+
+    return ResponseEntity.ok(
+            usuarioService.listarUsuarios()
+    );
+}
 }

@@ -1,5 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+
+import {
+  HttpClient,
+  HttpHeaders
+} from '@angular/common/http';
+
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit
+} from '@angular/core';
 
 @Component({
   selector: 'app-admin-users',
@@ -8,35 +18,107 @@ import { Component } from '@angular/core';
   templateUrl: './users.html',
   styleUrl: './users.scss'
 })
-export class AdminUsersComponent {
-  users = [
-    {
-      name: 'TechCorp S.A.',
-      email: 'admin@techcorp.com',
-      role: 'Cliente',
-      status: 'Activo',
-      date: '21 Abr 2026'
-    },
-    {
-      name: 'Global Tech Solutions',
-      email: 'ventas@globaltech.com',
-      role: 'Proveedor',
-      status: 'Activo',
-      date: '20 Abr 2026'
-    },
-    {
-      name: 'Corporación Andes',
-      email: 'compras@andes.com',
-      role: 'Cliente',
-      status: 'Pendiente',
-      date: '18 Abr 2026'
-    },
-    {
-      name: 'InfraLink Perú',
-      email: 'contacto@infralink.pe',
-      role: 'Proveedor',
-      status: 'Suspendido',
-      date: '15 Abr 2026'
+export class AdminUsersComponent
+implements OnInit {
+
+  private API_URL =
+    'https://proyectoinnovacion.onrender.com/api/usuarios/admin/listar';
+
+  users: any[] = [];
+
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+
+    setTimeout(() => {
+
+      this.listarUsuarios();
+
+      this.cdr.detectChanges();
+
+    }, 0);
+  }
+
+  private headers(): HttpHeaders {
+
+    return new HttpHeaders({
+
+      Authorization:
+        `Bearer ${localStorage.getItem('token')}`
+
+    });
+  }
+
+  listarUsuarios(): void {
+
+    this.http.get<any[]>(
+      this.API_URL,
+      {
+        headers: this.headers()
+      }
+    )
+    .subscribe({
+
+      next: (res) => {
+
+        this.users = res;
+
+        this.cdr.detectChanges();
+      },
+
+      error: (err) => {
+
+        console.error(err);
+      }
+    });
+  }
+
+  getTotalUsuarios(): number {
+
+    return this.users.length;
+  }
+
+  getClientes(): number {
+
+    return this.users.filter(
+      u =>
+        u.rol?.toUpperCase() === 'CLIENTE'
+    ).length;
+  }
+
+  getProveedores(): number {
+
+    return this.users.filter(
+      u =>
+        u.rol?.toUpperCase() === 'PROVEEDOR'
+    ).length;
+  }
+
+  getPendientes(): number {
+
+    return this.users.filter(
+      u =>
+        u.estado?.toUpperCase() === 'PENDIENTE'
+    ).length;
+  }
+
+  formatearFecha(fecha: string): string {
+
+    if (!fecha) {
+      return '';
     }
-  ];
+
+    return new Date(fecha)
+      .toLocaleDateString(
+        'es-PE',
+        {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        }
+      );
+  }
 }

@@ -1,79 +1,173 @@
 <!-- Backend touchpoint: user access list and status controls for admin review. -->
 <div class="admin-users-page">
+
   <div class="page-header">
+
     <div>
+
       <span>Gestión de accesos</span>
+
       <h1>Usuarios</h1>
-      <p>Administra clientes, proveedores y estados de acceso a la plataforma.</p>
+
+      <p>
+        Administra clientes, proveedores y estados de acceso a la plataforma.
+      </p>
+
     </div>
 
-    <button class="btn-primary">+ Nuevo usuario</button>
+    <button class="btn-primary">
+      + Nuevo usuario
+    </button>
+
   </div>
 
   <div class="summary-grid">
+
     <div class="summary-card">
+
       <span>Total usuarios</span>
-      <strong>2,845</strong>
+
+      <strong>
+        {{ getTotalUsuarios() }}
+      </strong>
+
     </div>
 
     <div class="summary-card">
+
       <span>Clientes</span>
-      <strong>2,661</strong>
+
+      <strong>
+        {{ getClientes() }}
+      </strong>
+
     </div>
 
     <div class="summary-card">
+
       <span>Proveedores</span>
-      <strong>184</strong>
+
+      <strong>
+        {{ getProveedores() }}
+      </strong>
+
     </div>
 
     <div class="summary-card">
+
       <span>Pendientes</span>
-      <strong>23</strong>
+
+      <strong>
+        {{ getPendientes() }}
+      </strong>
+
     </div>
+
   </div>
 
   <section class="users-card">
+
     <div class="users-card__header">
+
       <h2>Listado de usuarios</h2>
 
-      <div class="search-box">Buscar por nombre, correo o rol...</div>
+      <div class="search-box">
+        Buscar por nombre, correo o rol...
+      </div>
+
     </div>
 
     <div class="users-table">
+
       <div class="users-table__head">
+
         <div>Usuario</div>
+
         <div>Correo</div>
+
         <div>Rol</div>
+
         <div>Estado</div>
+
         <div>Registro</div>
+
         <div>Acción</div>
+
       </div>
 
-      <div class="users-table__row" *ngFor="let user of users">
+      <div
+        class="users-table__row"
+        *ngFor="let user of users"
+      >
+
         <div class="user-cell">
-          <div class="avatar">{{ user.name.charAt(0) }}</div>
-          <strong>{{ user.name }}</strong>
+
+          <div class="avatar">
+
+            {{
+              user.nombreCompleto
+              ? user.nombreCompleto.charAt(0)
+              : '?'
+            }}
+
+          </div>
+
+          <strong>
+            {{ user.nombreCompleto }}
+          </strong>
+
         </div>
 
-        <div>{{ user.email }}</div>
-        <div>{{ user.role }}</div>
+        <div>
+          {{ user.correo }}
+        </div>
 
         <div>
+          {{ user.rol }}
+        </div>
+
+        <div>
+
           <span
             class="status"
-            [class.pending]="user.status === 'Pendiente'"
-            [class.suspended]="user.status === 'Suspendido'"
-          >
-            {{ user.status }}
-          </span>
-        </div>
 
-        <div>{{ user.date }}</div>
+            [class.pending]="
+              user.estado === 'PENDIENTE'
+            "
+
+            [class.suspended]="
+              user.estado === 'SUSPENDIDO'
+            "
+          >
+
+            {{ user.estado }}
+
+          </span>
+
+        </div>
 
         <div>
-          <button class="btn-secondary">Gestionar</button>
+
+          {{
+            formatearFecha(
+              user.fechaRegistro
+            )
+          }}
+
         </div>
+
+        <div>
+
+          <button class="btn-secondary">
+            Gestionar
+          </button>
+
+        </div>
+
       </div>
+
     </div>
+
   </section>
+
 </div>
