@@ -38,12 +38,43 @@
   border: 1px solid #374151;
   border-radius: 16px;
   padding: 1.5rem;
-  min-width: 0;
+  box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
 }
 
-.payment-summary h2 {
+.step-section {
+  margin-bottom: 1.5rem;
+
+  h3 {
+    color: #e5e7eb;
+    margin: 0 0 0.75rem;
+  }
+}
+
+.map-box {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 220px;
+  max-height: 360px;
+  border-radius: 12px;
+  border: 1px solid #374151;
+  background: #0f172a;
+  margin-bottom: 0.75rem;
+}
+
+.full-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 0.9rem;
+  border-radius: 10px;
+  border: 1px solid #374151;
+  background: #0f172a;
   color: #e5e7eb;
-  margin-bottom: 1rem;
+}
+
+.methods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .step-section,
@@ -72,6 +103,7 @@
 }
 
 .method-card {
+  position: relative;
   padding: 1rem;
   border: 1px solid #374151;
   border-radius: 12px;
@@ -88,6 +120,10 @@
     margin: 0.25rem 0 0;
   }
 
+  small {
+    color: #9ca3af;
+  }
+
   &:hover {
     background: #273449;
   }
@@ -99,77 +135,86 @@
 }
 
 .card-check {
-  width: 28px;
-  height: 28px;
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 24px;
+  height: 24px;
   border-radius: 999px;
+  background: #3b82f6;
+  color: #ffffff;
   display: grid;
   place-items: center;
-  margin-bottom: 0.75rem;
-  background: rgba(59, 130, 246, 0.16);
-  color: #93c5fd;
-  font-weight: 900;
+  font-weight: 800;
+  font-size: 0.75rem;
 }
 
-.full-input,
-.form-row input,
-.payment-summary input[type='text'] {
-  width: 100%;
-  min-width: 0;
-  padding: 0.9rem 1rem;
-  border-radius: 10px;
-  border: 1px solid #374151;
-  background: #0f172a;
-  color: #e5e7eb;
-  outline: none;
+.no-data {
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
 
-  &:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
-  }
+.upload-section {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px dashed #374151;
+  border-radius: 12px;
+  background: #111827;
 }
 
 .form-row {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 0.75rem;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
 
   label {
-    color: #cbd5e1;
-    font-weight: 700;
+    color: #9ca3af;
+    font-size: 0.9rem;
+  }
+
+  input {
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid #374151;
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 0 0.9rem;
+    outline: none;
   }
 }
 
 .preview-box {
-  padding: 1rem;
-  border-radius: 12px;
-  border: 1px solid #374151;
-  background: rgba(15, 23, 42, 0.72);
+  margin-top: 0.75rem;
 
   p {
-    margin: 0 0 0.75rem;
     color: #9ca3af;
+    margin: 0 0 0.5rem;
   }
-
 }
 
 .voucher-preview {
   width: 100%;
-  max-height: 220px;
-  object-fit: contain;
-  display: block;
+  max-height: 240px;
   border-radius: 10px;
-  background: #0f172a;
+  border: 1px solid #374151;
+  object-fit: cover;
+  display: block;
+}
+
+.payment-summary {
+  h3 {
+    color: #e5e7eb;
+    margin: 0 0 1rem;
+  }
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-
-  span {
-    color: #9ca3af;
-  }
+  margin-bottom: 0.8rem;
+  color: #9ca3af;
 
   strong {
     color: #e5e7eb;
@@ -177,16 +222,10 @@
   }
 }
 
-.summary-row + .summary-row {
-  margin-top: 0.9rem;
-}
-
 .total-big {
-  align-items: baseline;
-
   strong {
     color: #60a5fa;
-    font-size: 1.25rem;
+    font-size: 1.3rem;
   }
 }
 
@@ -206,63 +245,26 @@
   }
 
   &:disabled {
+    opacity: 0.6;
     cursor: not-allowed;
-    opacity: 0.65;
   }
 }
 
-.map-box {
-  width: 100%;
-  min-height: 280px;
-  aspect-ratio: 16 / 10;
-  border-radius: 14px;
-  border: 1px solid #374151;
-  margin-bottom: 0;
-  overflow: hidden;
-}
-
-.payment-summary {
-  position: sticky;
-  top: 96px;
-  align-self: start;
-  overflow: hidden;
+.terms-note {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-top: 0.8rem;
 }
 
 @media (max-width: 1100px) {
   .payment-grid {
     grid-template-columns: 1fr;
   }
-
-  .payment-summary {
-    position: static;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
 }
 
-@media (max-width: 768px) {
-  .payment-page {
-    gap: 1rem;
-  }
-
-  .payment-main,
-  .payment-summary {
-    padding: 1rem;
-  }
-
+@media (max-width: 720px) {
   .map-box {
-    min-height: 220px;
     aspect-ratio: 4 / 3;
-  }
-
-  .summary-row {
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-
-  .confirm-btn {
-    height: 46px;
   }
 }

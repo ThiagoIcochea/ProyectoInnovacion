@@ -1,0 +1,403 @@
+<div class="pr-page" *ngIf="!loadingProveedor && proveedor">
+
+  <!-- Breadcrumb -->
+  <nav class="pr-breadcrumb">
+    <button class="pr-back" (click)="irAlCarrito()">←</button>
+    <a routerLink="/app/rfq/catalog" class="crumb">Catálogo RFQ</a>
+    <span class="crumb-sep">›</span>
+    <button class="crumb crumb-link" (click)="volverAlDetalle()" *ngIf="product">
+      {{ product.producto }}
+    </button>
+    <span class="crumb-sep">›</span>
+    <span class="crumb crumb--active">{{ proveedor.nombre }}</span>
+
+    <div class="pr-cart-indicator" *ngIf="requestItems.length > 0" (click)="irAlCarrito()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+      </svg>
+      Solicitud Actual <span class="cart-count">{{ requestItems.length }}</span>
+    </div>
+  </nav>
+
+  <!-- Layout -->
+  <div class="pr-layout">
+
+    <!-- MAIN: Reviews -->
+    <div class="pr-main">
+
+      <!-- Header del proveedor -->
+      <div class="provider-hero">
+        <div class="provider-hero__logo">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </div>
+        <div class="provider-hero__info">
+          <h1>{{ proveedor.nombre }}</h1>
+          <div class="provider-hero__meta">
+            <span class="provider-score-badge" [class]="scoreColor(proveedor.scoringGeneral)">
+              {{ proveedor.scoringGeneral }}/100 Scoring General
+            </span>
+            <span class="meta-chip">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              {{ proveedor.certificacion }}
+            </span>
+            <span class="meta-chip">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+              {{ proveedor.ubicacion }}
+            </span>
+            <span class="meta-chip">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              En Nethink desde {{ proveedor.desde }}
+            </span>
+          </div>
+          <p class="provider-hero__desc">{{ proveedor.descripcion }}</p>
+        </div>
+      </div>
+
+      <!-- Métricas de performance -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon metric-icon--blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-value">{{ proveedor.totalPedidos | number }}</span>
+            <span class="metric-label">Pedidos Completados</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon metric-icon--green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+              <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-value">{{ proveedor.tasaEntregaOportuna }}%</span>
+            <span class="metric-label">Entregas a Tiempo</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon metric-icon--yellow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-value">{{ proveedor.tasaSatisfaccion }}%</span>
+            <span class="metric-label">Satisfacción</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon metric-icon--purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-value">{{ proveedor.tiempoRespuesta }}</span>
+            <span class="metric-label">Tiempo de Respuesta</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Score breakdown -->
+      <div class="score-breakdown">
+        <h3 class="section-title">Análisis de Puntaje</h3>
+        <div class="score-bars">
+          <div class="score-bar-row">
+            <span class="score-bar-label">Calidad del Producto</span>
+            <div class="score-bar-track">
+              <div class="score-bar-fill score-bar-fill--blue"
+                [style.width.%]="proveedor.scoreCalidad * 20"></div>
+            </div>
+            <span class="score-bar-value">{{ proveedor.scoreCalidad }}/5</span>
+          </div>
+          <div class="score-bar-row">
+            <span class="score-bar-label">Competitividad de Precio</span>
+            <div class="score-bar-track">
+              <div class="score-bar-fill score-bar-fill--green"
+                [style.width.%]="proveedor.scorePrecio * 20"></div>
+            </div>
+            <span class="score-bar-value">{{ proveedor.scorePrecio }}/5</span>
+          </div>
+          <div class="score-bar-row">
+            <span class="score-bar-label">Cumplimiento de Plazo</span>
+            <div class="score-bar-track">
+              <div class="score-bar-fill score-bar-fill--yellow"
+                [style.width.%]="proveedor.scoreTiempo * 20"></div>
+            </div>
+            <span class="score-bar-value">{{ proveedor.scoreTiempo }}/5</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certificaciones -->
+      <div class="certifications-row">
+        <span class="section-label">Certificaciones:</span>
+        <span class="cert-chip" *ngFor="let c of proveedor.certificaciones">{{ c }}</span>
+      </div>
+
+      <!-- ── RESEÑAS ────────────────────────────────────────── -->
+      <div class="reviews-section">
+        <h3 class="section-title">Reseñas y Comentarios</h3>
+
+        <div class="reviews-layout">
+
+          <!-- Panel izquierdo: rating summary -->
+          <div class="rating-summary">
+            <div class="rating-big">{{ ratingPromedio | number:'1.1-1' }}</div>
+            <div class="rating-stars">
+              <span *ngFor="let s of starArray(5)"
+                class="star-icon"
+                [class.star-filled]="s <= ratingPromedio">★</span>
+            </div>
+            <div class="rating-count">Basado en {{ reviews.length }} reseñas</div>
+
+            <!-- Distribución por estrellas -->
+            <div class="rating-bars">
+              <div class="rating-bar-row"
+                *ngFor="let d of ratingDistribucion"
+                (click)="setFiltroEstrellas(d.estrellas)"
+                [class.active-filter]="filtroEstrellas === d.estrellas">
+                <span class="rbar-label">{{ d.estrellas }}★</span>
+                <div class="rbar-track">
+                  <div class="rbar-fill" [style.width.%]="d.porcentaje"
+                    [class.rbar-fill--high]="d.estrellas >= 4"
+                    [class.rbar-fill--mid]="d.estrellas === 3"
+                    [class.rbar-fill--low]="d.estrellas <= 2">
+                  </div>
+                </div>
+                <span class="rbar-count">{{ d.cantidad }}</span>
+              </div>
+            </div>
+
+            <div class="filter-clear" *ngIf="filtroEstrellas > 0" (click)="setFiltroEstrellas(0)">
+              ✕ Quitar filtro
+            </div>
+          </div>
+
+          <!-- Panel derecho: lista de reseñas -->
+          <div class="reviews-list-panel">
+
+            <!-- Orden -->
+            <div class="reviews-toolbar">
+              <span class="reviews-count">
+                {{ reviewsFiltradas.length }} reseña{{ reviewsFiltradas.length !== 1 ? 's' : '' }}
+                <span *ngIf="filtroEstrellas > 0">— Filtrado: {{ filtroEstrellas }}★</span>
+              </span>
+              <div class="order-tabs">
+                <button class="order-tab" [class.active]="ordenResenas === 'reciente'"
+                  (click)="setOrden('reciente')">Más recientes</button>
+                <button class="order-tab" [class.active]="ordenResenas === 'calidad'"
+                  (click)="setOrden('calidad')">Mayor calificación</button>
+              </div>
+            </div>
+
+            <!-- Cards de reseñas -->
+            <div class="review-card" *ngFor="let r of reviewsFiltradas">
+              <div class="review-card__top">
+                <div class="review-avatar">{{ r.autor.charAt(0) }}</div>
+                <div class="review-meta">
+                  <div class="review-autor-row">
+                    <strong>{{ r.autor }}</strong>
+                    <span class="review-verified" *ngIf="r.verificado">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      Compra verificada
+                    </span>
+                  </div>
+                  <div class="review-stars-row">
+                    <span *ngFor="let s of starArray(5)"
+                      class="star-icon star-sm"
+                      [class.star-filled]="s <= r.rating">★</span>
+                    <span class="review-date">{{ formatFecha(r.fecha) }}</span>
+                  </div>
+                </div>
+              </div>
+              <p class="review-text">{{ r.comentario }}</p>
+            </div>
+
+            <div class="reviews-empty" *ngIf="reviewsFiltradas.length === 0">
+              No hay reseñas con {{ filtroEstrellas }} estrellas.
+              <button class="link-btn" (click)="setFiltroEstrellas(0)">Ver todas</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulario de nueva reseña -->
+        <div class="new-review-form">
+          <div class="new-review-success" *ngIf="resenaEnviada">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            ¡Gracias! Tu reseña fue publicada.
+          </div>
+
+          <div *ngIf="!resenaEnviada">
+            <h4 class="new-review-title">Escribe una reseña o comentario</h4>
+
+            <div class="star-picker">
+              <button class="star-pick"
+                *ngFor="let s of starArray(5)"
+                [class]="getStarClass(s, nuevaResenaRating, nuevaResenaHover)"
+                (mouseenter)="setHoverStar(s)"
+                (mouseleave)="clearHoverStar()"
+                (click)="setRatingStar(s)">★</button>
+            </div>
+
+            <textarea
+              class="review-textarea"
+              [(ngModel)]="nuevaResenaTexto"
+              placeholder="Describe tu experiencia con este proveedor..."
+              rows="4"
+              maxlength="500">
+            </textarea>
+
+            <div class="review-form-footer">
+              <span class="char-count">{{ nuevaResenaTexto.length }}/500</span>
+              <button class="submit-review-btn"
+                (click)="enviarResena()"
+                [disabled]="!nuevaResenaRating || !nuevaResenaTexto.trim()">
+                Publicar Reseña
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ASIDE: Oferta del producto -->
+    <aside class="pr-aside">
+
+      <div class="offer-card">
+        <div class="offer-card__header">Oferta del Producto Seleccionado</div>
+
+        <div class="offer-product-row" *ngIf="product">
+          <div class="offer-product-thumb">
+            <img
+              [src]="product.imagenes?.[0]?.URL || 'assets/no-image.png'"
+              [alt]="product.producto"
+              loading="lazy"
+            >
+          </div>
+          <div class="offer-product-info">
+            <strong>{{ product.producto }}</strong>
+            <span class="offer-stock-badge stock-high" *ngIf="(proveedorProducto?.stockDisponible ?? 0) > 50">
+              ✓ Stock Alto Disponible
+            </span>
+            <span class="offer-stock-badge stock-mid" *ngIf="(proveedorProducto?.stockDisponible ?? 0) > 0 && (proveedorProducto?.stockDisponible ?? 0) <= 50">
+              ⚠ Stock Limitado
+            </span>
+          </div>
+        </div>
+
+        <div class="offer-divider"></div>
+
+        <div class="offer-price-section">
+          <div class="offer-price-label">Precio Referencial por Unidad</div>
+          <div class="offer-price">$ {{ (proveedorProducto?.precioReferencia ?? product?.precioUnitario ?? 0) | number:'1.2-2' }}</div>
+          <div class="offer-price-note">Los precios finales dependerán del volumen total de su RFQ.</div>
+        </div>
+
+        <div class="offer-details">
+          <div class="offer-detail-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+              <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+            <span>Entrega en {{ proveedorProducto?.tiempoEntrega ?? product?.tiempoEntregaDias ?? '5' }} días hábiles</span>
+          </div>
+          <div class="offer-detail-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>Garantía: {{ proveedorProducto?.garantia ?? product?.garantiaMeses ?? 12 }} meses</span>
+          </div>
+        </div>
+
+        <!-- Qty en el aside -->
+        <div class="offer-qty-row">
+          <span class="offer-qty-label">Cantidad</span>
+          <div class="ap-qty-control">
+            <button class="qty-btn" (click)="disminuirQty()" [disabled]="qty <= 1">−</button>
+            <span class="qty-value">{{ qty }}</span>
+            <button class="qty-btn" (click)="aumentarQty()">+</button>
+          </div>
+        </div>
+
+        <button class="offer-btn-primary" (click)="agregarAlCarrito()" *ngIf="!yaEnCarrito">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Agregar a Solicitud RFQ
+        </button>
+
+        <button class="offer-btn-added" (click)="irAlCarrito()" *ngIf="yaEnCarrito">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Ya en tu solicitud — Ver Catálogo
+        </button>
+      </div>
+
+      <!-- Mini-panel de confianza -->
+      <div class="trust-panel">
+        <div class="trust-row">
+          <div class="trust-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div>
+            <strong>Proveedor Verificado</strong>
+            <span>Nethink validó su identidad y documentación.</span>
+          </div>
+        </div>
+        <div class="trust-row">
+          <div class="trust-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div>
+            <strong>Respuesta Rápida</strong>
+            <span>Tiempo promedio: {{ proveedor.tiempoRespuesta }}</span>
+          </div>
+        </div>
+        <div class="trust-row">
+          <div class="trust-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div>
+            <strong>Scoring Nethink</strong>
+            <span>{{ proveedor.scoringGeneral }}/100 — Excelente</span>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="pr-loading" *ngIf="loadingProveedor">
+  <div class="loader-ring"></div>
+  <p>Cargando perfil del proveedor...</p>
+</div>

@@ -1,5 +1,6 @@
 package com.nethink.b2b.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,7 +27,7 @@ public class Solicitud {
     @JoinColumn(name = "id_proveedor", nullable = false)
     private Proveedor proveedor;
     
-    // se añadió esto val
+    @JsonIgnore
     @OneToMany(mappedBy = "solicitud", fetch = FetchType.LAZY)
     private List<DetalleSolicitud> detalles;
 
@@ -265,7 +266,7 @@ public class Solicitud {
         this.version = version;
     }
     
-    // se añadio set y get de detalle solicitud
+   @JsonIgnore
     public List<DetalleSolicitud> getDetalles() {
       return detalles;
    }

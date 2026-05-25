@@ -17,6 +17,7 @@ export class DashboardComponent implements OnInit {
 
   recommendedProducts: any[] = [];
   requestItems: any[] = [];
+  mostrarCarritoMovil = false;
 
   publicidades: any[] = [];
   currentPublicidadIndex: number = 0;

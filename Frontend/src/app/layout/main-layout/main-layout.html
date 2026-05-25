@@ -1,6 +1,12 @@
 <!-- Backend touchpoint: sidebar, topbar and user profile rendering are controlled from this shell. -->
 <div class="app-shell">
-  <aside class="sidebar">
+  <div
+    class="sidebar-overlay"
+    [class.is-open]="menuMovilAbierto"
+    (click)="cerrarMenuMovil()">
+  </div>
+
+  <aside class="sidebar" [class.is-open]="menuMovilAbierto">
     <div class="sidebar__brand">
       <div class="sidebar__logo" aria-hidden="true">
         <svg viewBox="0 0 24 24" role="presentation" focusable="false">
@@ -13,7 +19,7 @@
         <strong>Nethink S.A.C</strong>
 
         <span>
-          {{ panelActual }}
+          {{ isAdmin ? 'Administrador' : isProvider ? 'Proveedor' : 'Cliente' }}
         </span>
       </div>
     </div>
@@ -25,7 +31,8 @@
           [routerLink]="['/app/dashboard']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Inicio
         </a>
 
@@ -33,7 +40,8 @@
           [routerLink]="['/app/rfq/catalog']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Catálogo RFQ
         </a>
 
@@ -41,7 +49,8 @@
           [routerLink]="['/app/requests']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Mis Solicitudes
         </a>
 
@@ -49,7 +58,8 @@
           [routerLink]="['/app/history']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Historial
         </a>
 
@@ -57,7 +67,8 @@
           [routerLink]="['/app/profile']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Perfil
         </a>
 
@@ -76,7 +87,8 @@
           [routerLink]="['/app/provider/dashboard']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Dashboard
         </a>
 
@@ -84,7 +96,8 @@
           [routerLink]="['/app/provider/requests']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Solicitudes
 
           <span class="sidebar__count">
@@ -96,7 +109,8 @@
           [routerLink]="['/app/provider/payments']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Pagos
 
           <span class="sidebar__count">
@@ -108,7 +122,8 @@
           [routerLink]="['/app/provider/deliveries']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Entregas
         </a>
 
@@ -116,7 +131,8 @@
           [routerLink]="['/app/provider/products']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Productos
         </a>
 
@@ -124,7 +140,8 @@
           [routerLink]="['/app/provider/api-settings']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Configuración API
         </a>
 
@@ -143,7 +160,8 @@
           [routerLink]="['/app/admin/dashboard']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Dashboard
         </a>
 
@@ -151,7 +169,8 @@
           [routerLink]="['/app/admin/users']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Usuarios
         </a>
 
@@ -159,7 +178,8 @@
           [routerLink]="['/app/admin/providers']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Proveedores
         </a>
 
@@ -167,7 +187,8 @@
           [routerLink]="['/app/admin/rfqs']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Solicitudes RFQ
         </a>
 
@@ -175,7 +196,8 @@
           [routerLink]="['/app/admin/products']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Catálogo de Productos
         </a>
 
@@ -183,7 +205,8 @@
           [routerLink]="['/app/admin/integrations']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Integraciones & API
         </a>
 
@@ -191,7 +214,8 @@
           [routerLink]="['/app/admin/logs']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Logs del Sistema
         </a>
 
@@ -199,7 +223,8 @@
           [routerLink]="['/app/admin/settings']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="sidebar__link">
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
           Configuración General
         </a>
 
@@ -207,15 +232,12 @@
     </ng-container>
 
     <div class="sidebar__footer">
-      <button type="button" class="sidebar__logout" (click)="logout()">
-        <span class="sidebar__logout-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-            <path d="M10 17v-2H4V9h6V7l4 5-4 5z" fill="currentColor"></path>
-            <path d="M14 5h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
-        </span>
-        <span>Cerrar Sesión</span>
-      </button>
+      <a
+        [routerLink]="['/login']"
+        class="sidebar__link sidebar__link--logout"
+        (click)="cerrarMenuMovil()">
+        Cerrar sesión
+      </a>
     </div>
   </aside>
 
@@ -223,33 +245,35 @@
 
     <header class="topbar">
 
-      <div class="topbar__brand">
-        <div class="topbar__brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-            <path d="M4 7.5L12 3l8 4.5v9L12 21l-8-4.5z" fill="currentColor" opacity="0.2"></path>
-            <path d="M7 9h10v2H7zm0 4h10v2H7z" fill="currentColor"></path>
-          </svg>
-        </div>
-
-        <div>
-          <strong>Nethink S.A.C</strong>
-          <span>Gestión B2B de RFQ y operaciones</span>
-        </div>
-      </div>
+      <button
+        type="button"
+        class="topbar__menu-button"
+        (click)="toggleMenuMovil()"
+        [attr.aria-expanded]="menuMovilAbierto"
+        aria-label="Abrir menú lateral">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
 
       <div class="topbar__search">
         Buscar dentro del sistema...
       </div>
 
       <div class="topbar__actions" *ngIf="isProvider">
-        <span class="api-pill">
-          API conectada
-        </span>
+        <span
+  class="api-pill"
+  [class.api-pill--ok]="estadoApi === 'OK'"
+  [class.api-pill--error]="estadoApi !== 'OK'">
+
+  API {{ estadoApi }}
+
+</span>
       </div>
 
       <div class="topbar__user">
 
-        <div>
+        <div class="topbar__user-info">
           <strong>
             {{ nombreCompleto }}
           </strong>

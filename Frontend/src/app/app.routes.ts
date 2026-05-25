@@ -47,6 +47,20 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/client/rfq-catalog/rfq-catalog').then(m => m.RfqCatalogComponent)
       },
+
+      // ── NUEVAS RUTAS ──────────────────────────────────────────────────────
+      {
+        path: 'rfq/product/:id',
+        loadComponent: () =>
+          import('./features/client/product-detail/product-detail').then(m => m.ProductDetailComponent)
+      },
+      {
+        path: 'rfq/provider-reviews',
+        loadComponent: () =>
+          import('./features/client/provider-reviews/provider-reviews').then(m => m.ProviderReviewsComponent)
+      },
+      // ─────────────────────────────────────────────────────────────────────
+
       {
         path: 'rfq/results',
         loadComponent: () =>
@@ -67,20 +81,20 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/client/requests/requests').then(m => m.RequestsComponent)
       },
-     {
-  path: 'requests/tracking/:id',
-  loadComponent: () =>
-    import('./features/client/request-tracking/request-tracking').then(m => m.RequestTrackingComponent)
-},
+      {
+        path: 'requests/tracking/:id',
+        loadComponent: () =>
+          import('./features/client/request-tracking/request-tracking').then(m => m.RequestTrackingComponent)
+      },
       {
         path: 'requests/evaluation',
         loadComponent: () =>
           import('./features/client/request-evaluation/request-evaluation').then(m => m.RequestEvaluationComponent)
       },
       {
-         path: 'history',
-    loadComponent: () =>
-      import('./features/client/history/history').then(m => m.HistoryComponent)
+        path: 'history',
+        loadComponent: () =>
+          import('./features/client/history/history').then(m => m.HistoryComponent)
       },
       {
         path: 'profile',

@@ -1,10 +1,14 @@
-@use './abstracts/colors';
-@use './abstracts/spacing';
-@use './abstracts/typography';
-@use './abstracts/radius';
-@use './abstracts/shadows';
-@use './abstracts/mixins';
+@import './base/reset';
+@import './base/globals';
+@import './base/utilities';
 
-@use './base/reset';
-@use './base/globals';
-@use './base/utilities';
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+@import './abstracts/variables';
+@import './abstracts/colors';
+@import './abstracts/spacing';
+@import './abstracts/typography';
+@import './abstracts/radius';
+@import './abstracts/shadows';
+@import './abstracts/mixins';
+

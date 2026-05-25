@@ -1,9 +1,9 @@
 <!-- Backend touchpoint: this screen routes users to client or provider registration. -->
 <div class="role-page">
   <div class="role-header">
-    <div class="brand">Nethink S.A.C</div>
-    <h1>Selecciona un único rol de acceso</h1>
-    <p>Elige cómo deseas registrarte dentro de la plataforma. El primer rol queda seleccionado por defecto.</p>
+    <div class="brand">Nethink</div>
+    <h1>Selecciona tu rol</h1>
+    <p>Elige cómo deseas registrarte dentro de la plataforma.</p>
   </div>
 
   <div class="role-grid">
@@ -21,8 +21,4 @@
       <div class="role-card__action" *ngIf="selectedRole.route !== role.route">Elegir rol</div>
     </button>
   </div>
-
-  <a class="role-continue" [routerLink]="selectedRole.route">
-    Continuar como {{ selectedRole.title }} →
-  </a>
 </div>

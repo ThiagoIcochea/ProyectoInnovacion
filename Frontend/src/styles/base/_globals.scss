@@ -1,8 +1,47 @@
 @use '../abstracts/colors' as *;
 @use '../abstracts/typography' as *;
+@use '../abstracts/radius' as *;
+@use '../abstracts/shadows' as *;
 
 body {
-  font-family: $font-family;
-  background: $bg-app;
+  font-family: $body-font;
+  background:
+    radial-gradient(circle at top left, rgba(79, 140, 255, 0.12), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.08), transparent 24%),
+    linear-gradient(180deg, #09111f 0%, $bg-app 55%, #070d18 100%);
   color: $text-primary;
+  font-size: 16px;
+  line-height: $line-height-base;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: $heading-font;
+  color: $text-primary;
+  letter-spacing: -0.02em;
+}
+
+p {
+  color: $text-secondary;
+}
+
+strong {
+  color: $text-primary;
+}
+
+.app-surface {
+  background: rgba(16, 25, 45, 0.72);
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.app-shell-page {
+  padding: clamp(1rem, 2vw, 1.5rem);
 }
