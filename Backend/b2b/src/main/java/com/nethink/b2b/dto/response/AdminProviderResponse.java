@@ -15,6 +15,38 @@ public class AdminProviderResponse {
     private String apiTipo;
 
     private String estado;
+    
+     private String estadoApi;
+
+private String codigoRespuesta;
+
+private Integer tiempoRespuestaMs;
+
+    public String getEstadoApi() {
+        return estadoApi;
+    }
+
+    public void setEstadoApi(String estadoApi) {
+        this.estadoApi = estadoApi;
+    }
+
+    public String getCodigoRespuesta() {
+        return codigoRespuesta;
+    }
+
+    public void setCodigoRespuesta(String codigoRespuesta) {
+        this.codigoRespuesta = codigoRespuesta;
+    }
+
+    public Integer getTiempoRespuestaMs() {
+        return tiempoRespuestaMs;
+    }
+
+    public void setTiempoRespuestaMs(Integer tiempoRespuestaMs) {
+        this.tiempoRespuestaMs = tiempoRespuestaMs;
+    }
+    
+   
 
     public Integer getIdProveedor() {
         return idProveedor;

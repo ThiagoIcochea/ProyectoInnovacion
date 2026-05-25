@@ -8,7 +8,6 @@ import {
 import {
   ChangeDetectorRef,
   Component,
-  NgZone,
   OnInit
 } from '@angular/core';
 
@@ -36,11 +35,8 @@ implements OnInit {
 
   searchTerm: string = '';
 
-  loading: boolean = false;
-
   constructor(
     private http: HttpClient,
-    private zone: NgZone,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -48,6 +44,11 @@ implements OnInit {
 
     this.listarProviders();
 
+    setInterval(() => {
+
+      this.listarProviders();
+
+    }, 3000);
   }
 
   private headers(): HttpHeaders {
@@ -62,8 +63,6 @@ implements OnInit {
 
   listarProviders(): void {
 
-    this.loading = true;
-
     this.http.get<any[]>(
       this.API_URL,
       {
@@ -74,76 +73,57 @@ implements OnInit {
 
       next: (res) => {
 
-        this.zone.run(() => {
+        this.providers = res;
 
-          this.providers =
-            [...(res || [])];
+        this.filteredProviders = [...res];
 
-          this.filteredProviders =
-            [...this.providers];
+        this.filtrarProviders();
 
-          this.loading = false;
-
-          this.cdr.detectChanges();
-
-        });
-
+        this.cdr.detectChanges();
       },
 
       error: (err) => {
 
         console.error(err);
-
-        this.loading = false;
-
-        this.cdr.detectChanges();
-
       }
     });
   }
 
   filtrarProviders(): void {
 
-    const texto =
-      this.searchTerm
-      .toLowerCase()
-      .trim();
-
-    if (!texto) {
-
-      this.filteredProviders =
-        [...this.providers];
-
-      this.cdr.detectChanges();
-
-      return;
-    }
+    const text =
+      this.searchTerm.toLowerCase();
 
     this.filteredProviders =
-      this.providers.filter(p =>
+      this.providers.filter(provider =>
 
-        p?.razonSocial
+        provider?.razonSocial
           ?.toLowerCase()
-          .includes(texto)
+          .includes(text)
 
         ||
 
-        p?.correo
+        provider?.correo
           ?.toLowerCase()
-          .includes(texto)
+          .includes(text)
 
         ||
 
-        p?.estado
+        provider?.estado
           ?.toLowerCase()
-          .includes(texto)
+          .includes(text)
 
         ||
 
-        p?.ruc
+        provider?.estadoApi
           ?.toLowerCase()
-          .includes(texto)
+          .includes(text)
 
+        ||
+
+        provider?.ruc
+          ?.toLowerCase()
+          .includes(text)
       );
 
     this.cdr.detectChanges();
@@ -157,36 +137,24 @@ implements OnInit {
   getActivos(): number {
 
     return this.filteredProviders.filter(
-
       p =>
-
-        p?.estado?.toUpperCase()
-        === 'ACTIVO'
-
+        p.estado?.toUpperCase() === 'ACTIVO'
     ).length;
   }
 
   getApiConectada(): number {
 
     return this.filteredProviders.filter(
-
       p =>
-
-        p?.apiUrl &&
-        p?.apiUrl.trim() !== ''
-
+        p.estadoApi?.toUpperCase() === 'CONECTADA'
     ).length;
   }
 
   getSuspendidos(): number {
 
     return this.filteredProviders.filter(
-
       p =>
-
-        p?.estado?.toUpperCase()
-        === 'SUSPENDIDO'
-
+        p.estado?.toUpperCase() === 'SUSPENDIDO'
     ).length;
   }
 }

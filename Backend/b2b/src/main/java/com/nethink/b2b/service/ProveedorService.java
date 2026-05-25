@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.nethink.b2b.dto.response.AdminProviderResponse;
+import java.util.Optional;
 
 @Service
 public class ProveedorService {
@@ -45,6 +46,9 @@ public class ProveedorService {
 
     @Autowired
     private ProveedorCertificacionRepository proveedorCertificacionRepository;
+    
+    @Autowired
+private LogsApiRepository logsApiRepository;
 
     @Transactional
     public void registerProvider(RegisterProviderRequest req) {
@@ -129,7 +133,7 @@ public class ProveedorService {
         );
     }
     
-    public List<AdminProviderResponse> listarProviders() {
+   public List<AdminProviderResponse> listarProviders() {
 
     List<Proveedor> providers =
             proveedorRepository.findAll();
@@ -165,6 +169,36 @@ public class ProveedorService {
             dto.setCorreo(
                     p.getUsuario()
                      .getCorreo());
+        }
+
+        Optional<LogsApi> ultimoLog =
+                logsApiRepository
+                .findTopByProveedor_IdProveedorOrderByFechaDesc(
+                        p.getIdProveedor()
+                );
+
+        if (ultimoLog.isPresent()) {
+
+            LogsApi log =
+                    ultimoLog.get();
+
+            dto.setEstadoApi(
+                    log.getEstado().name()
+            );
+
+            dto.setCodigoRespuesta(
+                    log.getCodigoRespuesta()
+            );
+
+            dto.setTiempoRespuestaMs(
+                    log.getTiempoRespuestaMs()
+            );
+
+        } else {
+
+            dto.setEstadoApi(
+                    "PENDIENTE"
+            );
         }
 
         response.add(dto);

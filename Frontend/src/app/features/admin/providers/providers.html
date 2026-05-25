@@ -142,18 +142,16 @@
             class="api-status"
 
             [class.pending]="
-              !provider?.apiUrl
+              provider?.estadoApi === 'PENDIENTE'
             "
 
             [class.error]="
-              provider?.estado === 'SUSPENDIDO'
+              provider?.estadoApi === 'ERROR'
             "
           >
 
             {{
-              provider?.apiUrl
-              ? 'Conectada'
-              : 'Pendiente'
+              provider?.estadoApi
             }}
 
           </span>
