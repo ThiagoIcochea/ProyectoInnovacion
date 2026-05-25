@@ -1,4 +1,3 @@
-<!-- Backend touchpoint: user access list and status controls for admin review. -->
 <div class="admin-users-page">
 
   <div class="page-header">
@@ -10,7 +9,7 @@
       <h1>Usuarios</h1>
 
       <p>
-        Administra clientes, proveedores y estados de acceso a la plataforma.
+        Administra clientes y proveedores registrados en la plataforma.
       </p>
 
     </div>
@@ -55,10 +54,10 @@
 
     <div class="summary-card">
 
-      <span>Pendientes</span>
+      <span>Suspendidos</span>
 
       <strong>
-        {{ getPendientes() }}
+        {{ getSuspendidos() }}
       </strong>
 
     </div>
@@ -71,9 +70,13 @@
 
       <h2>Listado de usuarios</h2>
 
-      <div class="search-box">
-        Buscar por nombre, correo o rol...
-      </div>
+      <input
+        type="text"
+        class="search-box"
+        placeholder="Buscar por nombre, correo o rol..."
+        [(ngModel)]="searchTerm"
+        (input)="filtrarUsuarios()"
+      />
 
     </div>
 
@@ -97,7 +100,7 @@
 
       <div
         class="users-table__row"
-        *ngFor="let user of users"
+        *ngFor="let user of filteredUsers"
       >
 
         <div class="user-cell">
@@ -105,25 +108,32 @@
           <div class="avatar">
 
             {{
-              user.nombreCompleto
-              ? user.nombreCompleto.charAt(0)
-              : '?'
+              user?.nombreCompleto?.charAt(0) || '?'
             }}
 
           </div>
 
           <strong>
-            {{ user.nombreCompleto }}
+
+            {{
+              user?.nombreCompleto
+              || 'Sin nombre'
+            }}
+
           </strong>
 
         </div>
 
         <div>
-          {{ user.correo }}
+
+          {{ user?.correo }}
+
         </div>
 
         <div>
-          {{ user.rol }}
+
+          {{ user?.rol }}
+
         </div>
 
         <div>
@@ -132,15 +142,15 @@
             class="status"
 
             [class.pending]="
-              user.estado === 'PENDIENTE'
+              user?.estado === 'PENDIENTE'
             "
 
             [class.suspended]="
-              user.estado === 'SUSPENDIDO'
+              user?.estado === 'SUSPENDIDO'
             "
           >
 
-            {{ user.estado }}
+            {{ user?.estado }}
 
           </span>
 
@@ -150,7 +160,7 @@
 
           {{
             formatearFecha(
-              user.fechaRegistro
+              user?.fechaRegistro
             )
           }}
 
@@ -163,6 +173,15 @@
           </button>
 
         </div>
+
+      </div>
+
+      <div
+        class="empty-state"
+        *ngIf="filteredUsers.length === 0"
+      >
+
+        No se encontraron usuarios.
 
       </div>
 

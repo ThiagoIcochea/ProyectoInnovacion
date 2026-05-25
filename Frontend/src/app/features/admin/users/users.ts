@@ -8,13 +8,19 @@ import {
 import {
   ChangeDetectorRef,
   Component,
+  NgZone,
   OnInit
 } from '@angular/core';
+
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    FormsModule
+  ],
   templateUrl: './users.html',
   styleUrl: './users.scss'
 })
@@ -26,20 +32,22 @@ implements OnInit {
 
   users: any[] = [];
 
+  filteredUsers: any[] = [];
+
+  searchTerm: string = '';
+
+  loading: boolean = false;
+
   constructor(
     private http: HttpClient,
+    private zone: NgZone,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
 
-    setTimeout(() => {
+    this.listarUsuarios();
 
-      this.listarUsuarios();
-
-      this.cdr.detectChanges();
-
-    }, 0);
   }
 
   private headers(): HttpHeaders {
@@ -54,6 +62,8 @@ implements OnInit {
 
   listarUsuarios(): void {
 
+    this.loading = true;
+
     this.http.get<any[]>(
       this.API_URL,
       {
@@ -64,51 +74,132 @@ implements OnInit {
 
       next: (res) => {
 
-        this.users = res;
+        this.zone.run(() => {
 
-        this.cdr.detectChanges();
+          const usuarios =
+            (res || []).filter(
+
+              u =>
+
+                u?.rol !== 'ADMIN'
+
+            );
+
+          this.users = [...usuarios];
+
+          this.filteredUsers =
+            [...usuarios];
+
+          this.loading = false;
+
+          this.cdr.detectChanges();
+
+        });
+
       },
 
       error: (err) => {
 
         console.error(err);
+
+        this.loading = false;
+
+        this.cdr.detectChanges();
+
       }
     });
   }
 
+  filtrarUsuarios(): void {
+
+    const texto =
+      this.searchTerm
+      .toLowerCase()
+      .trim();
+
+    if (!texto) {
+
+      this.filteredUsers =
+        [...this.users];
+
+      this.cdr.detectChanges();
+
+      return;
+    }
+
+    this.filteredUsers =
+      this.users.filter(user =>
+
+        user?.nombreCompleto
+          ?.toLowerCase()
+          .includes(texto)
+
+        ||
+
+        user?.correo
+          ?.toLowerCase()
+          .includes(texto)
+
+        ||
+
+        user?.rol
+          ?.toLowerCase()
+          .includes(texto)
+
+      );
+
+    this.cdr.detectChanges();
+  }
+
   getTotalUsuarios(): number {
 
-    return this.users.length;
+    return this.filteredUsers.length;
   }
 
   getClientes(): number {
 
-    return this.users.filter(
+    return this.filteredUsers.filter(
+
       u =>
-        u.rol?.toUpperCase() === 'CLIENTE'
+
+        u?.rol?.toUpperCase()
+        === 'CLIENTE'
+
     ).length;
   }
 
   getProveedores(): number {
 
-    return this.users.filter(
+    return this.filteredUsers.filter(
+
       u =>
-        u.rol?.toUpperCase() === 'PROVEEDOR'
+
+        u?.rol?.toUpperCase()
+        === 'PROVEEDOR'
+
     ).length;
   }
 
-  getPendientes(): number {
+  getSuspendidos(): number {
 
-    return this.users.filter(
+    return this.filteredUsers.filter(
+
       u =>
-        u.estado?.toUpperCase() === 'PENDIENTE'
+
+        u?.estado?.toUpperCase()
+        === 'SUSPENDIDO'
+
     ).length;
   }
 
-  formatearFecha(fecha: string): string {
+  formatearFecha(
+    fecha: string
+  ): string {
 
     if (!fecha) {
+
       return '';
+
     }
 
     return new Date(fecha)

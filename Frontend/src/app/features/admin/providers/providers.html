@@ -1,82 +1,205 @@
-<!-- Backend touchpoint: provider status overview for admin review. -->
 <div class="admin-providers-page">
+
   <div class="page-header">
+
     <div>
+
       <span>Red de proveedores</span>
+
       <h1>Proveedores</h1>
-      <p>Supervisa proveedores registrados, estado de verificación e integración API.</p>
+
+      <p>
+        Supervisa proveedores registrados, estado e integración API.
+      </p>
+
     </div>
+
   </div>
 
   <div class="summary-grid">
+
     <div class="summary-card">
+
       <span>Total proveedores</span>
-      <strong>184</strong>
+
+      <strong>
+        {{ getTotalProveedores() }}
+      </strong>
+
     </div>
 
     <div class="summary-card">
-      <span>Verificados</span>
-      <strong>156</strong>
+
+      <span>Activos</span>
+
+      <strong>
+        {{ getActivos() }}
+      </strong>
+
     </div>
 
     <div class="summary-card">
+
       <span>API conectada</span>
-      <strong>132</strong>
+
+      <strong>
+        {{ getApiConectada() }}
+      </strong>
+
     </div>
 
     <div class="summary-card">
-      <span>Observados</span>
-      <strong>08</strong>
+
+      <span>Suspendidos</span>
+
+      <strong>
+        {{ getSuspendidos() }}
+      </strong>
+
     </div>
+
   </div>
 
   <section class="providers-card">
+
     <div class="providers-card__header">
+
       <h2>Listado de proveedores</h2>
-      <div class="search-box">Buscar proveedor, correo o estado...</div>
+
+      <input
+        type="text"
+        class="search-box"
+        placeholder="Buscar proveedor, correo o estado..."
+        [(ngModel)]="searchTerm"
+        (input)="filtrarProviders()"
+      />
+
     </div>
 
     <div class="providers-table">
+
       <div class="providers-table__head">
+
         <div>Proveedor</div>
+
         <div>Correo</div>
-        <div>Productos</div>
+
+        <div>RUC</div>
+
         <div>API</div>
-        <div>Rating</div>
+
+        <div>Tipo API</div>
+
         <div>Estado</div>
+
       </div>
 
-      <div class="providers-table__row" *ngFor="let provider of providers">
+      <div
+        class="providers-table__row"
+        *ngFor="let provider of filteredProviders"
+      >
+
         <div class="provider-cell">
-          <div class="avatar">{{ provider.name.charAt(0) }}</div>
-          <strong>{{ provider.name }}</strong>
+
+          <div class="avatar">
+
+            {{
+              provider?.razonSocial?.charAt(0)
+              || '?'
+            }}
+
+          </div>
+
+          <strong>
+
+            {{
+              provider?.razonSocial
+            }}
+
+          </strong>
+
         </div>
 
-        <div>{{ provider.email }}</div>
-        <div>{{ provider.products }}</div>
+        <div>
+
+          {{
+            provider?.correo
+          }}
+
+        </div>
 
         <div>
+
+          {{
+            provider?.ruc
+          }}
+
+        </div>
+
+        <div>
+
           <span
             class="api-status"
-            [class.pending]="provider.api === 'Pendiente'"
-            [class.error]="provider.api === 'Error'"
-          >
-            {{ provider.api }}
-          </span>
-        </div>
 
-        <div>⭐ {{ provider.rating }}</div>
+            [class.pending]="
+              !provider?.apiUrl
+            "
+
+            [class.error]="
+              provider?.estado === 'SUSPENDIDO'
+            "
+          >
+
+            {{
+              provider?.apiUrl
+              ? 'Conectada'
+              : 'Pendiente'
+            }}
+
+          </span>
+
+        </div>
 
         <div>
+
+          {{
+            provider?.apiTipo
+            || 'No definida'
+          }}
+
+        </div>
+
+        <div>
+
           <span
             class="status"
-            [class.pending]="provider.status === 'Pendiente'"
-            [class.observed]="provider.status === 'Observado'"
+
+            [class.observed]="
+              provider?.estado === 'SUSPENDIDO'
+            "
           >
-            {{ provider.status }}
+
+            {{
+              provider?.estado
+            }}
+
           </span>
+
         </div>
+
       </div>
+
+      <div
+        class="empty-state"
+        *ngIf="filteredProviders.length === 0"
+      >
+
+        No se encontraron proveedores.
+
+      </div>
+
     </div>
+
   </section>
+
 </div>

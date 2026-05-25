@@ -10,10 +10,14 @@ import com.nethink.b2b.repository.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.nethink.b2b.dto.response.AdminProviderResponse;
 
 @Service
 public class ProveedorService {
@@ -124,4 +128,48 @@ public class ProveedorService {
                 prov.getRuc()
         );
     }
+    
+    public List<AdminProviderResponse> listarProviders() {
+
+    List<Proveedor> providers =
+            proveedorRepository.findAll();
+
+    List<AdminProviderResponse> response =
+            new ArrayList<>();
+
+    for (Proveedor p : providers) {
+
+        AdminProviderResponse dto =
+                new AdminProviderResponse();
+
+        dto.setIdProveedor(
+                p.getIdProveedor());
+
+        dto.setRazonSocial(
+                p.getRazonSocial());
+
+        dto.setRuc(
+                p.getRuc());
+
+        dto.setApiUrl(
+                p.getApiUrl());
+
+        dto.setApiTipo(
+                p.getApiTipo());
+
+        dto.setEstado(
+                p.getEstado());
+
+        if (p.getUsuario() != null) {
+
+            dto.setCorreo(
+                    p.getUsuario()
+                     .getCorreo());
+        }
+
+        response.add(dto);
+    }
+
+    return response;
+}
 }
