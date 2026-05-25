@@ -27,7 +27,7 @@ public class Solicitud {
     private Proveedor proveedor;
     
     // se añadió esto val
-    @OneToMany(mappedBy = "solicitud", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "solicitud", fetch = FetchType.LAZY)
     private List<DetalleSolicitud> detalles;
 
     @Column(name = "direccion_envio", columnDefinition = "TEXT")
