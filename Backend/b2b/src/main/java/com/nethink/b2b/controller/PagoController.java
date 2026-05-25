@@ -23,6 +23,8 @@ import com.nethink.b2b.dto.response.PagoResponse;
 import com.nethink.b2b.entity.Proveedor;
 import com.nethink.b2b.repository.ProveedorRepository;
 import com.nethink.b2b.service.PagoService;
+import java.util.HashMap;
+import java.util.Map;
 
 
 
@@ -76,16 +78,23 @@ listarMisPagos(Principal principal) {
     
     
     
- @PutMapping("/{idPago}/aprobar")
+@PutMapping("/{idPago}/aprobar")
 public ResponseEntity<?> aprobarPago(
         @PathVariable Integer idPago
 ) {
 
-    pagoService.aprobarPago(idPago)  ;
+    pagoService.aprobarPago(idPago);
 
-    return ResponseEntity.ok("Pago aprobado");
-}   
-    
+    Map<String, String> response =
+            new HashMap<>();
+
+    response.put(
+            "mensaje",
+            "Pago aprobado"
+    );
+
+    return ResponseEntity.ok(response);
+} 
     
     
     
