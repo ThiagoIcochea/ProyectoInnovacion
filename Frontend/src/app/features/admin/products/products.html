@@ -1,8 +1,11 @@
 <div class="admin-products-page">
+
   <div class="page-header">
     <div>
       <span>Catálogo global</span>
+
       <h1>Productos del sistema</h1>
+
       <p>
         Supervisa productos disponibles, proveedores asociados y niveles de stock
         sincronizados por API.
@@ -15,11 +18,17 @@
     <section class="products-card">
 
       <div class="card-header">
+
         <h2>Productos registrados</h2>
 
-        <div class="search-box">
-          Buscar por producto, marca o categoría...
-        </div>
+        <input
+          type="text"
+          class="search-box"
+          placeholder="Buscar por producto, marca o categoría..."
+          [(ngModel)]="searchText"
+          (input)="filtrarProductos()"
+        />
+
       </div>
 
       <div class="products-table">
@@ -35,7 +44,7 @@
 
         <div
           class="products-table__row"
-          *ngFor="let product of products"
+          *ngFor="let product of filteredProducts"
           [class.active]="selectedProduct?.idProducto === product.idProducto"
           (click)="seleccionarProducto(product)"
         >
@@ -61,6 +70,7 @@
           </div>
 
           <div>
+
             <span
               class="status"
               [class.warning]="product.status === 'Stock medio'"
@@ -68,6 +78,7 @@
             >
               {{ product.status }}
             </span>
+
           </div>
 
         </div>
@@ -97,19 +108,23 @@
       <div class="detail-summary">
 
         <div>
+
           <span>Proveedores</span>
 
           <strong>
             {{ selectedProduct?.providersCount }}
           </strong>
+
         </div>
 
         <div>
+
           <span>Stock total</span>
 
           <strong>
             {{ selectedProduct?.totalStock }}
           </strong>
+
         </div>
 
       </div>
@@ -121,6 +136,7 @@
         <div class="provider-item">
 
           <div>
+
             <strong>
               Estado del producto
             </strong>
@@ -128,6 +144,7 @@
             <span>
               {{ selectedProduct?.status }}
             </span>
+
           </div>
 
           <div class="provider-stock">
@@ -154,4 +171,5 @@
     </aside>
 
   </div>
+
 </div>

@@ -31,6 +31,7 @@ import com.nethink.b2b.dto.response.DetalleSolicitudResponse;
 import com.nethink.b2b.dto.response.EspecificacionResponse;
 import com.nethink.b2b.entity.ProductoEspecificacion;
 import com.nethink.b2b.repository.ProductoEspecificacionRepository; 
+import jakarta.servlet.http.HttpServletRequest;
 
 
 import java.math.BigDecimal;
@@ -59,6 +60,7 @@ public class SolicitudService {
     private final EmpresaCompradoraRepository empresaRepo;
     private final SolicitudHistorialRepository historialRepo;
     private final EmailService emailService;
+    private final LogsSistemaService logsSistemaService;
     private final InventarioReservaService reservaService;
     private final InventarioReservaRepository reservaRepo;
     private final DescuentoVolumenRepository descuentoVolumenRepo;
@@ -77,6 +79,7 @@ public class SolicitudService {
             SolicitudHistorialRepository historialRepo,
             EmailService emailService,
             InventarioReservaService reservaService,
+            LogsSistemaService logsSistemaService,
             InventarioReservaRepository reservaRepo,
             DescuentoVolumenRepository descuentoVolumenRepo,
             ProductoEspecificacionRepository especificaRepo 
@@ -89,6 +92,7 @@ public class SolicitudService {
         this.empresaRepo = empresaRepo;
         this.historialRepo = historialRepo;
         this.emailService = emailService;
+        this.logsSistemaService = logsSistemaService;
         this.reservaService=reservaService;
         this.reservaRepo= reservaRepo;
         this.descuentoVolumenRepo= descuentoVolumenRepo;
@@ -98,7 +102,8 @@ public class SolicitudService {
     @Transactional
     public Solicitud crearSolicitud(
             SolicitudCrearRequest request,
-            String correoCliente
+            String correoCliente,
+            HttpServletRequest req
     ) {
 
         Usuario cliente = usuarioRepo.findByCorreo(correoCliente)
@@ -110,6 +115,8 @@ public class SolicitudService {
         EmpresaCompradora empresa = null;
 
         if (request.idEmpresa() != null) {
+            
+            
 
             empresa = empresaRepo.findById(request.idEmpresa())
                     .orElseThrow(() ->
@@ -150,6 +157,14 @@ int cantidadReq = itemReq.cantidad();
 int disponible = reservaService.calcularStockDisponible(pp);
 
 if (disponible < cantidadReq) {
+    logsSistemaService.registrarLog(
+    cliente.getIdUsuario(),
+    "STOCK_INSUFICIENTE",
+    "SOLICITUDES",
+    "Stock insuficiente para producto: "
+        + pp.getProducto().getNombre(),
+    req
+);
     throw new RuntimeException("Stock insuficiente para producto: " + pp.getProducto().getNombre());
 }
 
@@ -253,6 +268,17 @@ BigDecimal totalItem =
 
         Solicitud finalizada =
                 solicitudRepo.save(guardada);
+        
+        logsSistemaService.registrarLog(
+    cliente.getIdUsuario(),
+    "CREAR_SOLICITUD",
+    "SOLICITUDES",
+    "Solicitud creada ID: "
+        + finalizada.getIdSolicitud()
+        + " | Total: "
+        + finalizada.getTotal(),
+    req
+);
 
         SolicitudHistorial historial =
                 new SolicitudHistorial();
@@ -287,6 +313,14 @@ BigDecimal totalItem =
 
         } catch (Exception e) {
 
+            
+            logsSistemaService.registrarLog(
+    cliente.getIdUsuario(),
+    "EMAIL_ERROR",
+    "EMAIL",
+    e.getMessage(),
+   req
+);
             e.printStackTrace();
         }
 
@@ -353,8 +387,19 @@ BigDecimal totalItem =
     }
 
     public TrackingResponse obtenerTracking(
-            Integer idSolicitud
+            Integer idSolicitud,
+            Integer idUsuario,
+            HttpServletRequest request
     ) {
+        
+        logsSistemaService.registrarLog(
+    idUsuario,
+    "TRACKING",
+    "SOLICITUDES",
+    "Consulta tracking solicitud ID: "
+        + idSolicitud,
+    request
+);
 
         Solicitud s = solicitudRepo.buscarTracking(idSolicitud)
                 .orElseThrow();
@@ -435,7 +480,8 @@ BigDecimal totalItem =
 
     public Map<String, String> cancelarSolicitud(
             Integer idSolicitud,
-            String correoUsuario
+            String correoUsuario,
+            HttpServletRequest request
     ) {
 
         Solicitud solicitud =
@@ -459,6 +505,15 @@ BigDecimal totalItem =
         );
 
         solicitudRepo.save(solicitud);
+        
+        logsSistemaService.registrarLog(
+    usuario.getIdUsuario(),
+    "CANCELAR_SOLICITUD",
+    "SOLICITUDES",
+    "Solicitud cancelada ID: "
+        + solicitud.getIdSolicitud(),
+    request
+);
         
          List<InventarioReserva> reservas =
             reservaRepo.findBySolicitud_IdSolicitud(idSolicitud);
@@ -635,7 +690,16 @@ BigDecimal totalItem =
     
     
     public List<SolicitudResponse> listarSolicitudesProveedor(
-        Integer idProveedor) {
+        Integer idProveedor,Integer idUsuario, HttpServletRequest request) {
+        
+        logsSistemaService.registrarLog(
+    idUsuario,
+    "LISTAR_SOLICITUDES_PROVEEDOR",
+    "PROVEEDORES",
+    "Consulta solicitudes proveedor ID: "
+        + idProveedor,
+   request
+);
 
     List<Solicitud> solicitudes =
             solicitudRepo.listarSolicitudes(idProveedor);
@@ -784,8 +848,14 @@ BigDecimal totalItem =
     
     
     
-    public List<SolicitudResponse> listarTodasSolicitudes() {
-
+    public List<SolicitudResponse> listarTodasSolicitudes(Integer idUsuario,HttpServletRequest request) {
+logsSistemaService.registrarLog(
+    idUsuario,
+    "LISTAR_SOLICITUDES",
+    "ADMIN",
+    "Consulta global de solicitudes",
+    request
+);
     List<Solicitud> solicitudes =
             solicitudRepo.findAll();
 

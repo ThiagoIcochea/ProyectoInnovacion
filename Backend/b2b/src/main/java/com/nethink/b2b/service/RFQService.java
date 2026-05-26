@@ -8,6 +8,7 @@ import com.nethink.b2b.entity.DescuentoVolumen;
 import com.nethink.b2b.entity.ProveedorProducto;
 import com.nethink.b2b.repository.DescuentoVolumenRepository;
 import com.nethink.b2b.repository.ProveedorProductoRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -20,15 +21,26 @@ public class RFQService {
     private final ScoringService scoringService;
     private final InventarioReservaService inventarioReSer;
     private final DescuentoVolumenRepository descuentoVolumenRepo;
+    private final LogsSistemaService logsSistemaService;
 
-    public RFQService(ProveedorProductoRepository provProdRepo, ScoringService scoringService,InventarioReservaService inventarioReSer, DescuentoVolumenRepository descuentoVolumenRepo) {
+    public RFQService(ProveedorProductoRepository provProdRepo, ScoringService scoringService,InventarioReservaService inventarioReSer, DescuentoVolumenRepository descuentoVolumenRepo,LogsSistemaService logsSistemaService) {
         this.provProdRepo = provProdRepo;
         this.scoringService = scoringService;
         this.inventarioReSer=  inventarioReSer;
         this.descuentoVolumenRepo= descuentoVolumenRepo;
+        this.logsSistemaService = logsSistemaService;
     }
 
-    public List<RFQProveedorResponse> buscarYCalificarProveedores(RFQRequest request) {
+    public List<RFQProveedorResponse> buscarYCalificarProveedores(RFQRequest request,Integer idUsuario, HttpServletRequest req) {
+        logsSistemaService.registrarLog(
+    idUsuario,
+    "RFQ_BUSQUEDA",
+    "RFQ",
+    "Nueva búsqueda RFQ con "
+        + request.getItems().size()
+        + " productos",
+    req
+);
         List<Integer> idsProductos = request.getItems().stream()
                 .map(ItemRFQRequest::getIdProducto)
                 .toList();
@@ -38,7 +50,17 @@ public class RFQService {
                 idsProductos.size()
         );
 
-        if (proveedoresIds.isEmpty()) return new ArrayList<>();
+        if (proveedoresIds.isEmpty()) {
+            
+            logsSistemaService.registrarLog(
+   idUsuario,
+    "RFQ_SIN_RESULTADOS",
+    "RFQ",
+    "No se encontraron proveedores para RFQ",
+    req
+);
+            return new ArrayList<>();
+        }
 
         List<ProveedorProducto> detalles = provProdRepo.findDetallesParaScoring(proveedoresIds, idsProductos);
         Map<Integer, List<ProveedorProducto>> porProveedor = detalles.stream()
@@ -77,7 +99,16 @@ DescuentoVolumen mejor = volumenes.stream()
 
 if (mejor != null) {
 
-    // SI HAY VOLUMEN → ESTE GANA
+    logsSistemaService.registrarLog(
+    idUsuario,
+    "DESCUENTO_VOLUMEN",
+    "RFQ",
+    "Descuento volumen aplicado proveedor: "
+        + pp.getProveedor().getRazonSocial()
+        + " | Producto: "
+        + pp.getProducto().getNombre(),
+    req
+);
     precioFinal = mejor.getPrecioUnitario().doubleValue();
 
 } else {
@@ -131,6 +162,16 @@ if (mejor != null) {
 }
 itemsDetalle.add(itemDetalle);
                 } else {
+                    logsSistemaService.registrarLog(
+    idUsuario,
+    "RFQ_STOCK_INSUFICIENTE",
+    "RFQ",
+    "Proveedor "
+        + pp.getProveedor().getRazonSocial()
+        + " sin stock suficiente para producto "
+        + pp.getProducto().getNombre(),
+    req
+);
                     cumpleStock = false;
                     break;
                 }
@@ -152,7 +193,24 @@ itemsDetalle.add(itemDetalle);
         }
 
         scoringService.calcularScore(candidatos, request.getPrioridad());
-
+        logsSistemaService.registrarLog(
+    idUsuario,
+    "RFQ_SCORING",
+    "RFQ",
+    "Scoring calculado para "
+        + candidatos.size()
+        + " proveedores",
+    req
+);
+        
+        
+        logsSistemaService.registrarLog(
+    idUsuario,
+    "RFQ_FINALIZADO",
+    "RFQ",
+    "RFQ completado correctamente",
+    req
+);
         return candidatos.stream()
                 .sorted(Comparator.comparingDouble(RFQProveedorResponse::getScoreFinal).reversed())
                 .limit(10)

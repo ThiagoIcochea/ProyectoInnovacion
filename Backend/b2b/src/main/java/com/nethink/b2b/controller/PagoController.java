@@ -23,6 +23,7 @@ import com.nethink.b2b.dto.response.PagoResponse;
 import com.nethink.b2b.entity.Proveedor;
 import com.nethink.b2b.repository.ProveedorRepository;
 import com.nethink.b2b.service.PagoService;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +62,7 @@ public class PagoController {
     
     @GetMapping("/proveedor/mis-pagos")
 public ResponseEntity<List<PagoResponse>>
-listarMisPagos(Principal principal) {
+listarMisPagos(Principal principal,HttpServletRequest httpRequest) {
 
     Proveedor proveedor =
             proveedorRepo.findByUsuario_Correo(
@@ -72,7 +73,7 @@ listarMisPagos(Principal principal) {
 
     return ResponseEntity.ok(
             pagoService.listarPagosProveedor(
-                    proveedor.getIdProveedor())
+                    proveedor.getIdProveedor(), httpRequest)
     );
 }
     
@@ -81,10 +82,11 @@ listarMisPagos(Principal principal) {
 @PutMapping("/{idPago}/aprobar")
 public ResponseEntity<?> aprobarPago(
         @PathVariable Integer idPago,
-        Principal principal
+        Principal principal,
+        HttpServletRequest httpRequest
 ) {
 
-    pagoService.aprobarPago(idPago,principal.getName());
+    pagoService.aprobarPago(idPago,principal.getName(), httpRequest);
 
     Map<String, String> response =
             new HashMap<>();
