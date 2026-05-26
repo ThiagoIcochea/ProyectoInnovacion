@@ -1,4 +1,3 @@
-<!-- Backend touchpoint: global product catalog and supplier stock overview. -->
 <div class="admin-products-page">
   <div class="page-header">
     <div>
@@ -12,13 +11,19 @@
   </div>
 
   <div class="products-grid">
+
     <section class="products-card">
+
       <div class="card-header">
         <h2>Productos registrados</h2>
-        <div class="search-box">Buscar por producto, marca o categoría...</div>
+
+        <div class="search-box">
+          Buscar por producto, marca o categoría...
+        </div>
       </div>
 
       <div class="products-table">
+
         <div class="products-table__head">
           <div>Producto</div>
           <div>Marca</div>
@@ -30,14 +35,31 @@
 
         <div
           class="products-table__row"
-          *ngFor="let product of products; let i = index"
-          [class.active]="i === 0"
+          *ngFor="let product of products"
+          [class.active]="selectedProduct?.idProducto === product.idProducto"
+          (click)="seleccionarProducto(product)"
         >
-          <div class="product-name">{{ product.name }}</div>
-          <div>{{ product.brand }}</div>
-          <div>{{ product.category }}</div>
-          <div>{{ product.providersCount }}</div>
-          <div>{{ product.totalStock }} und.</div>
+
+          <div class="product-name">
+            {{ product.name }}
+          </div>
+
+          <div>
+            {{ product.brand }}
+          </div>
+
+          <div>
+            {{ product.category }}
+          </div>
+
+          <div>
+            {{ product.providersCount }}
+          </div>
+
+          <div>
+            {{ product.totalStock }} und.
+          </div>
+
           <div>
             <span
               class="status"
@@ -47,56 +69,89 @@
               {{ product.status }}
             </span>
           </div>
+
         </div>
+
       </div>
+
     </section>
 
     <aside class="detail-card">
+
       <div class="detail-header">
+
         <span>Producto seleccionado</span>
-        <h2>{{ selectedProduct.name }}</h2>
-        <p>{{ selectedProduct.brand }} · {{ selectedProduct.category }}</p>
+
+        <h2>
+          {{ selectedProduct?.name }}
+        </h2>
+
+        <p>
+          {{ selectedProduct?.brand }}
+          ·
+          {{ selectedProduct?.category }}
+        </p>
+
       </div>
 
       <div class="detail-summary">
+
         <div>
           <span>Proveedores</span>
-          <strong>{{ selectedProduct.providersCount }}</strong>
+
+          <strong>
+            {{ selectedProduct?.providersCount }}
+          </strong>
         </div>
 
         <div>
           <span>Stock total</span>
-          <strong>{{ selectedProduct.totalStock }}</strong>
+
+          <strong>
+            {{ selectedProduct?.totalStock }}
+          </strong>
         </div>
+
       </div>
 
-      <h3>Proveedores disponibles</h3>
+      <h3>Información</h3>
 
       <div class="provider-list">
-        <div class="provider-item" *ngFor="let provider of providers">
+
+        <div class="provider-item">
+
           <div>
-            <strong>{{ provider.name }}</strong>
-            <span>{{ provider.api }}</span>
+            <strong>
+              Estado del producto
+            </strong>
+
+            <span>
+              {{ selectedProduct?.status }}
+            </span>
           </div>
 
           <div class="provider-stock">
-            <strong>{{ provider.stock }} und.</strong>
-            <span>{{ provider.price }}</span>
+
+            <strong>
+              {{ selectedProduct?.totalStock }} und.
+            </strong>
+
+            <span>
+              {{ selectedProduct?.brand }}
+            </span>
+
           </div>
 
-          <button
-            class="notify-btn"
-            *ngIf="provider.stock <= 5"
-          >
-            Notificar bajo stock
-          </button>
         </div>
+
       </div>
 
       <div class="info-box">
         El stock mostrado proviene de la sincronización API de cada proveedor.
         El administrador solo supervisa y notifica incidencias.
       </div>
+
     </aside>
+
   </div>
 </div>

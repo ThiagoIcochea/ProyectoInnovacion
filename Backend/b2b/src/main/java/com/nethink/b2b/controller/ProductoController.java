@@ -5,6 +5,7 @@ import com.nethink.b2b.dto.response.CatalogoFiltrosResponse;
 import com.nethink.b2b.entity.Producto;
 import com.nethink.b2b.service.ProductoService;
 import com.nethink.b2b.dto.response.CatalogoResponse;
+import com.nethink.b2b.dto.response.ProductoAdminResponse;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -38,4 +39,13 @@ public class ProductoController {
     public ResponseEntity<List<CatalogoResponse>> filtrarCatalogo(@RequestBody FiltroRFQRequest filtro) {
         return ResponseEntity.ok(productoService.filtrarCatalogo(filtro));
     }
+    
+    @GetMapping("/admin")
+public ResponseEntity<List<ProductoAdminResponse>>
+obtenerProductosAdmin() {
+
+    return ResponseEntity.ok(
+            productoService.obtenerProductosAdmin()
+    );
+}
 }

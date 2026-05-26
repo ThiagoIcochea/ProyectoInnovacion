@@ -1,67 +1,53 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Component, OnInit, inject } from '@angular/core';
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    HttpClientModule
+  ],
   templateUrl: './products.html',
   styleUrl: './products.scss'
 })
-export class AdminProductsComponent {
-  selectedProduct = {
-    name: 'Cisco Catalyst 9300 48-port PoE+',
-    brand: 'Cisco',
-    category: 'Switch',
-    totalStock: 24,
-    providersCount: 3
-  };
+export class AdminProductsComponent implements OnInit {
 
-  products = [
-    {
-      name: 'Cisco Catalyst 9300 48-port PoE+',
-      brand: 'Cisco',
-      category: 'Switch',
-      providersCount: 3,
-      totalStock: 24,
-      status: 'Stock medio'
-    },
-    {
-      name: 'Ubiquiti UniFi UAP-AC-PRO',
-      brand: 'Ubiquiti',
-      category: 'Access Point',
-      providersCount: 4,
-      totalStock: 82,
-      status: 'Stock alto'
-    },
-    {
-      name: 'Fortinet FortiGate 60F',
-      brand: 'Fortinet',
-      category: 'Firewall',
-      providersCount: 2,
-      totalStock: 6,
-      status: 'Bajo stock'
-    }
-  ];
+  private http = inject(HttpClient);
 
-  providers = [
-    {
-      name: 'Global Tech Solutions',
-      stock: 12,
-      price: 'US$ 3,600.00',
-      api: 'Sincronizado'
-    },
-    {
-      name: 'InfraLink Perú',
-      stock: 8,
-      price: 'US$ 3,720.00',
-      api: 'Sincronizado'
-    },
-    {
-      name: 'NetWorks Corp',
-      stock: 4,
-      price: 'US$ 3,680.00',
-      api: 'Stock bajo'
-    }
-  ];
+  products: any[] = [];
+
+  selectedProduct: any = null;
+
+  providers: any[] = [];
+
+  ngOnInit(): void {
+    this.obtenerProductos();
+  }
+
+  obtenerProductos(): void {
+
+    this.http.get<any[]>(
+      'https://proyectoinnovacion.onrender.com/api/productos/admin'
+    ).subscribe({
+
+      next: (resp) => {
+
+        this.products = resp;
+
+        if (resp.length > 0) {
+          this.selectedProduct = resp[0];
+        }
+      },
+
+      error: (err) => {
+        console.error('Error obteniendo productos', err);
+      }
+    });
+  }
+
+  seleccionarProducto(product: any): void {
+    this.selectedProduct = product;
+  }
 }
