@@ -8,7 +8,53 @@
 
       <h1>Solicitudes RFQ</h1>
 
-      <p>Monitorea todas las solicitudes del sistema.</p>
+      <p>
+        Monitorea todas las solicitudes del sistema.
+      </p>
+
+    </div>
+
+  </div>
+
+  <div class="summary-grid">
+
+    <div class="summary-card">
+
+      <span>Total RFQs</span>
+
+      <strong>
+        {{ getTotalRfqs() }}
+      </strong>
+
+    </div>
+
+    <div class="summary-card">
+
+      <span>Pagadas</span>
+
+      <strong>
+        {{ getPagadas() }}
+      </strong>
+
+    </div>
+
+    <div class="summary-card">
+
+      <span>Pendientes</span>
+
+      <strong>
+        {{ getPendientes() }}
+      </strong>
+
+    </div>
+
+    <div class="summary-card">
+
+      <span>Canceladas</span>
+
+      <strong>
+        {{ getCanceladas() }}
+      </strong>
 
     </div>
 
@@ -22,9 +68,10 @@
 
       <input
         type="text"
+        class="search-box"
         placeholder="Buscar por cliente, proveedor o ID..."
         [(ngModel)]="search"
-        class="search-box"
+        (input)="filtrarRfqs()"
       />
 
     </div>
@@ -34,60 +81,97 @@
       <div class="rfqs-table__head">
 
         <div>ID</div>
+
         <div>Cliente</div>
+
         <div>Empresa</div>
+
         <div>Proveedor</div>
+
         <div>Monto</div>
+
         <div>Estado</div>
+
         <div>Fecha</div>
 
       </div>
 
       <div
         class="rfqs-table__row"
-        *ngFor="let rfq of filtrarRfqs()"
+        *ngFor="let rfq of filteredRfqs"
       >
 
         <div class="code">
+
           RFQ-{{ rfq.idSolicitud }}
+
         </div>
 
         <div>
+
           {{ rfq.nombreCliente }}
+
         </div>
 
         <div>
+
           {{ rfq.nombreEmpresa || 'Independiente' }}
+
         </div>
 
         <div>
+
           {{ rfq.nombreProveedor }}
+
         </div>
 
         <div>
+
           S/ {{ rfq.total }}
+
         </div>
 
         <div>
 
           <span
             class="status"
-            [class.warning]="rfq.estado === 'PAGO_PENDIENTE' || rfq.estado === 'PAGO_VALIDANDO'"
-            [class.danger]="rfq.estado === 'CANCELADA'"
+
+            [class.warning]="
+              rfq.estado === 'PAGO_PENDIENTE'
+              || rfq.estado === 'PAGO_VALIDANDO'
+            "
+
+            [class.danger]="
+              rfq.estado === 'CANCELADA'
+            "
+
+            [class.success]="
+              rfq.estado === 'PAGADA'
+              || rfq.estado === 'COMPLETADA'
+            "
           >
+
             {{ formatearEstado(rfq.estado) }}
+
           </span>
 
         </div>
 
         <div>
+
           {{ formatearFecha(rfq.fechaCreacion) }}
+
         </div>
 
       </div>
 
-      <div class="empty-state" *ngIf="filtrarRfqs().length === 0">
+      <div
+        class="empty-state"
+        *ngIf="filteredRfqs.length === 0"
+      >
+
         No existen solicitudes registradas.
+
       </div>
 
     </div>
