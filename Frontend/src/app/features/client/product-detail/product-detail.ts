@@ -17,9 +17,10 @@ export class ProductDetailComponent implements OnInit {
   requestItems: any[] = [];
   selectedImageIndex: number = 0;
   qty: number = 1;
-  activeTab: 'specs' | 'discounts' | 'delivery' = 'specs';
+  activeTab: 'specs' | 'delivery' | 'providers' = 'specs';
   loading: boolean = true;
   imageZoomed: boolean = false;
+  imageLoadFailures: { [key: string]: boolean } = {};
 
   private readonly API_BASE = 'https://proyectoinnovacion.onrender.com/api';
 
@@ -89,12 +90,20 @@ export class ProductDetailComponent implements OnInit {
   // ── Galería ────────────────────────────────────────────────
   get imagenes(): string[] {
     const imgs = this.product?.imagenes ?? [];
-    if (imgs.length === 0) return ['assets/no-image.png'];
-    return imgs.map((i: any) => i.URL ?? i.url ?? 'assets/no-image.png');
+    return imgs
+      .map((i: any) => i.URL ?? i.url)
+      .filter((url: string | null | undefined): url is string => !!url && !this.imageLoadFailures[url]);
   }
 
-  get imagenActiva(): string {
-    return this.imagenes[this.selectedImageIndex] ?? 'assets/no-image.png';
+  get imagenActiva(): string | null {
+    return this.imagenes[this.selectedImageIndex] ?? this.imagenes[0] ?? null;
+  }
+
+  handleImageError(url: string | null): void {
+    if (!url) return;
+    this.imageLoadFailures[url] = true;
+    this.selectedImageIndex = 0;
+    this.cdr.detectChanges();
   }
 
   selectImage(index: number): void {
@@ -106,7 +115,7 @@ export class ProductDetailComponent implements OnInit {
   }
 
   // ── Tabs ───────────────────────────────────────────────────
-  setTab(tab: 'specs' | 'discounts' | 'delivery'): void {
+  setTab(tab: 'specs' | 'delivery' | 'providers'): void {
     this.activeTab = tab;
   }
 
@@ -126,7 +135,7 @@ export class ProductDetailComponent implements OnInit {
       this.requestItems.push({
         idProducto: this.product.idProducto,
         name: this.product.producto,
-        detail: `${this.product.marca} • ${this.product.descripcion?.substring(0, 30)}...`,
+        detail: `${this.product.marca} - ${this.product.descripcion?.substring(0, 30)}...`,
         qty: this.qty,
         precioReferencia: this.product.precioUnitario ?? null,
         categoria: this.product.categoria,
@@ -144,35 +153,6 @@ export class ProductDetailComponent implements OnInit {
   }
 
   // ── Helpers de display ─────────────────────────────────────
-  get stockLabel(): string {
-    const s = this.product?.stock ?? 0;
-    if (s > 50) return 'Stock Alto';
-    if (s > 10) return 'Stock Disponible';
-    if (s > 0)  return 'Stock Limitado';
-    return 'Sin Stock';
-  }
-
-  get stockClass(): string {
-    const s = this.product?.stock ?? 0;
-    if (s > 50) return 'stock-high';
-    if (s > 10) return 'stock-mid';
-    if (s > 0)  return 'stock-low';
-    return 'stock-none';
-  }
-
-  get precioConDescuento(): number | null {
-    const p = this.product;
-    if (!p?.precioUnitario) return null;
-    if (p.enOferta && p.porcentajeDescuento) {
-      return p.precioUnitario * (1 - p.porcentajeDescuento / 100);
-    }
-    return p.precioUnitario;
-  }
-
-  get totalEstimado(): number {
-    return (this.precioConDescuento ?? this.product?.precioUnitario ?? 0) * this.qty;
-  }
-
   // Navega a provider-reviews pasando el producto como state
   verResenasProveedores(): void {
     this.router.navigate(['/app/rfq/provider-reviews'], {

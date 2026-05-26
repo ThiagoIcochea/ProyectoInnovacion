@@ -1,8 +1,35 @@
+.btn,
 .btn-primary,
 .btn-secondary,
+.btn-outline,
 .btn-ghost,
-.btn-danger {
+.btn-danger,
+.btn-success,
+.btn-icon {
 	@include button-base;
+}
+
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.btn-ghost,
+.btn-danger,
+.btn-success {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.45rem;
+	text-decoration: none;
+	white-space: nowrap;
+
+	&:disabled,
+	&.disabled {
+		cursor: not-allowed;
+		opacity: 0.55;
+		transform: none;
+		box-shadow: none;
+	}
 }
 
 .btn-primary {
@@ -31,6 +58,21 @@
 	}
 }
 
+.btn-outline {
+	background: transparent;
+	color: $primary-light;
+	border-color: rgba(79, 140, 255, 0.28);
+
+	&:hover {
+		background: rgba(79, 140, 255, 0.1);
+		transform: translateY(-1px);
+	}
+
+	&:focus-visible {
+		@include focus-ring;
+	}
+}
+
 .btn-ghost {
 	background: transparent;
 	color: $text-secondary;
@@ -50,6 +92,50 @@
 	&:hover {
 		background: rgba(244, 63, 94, 0.18);
 		color: #fff1f4;
+	}
+}
+
+.btn-success {
+	background: rgba(34, 197, 94, 0.14);
+	color: #86efac;
+	border-color: rgba(34, 197, 94, 0.24);
+
+	&:hover {
+		background: rgba(34, 197, 94, 0.2);
+		color: #dcfce7;
+		transform: translateY(-1px);
+	}
+
+	&:focus-visible {
+		@include focus-ring;
+	}
+}
+
+.btn-icon {
+	width: 42px;
+	height: 42px;
+	min-height: 42px;
+	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: $radius-md;
+	border-color: $border;
+	background: rgba(255, 255, 255, 0.03);
+	color: $text-primary;
+
+	svg {
+		width: 18px;
+		height: 18px;
+	}
+
+	&:hover {
+		transform: translateY(-1px);
+		background: rgba(255, 255, 255, 0.06);
+	}
+
+	&:focus-visible {
+		@include focus-ring;
 	}
 }
 

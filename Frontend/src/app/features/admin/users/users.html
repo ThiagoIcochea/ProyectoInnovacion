@@ -99,8 +99,17 @@
       </div>
 
       <div
+        class="users-table__row users-table__row--skeleton"
+        *ngFor="let row of skeletonRows"
+        [hidden]="!loading"
+      >
+        <div class="skeleton-line" *ngFor="let item of [1, 2, 3, 4, 5, 6]"></div>
+      </div>
+
+      <div
         class="users-table__row"
         *ngFor="let user of filteredUsers"
+        [hidden]="loading"
       >
 
         <div class="user-cell">
@@ -178,7 +187,7 @@
 
       <div
         class="empty-state"
-        *ngIf="filteredUsers.length === 0"
+        *ngIf="!loading && filteredUsers.length === 0"
       >
 
         No se encontraron usuarios.

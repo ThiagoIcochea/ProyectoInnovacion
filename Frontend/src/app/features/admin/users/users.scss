@@ -134,6 +134,10 @@
   }
 }
 
+.users-table__row--skeleton {
+  pointer-events: none;
+}
+
 .user-cell {
   display: flex;
   align-items: center;
@@ -192,4 +196,9 @@
   .users-table__row {
     grid-template-columns: 1fr;
   }
+}
+
+.empty-state {
+  padding: 1.25rem 1.5rem;
+  color: #9ca3af;
 }

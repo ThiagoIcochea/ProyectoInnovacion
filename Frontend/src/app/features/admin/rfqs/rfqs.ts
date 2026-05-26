@@ -18,6 +18,8 @@ export class AdminRfqsComponent implements OnInit {
 
   rfqs: any[] = [];
   search: string = '';
+  loading = true;
+  readonly skeletonRows = Array.from({ length: 5 });
 
   constructor(private http: HttpClient) {}
 
@@ -26,6 +28,7 @@ export class AdminRfqsComponent implements OnInit {
   }
 
   listarRfqs(): void {
+    this.loading = true;
 
     const token = localStorage.getItem('token');
 
@@ -40,10 +43,13 @@ export class AdminRfqsComponent implements OnInit {
 
       next: (data) => {
         this.rfqs = data;
+        this.loading = false;
       },
 
       error: (err) => {
         console.error(err);
+        this.rfqs = [];
+        this.loading = false;
       }
 
     });

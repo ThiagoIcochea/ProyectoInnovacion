@@ -51,6 +51,12 @@
         <div>Estado</div>
       </div>
 
+      <ng-container *ngIf="loading">
+        <div class="products-table__row products-table__row--skeleton" *ngFor="let row of skeletonRows">
+          <div class="skeleton-line" *ngFor="let item of [1, 2, 3, 4, 5, 6, 7, 8]"></div>
+        </div>
+      </ng-container>
+
       <div class="products-table__row" *ngFor="let p of filteredProducts">
         <div class="sku">{{ p.skuGlobal }}</div>
         <div>{{ p.nombre }}</div>
@@ -87,6 +93,10 @@
             {{ p.stock < 10 ? 'Bajo stock' : 'Activo' }}
           </span>
         </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && filteredProducts.length === 0">
+        No se encontraron productos.
       </div>
     </div>
   </section>

@@ -39,7 +39,14 @@
       <form class="login-form">
         <div class="form-group">
           <label for="email">Correo corporativo</label>
-          <input id="email" name="email" type="email" [(ngModel)]="email" placeholder="empresa@correo.com" />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            [ngModel]="email"
+            (ngModelChange)="onEmailChange($event)"
+            placeholder="empresa@correo.com"
+          />
         </div>
 
         <div class="form-group">
@@ -49,7 +56,12 @@
 
         <div class="login-form__options">
           <label class="checkbox-row">
-            <input type="checkbox" />
+            <input
+              type="checkbox"
+              name="rememberEmail"
+              [(ngModel)]="rememberEmail"
+              (change)="onRememberChange()"
+            />
             <span>Recordarme</span>
           </label>
 

@@ -52,6 +52,7 @@
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
+  min-width: 0;
 
   h2 {
     color: #e5e7eb;
@@ -69,6 +70,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
+  min-width: 0;
 
   label {
     color: #e5e7eb;
@@ -158,7 +160,9 @@
   gap: 0.9rem;
 
   div {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(110px, auto) minmax(0, 1fr);
+    align-items: start;
     justify-content: space-between;
     gap: 1rem;
     padding-bottom: 0.8rem;
@@ -171,7 +175,32 @@
 
   strong {
     color: #e5e7eb;
+    min-width: 0;
   }
+}
+
+.secret-value-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 40px !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding-bottom: 0 !important;
+  border-bottom: 0 !important;
+  min-width: 0;
+}
+
+.secret-value {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.secret-value--expanded {
+  white-space: normal;
+  word-break: break-all;
+  overflow: visible;
 }
 
 .text-warning {
@@ -198,4 +227,63 @@
   .actions {
     flex-direction: column;
   }
+
+  .sync-list div {
+    grid-template-columns: 1fr;
+  }
+
+  .secret-value-row {
+    grid-template-columns: minmax(0, 1fr) 40px !important;
+  }
+}
+
+.secret-input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  border: 1px solid #374151;
+  border-radius: 12px;
+  background: #0f172a;
+  overflow: hidden;
+
+  input {
+    min-width: 0;
+    border: 0;
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+
+  &:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+  }
+}
+
+.secret-toggle {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #93c5fd;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background: rgba(59, 130, 246, 0.12);
+  }
+}
+
+.api-card--skeleton {
+  display: grid;
+  gap: 0.85rem;
 }

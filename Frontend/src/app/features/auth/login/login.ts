@@ -1,6 +1,6 @@
 // Backend touchpoint: login request and role-based redirect after token issuance.
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -13,17 +13,43 @@ import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../../co
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
 
   email: string = '';
   password: string = '';
+  rememberEmail: boolean = false;
+
+  private readonly rememberedEmailKey = 'rememberedEmail';
 
   constructor(
     private http: HttpClient,
     private router: Router
   ) {}
 
+  ngOnInit(): void {
+    const rememberedEmail = localStorage.getItem(this.rememberedEmailKey);
+
+    if (rememberedEmail) {
+      this.email = rememberedEmail;
+      this.rememberEmail = true;
+    }
+  }
+
+  onEmailChange(value: string): void {
+    this.email = value;
+
+    if (this.rememberEmail) {
+      this.syncRememberedEmail();
+    }
+  }
+
+  onRememberChange(): void {
+    this.syncRememberedEmail();
+  }
+
   login() {
+
+    this.syncRememberedEmail();
 
     const body = {
       correo: this.email,
@@ -67,5 +93,16 @@ export class LoginComponent {
 
       this.router.navigate([APP_ROUTE_PATHS.login]);
     }
+  }
+
+  private syncRememberedEmail(): void {
+    const email = this.email.trim();
+
+    if (this.rememberEmail && email) {
+      localStorage.setItem(this.rememberedEmailKey, email);
+      return;
+    }
+
+    localStorage.removeItem(this.rememberedEmailKey);
   }
 }

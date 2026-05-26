@@ -44,8 +44,17 @@
       </div>
 
       <div
+        class="rfqs-table__row rfqs-table__row--skeleton"
+        *ngFor="let row of skeletonRows"
+        [hidden]="!loading"
+      >
+        <div class="skeleton-line" *ngFor="let item of [1, 2, 3, 4, 5, 6, 7]"></div>
+      </div>
+
+      <div
         class="rfqs-table__row"
         *ngFor="let rfq of filtrarRfqs()"
+        [hidden]="loading"
       >
 
         <div class="code">
@@ -86,7 +95,7 @@
 
       </div>
 
-      <div class="empty-state" *ngIf="filtrarRfqs().length === 0">
+      <div class="empty-state" *ngIf="!loading && filtrarRfqs().length === 0">
         No existen solicitudes registradas.
       </div>
 

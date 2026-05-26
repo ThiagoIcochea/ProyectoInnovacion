@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
@@ -14,9 +14,17 @@ import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.
 })
 export class RfqCatalogComponent implements OnInit {
   products: any[] = [];
+  productsOriginal: any[] = [];
   requestItems: any[] = [];
   filtros: any = { categorias: [], marcas: [] };
   mostrarSolicitudMovil = false;
+  mostrarFiltros = false;
+  loadingProducts = true;
+  loadingFilters = true;
+  searchingProviders = false;
+  searchTerm = '';
+  readonly skeletonCards = Array.from({ length: 8 });
+  imageLoadFailures: { [key: number]: boolean } = {};
 
   selectedCategories: number[] = [];
   selectedBrands: number[] = [];
@@ -34,11 +42,17 @@ export class RfqCatalogComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.cargarCarritoLocal();
+    this.route.queryParamMap.subscribe(params => {
+      this.searchTerm = params.get('search')?.trim() || '';
+      this.currentPage = 1;
+      this.aplicarBusquedaLocal();
+    });
     this.cargarFiltrosDisponibles();
     this.aplicarFiltrosRefinado();
   }
@@ -61,18 +75,25 @@ export class RfqCatalogComponent implements OnInit {
   }
 
   cargarFiltrosDisponibles(): void {
+    this.loadingFilters = true;
+
     this.http.get<any>(`${this.API_BASE}/productos/filtros`, { headers: this.getHeaders() }).subscribe({
       next: (res) => {
         this.filtros = res;
+        this.loadingFilters = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al cargar filtros', err);
+        this.loadingFilters = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
   aplicarFiltrosRefinado(): void {
+    this.loadingProducts = true;
+
     const listaSpecs = Object.values(this.specsPorCategoria).filter(
       s => s && s.trim() !== ''
     );
@@ -89,14 +110,50 @@ export class RfqCatalogComponent implements OnInit {
       { headers: this.getHeaders() }
     ).subscribe({
       next: (res) => {
-        this.products = res;
+        this.productsOriginal = res || [];
+        this.aplicarBusquedaLocal();
         this.currentPage = 1;
+        this.loadingProducts = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al filtrar', err);
+        this.products = [];
+        this.productsOriginal = [];
+        this.loadingProducts = false;
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  aplicarBusquedaLocal(): void {
+    const term = this.searchTerm.trim().toLowerCase();
+
+    if (!term) {
+      this.products = [...this.productsOriginal];
+      this.currentPage = 1;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.products = this.productsOriginal.filter(product => {
+      const specs = (product.especificaciones || [])
+        .map((spec: any) => `${spec?.nombre || ''} ${spec?.valor || ''}`)
+        .join(' ');
+
+      return [
+        product.producto,
+        product.marca,
+        product.categoria,
+        product.descripcion,
+        specs
+      ]
+        .filter(Boolean)
+        .some(value => String(value).toLowerCase().includes(term));
+    });
+
+    this.currentPage = 1;
+    this.cdr.detectChanges();
   }
 
   toggleFiltro(tipo: 'cat' | 'marca', id: number): void {
@@ -150,7 +207,7 @@ export class RfqCatalogComponent implements OnInit {
       this.requestItems.push({
         idProducto: product.idProducto,
         name: product.producto,
-        detail: `${product.marca} • ${product.descripcion?.substring(0, 30)}...`,
+        detail: `${product.marca} - ${product.descripcion?.substring(0, 30)}...`,
         qty: 1,
         precioReferencia: product.precioUnitario ?? null,
         categoria: product.categoria,
@@ -197,6 +254,12 @@ export class RfqCatalogComponent implements OnInit {
   }
 
   buscarProveedoresRFQ(): void {
+    if (this.searchingProviders) {
+      return;
+    }
+
+    this.searchingProviders = true;
+
     const request = {
       items: this.requestItems.map(i => ({
         idProducto: i.idProducto,
@@ -223,8 +286,65 @@ export class RfqCatalogComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al buscar proveedores', err);
+        this.searchingProviders = false;
+        this.cdr.detectChanges();
         alert('No se encontraron proveedores que cumplan con los requisitos de tu carrito.');
       }
     });
+  }
+
+  get activeFilterCount(): number {
+    const specsActivas = Object.values(this.specsPorCategoria)
+      .filter(spec => spec && spec.trim() !== '').length;
+
+    return this.selectedCategories.length + this.selectedBrands.length + specsActivas;
+  }
+
+  get hasActiveFilters(): boolean {
+    return this.activeFilterCount > 0;
+  }
+
+  toggleFiltros(): void {
+    this.mostrarFiltros = !this.mostrarFiltros;
+  }
+
+  cerrarFiltros(): void {
+    this.mostrarFiltros = false;
+  }
+
+  aplicarFiltrosDesdePanel(): void {
+    this.aplicarFiltrosRefinado();
+    this.cerrarFiltros();
+  }
+
+  limpiarFiltros(): void {
+    this.selectedCategories = [];
+    this.selectedBrands = [];
+    this.specsPorCategoria = {};
+    this.currentPage = 1;
+    this.aplicarFiltrosRefinado();
+    this.cerrarFiltros();
+  }
+
+  getProductImage(product: any): string | null {
+    const productId = product?.idProducto;
+
+    if (productId && this.imageLoadFailures[productId]) {
+      return null;
+    }
+
+    const img = product?.imagenes?.[0];
+    return img?.URL || img?.url || null;
+  }
+
+  markImageAsFailed(product: any): void {
+    if (product?.idProducto) {
+      this.imageLoadFailures[product.idProducto] = true;
+      this.cdr.detectChanges();
+    }
+  }
+
+  getPrimarySpec(product: any): any | null {
+    return product?.especificaciones?.find((spec: any) => spec?.nombre || spec?.valor) ?? null;
   }
 }

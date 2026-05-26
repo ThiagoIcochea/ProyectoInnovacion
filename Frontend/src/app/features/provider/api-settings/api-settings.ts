@@ -38,6 +38,10 @@ implements OnInit {
     fechaUltimaConexion: ''
   };
 
+  loading = true;
+  showEndpoint = false;
+  showApiKey = false;
+
   constructor(
     private http: HttpClient,
     private cdr: ChangeDetectorRef
@@ -57,7 +61,7 @@ implements OnInit {
 
   cargarConfiguracion(): void {
 
-   
+    this.loading = true;
 
     this.http.get<any>(
       `${this.API_URL}`,
@@ -70,6 +74,7 @@ implements OnInit {
       next: (res) => {
 
         this.config = res;
+        this.loading = false;
 
         this.cdr.detectChanges();
       },
@@ -79,6 +84,8 @@ implements OnInit {
           'Error cargando configuración API',
           err
         );
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -154,5 +161,16 @@ implements OnInit {
         alert('Error de conexión');
       }
     });
+  }
+
+  toggleSecret(field: string): void {
+    if (field === 'endpoint') {
+      this.showEndpoint = !this.showEndpoint;
+      return;
+    }
+
+    if (field === 'apiKey') {
+      this.showApiKey = !this.showApiKey;
+    }
   }
 }

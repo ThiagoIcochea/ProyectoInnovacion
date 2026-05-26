@@ -25,6 +25,8 @@ implements OnInit {
     'https://proyectoinnovacion.onrender.com/api/config';
 
   integrations: any[] = [];
+  loading = true;
+  readonly skeletonCards = Array.from({ length: 6 });
 
   constructor(
     private http: HttpClient,
@@ -51,6 +53,7 @@ implements OnInit {
   }
 
   listar(): void {
+    this.loading = true;
 
     this.http.get<any[]>(
       this.API_URL,
@@ -63,6 +66,7 @@ implements OnInit {
       next: (res) => {
 
         this.integrations = res;
+        this.loading = false;
 
         this.cdr.detectChanges();
       },
@@ -70,6 +74,9 @@ implements OnInit {
       error: (err) => {
 
         console.error(err);
+        this.integrations = [];
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

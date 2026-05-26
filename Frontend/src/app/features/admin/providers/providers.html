@@ -95,8 +95,17 @@
       </div>
 
       <div
+        class="providers-table__row providers-table__row--skeleton"
+        *ngFor="let row of skeletonRows"
+        [hidden]="!loading"
+      >
+        <div class="skeleton-line" *ngFor="let item of [1, 2, 3, 4, 5, 6]"></div>
+      </div>
+
+      <div
         class="providers-table__row"
         *ngFor="let provider of filteredProviders"
+        [hidden]="loading"
       >
 
         <div class="provider-cell">
@@ -189,7 +198,7 @@
 
       <div
         class="empty-state"
-        *ngIf="filteredProviders.length === 0"
+        *ngIf="!loading && filteredProviders.length === 0"
       >
 
         No se encontraron proveedores.

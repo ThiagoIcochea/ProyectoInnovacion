@@ -21,10 +21,22 @@
   </div>
 
   <div class="integration-grid">
+    <div
+      class="integration-card integration-card--skeleton"
+      *ngFor="let item of skeletonCards"
+      [hidden]="!loading">
+
+      <div class="skeleton-line skeleton-line--short"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line skeleton-line--short"></div>
+      <div class="skeleton-block skeleton-block--button"></div>
+
+    </div>
 
     <div
       class="integration-card"
-      *ngFor="let item of integrations">
+      *ngFor="let item of integrations"
+      [hidden]="loading">
 
       <div class="integration-header">
 
@@ -73,6 +85,10 @@
 
       </div>
 
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && integrations.length === 0">
+      No hay integraciones configuradas.
     </div>
 
   </div>
