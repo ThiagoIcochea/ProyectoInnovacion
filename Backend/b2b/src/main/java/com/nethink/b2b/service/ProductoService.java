@@ -11,6 +11,7 @@ import com.nethink.b2b.repository.ProductoRepository;
 import com.nethink.b2b.repository.CategoriaRepository;
 import com.nethink.b2b.repository.MarcaRepository;
 import com.nethink.b2b.repository.ProductoEspecificacionRepository;
+import com.nethink.b2b.dto.response.ProductoAdminResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -110,4 +111,55 @@ public class ProductoService {
         resp.setEspecificaciones(new ArrayList<>());
         return resp;
     }
+    
+    public List<ProductoAdminResponse> obtenerProductosAdmin() {
+
+    List<Object[]> rows = productoRepository.obtenerProductosAdmin();
+
+    return rows.stream().map(row -> {
+
+        ProductoAdminResponse dto =
+                new ProductoAdminResponse();
+
+        Integer stock =
+                ((Number) row[5]).intValue();
+
+        dto.setIdProducto(
+                ((Number) row[0]).intValue()
+        );
+
+        dto.setName(
+                (String) row[1]
+        );
+
+        dto.setBrand(
+                (String) row[2]
+        );
+
+        dto.setCategory(
+                (String) row[3]
+        );
+
+        dto.setProvidersCount(
+                ((Number) row[4]).intValue()
+        );
+
+        dto.setTotalStock(stock);
+
+        if (stock <= 5) {
+            dto.setStatus("Bajo stock");
+        }
+
+        else if (stock <= 25) {
+            dto.setStatus("Stock medio");
+        }
+
+        else {
+            dto.setStatus("Stock alto");
+        }
+
+        return dto;
+
+    }).toList();
+}
 }

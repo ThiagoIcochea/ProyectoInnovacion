@@ -118,4 +118,34 @@ public interface ProductoRepository
             @Param("idMarca") Integer idMarca,
             @Param("idCategoria") Integer idCategoria
     );
+    
+    @Query(value = """
+    SELECT
+        p.id_producto,
+        p.nombre,
+        m.nombre AS marca,
+        c.nombre AS categoria,
+
+        COUNT(DISTINCT pp.id_proveedor) AS providersCount,
+
+        COALESCE(SUM(pp.stock),0) AS totalStock
+
+    FROM productos p
+
+    LEFT JOIN marcas m
+        ON m.id_marca = p.id_marca
+
+    LEFT JOIN categorias c
+        ON c.id_categoria = p.id_categoria
+
+    LEFT JOIN proveedor_producto pp
+        ON pp.id_producto = p.id_producto
+
+    GROUP BY
+        p.id_producto,
+        p.nombre,
+        m.nombre,
+        c.nombre
+""", nativeQuery = true)
+List<Object[]> obtenerProductosAdmin();
 }
