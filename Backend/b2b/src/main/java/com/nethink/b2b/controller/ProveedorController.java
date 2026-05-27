@@ -8,6 +8,7 @@ import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.entity.enums.PrioridadRFQ;
 import com.nethink.b2b.repository.UsuarioRepository;
 import com.nethink.b2b.service.ProveedorService;
+import com.nethink.b2b.service.ScoringService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.List;
