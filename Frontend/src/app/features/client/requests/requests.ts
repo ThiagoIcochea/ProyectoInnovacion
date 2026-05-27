@@ -94,6 +94,7 @@ export class RequestsComponent implements OnInit {
   private mapStatusClass(estado: string): string {
 
     const map: any = {
+      'Pedido aprobado': "ok",
       'Pago pendiente': 'pending',
       'Validando pago': 'validating',
       'En preparación': 'preparing',

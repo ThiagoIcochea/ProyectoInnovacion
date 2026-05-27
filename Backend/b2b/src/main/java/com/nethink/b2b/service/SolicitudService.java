@@ -990,7 +990,7 @@ public void rechazarPedido(Integer idSolicitud,String prompt, String correoUsuar
 
 
     sol.setEstado(
-          Solicitud.EstadoSolicitud.PEDIDO_RECHAZADO
+          Solicitud.EstadoSolicitud.CANCELADA
     );
     
     sol.setFechaCancelacion(LocalDateTime.now());
@@ -1011,7 +1011,7 @@ public void rechazarPedido(Integer idSolicitud,String prompt, String correoUsuar
     
         SolicitudHistorial historial = new SolicitudHistorial();
         historial.setSolicitud(sol);
-        historial.setEstado("PEDIDO_RECHAZADO");
+        historial.setEstado("CANCELADA");
         historial.setIdUsuario(usuario.getIdUsuario());
         historial.setDescripcion("Pedido rechazado por:"+prompt);
         historial.setFecha(LocalDateTime.now());
