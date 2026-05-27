@@ -54,7 +54,29 @@ export class RfqQuotationComponent implements OnInit {
 
   direccionEntrega = '';
 
+  selectedLocation: {
+    lat: number | null;
+    lng: number | null;
+    address: string;
+  } = {
+    lat: null,
+    lng: null,
+    address: ''
+  };
+
+  tempLocation: {
+    lat: number | null;
+    lng: number | null;
+    address: string;
+  } = {
+    lat: null,
+    lng: null,
+    address: ''
+  };
+
   loading = false;
+
+  resolvingLocationAddress = false;
 
   // MAPA MODAL
   mostrarMapaModal = false;
@@ -120,12 +142,18 @@ export class RfqQuotationComponent implements OnInit {
   abrirMapaModal(): void {
 
     this.mostrarMapaModal = true;
+    this.tempLocation = {
+      lat: this.selectedLocation.lat,
+      lng: this.selectedLocation.lng,
+      address: this.selectedLocation.address || this.direccionEntrega
+    };
 
     setTimeout(() => {
 
       this.initMap();
+      this.refreshMapSize();
 
-    }, 200);
+    }, 250);
   }
 
   cerrarMapaModal(): void {
@@ -138,6 +166,63 @@ export class RfqQuotationComponent implements OnInit {
 
       this.map = null;
     }
+
+    this.marker = null;
+  }
+
+  confirmarUbicacion(): void {
+    this.selectedLocation = {
+      lat: this.tempLocation.lat,
+      lng: this.tempLocation.lng,
+      address: this.tempLocation.address.trim()
+    };
+
+    this.direccionEntrega =
+      this.selectedLocation.address ||
+      this.getLocationCoordinatesLabel(this.selectedLocation);
+
+    this.cerrarMapaModal();
+  }
+
+  refreshMapSize(): void {
+    if (!this.map) return;
+
+    setTimeout(() => {
+      this.map.invalidateSize();
+    }, 120);
+  }
+
+  hasTempLocation(): boolean {
+    return this.tempLocation.lat !== null && this.tempLocation.lng !== null;
+  }
+
+  getLocationSummary(): string {
+    if (this.direccionEntrega) return this.direccionEntrega;
+
+    if (
+      this.selectedLocation.lat !== null &&
+      this.selectedLocation.lng !== null
+    ) {
+      return 'Ubicacion seleccionada';
+    }
+
+    return 'Selecciona tu ubicacion de entrega';
+  }
+
+  getSelectedCoordinatesLabel(): string {
+    return this.getLocationCoordinatesLabel(this.selectedLocation);
+  }
+
+  getTempCoordinatesLabel(): string {
+    return this.getLocationCoordinatesLabel(this.tempLocation);
+  }
+
+  private getLocationCoordinatesLabel(
+    location: { lat: number | null; lng: number | null }
+  ): string {
+    if (location.lat === null || location.lng === null) return '';
+
+    return `Lat: ${location.lat.toFixed(5)}, Lng: ${location.lng.toFixed(5)}`;
   }
 
   initMap(): void {
@@ -160,7 +245,24 @@ export class RfqQuotationComponent implements OnInit {
       }
     ).addTo(this.map);
 
-    if (navigator.geolocation) {
+    const initialLat = this.tempLocation.lat;
+    const initialLng = this.tempLocation.lng;
+
+    if (initialLat !== null && initialLng !== null) {
+
+      this.map.setView(
+        [initialLat, initialLng],
+        16
+      );
+
+      this.setMapMarker(
+        initialLat,
+        initialLng
+      );
+
+      this.refreshMapSize();
+
+    } else if (navigator.geolocation) {
 
       navigator.geolocation.getCurrentPosition(
 
@@ -177,20 +279,22 @@ export class RfqQuotationComponent implements OnInit {
             16
           );
 
-          this.marker =
-            L.marker([lat, lng])
-            .addTo(this.map);
+          this.setMapMarker(
+            lat,
+            lng
+          );
+
+          this.setTempLocation(
+            lat,
+            lng
+          );
 
           this.obtenerDireccion(
             lat,
             lng
           );
 
-          setTimeout(() => {
-
-            this.map.invalidateSize();
-
-          }, 300);
+          this.refreshMapSize();
         },
 
         () => {
@@ -199,6 +303,8 @@ export class RfqQuotationComponent implements OnInit {
             [-12.0464, -77.0428],
             13
           );
+
+          this.refreshMapSize();
         }
       );
 
@@ -208,6 +314,8 @@ export class RfqQuotationComponent implements OnInit {
         [-12.0464, -77.0428],
         13
       );
+
+      this.refreshMapSize();
     }
 
     // CLICK EN MAPA
@@ -221,36 +329,36 @@ export class RfqQuotationComponent implements OnInit {
         const lng =
           e.latlng.lng;
 
-        if (this.marker) {
-
-          this.map.removeLayer(
-            this.marker
-          );
-        }
-
-        this.marker =
-          L.marker([lat, lng])
-          .addTo(this.map);
-
-        this.obtenerDireccion(
+        this.onMapClick(
           lat,
           lng
         );
-
-        // CERRAR AUTOMATICAMENTE
-        setTimeout(() => {
-
-          this.cerrarMapaModal();
-
-        }, 700);
       }
     );
 
-    setTimeout(() => {
+    this.refreshMapSize();
+  }
 
-      this.map.invalidateSize();
+  onMapClick(lat: number, lng: number): void {
+    this.setMapMarker(lat, lng);
+    this.setTempLocation(lat, lng);
+    this.obtenerDireccion(lat, lng);
+  }
 
-    }, 100);
+  setMapMarker(lat: number, lng: number): void {
+    if (this.marker) {
+      this.map.removeLayer(this.marker);
+    }
+
+    this.marker =
+      L.marker([lat, lng])
+      .addTo(this.map);
+  }
+
+  setTempLocation(lat: number, lng: number): void {
+    this.tempLocation.lat = lat;
+    this.tempLocation.lng = lng;
+    this.tempLocation.address = '';
   }
 
   obtenerDireccion(
@@ -259,16 +367,32 @@ export class RfqQuotationComponent implements OnInit {
   ): void {
 
     const url =
-      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18&accept-language=es&lat=${lat}&lon=${lng}`;
+
+    this.resolvingLocationAddress = true;
 
     this.http.get<any>(url)
-    .subscribe(res => {
+    .subscribe({
+      next: (res) => {
+
+      const resolvedAddress = this.formatNominatimAddress(res);
+
+      if (resolvedAddress) {
+        this.tempLocation.address = resolvedAddress;
+        this.resolvingLocationAddress = false;
+        return;
+      }
+
+      this.obtenerDireccionPhoton(lat, lng);
+      return;
 
       if (!res || !res.address) {
 
-        this.direccionEntrega =
+        this.tempLocation.address =
           res.display_name ||
           'Ubicación no encontrada';
+
+        this.resolvingLocationAddress = false;
 
         return;
       }
@@ -299,7 +423,7 @@ export class RfqQuotationComponent implements OnInit {
       const departamento =
         a.state || '';
 
-      this.direccionEntrega =
+      this.tempLocation.address =
         `${calle}${numero}, ${distrito}, ${provincia}, ${departamento}`.trim();
 
       if (
@@ -309,10 +433,108 @@ export class RfqQuotationComponent implements OnInit {
         !departamento
       ) {
 
-        this.direccionEntrega =
+        this.tempLocation.address =
           res.display_name;
       }
+
+      this.resolvingLocationAddress = false;
+      },
+      error: () => {
+        this.obtenerDireccionPhoton(lat, lng);
+      }
     });
+  }
+
+  private obtenerDireccionPhoton(lat: number, lng: number): void {
+    const url =
+      `https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}&lang=es`;
+
+    this.http.get<any>(url)
+    .subscribe({
+      next: (res) => {
+        this.tempLocation.address =
+          this.formatPhotonAddress(res) ||
+          'Direccion no disponible';
+
+        this.resolvingLocationAddress = false;
+      },
+      error: () => {
+        this.tempLocation.address = 'Direccion no disponible';
+        this.resolvingLocationAddress = false;
+      }
+    });
+  }
+
+  private formatNominatimAddress(res: any): string {
+    if (!res) return '';
+
+    const a = res.address || {};
+    const calle =
+      a.road ||
+      a.pedestrian ||
+      a.footway ||
+      a.street ||
+      a.path ||
+      a.cycleway ||
+      a.neighbourhood ||
+      '';
+    const numero = a.house_number ? ` ${a.house_number}` : '';
+    const distrito =
+      a.suburb ||
+      a.city_district ||
+      a.district ||
+      a.town ||
+      a.city ||
+      '';
+    const provincia =
+      a.county ||
+      a.province ||
+      '';
+    const departamento =
+      a.state ||
+      '';
+    const parts = [
+      `${calle}${numero}`.trim(),
+      distrito,
+      provincia,
+      departamento
+    ].filter(Boolean);
+
+    return parts.length ? parts.join(', ') : (res.display_name || '');
+  }
+
+  private formatPhotonAddress(res: any): string {
+    const properties = res?.features?.[0]?.properties;
+    if (!properties) return '';
+
+    const calle =
+      properties.street ||
+      properties.name ||
+      properties.osm_value ||
+      '';
+    const numero =
+      properties.housenumber
+        ? ` ${properties.housenumber}`
+        : '';
+    const distrito =
+      properties.district ||
+      properties.city ||
+      properties.locality ||
+      '';
+    const provincia =
+      properties.county ||
+      '';
+    const departamento =
+      properties.state ||
+      '';
+    const parts = [
+      `${calle}${numero}`.trim(),
+      distrito,
+      provincia,
+      departamento
+    ].filter(Boolean);
+
+    return parts.join(', ');
   }
 
   confirmarOrden(): void {
