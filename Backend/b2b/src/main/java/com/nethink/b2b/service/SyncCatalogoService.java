@@ -350,7 +350,7 @@ public class SyncCatalogoService {
             imagen.setProducto(producto);
             imagen.setUrl(img.getUrl());
             imagen.setPrincipal(Boolean.TRUE.equals(img.getPrincipal()));
-            imagen.setOrden(imagen.getOrden());
+            imagen.setOrden(img.getOrden());
             imagenRepo.save(imagen);
         }
     }

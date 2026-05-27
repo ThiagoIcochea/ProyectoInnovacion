@@ -1,67 +1,143 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+
+import {
+  HttpClient,
+  HttpClientModule,
+  HttpHeaders
+} from '@angular/common/http';
+
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit
+} from '@angular/core';
+
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    HttpClientModule,
+    FormsModule
+  ],
   templateUrl: './products.html',
   styleUrl: './products.scss'
 })
-export class AdminProductsComponent {
-  selectedProduct = {
-    name: 'Cisco Catalyst 9300 48-port PoE+',
-    brand: 'Cisco',
-    category: 'Switch',
-    totalStock: 24,
-    providersCount: 3
-  };
+export class AdminProductsComponent
+implements OnInit {
 
-  products = [
-    {
-      name: 'Cisco Catalyst 9300 48-port PoE+',
-      brand: 'Cisco',
-      category: 'Switch',
-      providersCount: 3,
-      totalStock: 24,
-      status: 'Stock medio'
-    },
-    {
-      name: 'Ubiquiti UniFi UAP-AC-PRO',
-      brand: 'Ubiquiti',
-      category: 'Access Point',
-      providersCount: 4,
-      totalStock: 82,
-      status: 'Stock alto'
-    },
-    {
-      name: 'Fortinet FortiGate 60F',
-      brand: 'Fortinet',
-      category: 'Firewall',
-      providersCount: 2,
-      totalStock: 6,
-      status: 'Bajo stock'
-    }
-  ];
+  private API_URL =
+    'https://proyectoinnovacion.onrender.com/api/productos/admin';
 
-  providers = [
-    {
-      name: 'Global Tech Solutions',
-      stock: 12,
-      price: 'US$ 3,600.00',
-      api: 'Sincronizado'
-    },
-    {
-      name: 'InfraLink Perú',
-      stock: 8,
-      price: 'US$ 3,720.00',
-      api: 'Sincronizado'
-    },
-    {
-      name: 'NetWorks Corp',
-      stock: 4,
-      price: 'US$ 3,680.00',
-      api: 'Stock bajo'
+  products: any[] = [];
+
+  filteredProducts: any[] = [];
+
+  selectedProduct: any = null;
+
+  searchText: string = '';
+
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+
+    this.obtenerProductos();
+  }
+
+  private headers(): HttpHeaders {
+
+    return new HttpHeaders({
+
+      Authorization:
+        `Bearer ${localStorage.getItem('token')}`
+
+    });
+  }
+
+  obtenerProductos(): void {
+
+    this.http.get<any[]>(
+      this.API_URL,
+      {
+        headers: this.headers()
+      }
+    )
+    .subscribe({
+
+      next: (res) => {
+
+        this.products = res;
+
+        this.filteredProducts = [...res];
+
+        if (this.filteredProducts.length > 0) {
+
+          this.selectedProduct =
+            this.filteredProducts[0];
+        }
+
+        this.filtrarProductos();
+
+        this.cdr.detectChanges();
+      },
+
+      error: (err) => {
+
+        console.error(
+          'Error obteniendo productos',
+          err
+        );
+      }
+    });
+  }
+
+  seleccionarProducto(
+    product: any
+  ): void {
+
+    this.selectedProduct = product;
+
+    this.cdr.detectChanges();
+  }
+
+  filtrarProductos(): void {
+
+    const text =
+      this.searchText.toLowerCase();
+
+    this.filteredProducts =
+      this.products.filter(product =>
+
+        product?.name
+          ?.toLowerCase()
+          .includes(text)
+
+        ||
+
+        product?.brand
+          ?.toLowerCase()
+          .includes(text)
+
+        ||
+
+        product?.category
+          ?.toLowerCase()
+          .includes(text)
+      );
+
+    if (
+      this.filteredProducts.length > 0
+    ) {
+
+      this.selectedProduct =
+        this.filteredProducts[0];
     }
-  ];
+
+    this.cdr.detectChanges();
+  }
 }

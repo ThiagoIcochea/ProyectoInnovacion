@@ -16,6 +16,7 @@ import com.nethink.b2b.entity.Proveedor;
 
 
 import com.nethink.b2b.repository.ProveedorRepository;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
@@ -90,11 +91,12 @@ listarHistorial(Principal principal) {
     @PostMapping("/crear")
     public ResponseEntity<?> crear(
             @RequestBody SolicitudCrearRequest request,
-            Principal principal
+            Principal principal,
+            HttpServletRequest httpRequest
     ) {
         String correo = principal.getName();
         return ResponseEntity.ok(
-                solicitudService.crearSolicitud(request, correo)
+                solicitudService.crearSolicitud(request, correo, httpRequest)
         );
     }
 
@@ -115,7 +117,8 @@ listarHistorial(Principal principal) {
             @RequestParam("codigoOperacion") String codigoOperacion,
             @RequestParam("metodo") String metodo,
             @RequestParam("direccion") String direccion,
-            Principal principal
+            Principal principal,
+            HttpServletRequest httpRequest
     ) {
 
         try {
@@ -127,7 +130,8 @@ listarHistorial(Principal principal) {
                             codigoOperacion,
                             metodo,
                             direccion,
-                            principal.getName()
+                            principal.getName(),
+                            httpRequest
                     )
             );
 
@@ -138,21 +142,25 @@ listarHistorial(Principal principal) {
     }
 
     @GetMapping("/{idSolicitud}/tracking")
-    public ResponseEntity<?> tracking(@PathVariable Integer idSolicitud) {
+    public ResponseEntity<?> tracking(@PathVariable Integer idSolicitud, Principal principal,HttpServletRequest httpRequest) {
+        Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         return ResponseEntity.ok(
-                solicitudService.obtenerTracking(idSolicitud)
+                solicitudService.obtenerTracking(idSolicitud, usuario.getIdUsuario(),httpRequest)
         );
     }
  @PutMapping("/{idSolicitud}/cancelar")
 public ResponseEntity<?> cancelar(
         @PathVariable Integer idSolicitud,
-        Principal principal
+        Principal principal,
+        HttpServletRequest httpRequest
 ) {
 
     return ResponseEntity.ok(
             solicitudService.cancelarSolicitud(
                     idSolicitud,
-                    principal.getName()
+                    principal.getName(),
+                    httpRequest
             )
     );
 }
@@ -163,7 +171,7 @@ public ResponseEntity<?> cancelar(
 
 @GetMapping("/proveedor/mis-solicitudes")
 public ResponseEntity<List<SolicitudResponse>> listarMisSolicitudesProveedor(
-        Principal principal
+        Principal principal,HttpServletRequest httpRequest
 ) {
 
     Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
@@ -177,7 +185,7 @@ public ResponseEntity<List<SolicitudResponse>> listarMisSolicitudesProveedor(
 
     return ResponseEntity.ok(
             solicitudService.listarSolicitudesProveedor(
-                    proveedor.getIdProveedor()
+                    proveedor.getIdProveedor(), usuario.getIdUsuario(), httpRequest
             )
     );
 }
@@ -201,10 +209,11 @@ public ResponseEntity<List<SolicitudResponse>> listarMisSolicitudesProveedor(
 
 
 @GetMapping("/admin/listar")
-public ResponseEntity<List<SolicitudResponse>> listarTodas() {
-
+public ResponseEntity<List<SolicitudResponse>> listarTodas(Principal principal, HttpServletRequest httpRequest) {
+   Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     return ResponseEntity.ok(
-            solicitudService.listarTodasSolicitudes()
+            solicitudService.listarTodasSolicitudes(usuario.getIdUsuario(),httpRequest)
     );
 }
 

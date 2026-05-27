@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.nethink.b2b.dto.response.AdminProviderResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 @Service
@@ -48,22 +49,51 @@ public class ProveedorService {
     private ProveedorCertificacionRepository proveedorCertificacionRepository;
     
     @Autowired
+private LogsSistemaService logsSistemaService;
+    
+    @Autowired
 private LogsApiRepository logsApiRepository;
 
     @Transactional
-    public void registerProvider(RegisterProviderRequest req) {
+    public void registerProvider(RegisterProviderRequest req,  HttpServletRequest request) {
 
         if (usuarioRepository.findByCorreo(req.getCorreo()).isPresent()) {
+            logsSistemaService.registrarLog(
+    null,
+    "CORREO_DUPLICADO",
+    "PROVEEDORES",
+    "Intento registro proveedor con correo existente: "
+        + req.getCorreo(),
+    request
+);
             throw new RuntimeException("Correo ya registrado");
         }
 
         if (proveedorRepository.findByRuc(req.getRuc()).isPresent()) {
+            
+            logsSistemaService.registrarLog(
+    null,
+    "RUC_DUPLICADO",
+    "PROVEEDORES",
+    "Intento registro con RUC existente: "
+        + req.getRuc(),
+    request
+);
+            
             throw new RuntimeException("RUC ya registrado");
         }
 
         SunatResponse sunat = sunatService.consultarRuc(req.getRuc());
 
         if (sunat == null || sunat.getRazonSocial() == null) {
+            logsSistemaService.registrarLog(
+    null,
+    "SUNAT_ERROR",
+    "SUNAT",
+    "RUC inválido consultado: "
+        + req.getRuc(),
+   request
+);
             throw new RuntimeException("RUC inválido en SUNAT");
         }
 
@@ -82,7 +112,16 @@ private LogsApiRepository logsApiRepository;
         user.setFechaRegistro(LocalDateTime.now());
         user.setRol(rolProveedor);
 
-        usuarioRepository.save(user);
+        user = usuarioRepository.save(user);
+        
+        logsSistemaService.registrarLog(
+    user.getIdUsuario(),
+    "USUARIO_PROVEEDOR_CREADO",
+    "PROVEEDORES",
+    "Usuario proveedor registrado: "
+        + user.getCorreo(),
+   request
+);
 
         Proveedor prov = new Proveedor();
         prov.setUsuario(user);
@@ -96,6 +135,17 @@ private LogsApiRepository logsApiRepository;
         prov.setEstado("ACTIVO");
 
        prov = proveedorRepository.save(prov);
+       
+       logsSistemaService.registrarLog(
+    user.getIdUsuario(),
+    "PROVEEDOR_REGISTRADO",
+    "PROVEEDORES",
+    "Proveedor registrado: "
+        + prov.getRazonSocial()
+        + " | RUC: "
+        + prov.getRuc(),
+    request
+);
 
         if (req.getMetodosPago() != null) {
             for (MetodoPagoRequest mp : req.getMetodosPago()) {
@@ -107,6 +157,15 @@ private LogsApiRepository logsApiRepository;
                 metodo.setNumeroCuenta(mp.getNumeroCuenta());
 
                 metodoPagoRepository.save(metodo);
+                
+                logsSistemaService.registrarLog(
+    user.getIdUsuario(),
+    "METODO_PAGO_REGISTRADO",
+    "PROVEEDORES",
+    "Método pago agregado proveedor: "
+        + prov.getRazonSocial(),
+   request
+);
             }
         }
 
@@ -123,6 +182,15 @@ private LogsApiRepository logsApiRepository;
                 pc.setFechaExpiracion(c.getFechaExpiracion());
 
                 proveedorCertificacionRepository.save(pc);
+                
+                logsSistemaService.registrarLog(
+    user.getIdUsuario(),
+    "CERTIFICACION_REGISTRADA",
+    "PROVEEDORES",
+    "Certificación agregada: "
+        + cert.getNombre(),
+    request
+);
             }
         }
 
@@ -131,10 +199,25 @@ private LogsApiRepository logsApiRepository;
                 prov.getRazonSocial(),
                 prov.getRuc()
         );
+        
+        logsSistemaService.registrarLog(
+    user.getIdUsuario(),
+    "EMAIL_REGISTRO",
+    "EMAIL",
+    "Correo registro proveedor enviado",
+    request
+);
     }
     
-   public List<AdminProviderResponse> listarProviders() {
+   public List<AdminProviderResponse> listarProviders(Integer idUsuario,  HttpServletRequest request) {
 
+       logsSistemaService.registrarLog(
+    idUsuario,
+    "LISTAR_PROVEEDORES",
+    "ADMIN",
+    "Consulta global proveedores",
+    request
+);
     List<Proveedor> providers =
             proveedorRepository.findAll();
 

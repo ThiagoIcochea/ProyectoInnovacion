@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.nethink.b2b.dto.response.PagoResponse; 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList; 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ public class PagoService {
     private final UsuarioRepository usuarioRepo;
     private final Cloudinary cloudinary;
     private final InventarioReservaService inventarioReservaService;
+    private final LogsSistemaService logsSistemaService;
     
 
     public PagoService(
@@ -39,7 +41,8 @@ public class PagoService {
             SolicitudHistorialRepository historialRepo,
             UsuarioRepository usuarioRepo,
             Cloudinary cloudinary,
-            InventarioReservaService inventarioReservaService
+            InventarioReservaService inventarioReservaService,
+            LogsSistemaService logsSistemaService
     ) {
         this.pagoRepo = pagoRepo;
         this.solicitudRepo = solicitudRepo;
@@ -47,6 +50,7 @@ public class PagoService {
         this.usuarioRepo = usuarioRepo;
         this.cloudinary = cloudinary;
         this.inventarioReservaService= inventarioReservaService;
+        this.logsSistemaService = logsSistemaService;
     }
 
     @Transactional
@@ -57,7 +61,8 @@ public class PagoService {
             String codigoOp,
             String metodo,
             String direccionConfirmada,
-            String correoUsuario
+            String correoUsuario,
+            HttpServletRequest req
     ) throws IOException {
 
         Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
@@ -73,7 +78,24 @@ public class PagoService {
                 Solicitud.EstadoSolicitud.PAGO_VALIDANDO,
                 direccionConfirmada
         );
+        
+        logsSistemaService.registrarLog(
+    usuario.getIdUsuario(),
+    "PAGO_VALIDANDO",
+    "PAGOS",
+    "Pago enviado para validación solicitud ID: "
+        + sol.getIdSolicitud(),
+   req
+);
         inventarioReservaService.confirmarReserva(sol.getIdSolicitud());
+        logsSistemaService.registrarLog(
+    usuario.getIdUsuario(),
+    "RESERVA_CONFIRMADA",
+    "INVENTARIO",
+    "Reserva confirmada solicitud ID: "
+        + sol.getIdSolicitud(),
+    req
+);
         Pago pago = new Pago();
         pago.setSolicitud(sol);   // setIdSolicitud(idSolicitud) revisar con thiago
         pago.setEntidad(entidad);
@@ -85,6 +107,17 @@ public class PagoService {
         pago.setComprobanteUrl(urlPublica);
 
         Pago pagoGuardado = pagoRepo.save(pago);
+        
+        logsSistemaService.registrarLog(
+    usuario.getIdUsuario(),
+    "REGISTRAR_PAGO",
+    "PAGOS",
+    "Pago registrado para solicitud ID: "
+        + sol.getIdSolicitud()
+        + " | Monto: "
+        + sol.getTotal(),
+    req
+);
 
         SolicitudHistorial historial = new SolicitudHistorial();
         historial.setSolicitud(sol);
@@ -118,7 +151,16 @@ public class PagoService {
 
     
 // lista de pagos de proveedor autenticado
-    public List<PagoResponse> listarPagosProveedor(Integer idProveedor    ) {
+    public List<PagoResponse> listarPagosProveedor(Integer idProveedor ,  HttpServletRequest req   ) {
+        
+        logsSistemaService.registrarLog(
+    idProveedor,
+    "LISTAR_PAGOS",
+    "PAGOS",
+    "Consulta pagos proveedor ID: "
+        + idProveedor,
+   req
+);
 
         List<Pago> pagos = pagoRepo.listarPagosProveedor(idProveedor);
 
@@ -233,7 +275,7 @@ public class PagoService {
     
     
     @Transactional
-public void aprobarPago(Integer idPago, String correoUsuario) {
+public void aprobarPago(Integer idPago, String correoUsuario,HttpServletRequest req) {
 
     Pago pago = pagoRepo.findById(idPago)
             .orElseThrow(() ->
@@ -260,6 +302,17 @@ public void aprobarPago(Integer idPago, String correoUsuario) {
     );
 
     pagoRepo.save(pago);
+    
+    logsSistemaService.registrarLog(
+    usuario.getIdUsuario(),
+    "PAGO_APROBADO",
+    "PAGOS",
+    "Pago aprobado ID: "
+        + pago.getIdPago()
+        + " | Solicitud: "
+        + solicitud.getIdSolicitud(),
+    req
+);
     
         SolicitudHistorial historial = new SolicitudHistorial();
         historial.setSolicitud(solicitud);

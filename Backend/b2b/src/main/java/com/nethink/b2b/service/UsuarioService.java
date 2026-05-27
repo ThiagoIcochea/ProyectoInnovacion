@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.nethink.b2b.dto.response.AdminUserResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,22 +33,25 @@ public class UsuarioService {
     private final Cloudinary cloudinary;
     private final RolRepository rolRepository;
     private final EmailService emailService;
+    private final LogsSistemaService logsSistemaService;
 
     public UsuarioService(
             UsuarioRepository usuarioRepo,
             PreferenciaUsuarioRepository prefRepo,
             Cloudinary cloudinary,
             RolRepository rolRepository,
-            EmailService emailService
+            EmailService emailService,
+            LogsSistemaService logsSistemaService
     ) {
         this.usuarioRepo = usuarioRepo;
         this.prefRepo = prefRepo;
         this.cloudinary = cloudinary;
         this.rolRepository = rolRepository;
         this.emailService=emailService;
+        this.logsSistemaService = logsSistemaService;
     }
 
-    public void registrarCliente(RegisterClientRequest req) {
+    public void registrarCliente(RegisterClientRequest req,  HttpServletRequest request) {
 
         if (usuarioRepo.findByCorreo(req.getCorreo()).isPresent()) {
             throw new RuntimeException("Correo ya registrado");
@@ -74,15 +78,32 @@ public class UsuarioService {
         usuario.setFechaRegistro(LocalDateTime.now());
         
 
-        usuarioRepo.save(usuario);
+        usuario = usuarioRepo.save(usuario);
+        
+        logsSistemaService.registrarLog(
+    usuario.getIdUsuario(),
+    "REGISTRO_USUARIO",
+    "USUARIOS",
+    "Nuevo cliente registrado: "
+        + usuario.getCorreo(),
+     request
+);
         
         emailService.enviarCorreoRegistroCliente(usuario);
     }
 
-    public ProfileResponse obtenerPerfil(String correo) {
+    public ProfileResponse obtenerPerfil(String correo,  HttpServletRequest request) {
 
         Usuario usuario = usuarioRepo.findByCorreo(correo)
                 .orElseThrow();
+        
+        logsSistemaService.registrarLog(
+    usuario.getIdUsuario(),
+    "VER_PERFIL",
+    "USUARIOS",
+    "Consulta perfil usuario",
+    request
+);
 
         PreferenciaUsuario pref = prefRepo
                 .findByUsuario_IdUsuario(usuario.getIdUsuario())
@@ -115,7 +136,8 @@ public class UsuarioService {
             String correo,
             ProfileUpdateRequest req,
             MultipartFile foto,
-            String fotoUrl
+            String fotoUrl,
+             HttpServletRequest request
     ) {
 
         Usuario usuario = usuarioRepo.findByCorreo(correo)
@@ -131,16 +153,48 @@ public class UsuarioService {
     boolean existe = usuarioRepo.findByCorreo(req.getCorreo()).isPresent();
 
     if (existe) {
+        
+        logsSistemaService.registrarLog(
+    null,
+    "CORREO_DUPLICADO",
+    "USUARIOS",
+    "Intento registro con correo existente: "
+        + req.getCorreo(),
+  request
+);
+        logsSistemaService.registrarLog(
+    usuario.getIdUsuario(),
+    "ERROR_CORREO_DUPLICADO",
+    "USUARIOS",
+    "Intento actualizar a correo existente: "
+        + req.getCorreo(),
+    request
+);
         throw new RuntimeException("El correo ya está registrado por otro usuario");
     }
 
     usuario.setCorreo(req.getCorreo());
+    logsSistemaService.registrarLog(
+    usuario.getIdUsuario(),
+    "CAMBIO_CORREO",
+    "USUARIOS",
+    "Correo actualizado a: "
+        + req.getCorreo(),
+    request
+);
     }
 
         if (foto != null && !foto.isEmpty()) {
             try {
-                usuario.setFotoPerfil(subirACloudinary(foto));
+                usuario.setFotoPerfil(subirACloudinary(usuario.getIdUsuario(),foto,request));
             } catch (IOException e) {
+                logsSistemaService.registrarLog(
+    usuario.getIdUsuario(),
+    "CLOUDINARY_ERROR",
+    "USUARIOS",
+    e.getMessage(),
+    request
+);
                 throw new RuntimeException("Error subiendo archivo a Cloudinary", e);
             }
         } else if (fotoUrl != null && !fotoUrl.isEmpty()) {
@@ -148,6 +202,14 @@ public class UsuarioService {
         }
 
         usuarioRepo.save(usuario);
+        
+        logsSistemaService.registrarLog(
+    usuario.getIdUsuario(),
+    "ACTUALIZAR_PERFIL",
+    "USUARIOS",
+    "Perfil actualizado",
+    request
+);
 
         PreferenciaUsuario pref = prefRepo
                 .findByUsuario_IdUsuario(usuario.getIdUsuario())
@@ -161,7 +223,7 @@ public class UsuarioService {
         prefRepo.save(pref);
     }
 
-    private String subirACloudinary(MultipartFile archivo) throws IOException {
+    private String subirACloudinary( Integer idUsuario,MultipartFile archivo,  HttpServletRequest request) throws IOException {
 
         Map uploadResult = cloudinary.uploader().upload(
                 archivo.getBytes(),
@@ -169,12 +231,26 @@ public class UsuarioService {
                         "folder", "b2b/perfil"
                 )
         );
+        
+        logsSistemaService.registrarLog(
+    idUsuario,
+    "UPLOAD_FOTO",
+    "CLOUDINARY",
+    "Foto perfil subida correctamente",
+    request
+);
 
         return uploadResult.get("secure_url").toString();
     }
     
-    public List<AdminUserResponse> listarUsuarios() {
-
+    public List<AdminUserResponse> listarUsuarios(Integer idUsuario, HttpServletRequest request) {
+    logsSistemaService.registrarLog(
+    idUsuario,
+    "LISTAR_USUARIOS",
+    "ADMIN",
+    "Consulta global usuarios",
+    request
+);
     List<Usuario> usuarios =
             usuarioRepo.findAll();
 
