@@ -247,6 +247,39 @@ aprobarPedido(): void {
   }
 
 
+  rechazarPedido(): void {
+
+    if (!this.selectedRequest) return;
+
+    const promp = prompt('Ingrese el motivo por el cual cancela la orden.') || "";
+
+    
+
+    this.requestService
+      .rechazarPedido(this.selectedRequest.idSolicitud,promp)
+      .subscribe({
+
+        next: () => {
+
+          alert('Pedido rechazado correctamente');
+
+          
+
+        },
+
+        error: (err) => {
+
+          console.error(err);
+
+          alert('Error al rechazar pedido');
+
+        }
+
+      });
+
+  }
+
+
 
 
 

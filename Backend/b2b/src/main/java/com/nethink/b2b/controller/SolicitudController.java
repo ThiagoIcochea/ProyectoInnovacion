@@ -239,6 +239,25 @@ public ResponseEntity<?> aprobarPedido(
 
     return ResponseEntity.ok(response);
 } 
+@PutMapping("/{idSolicitud}/{prompt}/rechazar")
+public ResponseEntity<?> rechazarPedido(
+        @PathVariable Integer idSolicitud,
+        @PathVariable String prompt,
+        Principal principal,
+        HttpServletRequest httpRequest
+) {
 
+    solicitudService.rechazarPedido(idSolicitud,prompt,principal.getName(), httpRequest);
+
+    Map<String, String> response =
+            new HashMap<>();
+
+    response.put(
+            "mensaje",
+            "Pedido rechazado"
+    );
+
+    return ResponseEntity.ok(response);
+} 
 
 }

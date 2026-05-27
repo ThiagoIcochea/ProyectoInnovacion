@@ -944,7 +944,7 @@ public void aprobarPedido(Integer idSolicitud, String correoUsuario,HttpServletR
 
    Solicitud sol = solicitudRepo.findById(idSolicitud)
             .orElseThrow(() ->
-                    new RuntimeException("Pago no encontrado"));
+                    new RuntimeException("Solicitud no encontrada"));
          Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -979,7 +979,46 @@ public void aprobarPedido(Integer idSolicitud, String correoUsuario,HttpServletR
 }
   
     
+            @Transactional
+public void rechazarPedido(Integer idSolicitud,String prompt, String correoUsuario,HttpServletRequest req) {
+
+   Solicitud sol = solicitudRepo.findById(idSolicitud)
+            .orElseThrow(() ->
+                    new RuntimeException("Solicitud no encontrada"));
+         Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+
+    sol.setEstado(
+          Solicitud.EstadoSolicitud.PEDIDO_RECHAZADO
+    );
     
+    sol.setFechaCancelacion(LocalDateTime.now());
+
+   sol = solicitudRepo.save(sol);
+
+  
+    
+    logsSistemaService.registrarLog(
+    usuario.getIdUsuario(),
+    "RECHAZAR PEDIDOS",
+    "PROVEEDORES",
+    "Pedido Rechazado ID: "
+        + sol.getIdSolicitud()
+     ,
+    req
+);
+    
+        SolicitudHistorial historial = new SolicitudHistorial();
+        historial.setSolicitud(sol);
+        historial.setEstado("PEDIDO_RECHAZADO");
+        historial.setIdUsuario(usuario.getIdUsuario());
+        historial.setDescripcion("Pedido rechazado por:"+prompt);
+        historial.setFecha(LocalDateTime.now());
+
+        historialRepo.save(historial);
+
+}
     
     
 }

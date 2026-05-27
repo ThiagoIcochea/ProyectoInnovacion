@@ -68,6 +68,14 @@ console.log("TOKEN:", localStorage.getItem('token'));
   );
 
 }
+  rechazarPedido(idSolicitud:number, promp: string){
+
+  return this.http.put(
+    `${this.apiUrl}/api/solicitudes/${idSolicitud}/promp/rechazar`,
+    {}
+  );
+
+}
 
 }
 

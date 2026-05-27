@@ -98,9 +98,9 @@
         La validación y generación de cotización se ejecutan desde el flujo automático, por lo que esta vista solo resume la solicitud.
       </div>
 
-       <div class="validation-actions">
-              <button class="btn-danger">Rechazar pago</button>
-              <button class="btn-primary" (click)="aprobarPedido()" [disabled]="!selectedPayment">
+       <div class="validation-actions" *ngIf="selectedRequest?.estado === 'PAGO_PENDIENTE'">
+              <button class="btn-danger" (click)="rechazarPedido()">Rechazar pago</button>
+              <button class="btn-primary" (click)="aprobarPedido()" [disabled]="!selectedRequest">
                 Aprobar pago
               </button>
             </div>

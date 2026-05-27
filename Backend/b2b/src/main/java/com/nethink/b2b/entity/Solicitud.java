@@ -85,6 +85,7 @@ public class Solicitud {
         CREADA,
         COTIZADA,
         PEDIDO_APROBADO,
+        PEDIDO_RECHAZADO,
         RECHAZADA,
         PAGO_PENDIENTE,
         PAGO_VALIDANDO,
