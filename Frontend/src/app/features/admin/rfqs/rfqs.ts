@@ -36,6 +36,8 @@ implements OnInit {
   filteredRfqs: any[] = [];
 
   search: string = '';
+  loading = true;
+  readonly skeletonRows = Array.from({ length: 5 });
 
   constructor(
     private http: HttpClient,
@@ -58,6 +60,7 @@ implements OnInit {
   }
 
   listarRfqs(): void {
+    this.loading = true;
 
     this.http.get<any[]>(
       this.API_URL,
@@ -76,11 +79,14 @@ implements OnInit {
         this.filtrarRfqs();
 
         this.cdr.detectChanges();
+        this.loading = false;
       },
 
       error: (err) => {
 
         console.error(err);
+        this.rfqs = [];
+        this.loading = false;
       }
 
     });

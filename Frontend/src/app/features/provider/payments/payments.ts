@@ -4,8 +4,8 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { PagoService } from './provider-payment.service';
 import { Payment } from './payments.model';
-
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, shareReplay, tap } from 'rxjs/operators';
 
 
 
@@ -21,7 +21,13 @@ import { Observable } from 'rxjs';
 export class ProviderPaymentsComponent  implements OnInit    {
 
  
-payments$!: Observable<Payment[]>;
+  payments$!: Observable<Payment[]>;
+  loading = true;
+  errorMessage = '';
+  voucherZoom = 1;
+  readonly minVoucherZoom = 0.5;
+  readonly maxVoucherZoom = 2.5;
+  readonly skeletonRows = Array.from({ length: 4 });
 
   selectedPayment: Payment | null = null;
 
@@ -29,15 +35,45 @@ payments$!: Observable<Payment[]>;
 
 ngOnInit(): void {
 
-    this.payments$ = this.pagoService.listarMisPagos();
+    this.cargarPagos();
 
   }
 
 
+private cargarPagos(): void {
+  this.loading = true;
+  this.errorMessage = '';
 
+  this.payments$ = this.pagoService.listarMisPagos().pipe(
+    tap((payments) => {
+      const lista = payments || [];
+
+      if (lista.length > 0) {
+        const currentId = this.selectedPayment?.idPago;
+        this.selectedPayment =
+          lista.find(payment => payment.idPago === currentId) ||
+          lista[0];
+      } else {
+        this.selectedPayment = null;
+      }
+
+      this.voucherZoom = 1;
+      this.loading = false;
+    }),
+    catchError((err) => {
+      console.error(err);
+      this.selectedPayment = null;
+      this.errorMessage = 'No se pudieron cargar los pagos.';
+      this.loading = false;
+      return of([]);
+    }),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+}
 
 seleccionarPago(pago: Payment): void {
     this.selectedPayment = pago;
+    this.voucherZoom = 1;
   }
 
 
@@ -56,8 +92,7 @@ aprobarPago(): void {
           alert('Pago aprobado correctamente');
 
           // recargar lista
-          this.payments$ =
-            this.pagoService.listarMisPagos();
+          this.cargarPagos();
 
         },
 
@@ -116,11 +151,61 @@ getPagoCode(payment: any): string {
 getCotCode(payment: any): string {
   if (!payment) return '';
 
-  const year = new Date(payment.fechaSolicitud).getFullYear();
+  const fecha = payment.fechaSolicitud || payment.fechaSolictud || payment.fechaPago;
+  const year = new Date(fecha).getFullYear();
 
   const id = String(payment.idSolicitud).padStart(4, '0');
 
   return `COT-${year}-${id}`;
+}
+
+getVoucherUrl(payment: any = this.selectedPayment): string {
+  if (!payment) {
+    return '';
+  }
+
+  return payment.comprobanteUrl ||
+    payment.comprobante_url ||
+    payment.voucherUrl ||
+    payment.voucher_url ||
+    payment.comprobante ||
+    '';
+}
+
+zoomInVoucher(): void {
+  this.voucherZoom = Math.min(
+    this.maxVoucherZoom,
+    Number((this.voucherZoom + 0.25).toFixed(2))
+  );
+}
+
+zoomOutVoucher(): void {
+  this.voucherZoom = Math.max(
+    this.minVoucherZoom,
+    Number((this.voucherZoom - 0.25).toFixed(2))
+  );
+}
+
+resetVoucherZoom(): void {
+  this.voucherZoom = 1;
+}
+
+downloadVoucher(payment: Payment | null = this.selectedPayment): void {
+  const voucherUrl = this.getVoucherUrl(payment);
+
+  if (!voucherUrl) {
+    alert('Comprobante no disponible');
+    return;
+  }
+
+  const link = document.createElement('a');
+  link.href = voucherUrl;
+  link.download = `comprobante-${payment?.idPago || 'pago'}`;
+  link.target = '_blank';
+  link.rel = 'noopener';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 

@@ -15,6 +15,8 @@ import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.
 export class RequestsComponent implements OnInit {
 
   requests: any[] = [];
+  loading = true;
+  readonly skeletonRows = Array.from({ length: 4 });
 
   summary = {
     activas: 0,
@@ -40,6 +42,7 @@ export class RequestsComponent implements OnInit {
   }
 
   cargarSolicitudes(): void {
+    this.loading = true;
 
     this.http.get<any[]>(
       `${APP_API_BASE_URL}/solicitudes/mis-solicitudes`,
@@ -76,11 +79,14 @@ export class RequestsComponent implements OnInit {
         }));
 
         this.calcularResumen();
+        this.loading = false;
         this.cdr.detectChanges();
       },
 
       error: (err) => {
         console.error('Error al cargar solicitudes:', err);
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

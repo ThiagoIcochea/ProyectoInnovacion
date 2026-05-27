@@ -14,6 +14,8 @@ export class ProviderProductsComponent implements OnInit {
 
   products: any[] = [];
   filteredProducts: any[] = [];
+  loading = true;
+  readonly skeletonRows = Array.from({ length: 5 });
 
   search = '';
 
@@ -40,7 +42,7 @@ export class ProviderProductsComponent implements OnInit {
 
   cargarProductos() {
 
-    
+    this.loading = true;
 
     this.http.get<any[]>(
       `${this.API_URL}/mis-productos`,
@@ -54,12 +56,17 @@ export class ProviderProductsComponent implements OnInit {
         this.filteredProducts = data;
 
         this.calcularResumenFiltrado();
+        this.loading = false;
 
         this.cdr.detectChanges();
       },
 
       error: (err) => {
         console.error('Error cargando productos:', err);
+        this.products = [];
+        this.filteredProducts = [];
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

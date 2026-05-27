@@ -22,7 +22,21 @@
     </div>
   </div>
 
-  <div class="api-grid">
+  <div class="api-grid" *ngIf="loading">
+    <section class="api-card api-card--skeleton">
+      <div class="skeleton-line skeleton-line--short"></div>
+      <div class="skeleton-line" *ngFor="let item of [1, 2, 3, 4]"></div>
+      <div class="skeleton-block skeleton-block--button"></div>
+    </section>
+
+    <aside class="sync-card api-card--skeleton">
+      <div class="skeleton-line skeleton-line--short"></div>
+      <div class="skeleton-block skeleton-block--button"></div>
+      <div class="skeleton-line" *ngFor="let item of [1, 2, 3]"></div>
+    </aside>
+  </div>
+
+  <div class="api-grid" *ngIf="!loading">
 
     <section class="api-card">
 
@@ -58,10 +72,25 @@
         <div class="form-group">
           <label>API Key / Token</label>
 
-          <input
-            type="password"
-            [(ngModel)]="config.apiToken"
-          />
+          <div class="secret-input">
+            <input
+              [type]="showApiKey ? 'text' : 'password'"
+              [(ngModel)]="config.apiToken"
+            />
+
+            <button
+              type="button"
+              class="secret-toggle"
+              (click)="toggleSecret('apiKey')"
+              [attr.aria-label]="showApiKey ? 'Ocultar token' : 'Mostrar token'">
+              <svg *ngIf="!showApiKey" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 5c5 0 8.5 4.5 9.5 7-1 2.5-4.5 7-9.5 7s-8.5-4.5-9.5-7C3.5 9.5 7 5 12 5Zm0 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0-2a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" fill="currentColor"></path>
+              </svg>
+              <svg *ngIf="showApiKey" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="m4.3 3 16.7 16.7-1.4 1.4-3-3A10.4 10.4 0 0 1 12 19c-5 0-8.5-4.5-9.5-7 .5-1.2 1.6-2.9 3.2-4.3L2.9 4.4 4.3 3Zm4.2 7a4 4 0 0 0 5.5 5.5L12.6 14A2 2 0 0 1 10 11.4L8.5 10Zm3.5-5c5 0 8.5 4.5 9.5 7-.4 1.1-1.4 2.6-2.8 3.9L16 13.2A4 4 0 0 0 10.8 8L8.7 5.9A10.2 10.2 0 0 1 12 5Z" fill="currentColor"></path>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="form-group">
@@ -132,9 +161,26 @@
 
         <div>
           <span>Endpoint</span>
-          <strong>
-            {{ config.endpoint || '-' }}
-          </strong>
+          <div class="secret-value-row">
+            <strong
+              class="secret-value"
+              [class.secret-value--expanded]="showEndpoint">
+              {{ config.endpoint || '-' }}
+            </strong>
+
+            <button
+              type="button"
+              class="secret-toggle"
+              (click)="toggleSecret('endpoint')"
+              [attr.aria-label]="showEndpoint ? 'Ocultar endpoint' : 'Mostrar endpoint'">
+              <svg *ngIf="!showEndpoint" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 5c5 0 8.5 4.5 9.5 7-1 2.5-4.5 7-9.5 7s-8.5-4.5-9.5-7C3.5 9.5 7 5 12 5Zm0 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0-2a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" fill="currentColor"></path>
+              </svg>
+              <svg *ngIf="showEndpoint" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="m4.3 3 16.7 16.7-1.4 1.4-3-3A10.4 10.4 0 0 1 12 19c-5 0-8.5-4.5-9.5-7 .5-1.2 1.6-2.9 3.2-4.3L2.9 4.4 4.3 3Zm4.2 7a4 4 0 0 0 5.5 5.5L12.6 14A2 2 0 0 1 10 11.4L8.5 10Zm3.5-5c5 0 8.5 4.5 9.5 7-.4 1.1-1.4 2.6-2.8 3.9L16 13.2A4 4 0 0 0 10.8 8L8.7 5.9A10.2 10.2 0 0 1 12 5Z" fill="currentColor"></path>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div>

@@ -145,6 +145,15 @@
           Configuración API
         </a>
 
+        <a
+          [routerLink]="['/app/provider/profile']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
+          Perfil
+        </a>
+
       </nav>
     </ng-container>
 
@@ -232,12 +241,12 @@
     </ng-container>
 
     <div class="sidebar__footer">
-      <a
-        [routerLink]="['/login']"
+      <button
+        type="button"
         class="sidebar__link sidebar__link--logout"
-        (click)="cerrarMenuMovil()">
+        (click)="logout()">
         Cerrar sesión
-      </a>
+      </button>
     </div>
   </aside>
 
@@ -256,9 +265,26 @@
         <span></span>
       </button>
 
-      <div class="topbar__search">
-        Buscar dentro del sistema...
-      </div>
+      <form
+        class="topbar__search"
+        *ngIf="isClient"
+        (ngSubmit)="ejecutarBusquedaGlobal()">
+        <input
+          type="search"
+          name="globalSearchTerm"
+          [(ngModel)]="globalSearchTerm"
+          placeholder="Buscar dentro del sistema..."
+          aria-label="Buscar dentro del sistema"
+        />
+
+        <button
+          type="submit"
+          aria-label="Buscar">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M10.5 18a7.5 7.5 0 1 1 5.3-12.8 7.5 7.5 0 0 1-5.3 12.8Zm0-2a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11Zm6.2.3 4 4-1.4 1.4-4-4 1.4-1.4Z" fill="currentColor"></path>
+          </svg>
+        </button>
+      </form>
 
       <div class="topbar__actions" *ngIf="isProvider">
         <span

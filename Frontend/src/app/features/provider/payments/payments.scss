@@ -88,7 +88,7 @@
 
 .payment-item {
   width: 100%;
-  border: none;
+  border: 0;
   background: transparent;
   text-align: left;
   padding: 1rem;
@@ -114,6 +114,14 @@
 
   b {
     color: #e5e7eb;
+  }
+}
+
+.payment-item--skeleton {
+  cursor: default;
+
+  &:hover {
+    background: transparent;
   }
 }
 
@@ -208,6 +216,8 @@
   strong {
     color: #e5e7eb;
     text-align: right;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -248,12 +258,23 @@
 }
 
 .btn-danger,
-.btn-primary {
+.btn-primary,
+.btn-secondary {
   height: 44px;
   border-radius: 12px;
   padding: 0 1rem;
   font-weight: 800;
   cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
 }
 
 .btn-danger {
@@ -266,6 +287,16 @@
   background: #3b82f6;
   border: none;
   color: white;
+}
+
+.btn-secondary {
+  background: #111827;
+  border: 1px solid #374151;
+  color: #e5e7eb;
+
+  &:hover:not(:disabled) {
+    background: #273449;
+  }
 }
 
 .voucher-card {
@@ -288,22 +319,51 @@
     #111827;
   background-size: 22px 22px;
   border: 1px solid #374151;
+  overflow: auto;
+  display: grid;
+  place-items: start center;
+  padding: 0.75rem;
+}
+
+.voucher-image {
+  max-width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+  border-radius: 10px;
+  transform-origin: top center;
+  transition: transform 0.2s ease;
+}
+
+.voucher-empty {
+  width: 100%;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.skeleton-voucher {
+  width: 100%;
+  height: 260px;
 }
 
 .voucher-actions {
   margin-top: 1rem;
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 
   button {
     flex: 1;
-    height: 36px;
-    border-radius: 10px;
-    border: 1px solid #374151;
-    background: #111827;
-    color: #e5e7eb;
-    cursor: pointer;
+    min-width: 96px;
   }
+}
+
+.empty-state {
+  padding: 1rem;
+  color: #9ca3af;
 }
 
 @media (max-width: 1200px) {

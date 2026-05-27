@@ -1,5 +1,11 @@
 <div class="catalog-page">
   <div
+    class="filter-overlay"
+    [class.is-open]="mostrarFiltros"
+    (click)="cerrarFiltros()">
+  </div>
+
+  <div
     class="request-overlay"
     [class.is-open]="mostrarSolicitudMovil"
     (click)="cerrarSolicitudMovil()">
@@ -15,75 +21,194 @@
     <span class="request-panel__fab-count">{{ requestItems.length }}</span>
   </button>
 
-  <aside class="filters-panel">
-    <div class="filter-section">
-      <div class="filter-header">
-        <h3>Categorías</h3>
+  <aside class="filters-panel" [class.is-open]="mostrarFiltros">
+    <div class="filters-panel__header">
+      <div>
+        <span>Catalogo RFQ</span>
+        <h2>Filtros</h2>
       </div>
 
-      <div *ngFor="let cat of filtros.categorias" class="category-item-group">
-        <label class="check-row">
-          <input
-            type="checkbox"
-            (change)="toggleFiltro('cat', cat.id)"
-            [checked]="selectedCategories.includes(cat.id)"
-          />
-          <span>{{ cat.nombre }}</span>
-          <small>{{ cat.cantidad }}</small>
-        </label>
+      <button
+        type="button"
+        class="filters-panel__close"
+        (click)="cerrarFiltros()"
+        aria-label="Cerrar filtros">
+        &times;
+      </button>
+    </div>
 
-        <div class="specs-inline-input" *ngIf="selectedCategories.includes(cat.id)">
-          <input
-            type="text"
-            [(ngModel)]="specsPorCategoria[cat.id]"
-            placeholder="Espec. para {{ cat.nombre }}..."
-            class="mini-input"
-          >
+    <div class="active-filters">
+      <span class="active-filters__label">Filtros actuales</span>
+
+      <div class="active-filters__chips" *ngIf="hasActiveFilters; else noActiveFilters">
+        <ng-container *ngFor="let cat of filtros.categorias || []">
+          <span class="filter-chip" *ngIf="selectedCategories.includes(cat.id)">
+            {{ cat.nombre }}
+          </span>
+        </ng-container>
+
+        <ng-container *ngFor="let brand of filtros.marcas || []">
+          <span class="filter-chip" *ngIf="selectedBrands.includes(brand.id)">
+            {{ brand.nombre }}
+          </span>
+        </ng-container>
+
+        <ng-container *ngFor="let cat of filtros.categorias || []">
+          <span
+            class="filter-chip filter-chip--soft"
+            *ngIf="specsPorCategoria[cat.id]?.trim()">
+            {{ specsPorCategoria[cat.id] }}
+          </span>
+        </ng-container>
+      </div>
+
+      <ng-template #noActiveFilters>
+        <p>Sin filtros activos.</p>
+      </ng-template>
+    </div>
+
+    <ng-container *ngIf="loadingFilters; else filtersContent">
+      <div class="skeleton-stack">
+        <div class="skeleton-line skeleton-line--short"></div>
+        <div class="skeleton-line" *ngFor="let item of [1, 2, 3, 4]"></div>
+        <div class="skeleton-line skeleton-line--short"></div>
+        <div class="skeleton-line" *ngFor="let item of [1, 2, 3]"></div>
+        <div class="skeleton-block skeleton-block--button"></div>
+      </div>
+    </ng-container>
+
+    <ng-template #filtersContent>
+      <div class="filters-panel__body">
+        <div class="filter-section">
+          <div class="filter-header">
+            <h3>Categorias</h3>
+          </div>
+
+          <div *ngFor="let cat of filtros.categorias || []" class="category-item-group">
+            <label class="check-row">
+              <input
+                type="checkbox"
+                (change)="toggleFiltro('cat', cat.id)"
+                [checked]="selectedCategories.includes(cat.id)"
+              />
+              <span>{{ cat.nombre }}</span>
+              <small>{{ cat.cantidad }}</small>
+            </label>
+
+            <div class="specs-inline-input" *ngIf="selectedCategories.includes(cat.id)">
+              <input
+                type="text"
+                [(ngModel)]="specsPorCategoria[cat.id]"
+                placeholder="Espec. para {{ cat.nombre }}..."
+                class="mini-input"
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-header">
+            <h3>Marcas</h3>
+          </div>
+
+          <label class="check-row" *ngFor="let m of filtros.marcas || []">
+            <input
+              type="checkbox"
+              (change)="toggleFiltro('marca', m.id)"
+              [checked]="selectedBrands.includes(m.id)"
+            />
+            <span>{{ m.nombre }}</span>
+            <small>{{ m.cantidad }}</small>
+          </label>
         </div>
       </div>
-    </div>
 
-    <div class="filter-section">
-      <div class="filter-header">
-        <h3>Marcas</h3>
+      <div class="filters-panel__actions">
+        <button type="button" class="filter-button filter-button--primary" (click)="aplicarFiltrosDesdePanel()">
+          Aplicar filtros
+        </button>
+
+        <button
+          type="button"
+          class="filter-button filter-button--ghost"
+          (click)="limpiarFiltros()"
+          [disabled]="!hasActiveFilters">
+          Limpiar filtros
+        </button>
       </div>
-
-      <label class="check-row" *ngFor="let m of filtros.marcas">
-        <input
-          type="checkbox"
-          (change)="toggleFiltro('marca', m.id)"
-          [checked]="selectedBrands.includes(m.id)"
-        />
-        <span>{{ m.nombre }}</span>
-        <small>{{ m.cantidad }}</small>
-      </label>
-    </div>
-
-    <button class="filter-button" (click)="aplicarFiltrosRefinado()">
-      Filtrar Catálogo
-    </button>
+    </ng-template>
   </aside>
 
   <section class="catalog-content">
     <div class="catalog-header">
-      <h1>Catálogo de Equipos</h1>
+      <div class="catalog-title">
+        <span>RFQ Marketplace</span>
+        <h1>Catalogo de Equipos</h1>
+      </div>
+
+      <div class="catalog-tools">
+        <button
+          type="button"
+          class="filters-toggle"
+          (click)="toggleFiltros()"
+          [attr.aria-expanded]="mostrarFiltros">
+          Filtros
+          <span *ngIf="hasActiveFilters">{{ activeFilterCount }}</span>
+        </button>
+
+        <div class="catalog-search">
+          <input
+            type="search"
+            name="catalogSearch"
+            [(ngModel)]="searchTerm"
+            (input)="aplicarBusquedaLocal()"
+            placeholder="Buscar productos..."
+            aria-label="Buscar productos en catalogo"
+          />
+        </div>
+      </div>
     </div>
 
-    <div class="product-grid">
-      <div
+    <div class="catalog-count" *ngIf="!loadingProducts">
+      {{ products.length }} producto{{ products.length === 1 ? '' : 's' }} disponible{{ products.length === 1 ? '' : 's' }}
+    </div>
+
+    <div class="product-grid" *ngIf="loadingProducts">
+      <div class="product-card product-card--skeleton" *ngFor="let item of skeletonCards">
+        <div class="skeleton-block skeleton-product-image"></div>
+        <div class="product-body">
+          <div class="skeleton-line skeleton-line--short"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-block skeleton-block--button"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-grid" *ngIf="!loadingProducts">
+      <article
         class="product-card"
         *ngFor="let product of paginatedProducts"
         (click)="verDetalle(product)"
+        tabindex="0"
       >
         <div class="product-image-container">
           <img
+            *ngIf="getProductImage(product) as imageUrl; else productPlaceholder"
             alt="Imagen de producto"
             title="Imagen de producto"
-            [src]="product.imagenes?.[0]?.URL || 'activos/no-image.png'"
+            [src]="imageUrl"
             class="producto-img"
             loading="lazy"
             decoding="async"
+            (error)="markImageAsFailed(product)"
           >
+
+          <ng-template #productPlaceholder>
+            <div class="image-placeholder">
+              <span>{{ product.marca?.slice(0, 2) || 'RFQ' }}</span>
+            </div>
+          </ng-template>
         </div>
 
         <div class="product-body">
@@ -94,33 +219,45 @@
 
           <h3>{{ product.producto }}</h3>
 
-          <div class="specs-mini-grid" *ngIf="product.especificaciones?.length">
-            <span
-              class="spec-pill"
-              *ngFor="let s of product.especificaciones.slice(0, 3)"
-            >
-              {{ s.nombre }}: {{ s.valor }}
-            </span>
+          <div class="primary-spec" *ngIf="getPrimarySpec(product) as spec">
+            <span>{{ spec.nombre }}</span>
+            <strong>{{ spec.valor }}</strong>
           </div>
 
-          <p class="description">{{ product.descripcion }}</p>
+          <p class="description" *ngIf="product.descripcion">{{ product.descripcion }}</p>
 
           <div class="product-footer">
-            <span class="product-id">#{{ product.idProducto }}</span>
+            <span class="product-id" *ngIf="product.idProducto">ID #{{ product.idProducto }}</span>
 
-            <button
-              class="add-button"
-              (click)="$event.stopPropagation(); agregarProducto(product)"
-            >
-              + Agregar
-            </button>
+            <div class="product-actions">
+              <button
+                type="button"
+                class="detail-button"
+                (click)="$event.stopPropagation(); verDetalle(product)"
+              >
+                Ver detalle
+              </button>
+
+              <button
+                type="button"
+                class="add-button"
+                (click)="$event.stopPropagation(); agregarProducto(product)"
+              >
+                + Agregar
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </article>
     </div>
 
-    <div class="pagination-container" *ngIf="products.length > pageSize">
+    <div class="empty-state" *ngIf="!loadingProducts && products.length === 0">
+      No se encontraron productos para tu busqueda.
+    </div>
+
+    <div class="pagination-container" *ngIf="!loadingProducts && products.length > pageSize">
       <button
+        type="button"
         class="pag-btn"
         (click)="prevPage()"
         [disabled]="currentPage === 1"
@@ -131,6 +268,7 @@
       <span class="pag-info">{{ currentPage }} / {{ totalPages }}</span>
 
       <button
+        type="button"
         class="pag-btn"
         (click)="nextPage()"
         [disabled]="currentPage === totalPages"
@@ -150,7 +288,7 @@
         <div class="request-panel__title-row">
           <div>
             <h2>Mi Solicitud</h2>
-            <p>{{ requestItems.length }} ítems seleccionados</p>
+            <p>{{ requestItems.length }} items seleccionados</p>
           </div>
 
           <span class="request-panel__counter">{{ requestItems.length }}</span>
@@ -168,8 +306,8 @@
               type="button"
               (click)="eliminarDelCarrito(item)"
               class="btn-remove"
-            >
-              ✕
+              aria-label="Eliminar producto">
+              &times;
             </button>
           </div>
 
@@ -206,14 +344,14 @@
             type="number"
             [(ngModel)]="precioMin"
             placeholder="Min"
-            aria-label="Presupuesto mínimo"
+            aria-label="Presupuesto minimo"
           >
 
           <input
             type="number"
             [(ngModel)]="precioMax"
             placeholder="Max"
-            aria-label="Presupuesto máximo"
+            aria-label="Presupuesto maximo"
           >
         </div>
       </div>
@@ -223,10 +361,14 @@
       type="button"
       (click)="buscarProveedoresRFQ()"
       class="primary-action"
-      [disabled]="requestItems.length === 0"
+      [disabled]="requestItems.length === 0 || searchingProviders"
     >
-      Buscar Proveedores RFQ →
+      {{ searchingProviders ? 'Buscando proveedores...' : 'Buscar Proveedores RFQ ->' }}
     </button>
-  </aside>
 
+    <div class="rfq-search-skeleton" *ngIf="searchingProviders">
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line skeleton-line--short"></div>
+    </div>
+  </aside>
 </div>

@@ -8,8 +8,10 @@ import {
 import {
   ChangeDetectorRef,
   Component,
+  OnDestroy,
   OnInit
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import {
   Router,
@@ -24,6 +26,7 @@ import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../core/
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterOutlet,
     RouterLink,
     RouterLinkActive
@@ -31,7 +34,7 @@ import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../core/
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss'
 })
-export class MainLayoutComponent implements OnInit {
+export class MainLayoutComponent implements OnInit, OnDestroy {
 
   usuario: any = {
     nombres: '',
@@ -42,6 +45,23 @@ export class MainLayoutComponent implements OnInit {
 
   estadoApi: string = 'Desconectada';
   menuMovilAbierto = false;
+  globalSearchTerm = '';
+  private fotoPerfilCacheBust = Date.now();
+  private profileUpdatedHandler = (event: Event) => {
+    const updatedUser = (event as CustomEvent<any>).detail;
+
+    if (updatedUser) {
+      this.usuario = {
+        ...this.usuario,
+        ...updatedUser
+      };
+      this.fotoPerfilCacheBust = Date.now();
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.cargarPerfil();
+  };
 
   private API_URL =
   'https://proyectoinnovacion.onrender.com/api/proveedor-api';
@@ -53,10 +73,15 @@ export class MainLayoutComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    window.addEventListener('profileUpdated', this.profileUpdatedHandler);
     this.cargarPerfil();
     if (this.isProvider) {
     this.cargarEstadoApi();
   }
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('profileUpdated', this.profileUpdatedHandler);
   }
 
   toggleMenuMovil(): void {
@@ -121,7 +146,15 @@ export class MainLayoutComponent implements OnInit {
       return '';
     }
 
-    return this.usuario.fotoPerfil + '?t=' + Date.now();
+    const foto = String(this.usuario.fotoPerfil);
+
+    if (foto.startsWith('data:')) {
+      return foto;
+    }
+
+    const separator = foto.includes('?') ? '&' : '?';
+
+    return `${foto}${separator}t=${this.fotoPerfilCacheBust}`;
   }
 
   get fotoPerfilValida(): boolean {
@@ -144,10 +177,22 @@ export class MainLayoutComponent implements OnInit {
 
   imagenError(): void {
     this.usuario.fotoPerfil = '';
+    this.fotoPerfilCacheBust = Date.now();
     this.cdr.detectChanges();
   }
 
+  ejecutarBusquedaGlobal(): void {
+    const search = this.globalSearchTerm.trim();
+
+    this.router.navigate(
+      [APP_ROUTE_PATHS.rfqCatalog],
+      search ? { queryParams: { search } } : { queryParams: {} }
+    );
+  }
+
   logout(): void {
+
+    this.cerrarMenuMovil();
 
     localStorage.removeItem(APP_STORAGE_KEYS.token);
     localStorage.removeItem(APP_STORAGE_KEYS.role);
@@ -155,7 +200,7 @@ export class MainLayoutComponent implements OnInit {
     localStorage.removeItem(APP_STORAGE_KEYS.selectedProvider);
     localStorage.removeItem(APP_STORAGE_KEYS.currentSolicitudId);
 
-    this.router.navigate([APP_ROUTE_PATHS.login]);
+    this.router.navigate([APP_ROUTE_PATHS.login], { replaceUrl: true });
   }
 
   private headers(): HttpHeaders {
@@ -178,6 +223,7 @@ export class MainLayoutComponent implements OnInit {
       next: (res) => {
 
         this.usuario = res;
+        this.fotoPerfilCacheBust = Date.now();
 
         this.cdr.detectChanges();
       },

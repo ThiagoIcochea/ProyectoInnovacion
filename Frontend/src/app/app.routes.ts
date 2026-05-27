@@ -1,6 +1,7 @@
 // Backend touchpoint: route map for all app flows; update this file when new backend-backed screens are added.
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './layout/main-layout/main-layout';
+import { authChildGuard, authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -31,6 +32,8 @@ export const routes: Routes = [
   {
     path: 'app',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
+    canActivateChild: [authChildGuard],
     children: [
       {
         path: '',
@@ -125,6 +128,11 @@ export const routes: Routes = [
         path: 'provider/products',
         loadComponent: () =>
           import('./features/provider/products/products').then(m => m.ProviderProductsComponent)
+      },
+      {
+        path: 'provider/profile',
+        loadComponent: () =>
+          import('./features/client/profile/profile').then(m => m.ProfileComponent)
       },
       {
         path: 'admin/dashboard',

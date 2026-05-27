@@ -1,6 +1,6 @@
 // Backend touchpoint: payment flow loads tracking data, payment methods and confirms payment.
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, AfterViewInit, HostListener } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, AfterViewInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -26,6 +26,7 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
   direccionEntrega = '';
   archivoCaptura: File | null = null;
   previewUrl: string | null = null;
+  nombreArchivoCaptura = '';
 
   totalSolicitud = 0;
 
@@ -34,7 +35,8 @@ export class RfqPaymentComponent implements OnInit, AfterViewInit {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -191,13 +193,19 @@ console.log('RFQ TOTAL:', this.provider?.totalCotizacion);
   onFileSelected(e: any): void {
 
     this.archivoCaptura = e.target.files[0];
+    this.previewUrl = null;
+    this.nombreArchivoCaptura = this.archivoCaptura?.name || '';
 
-    if (!this.archivoCaptura) return;
+    if (!this.archivoCaptura) {
+      this.cdr.detectChanges();
+      return;
+    }
 
     const reader = new FileReader();
 
     reader.onload = () => {
       this.previewUrl = reader.result as string;
+      this.cdr.detectChanges();
     };
 
     reader.readAsDataURL(this.archivoCaptura);

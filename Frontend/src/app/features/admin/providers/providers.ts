@@ -34,6 +34,8 @@ implements OnInit {
   filteredProviders: any[] = [];
 
   searchTerm: string = '';
+  loading = true;
+  readonly skeletonRows = Array.from({ length: 5 });
 
   constructor(
     private http: HttpClient,
@@ -58,6 +60,7 @@ implements OnInit {
   }
 
   listarProviders(): void {
+    this.loading = true;
 
     this.http.get<any[]>(
       this.API_URL,
@@ -74,6 +77,7 @@ implements OnInit {
         this.filteredProviders = [...res];
 
         this.filtrarProviders();
+        this.loading = false;
 
         this.cdr.detectChanges();
       },
@@ -81,6 +85,10 @@ implements OnInit {
       error: (err) => {
 
         console.error(err);
+        this.providers = [];
+        this.filteredProviders = [];
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

@@ -144,10 +144,20 @@
 .products-table__row {
   color: #e5e7eb;
   border-top: 1px solid rgba(55, 65, 81, 0.6);
+  min-width: 0;
 
   &:hover {
     background: rgba(39, 52, 73, 0.45);
   }
+}
+
+.products-table__row--skeleton {
+  pointer-events: none;
+}
+
+.empty-state {
+  padding: 1.25rem 1.5rem;
+  color: #9ca3af;
 }
 
 .sku {

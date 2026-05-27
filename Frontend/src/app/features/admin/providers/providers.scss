@@ -110,6 +110,15 @@
   }
 }
 
+.providers-table__row--skeleton {
+  pointer-events: none;
+}
+
+.empty-state {
+  padding: 1.25rem 1.5rem;
+  color: #9ca3af;
+}
+
 .provider-cell {
   display: flex;
   align-items: center;

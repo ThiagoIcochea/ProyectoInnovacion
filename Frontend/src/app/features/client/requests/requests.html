@@ -43,12 +43,22 @@
     </div>
 
     <!-- EMPTY STATE -->
-    <div *ngIf="requests.length === 0" class="empty-state">
+    <div class="requests-skeleton" *ngIf="loading">
+      <div class="skeleton-row" *ngFor="let item of skeletonRows">
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line skeleton-line--short"></div>
+        <div class="skeleton-line skeleton-line--short"></div>
+        <div class="skeleton-block skeleton-block--button"></div>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && requests.length === 0" class="empty-state">
       No tienes solicitudes registradas.
     </div>
 
     <!-- TABLE -->
-    <div class="requests-table" *ngIf="requests.length > 0">
+    <div class="requests-table" *ngIf="!loading && requests.length > 0">
 
       <div class="requests-table__head">
         <div>Código</div>

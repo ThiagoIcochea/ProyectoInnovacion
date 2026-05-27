@@ -84,7 +84,7 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  cargarPerfil(): void {
+  cargarPerfil(notifyProfileUpdated = false): void {
 
     this.http.get<any>(
       `${APP_API_BASE_URL}/usuarios/perfil`,
@@ -117,6 +117,14 @@ export class ProfileComponent implements OnInit {
 
           this.previewFoto = null;
           this.mostrarIniciales = true;
+        }
+
+        if (notifyProfileUpdated) {
+          window.dispatchEvent(
+            new CustomEvent('profileUpdated', {
+              detail: this.usuario
+            })
+          );
         }
 
         this.cdr.detectChanges();
@@ -236,7 +244,7 @@ export class ProfileComponent implements OnInit {
         this.nombreArchivoFoto = '';
         this.fotoUrl = '';
 
-        this.cargarPerfil();
+        this.cargarPerfil(true);
       },
 
       error: (err) => {

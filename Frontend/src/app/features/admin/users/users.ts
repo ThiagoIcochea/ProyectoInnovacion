@@ -37,6 +37,7 @@ implements OnInit {
   searchTerm: string = '';
 
   loading: boolean = false;
+  readonly skeletonRows = Array.from({ length: 5 });
 
   constructor(
     private http: HttpClient,

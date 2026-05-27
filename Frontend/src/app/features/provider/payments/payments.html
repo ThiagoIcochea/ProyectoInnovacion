@@ -1,53 +1,88 @@
 <!-- Backend touchpoint: payment validation queue and receipt review flow. -->
-
-
 <div class="provider-payments-page">
   <div class="page-header">
     <div>
-      <span>Validación financiera</span>
-      <h1>Validación de Pagos</h1>
-      <p>Revisa comprobantes enviados por clientes y confirma la operación.</p>
+      <span>Validacion financiera</span>
+      <h1>Validacion de Pagos</h1>
+      <p>Revisa comprobantes enviados por clientes y confirma la operacion.</p>
     </div>
   </div>
 
   <div class="payments-grid">
     <aside class="payment-list-card">
       <div class="list-header">
-        <h2>Pendientes de revisión</h2>
-        <span> {{(payments$ | async )?.length || 0 }}     pagos</span>
+        <h2>Pendientes de revision</h2>
+        <span>{{ (payments$ | async)?.length || 0 }} pagos</span>
       </div>
 
       <div class="search-box">Buscar por ID de pago o cliente...</div>
 
-      <div class="payment-list">
+      <div class="payment-list" *ngIf="loading">
+        <div class="payment-item payment-item--skeleton" *ngFor="let item of skeletonRows">
+          <div>
+            <div class="skeleton-line skeleton-line--short"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line skeleton-line--short"></div>
+          </div>
+
+          <div class="payment-meta">
+            <div class="skeleton-line skeleton-line--short"></div>
+            <div class="skeleton-block skeleton-block--button"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="payment-list" *ngIf="!loading">
         <button
           class="payment-item"
-          *ngFor="let payment of (payments$ | async )"
-          [class.active]="selectedPayment?.idPago === payment.idPago "
+          *ngFor="let payment of (payments$ | async)"
+          [class.active]="selectedPayment?.idPago === payment.idPago"
           (click)="seleccionarPago(payment)"
         >
           <div>
             <strong>{{ getPagoCode(payment) }}</strong>
-            <p>{{ payment.nombreEmpresa  }}</p>
-            <b>  $ {{ payment.totalSolicitud|| 0  }}</b>
+            <p>{{ payment.nombreEmpresa }}</p>
+            <b>$ {{ payment.totalSolicitud || 0 }}</b>
           </div>
 
           <div class="payment-meta">
-            <span>{{ getFecha(payment.fechaPago)    }} {{ getHora(payment.fechaPago) }} </span>
+            <span>{{ getFecha(payment.fechaPago) }} {{ getHora(payment.fechaPago) }}</span>
             <em [class.approved]="payment.estado === 'Aprobado'">
-              {{ payment.estado     }}
+              {{ payment.estado }}
             </em>
           </div>
         </button>
+
+        <div class="empty-state" *ngIf="((payments$ | async)?.length || 0) === 0">
+          {{ errorMessage || 'No hay pagos pendientes.' }}
+        </div>
       </div>
     </aside>
 
-    <section class="payment-detail-card">
+    <section class="payment-detail-card" *ngIf="loading">
+      <div class="detail-header">
+        <div class="skeleton-line skeleton-line--short"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line skeleton-line--short"></div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="payment-info">
+          <div class="skeleton-line" *ngFor="let item of [1, 2, 3, 4, 5, 6]"></div>
+        </div>
+
+        <aside class="voucher-card">
+          <div class="skeleton-block skeleton-voucher"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="payment-detail-card" *ngIf="!loading">
       <div class="detail-header">
         <div>
-          <span class="status-pill">Pendiente de validación</span>
-          <h2>Pago {{ getPagoCode(selectedPayment) }}   </h2>
-          <p>Asociado a Cotización: {{ getCotCode(selectedPayment)  }}     </p>
+          <span class="status-pill">{{ selectedPayment?.estado || 'Sin pago seleccionado' }}</span>
+          <h2>Pago {{ getPagoCode(selectedPayment) }}</h2>
+          <p>Asociado a Cotizacion: {{ getCotCode(selectedPayment) }}</p>
         </div>
       </div>
 
@@ -57,57 +92,59 @@
 
           <div class="info-list">
             <div>
-              <span>Razón Social</span>
-              <strong>{{ selectedPayment?.nombreEmpresa   }}</strong>
+              <span>Razon Social</span>
+              <strong>{{ selectedPayment?.nombreEmpresa }}</strong>
             </div>
 
             <div>
               <span>RUC</span>
-              <strong> {{selectedPayment?.rucEmpresa   }}    </strong>
+              <strong>{{ selectedPayment?.rucEmpresa }}</strong>
             </div>
 
             <div>
               <span>Contacto</span>
-              <strong> {{selectedPayment?.correoCliente    }}    </strong>
+              <strong>{{ selectedPayment?.correoCliente }}</strong>
             </div>
           </div>
 
-          <h3>Información de Transferencia</h3>
+          <h3>Informacion de Transferencia</h3>
 
           <div class="info-list">
             <div>
-              <span>Método de pago</span>
-              <strong>  {{selectedPayment?.metodo    }}    </strong>
+              <span>Metodo de pago</span>
+              <strong>{{ selectedPayment?.metodo }}</strong>
             </div>
 
             <div>
               <span>Banco origen</span>
-              <strong>  {{selectedPayment?.entidad}}    </strong>
+              <strong>{{ selectedPayment?.entidad }}</strong>
             </div>
 
             <div>
-              <span>Fecha operación</span>
-              <strong>  {{getFechaCompleta(selectedPayment?.fechaPago)       }}      </strong>
+              <span>Fecha operacion</span>
+              <strong>{{ getFechaCompleta(selectedPayment?.fechaPago) }}</strong>
             </div>
 
             <div>
-              <span>Código operación</span>
-              <strong>  {{selectedPayment?.codigoOperacion       }}       </strong>
+              <span>Codigo operacion</span>
+              <strong>{{ selectedPayment?.codigoOperacion }}</strong>
             </div>
           </div>
 
           <div class="amount-box">
             <span>Monto a validar</span>
-            <strong>$  {{selectedPayment?.totalSolicitud    }}      </strong>
+            <strong>$ {{ selectedPayment?.totalSolicitud }}</strong>
           </div>
 
           <div class="validation-box">
-            <h3>Validación</h3>
-            <p>Confirma si el monto y código de operación coinciden con tu cuenta bancaria.</p>
+            <h3>Validacion</h3>
+            <p>Confirma si el monto y codigo de operacion coinciden con tu cuenta bancaria.</p>
 
             <div class="validation-actions">
               <button class="btn-danger">Rechazar pago</button>
-              <button class="btn-primary" (click)="aprobarPago()"    >Aprobar pago</button>
+              <button class="btn-primary" (click)="aprobarPago()" [disabled]="!selectedPayment">
+                Aprobar pago
+              </button>
             </div>
           </div>
         </div>
@@ -115,23 +152,44 @@
         <aside class="voucher-card">
           <h3>Comprobante adjunto</h3>
 
-          <div class="voucher-preview">  
-            
-          <img
-    *ngIf="selectedPayment?.comprobanteUrl"
-    [src]="selectedPayment?.comprobanteUrl"
-    alt="Comprobante de pago"
-    class="voucher-image"
-  />
-          
-          
-          
+          <div class="voucher-preview">
+            <img
+              *ngIf="getVoucherUrl(selectedPayment)"
+              [src]="getVoucherUrl(selectedPayment)"
+              alt="Comprobante de pago"
+              class="voucher-image"
+              [style.transform]="'scale(' + voucherZoom + ')'"
+            />
+
+            <div class="voucher-empty" *ngIf="!getVoucherUrl(selectedPayment)">
+              Comprobante no disponible
+            </div>
           </div>
 
           <div class="voucher-actions">
-            <button>Zoom +</button>
-            <button>Zoom -</button>
-            <button>Descargar</button>
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="zoomInVoucher()"
+              [disabled]="voucherZoom >= maxVoucherZoom || !getVoucherUrl(selectedPayment)">
+              Zoom +
+            </button>
+
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="zoomOutVoucher()"
+              [disabled]="voucherZoom <= minVoucherZoom || !getVoucherUrl(selectedPayment)">
+              Zoom -
+            </button>
+
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="downloadVoucher(selectedPayment)"
+              [disabled]="!getVoucherUrl(selectedPayment)">
+              Descargar
+            </button>
           </div>
         </aside>
       </div>
