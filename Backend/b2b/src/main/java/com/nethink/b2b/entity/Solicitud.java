@@ -84,7 +84,7 @@ public class Solicitud {
     public enum EstadoSolicitud {
         CREADA,
         COTIZADA,
-        ACEPTADA,
+        PEDIDO_APROBADO,
         RECHAZADA,
         PAGO_PENDIENTE,
         PAGO_VALIDANDO,

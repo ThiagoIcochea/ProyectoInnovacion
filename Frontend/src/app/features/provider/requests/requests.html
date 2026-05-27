@@ -97,6 +97,13 @@
       <div class="workflow-note">
         La validación y generación de cotización se ejecutan desde el flujo automático, por lo que esta vista solo resume la solicitud.
       </div>
+
+       <div class="validation-actions">
+              <button class="btn-danger">Rechazar pago</button>
+              <button class="btn-primary" (click)="aprobarPedido()" [disabled]="!selectedPayment">
+                Aprobar pago
+              </button>
+            </div>
     </section>
   </div>
 

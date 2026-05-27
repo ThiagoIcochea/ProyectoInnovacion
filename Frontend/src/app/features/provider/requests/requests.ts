@@ -218,7 +218,33 @@ getFechaCompleta(date?: string): string {
 
 
 
+aprobarPedido(): void {
 
+    if (!this.selectedRequest) return;
+
+    this.requestService
+      .aprobarPedido(this.selectedRequest.idSolicitud)
+      .subscribe({
+
+        next: () => {
+
+          alert('Pedido aprobado correctamente');
+
+          
+
+        },
+
+        error: (err) => {
+
+          console.error(err);
+
+          alert('Error al aprobar pedido');
+
+        }
+
+      });
+
+  }
 
 
 

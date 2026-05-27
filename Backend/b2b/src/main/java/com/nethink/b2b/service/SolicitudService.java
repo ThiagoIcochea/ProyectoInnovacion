@@ -597,6 +597,8 @@ BigDecimal totalItem =
             case CREADA -> "Creada";
 
             case PAGO_PENDIENTE -> "Pago pendiente";
+                
+            case PEDIDO_APROBADO -> "Pedido aprobado";
 
             case PAGO_VALIDANDO -> "Validando pago";
                 
@@ -937,7 +939,45 @@ logsSistemaService.registrarLog(
 }
     
     
+        @Transactional
+public void aprobarPedido(Integer idSolicitud, String correoUsuario,HttpServletRequest req) {
+
+   Solicitud sol = solicitudRepo.findById(idSolicitud)
+            .orElseThrow(() ->
+                    new RuntimeException("Pago no encontrado"));
+         Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+
+    sol.setEstado(
+          Solicitud.EstadoSolicitud.PEDIDO_APROBADO
+    );
+
+   sol = solicitudRepo.save(sol);
+
+  
     
+    logsSistemaService.registrarLog(
+    usuario.getIdUsuario(),
+    "APROBAR PEDIDOS",
+    "PROVEEDORES",
+    "Pedido Aprobado ID: "
+        + sol.getIdSolicitud()
+     ,
+    req
+);
+    
+        SolicitudHistorial historial = new SolicitudHistorial();
+        historial.setSolicitud(sol);
+        historial.setEstado("PEDIDO_APROBADO");
+        historial.setIdUsuario(usuario.getIdUsuario());
+        historial.setDescripcion("Pedido aprobado");
+        historial.setFecha(LocalDateTime.now());
+
+        historialRepo.save(historial);
+
+}
+  
     
     
     

@@ -59,6 +59,16 @@ console.log("TOKEN:", localStorage.getItem('token'));
     );
   }
 
+
+  aprobarPedido(idSolicitud:number){
+
+  return this.http.put(
+    `${this.apiUrl}/api/solicitudes/${idSolicitud}/aprobar`,
+    {}
+  );
+
+}
+
 }
 
 
