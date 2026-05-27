@@ -80,4 +80,19 @@ public interface ProveedorProductoRepository
 List<ProveedorProducto> findProductosCompletosPorProveedor(
         @Param("idProveedor") Integer idProveedor
 );
+
+
+@Query("""
+SELECT AVG(pp.precioUnitario)
+FROM ProveedorProducto pp
+WHERE pp.proveedor.idProveedor = :idProveedor
+""")
+Double promedioPrecioProveedor(Integer idProveedor);
+
+@Query("""
+SELECT AVG(pp.tiempoEntregaDias)
+FROM ProveedorProducto pp
+WHERE pp.proveedor.idProveedor = :idProveedor
+""")
+Double promedioTiempoEntregaProveedor(Integer idProveedor);
 }
