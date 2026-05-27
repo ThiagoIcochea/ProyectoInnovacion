@@ -3,7 +3,9 @@ package com.nethink.b2b.controller;
 import com.nethink.b2b.dto.request.RegisterProviderRequest;
 import com.nethink.b2b.dto.response.AdminProviderResponse;
 import com.nethink.b2b.dto.response.IndicadorProveedorResponse;
+import com.nethink.b2b.dto.response.RFQProveedorResponse;
 import com.nethink.b2b.entity.Usuario;
+import com.nethink.b2b.entity.enums.PrioridadRFQ;
 import com.nethink.b2b.repository.UsuarioRepository;
 import com.nethink.b2b.service.ProveedorService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +23,8 @@ public class ProveedorController {
     private ProveedorService proveedorService;
     @Autowired
     private  UsuarioRepository usuarioRepo;
+    @Autowired
+private ScoringService scoringService;
 
    @PostMapping("/register")
 public Map<String, String> register(@RequestBody RegisterProviderRequest req,  HttpServletRequest httpRequest) {
@@ -57,4 +61,14 @@ public List<IndicadorProveedorResponse> top10(
 
     return proveedorService.top10Proveedores();
 }
+
+@PostMapping("/scoring")
+public List<RFQProveedorResponse> calcularScoring(
+        @RequestBody List<RFQProveedorResponse> proveedores,
+        @RequestParam(required = false) PrioridadRFQ prioridad
+) {
+    scoringService.calcularScore(proveedores, prioridad);
+    return proveedores;
+}
+
 }
