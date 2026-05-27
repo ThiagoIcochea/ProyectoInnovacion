@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.nethink.b2b.dto.response.AdminProviderResponse;
 import com.nethink.b2b.dto.response.IndicadorProveedorResponse;
+import com.nethink.b2b.entity.Solicitud.EstadoSolicitud;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
@@ -278,7 +279,7 @@ private LogsApiRepository logsApiRepository;
             .orElseThrow(() -> new RuntimeException("Proveedor no existe"));
 
     int completadas = solicitudRepo
-            .countByProveedor_IdProveedorAndEstado(idProveedor, "COMPLETADO");
+            .countByProveedor_IdProveedorAndEstado(idProveedor, EstadoSolicitud.COMPLETADA);
 
     int total = solicitudRepo
             .countByProveedor_IdProveedor(idProveedor);
@@ -314,7 +315,7 @@ private LogsApiRepository logsApiRepository;
     for (Proveedor p : proveedores) {
 
         int completadas = solicitudRepo
-                .countByProveedor_IdProveedorAndEstado(p.getIdProveedor(), "COMPLETADO");
+                .countByProveedor_IdProveedorAndEstado(p.getIdProveedor(), EstadoSolicitud.COMPLETADA);
 
         int total = solicitudRepo
                 .countByProveedor_IdProveedor(p.getIdProveedor());

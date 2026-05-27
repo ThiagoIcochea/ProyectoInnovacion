@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import com.nethink.b2b.entity.Solicitud.EstadoSolicitud;
 //se añadio para que detalle solicitud pueda gestionarse en la lista val
 import com.nethink.b2b.entity.DetalleSolicitud;
 
@@ -83,7 +84,7 @@ List<Solicitud> listarSolicitudes(@Param("idProveedor") Integer idProveedor);
 //List<DetalleSolicitud> listarDetalles(@Param("idSolicitud") Integer idSolicitud);
 
 
-int countByProveedor_IdProveedorAndEstado(Integer idProveedor, String estado);
+int countByProveedor_IdProveedorAndEstado(Integer idProveedor, EstadoSolicitud estado);
 
 int countByProveedor_IdProveedor(Integer idProveedor);
 
