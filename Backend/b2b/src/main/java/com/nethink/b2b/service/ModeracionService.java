@@ -26,7 +26,7 @@ public class ModeracionService {
 
         Configuracion config = configRepository.findByClave("AI_COMMENTS_URL").orElseThrow();
     
-        String url = config.getValor();
+        String url = config.getValor()+"/ia";
 
         IAComentarioRequest req = new IAComentarioRequest();
         req.setTexto(texto);
