@@ -83,7 +83,7 @@ List<ProveedorProducto> findProductosCompletosPorProveedor(
 
 
 @Query("""
-SELECT AVG(pp.precioUnitario)
+SELECT AVG(pp.precio)
 FROM ProveedorProducto pp
 WHERE pp.proveedor.idProveedor = :idProveedor
 """)
