@@ -111,4 +111,21 @@ public class ScoringService {
 
         return calidadFinal;
     }
+    
+    public double calcularScoreProveedorBasico(Integer idProveedor) {
+
+    double calidad = calcularCalidad(idProveedor);
+
+    // fallback si no tienes RFQ contexto
+    double precio = 1.0;
+    double tiempo = 1.0;
+
+    double wPrecio = 0.4;
+    double wTiempo = 0.3;
+    double wCalidad = 0.3;
+
+    return (wPrecio * precio) +
+           (wTiempo * tiempo) +
+           (wCalidad * (calidad / 5.0));
+}
 }

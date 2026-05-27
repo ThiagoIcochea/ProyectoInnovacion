@@ -2,6 +2,7 @@ package com.nethink.b2b.controller;
 
 import com.nethink.b2b.dto.request.RegisterProviderRequest;
 import com.nethink.b2b.dto.response.AdminProviderResponse;
+import com.nethink.b2b.dto.response.IndicadorProveedorResponse;
 import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.repository.UsuarioRepository;
 import com.nethink.b2b.service.ProveedorService;
@@ -32,5 +33,28 @@ public List<AdminProviderResponse> listarProviders(Principal principal, HttpServ
     Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     return proveedorService.listarProviders( usuario.getIdUsuario(),  httpRequest);
+}
+
+@GetMapping("/{idProveedor}/indicadores")
+public IndicadorProveedorResponse indicadoresProveedor(
+        @PathVariable Integer idProveedor,
+        Principal principal,
+        HttpServletRequest request
+) {
+    Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    return proveedorService.obtenerIndicadoresPorProveedor(idProveedor);
+}
+
+@GetMapping("/admin/top10")
+public List<IndicadorProveedorResponse> top10(
+        Principal principal,
+        HttpServletRequest request
+) {
+    Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    return proveedorService.top10Proveedores();
 }
 }

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.nethink.b2b.dto.response.AdminProviderResponse;
+import com.nethink.b2b.dto.response.IndicadorProveedorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
@@ -38,6 +39,8 @@ public class ProveedorService {
 
     @Autowired
     private EmailService emailService;
+      @Autowired
+    private ScoringService scoringService;
 
     @Autowired
     private MetodoPagoRepository metodoPagoRepository;
@@ -47,6 +50,10 @@ public class ProveedorService {
 
     @Autowired
     private ProveedorCertificacionRepository proveedorCertificacionRepository;
+    
+    @Autowired
+    
+    private SolicitudRepository solicitudRepo;
     
     @Autowired
 private LogsSistemaService logsSistemaService;
@@ -255,10 +262,86 @@ private LogsApiRepository logsApiRepository;
         }
 
         dto.setEstadoApi(p.getEstadoApi());
+        
+        
 
         response.add(dto);
     }
 
     return response;
+}
+   
+   
+   public IndicadorProveedorResponse obtenerIndicadoresPorProveedor(Integer idProveedor) {
+
+    Proveedor proveedor = proveedorRepository.findById(idProveedor)
+            .orElseThrow(() -> new RuntimeException("Proveedor no existe"));
+
+    int completadas = solicitudRepo
+            .countByProveedor_IdProveedorAndEstado(idProveedor, "COMPLETADO");
+
+    int total = solicitudRepo
+            .countByProveedor_IdProveedor(idProveedor);
+
+    double cumplimiento = total == 0
+            ? 0
+            : ((double) completadas / total) * 100;
+
+    double scoreCalidad = scoringService.calcularScoreProveedorBasico(idProveedor);
+
+    IndicadorProveedorResponse dto = new IndicadorProveedorResponse();
+
+    dto.setIdProveedor(idProveedor);
+    dto.setRazonSocial(proveedor.getRazonSocial());
+
+    dto.setPedidosCompletados(completadas);
+    dto.setPedidosTotal(total);
+
+    dto.setCumplimiento(cumplimiento);
+
+   
+    dto.setScoreGeneral(scoreCalidad);
+
+    return dto;
+}
+   
+   public List<IndicadorProveedorResponse> top10Proveedores() {
+
+    List<Proveedor> proveedores = proveedorRepository.findAll();
+
+    List<IndicadorProveedorResponse> lista = new ArrayList<>();
+
+    for (Proveedor p : proveedores) {
+
+        int completadas = solicitudRepo
+                .countByProveedor_IdProveedorAndEstado(p.getIdProveedor(), "COMPLETADO");
+
+        int total = solicitudRepo
+                .countByProveedor_IdProveedor(p.getIdProveedor());
+
+        double cumplimiento = total == 0
+                ? 0
+                : ((double) completadas / total) * 100;
+
+        double score = scoringService.calcularScoreProveedorBasico(p.getIdProveedor());
+
+        IndicadorProveedorResponse dto = new IndicadorProveedorResponse();
+
+        dto.setIdProveedor(p.getIdProveedor());
+        dto.setRazonSocial(p.getRazonSocial());
+
+        dto.setPedidosCompletados(completadas);
+        dto.setPedidosTotal(total);
+
+        dto.setCumplimiento(cumplimiento);
+        dto.setScoreGeneral(score);
+
+        lista.add(dto);
+    }
+
+    return lista.stream()
+            .sorted((a, b) -> Double.compare(b.getScoreGeneral(), a.getScoreGeneral()))
+            .limit(10)
+            .toList();
 }
 }

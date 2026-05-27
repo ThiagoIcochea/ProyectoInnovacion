@@ -83,7 +83,8 @@ List<Solicitud> listarSolicitudes(@Param("idProveedor") Integer idProveedor);
 //List<DetalleSolicitud> listarDetalles(@Param("idSolicitud") Integer idSolicitud);
 
 
+int countByProveedor_IdProveedorAndEstado(Integer idProveedor, String estado);
 
-
+int countByProveedor_IdProveedor(Integer idProveedor);
 
 }
