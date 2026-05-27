@@ -36,8 +36,11 @@ implements OnInit {
   filteredRfqs: any[] = [];
 
   search: string = '';
+
   loading = true;
-  readonly skeletonRows = Array.from({ length: 5 });
+
+  readonly skeletonRows =
+    Array.from({ length: 5 });
 
   constructor(
     private http: HttpClient,
@@ -60,6 +63,7 @@ implements OnInit {
   }
 
   listarRfqs(): void {
+
     this.loading = true;
 
     this.http.get<any[]>(
@@ -78,15 +82,22 @@ implements OnInit {
 
         this.filtrarRfqs();
 
-        this.cdr.detectChanges();
         this.loading = false;
+
+        this.cdr.detectChanges();
       },
 
       error: (err) => {
 
         console.error(err);
+
         this.rfqs = [];
+
+        this.filteredRfqs = [];
+
         this.loading = false;
+
+        this.cdr.detectChanges();
       }
 
     });
@@ -100,31 +111,31 @@ implements OnInit {
     this.filteredRfqs =
       this.rfqs.filter(rfq =>
 
-        rfq.idSolicitud
+        rfq?.idSolicitud
           ?.toString()
           .includes(s)
 
         ||
 
-        rfq.nombreCliente
+        rfq?.nombreCliente
           ?.toLowerCase()
           .includes(s)
 
         ||
 
-        rfq.nombreProveedor
+        rfq?.nombreProveedor
           ?.toLowerCase()
           .includes(s)
 
         ||
 
-        rfq.nombreEmpresa
+        rfq?.nombreEmpresa
           ?.toLowerCase()
           .includes(s)
 
         ||
 
-        rfq.estado
+        rfq?.estado
           ?.toLowerCase()
           .includes(s)
       );
