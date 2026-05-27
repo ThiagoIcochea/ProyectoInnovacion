@@ -5,6 +5,18 @@
     Cargando tracking...
   </div>
 
+  <section *ngIf="!loading && errorMessage" class="tracking-error">
+    <div>
+      <span>No se pudo mostrar el tracking</span>
+      <h2>{{ errorMessage }}</h2>
+      <p>El frontend esta funcionando, pero el backend rechazo la solicitud de tracking para este ID.</p>
+    </div>
+
+    <a routerLink="/app/requests" class="btn-secondary">
+      Volver a solicitudes
+    </a>
+  </section>
+
   <div *ngIf="!loading && tracking">
 
     <div class="page-title">
@@ -103,7 +115,7 @@
             <strong>{{ tracking.direccion }}</strong>
           </div>
 
-          <div *ngIf="tracking.estado !== 'Pago pendiente'">
+          <div *ngIf="!esPagoPendiente()">
             <span>Código de recepción</span>
             <strong>
               {{ tracking.codigoRecepcion || 'Pendiente de generar' }}
@@ -112,16 +124,17 @@
 
         </div>
 
-        <div class="delivery-code-card" *ngIf="tracking.estado !== 'Pago pendiente'">
+        <div class="delivery-code-card" *ngIf="!esPagoPendiente()">
           <span>Código de recepción</span>
           <strong>{{ tracking.codigoRecepcion || 'Pendiente' }}</strong>
           <p>Usa este código para verificar la entrega una vez que el pedido llegue a destino.</p>
         </div>
 
-        <div class="actions-box" *ngIf="tracking.estado === 'Pago pendiente'">
+        <div class="actions-box" *ngIf="esPagoPendiente()">
 
           <button class="btn-primary"
-                  [routerLink]="['/app/rfq/payment']">
+                  type="button"
+                  (click)="irAPago()">
             Pagar ahora
           </button>
 
