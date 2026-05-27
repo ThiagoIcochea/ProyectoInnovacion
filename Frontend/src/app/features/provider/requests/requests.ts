@@ -251,12 +251,14 @@ aprobarPedido(): void {
 
     if (!this.selectedRequest) return;
 
-    const promp = prompt('Ingrese el motivo por el cual cancela la orden.') || "";
+    const motivo =
+    prompt('Ingrese el motivo por el cual rechaza la orden.');
 
+  if (!motivo) return;
     
 
     this.requestService
-      .rechazarPedido(this.selectedRequest.idSolicitud,promp)
+      .rechazarPedido(this.selectedRequest.idSolicitud,motivo)
       .subscribe({
 
         next: () => {
