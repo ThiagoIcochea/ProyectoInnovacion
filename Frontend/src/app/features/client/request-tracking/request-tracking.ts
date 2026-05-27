@@ -17,6 +17,7 @@ export class RequestTrackingComponent implements OnInit {
   tracking: any = null;
   steps: any[] = [];
   loading = true;
+  errorMessage = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -30,7 +31,11 @@ export class RequestTrackingComponent implements OnInit {
 
     if (id) {
       this.cargarTracking(id);
+      return;
     }
+
+    this.errorMessage = 'No se encontro el identificador de la solicitud.';
+    this.loading = false;
   }
 
   private headers(): HttpHeaders {
@@ -40,6 +45,9 @@ export class RequestTrackingComponent implements OnInit {
   }
 
   cargarTracking(id: string): void {
+
+    this.loading = true;
+    this.errorMessage = '';
 
     this.http.get<any>(
       `${APP_API_BASE_URL}/solicitudes/${id}/tracking`,
@@ -73,9 +81,23 @@ export class RequestTrackingComponent implements OnInit {
 
       error: (err) => {
         console.error(err);
+        this.errorMessage = this.getTrackingErrorMessage(err);
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  private getTrackingErrorMessage(err: any): string {
+    if (err?.status === 400) {
+      return 'No se pudo cargar el tracking de esta solicitud. Verifica que el ID exista y pertenezca a tu cuenta.';
+    }
+
+    if (err?.status === 401 || err?.status === 403) {
+      return 'Tu sesion no tiene permisos para ver el tracking de esta solicitud.';
+    }
+
+    return 'No se pudo cargar el tracking en este momento.';
   }
 
   irAPago(): void {
@@ -118,6 +140,14 @@ export class RequestTrackingComponent implements OnInit {
     });
   }
 
+  private normalizarEstado(estado: string): string {
+    return (estado || '')
+      .toString()
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, '_');
+  }
+
   mapEstado(estado: string): string {
 
     const map: any = {
@@ -129,7 +159,7 @@ export class RequestTrackingComponent implements OnInit {
       CANCELADA: 'Cancelada'
     };
 
-    return map[estado] || estado;
+    return map[this.normalizarEstado(estado)] || estado;
   }
 
   getEstadoTexto(): string {
@@ -139,5 +169,9 @@ export class RequestTrackingComponent implements OnInit {
     }
 
     return this.mapEstado(this.tracking.estado);
+  }
+
+  esPagoPendiente(): boolean {
+    return this.normalizarEstado(this.tracking?.estado) === 'PAGO_PENDIENTE';
   }
 }

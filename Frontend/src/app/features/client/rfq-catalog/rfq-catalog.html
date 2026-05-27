@@ -169,113 +169,245 @@
       </div>
     </div>
 
-    <div class="catalog-count" *ngIf="!loadingProducts">
-      {{ products.length }} producto{{ products.length === 1 ? '' : 's' }} disponible{{ products.length === 1 ? '' : 's' }}
+    <div class="catalog-tabs" role="tablist" aria-label="Secciones del catalogo RFQ">
+      <button
+        type="button"
+        class="catalog-tab"
+        [class.active]="activeTab === 'productos'"
+        (click)="setActiveTab('productos')">
+        Productos
+      </button>
+
+      <button
+        type="button"
+        class="catalog-tab"
+        [class.active]="activeTab === 'proveedores'"
+        (click)="setActiveTab('proveedores')">
+        Top 10 proveedores
+      </button>
     </div>
 
-    <div class="product-grid" *ngIf="loadingProducts">
-      <div class="product-card product-card--skeleton" *ngFor="let item of skeletonCards">
-        <div class="skeleton-block skeleton-product-image"></div>
-        <div class="product-body">
-          <div class="skeleton-line skeleton-line--short"></div>
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line"></div>
-          <div class="skeleton-block skeleton-block--button"></div>
+    <ng-container *ngIf="activeTab === 'productos'">
+      <div class="catalog-count" *ngIf="!loadingProducts">
+        {{ products.length }} producto{{ products.length === 1 ? '' : 's' }} disponible{{ products.length === 1 ? '' : 's' }}
+      </div>
+
+      <div class="product-grid" *ngIf="loadingProducts">
+        <div class="product-card product-card--skeleton" *ngFor="let item of skeletonCards">
+          <div class="skeleton-block skeleton-product-image"></div>
+          <div class="product-body">
+            <div class="skeleton-line skeleton-line--short"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-block skeleton-block--button"></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="product-grid" *ngIf="!loadingProducts">
-      <article
-        class="product-card"
-        *ngFor="let product of paginatedProducts"
-        (click)="verDetalle(product)"
-        tabindex="0"
-      >
-        <div class="product-image-container">
-          <img
-            *ngIf="getProductImage(product) as imageUrl; else productPlaceholder"
-            alt="Imagen de producto"
-            title="Imagen de producto"
-            [src]="imageUrl"
-            class="producto-img"
-            loading="lazy"
-            decoding="async"
-            (error)="markImageAsFailed(product)"
-          >
+      <div class="product-grid" *ngIf="!loadingProducts">
+        <article
+          class="product-card"
+          *ngFor="let product of paginatedProducts"
+          (click)="verDetalle(product)"
+          tabindex="0"
+        >
+          <div class="product-image-container">
+            <img
+              *ngIf="getProductImage(product) as imageUrl; else productPlaceholder"
+              alt="Imagen de producto"
+              title="Imagen de producto"
+              [src]="imageUrl"
+              class="producto-img"
+              loading="lazy"
+              decoding="async"
+              (error)="markImageAsFailed(product)"
+            >
 
-          <ng-template #productPlaceholder>
-            <div class="image-placeholder">
-              <span>{{ product.marca?.slice(0, 2) || 'RFQ' }}</span>
+            <ng-template #productPlaceholder>
+              <div class="image-placeholder">
+                <span>{{ product.marca?.slice(0, 2) || 'RFQ' }}</span>
+              </div>
+            </ng-template>
+          </div>
+
+          <div class="product-body">
+            <div class="product-meta">
+              <span class="brand-label">{{ product.marca }}</span>
+              <span class="category-badge">{{ product.categoria }}</span>
             </div>
-          </ng-template>
-        </div>
 
-        <div class="product-body">
-          <div class="product-meta">
-            <span class="brand-label">{{ product.marca }}</span>
-            <span class="category-badge">{{ product.categoria }}</span>
-          </div>
+            <h3>{{ product.producto }}</h3>
 
-          <h3>{{ product.producto }}</h3>
+            <div class="primary-spec" *ngIf="getPrimarySpec(product) as spec">
+              <span>{{ spec.nombre }}</span>
+              <strong>{{ spec.valor }}</strong>
+            </div>
 
-          <div class="primary-spec" *ngIf="getPrimarySpec(product) as spec">
-            <span>{{ spec.nombre }}</span>
-            <strong>{{ spec.valor }}</strong>
-          </div>
+            <p class="description" *ngIf="product.descripcion">{{ product.descripcion }}</p>
 
-          <p class="description" *ngIf="product.descripcion">{{ product.descripcion }}</p>
+            <div class="product-footer">
+              <span class="product-id" *ngIf="product.idProducto">ID #{{ product.idProducto }}</span>
 
-          <div class="product-footer">
-            <span class="product-id" *ngIf="product.idProducto">ID #{{ product.idProducto }}</span>
+              <div class="product-actions">
+                <button
+                  type="button"
+                  class="detail-button"
+                  (click)="$event.stopPropagation(); verDetalle(product)"
+                >
+                  Ver detalle
+                </button>
 
-            <div class="product-actions">
-              <button
-                type="button"
-                class="detail-button"
-                (click)="$event.stopPropagation(); verDetalle(product)"
-              >
-                Ver detalle
-              </button>
-
-              <button
-                type="button"
-                class="add-button"
-                (click)="$event.stopPropagation(); agregarProducto(product)"
-              >
-                + Agregar
-              </button>
+                <button
+                  type="button"
+                  class="add-button"
+                  (click)="$event.stopPropagation(); agregarProducto(product)"
+                >
+                  + Agregar
+                </button>
+              </div>
             </div>
           </div>
+        </article>
+      </div>
+
+      <div class="empty-state" *ngIf="!loadingProducts && products.length === 0">
+        No se encontraron productos para tu busqueda.
+      </div>
+
+      <div class="pagination-container" *ngIf="!loadingProducts && products.length > pageSize">
+        <button
+          type="button"
+          class="pag-btn"
+          (click)="prevPage()"
+          [disabled]="currentPage === 1"
+        >
+          Anterior
+        </button>
+
+        <span class="pag-info">{{ currentPage }} / {{ totalPages }}</span>
+
+        <button
+          type="button"
+          class="pag-btn"
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+        >
+          Siguiente
+        </button>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="activeTab === 'proveedores'">
+      <section class="ranking-intro">
+        <span>Ranking comercial</span>
+        <h2>Top 10 proveedores</h2>
+        <p>Proveedores destacados por satisfaccion, rese&ntilde;as, cumplimiento y tiempo promedio de entrega.</p>
+        <div class="simulation-note" *ngIf="usarTopProveedoresSimulado">
+          Vista simulada basada en la estructura de comentarios y likes de la BD.
         </div>
-      </article>
-    </div>
+      </section>
 
-    <div class="empty-state" *ngIf="!loadingProducts && products.length === 0">
-      No se encontraron productos para tu busqueda.
-    </div>
+      <section class="top-provider-grid" *ngIf="loadingProducts">
+        <article class="top-provider-card top-provider-card--skeleton" *ngFor="let item of [1, 2, 3, 4]">
+          <div class="skeleton-block ranking-skeleton-rank"></div>
+          <div class="ranking-skeleton-body">
+            <div class="skeleton-line skeleton-line--short"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-block skeleton-block--button"></div>
+          </div>
+        </article>
+      </section>
 
-    <div class="pagination-container" *ngIf="!loadingProducts && products.length > pageSize">
-      <button
-        type="button"
-        class="pag-btn"
-        (click)="prevPage()"
-        [disabled]="currentPage === 1"
-      >
-        Anterior
-      </button>
+      <section class="top-provider-grid" *ngIf="!loadingProducts && topProviders.length > 0">
+        <article class="top-provider-card" *ngFor="let proveedor of topProviders; let i = index">
+          <div class="ranking-number">#{{ i + 1 }}</div>
 
-      <span class="pag-info">{{ currentPage }} / {{ totalPages }}</span>
+          <div class="top-provider-content">
+            <div class="top-provider-header">
+              <div class="top-provider-title">
+                <h3>{{ proveedor.razonSocial }}</h3>
+                <p>{{ proveedor.categoriaPrincipal || 'Rubro no disponible' }}</p>
+              </div>
 
-      <button
-        type="button"
-        class="pag-btn"
-        (click)="nextPage()"
-        [disabled]="currentPage === totalPages"
-      >
-        Siguiente
-      </button>
-    </div>
+              <div class="top-provider-badges">
+                <span class="provider-status provider-score-pill">{{ proveedor.scoringGeneral || 0 }}/100</span>
+
+                <span class="provider-status" *ngIf="proveedor.estado; else verifiedStatus">
+                  {{ proveedor.estado }}
+                </span>
+
+                <ng-template #verifiedStatus>
+                  <span class="provider-status" *ngIf="proveedor.verificado">Verificado</span>
+                </ng-template>
+              </div>
+            </div>
+
+            <div class="top-provider-metrics">
+              <div class="ranking-metric">
+                <span>Rese&ntilde;as</span>
+                <strong>{{ proveedor.totalComentarios || 0 }}</strong>
+              </div>
+
+              <div class="ranking-metric">
+                <span>Likes</span>
+                <strong>{{ proveedor.totalLikes || 0 }}</strong>
+              </div>
+
+              <div class="ranking-metric">
+                <span>Dislikes</span>
+                <strong>{{ proveedor.totalDislikes || 0 }}</strong>
+              </div>
+
+              <div class="ranking-metric">
+                <span>Satisfaccion</span>
+                <strong>{{ proveedor.satisfaccion || 0 }}%</strong>
+              </div>
+
+              <div class="ranking-metric">
+                <span>Entrega prom.</span>
+                <strong>{{ formatDays(proveedor.tiempoEntregaPromedio) }}</strong>
+              </div>
+
+              <div class="ranking-metric">
+                <span>Cumplimiento</span>
+                <strong>{{ formatPercent(proveedor.cumplimiento) }}</strong>
+              </div>
+            </div>
+
+            <div class="ranking-progress-group">
+              <div class="ranking-progress">
+                <div class="ranking-progress__label">
+                  <span>Satisfaccion de clientes</span>
+                  <strong>{{ proveedor.satisfaccion || 0 }}%</strong>
+                </div>
+                <div class="ranking-progress__track">
+                  <span [style.width.%]="getTopProviderProgress(proveedor.satisfaccion)"></span>
+                </div>
+              </div>
+
+              <div class="ranking-progress">
+                <div class="ranking-progress__label">
+                  <span>Cumplimiento</span>
+                  <strong>{{ formatPercent(proveedor.cumplimiento) }}</strong>
+                </div>
+                <div class="ranking-progress__track">
+                  <span [style.width.%]="getTopProviderProgress(proveedor.cumplimiento)"></span>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="reviews-action" (click)="verResenasProveedor(proveedor)">
+              Ver rese&ntilde;as
+            </button>
+          </div>
+        </article>
+      </section>
+
+      <div class="empty-state empty-state--providers" *ngIf="!loadingProducts && topProviders.length === 0">
+        No hay informacion de proveedores disponible.
+      </div>
+    </ng-container>
   </section>
 
   <aside class="request-panel" [class.is-open]="mostrarSolicitudMovil">
