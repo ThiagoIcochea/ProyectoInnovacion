@@ -131,7 +131,6 @@ listarHistorial(Principal principal) {
                             entidad,
                             codigoOperacion,
                             metodo,
-                            direccion,
                             principal.getName(),
                             httpRequest
                     )

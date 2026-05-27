@@ -376,6 +376,8 @@ BigDecimal totalItem =
             dto.setEstado(
                     formatearEstado(s.getEstado())
             );
+            
+            dto.setDireccionEnvio(s.getDireccionEnvio());
 
             dto.setFechaCreacion(
                     s.getFechaCreacion()
@@ -741,6 +743,8 @@ BigDecimal totalItem =
         dto.setNombreProveedor(
                 s.getProveedor()
                  .getRazonSocial());
+        
+        dto.setDireccionEnvio(s.getDireccionEnvio());
 
         // =====================================
         // DATOS EMPRESA
@@ -927,7 +931,7 @@ logsSistemaService.registrarLog(
         dto.setEstado(
                 s.getEstado().name()
         );
-
+        dto.setDireccionEnvio(s.getDireccionEnvio());
         dto.setFechaCreacion(
                 s.getFechaCreacion()
         );

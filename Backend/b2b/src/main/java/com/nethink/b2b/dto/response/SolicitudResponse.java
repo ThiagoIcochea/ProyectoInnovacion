@@ -23,6 +23,7 @@ public class SolicitudResponse {
     private String estado;
     
     
+    
     //se agregó tres atributos para mostrarle al proveedor estos datos
     private String nombreCliente;
     private String correoCliente;
@@ -30,8 +31,21 @@ public class SolicitudResponse {
     
     private String telefonoCliente;
     
-
+    private String direccionEnvio;
+    
     private LocalDateTime fechaCreacion;
+
+    public String getDireccionEnvio() {
+        return direccionEnvio;
+    }
+
+    public void setDireccionEnvio(String direccionEnvio) {
+        this.direccionEnvio = direccionEnvio;
+    }
+    
+    
+
+    
 
     public Integer getIdSolicitud() {
         return idSolicitud;

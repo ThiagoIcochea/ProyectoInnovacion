@@ -155,6 +155,7 @@ export class RequestTrackingComponent implements OnInit {
       PAGO_PENDIENTE: 'Pago pendiente',
       PEDIDO_APROBADO: "Pedido aprobado",
       PAGO_VALIDANDO: 'Validando pago',
+      PAGADA : "Pagado",
       EN_CAMINO: 'En camino',
       ENTREGADA: 'Entregado',
       CANCELADA: 'Cancelada'
@@ -174,5 +175,9 @@ export class RequestTrackingComponent implements OnInit {
 
   esPedidoAprobado(): boolean {
     return this.normalizarEstado(this.tracking?.estado) === 'PEDIDO_APROBADO';
+  }
+   esPagado(): boolean {
+    
+    return this.tracking?.estado === 'Pagado';
   }
 }

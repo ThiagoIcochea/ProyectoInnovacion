@@ -58,7 +58,7 @@
         <div>
           <h3> {{selectedRequest?.nombreEmpresa  || 'Cargando solicitud de empresa'      }}    </h3>
           <p> {{selectedRequest?.correoCliente}} · +51 {{selectedRequest?.telefonoCliente     }}     </p>
-          <span>Av. Principal 123, San Isidro, Lima, Perú</span>
+          <span>{{selectedRequest?.direccionEnvio}}</span>
         </div>
       </div>
 
@@ -99,9 +99,9 @@
       </div>
 
        <div class="validation-actions" *ngIf="selectedRequest?.estado === 'PAGO_PENDIENTE'">
-              <button class="btn-danger" (click)="rechazarPedido()">Rechazar pago</button>
+              <button class="btn-danger" (click)="rechazarPedido()">Rechazar pedido</button>
               <button class="btn-primary" (click)="aprobarPedido()" [disabled]="!selectedRequest">
-                Aprobar pago
+                Aprobar pedido
               </button>
             </div>
     </section>

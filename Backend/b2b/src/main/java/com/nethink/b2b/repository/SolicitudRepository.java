@@ -44,8 +44,8 @@ where s.idSolicitud = :id
 """)
 void actualizarPago(
         @Param("id") Integer id,
-        @Param("estado") Solicitud.EstadoSolicitud estado,
-        @Param("direccion") String direccion
+        @Param("estado") Solicitud.EstadoSolicitud estado
+       
 );
 
 

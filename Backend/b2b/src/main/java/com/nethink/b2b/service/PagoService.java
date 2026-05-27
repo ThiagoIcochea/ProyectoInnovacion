@@ -60,7 +60,6 @@ public class PagoService {
             String entidad,
             String codigoOp,
             String metodo,
-            String direccionConfirmada,
             String correoUsuario,
             HttpServletRequest req
     ) throws IOException {
@@ -75,8 +74,8 @@ public class PagoService {
 
         solicitudRepo.actualizarPago(
                 idSolicitud,
-                Solicitud.EstadoSolicitud.PAGO_VALIDANDO,
-                direccionConfirmada
+                Solicitud.EstadoSolicitud.PAGO_VALIDANDO
+                
         );
         
         logsSistemaService.registrarLog(
