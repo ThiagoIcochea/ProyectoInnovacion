@@ -24,6 +24,8 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -218,6 +220,44 @@ public ResponseEntity<List<SolicitudResponse>> listarTodas(Principal principal, 
 }
 
 
+@PutMapping("/{idSolicitud}/aprobar")
+public ResponseEntity<?> aprobarPedido(
+        @PathVariable Integer idSolicitud,
+        Principal principal,
+        HttpServletRequest httpRequest
+) {
 
+    solicitudService.aprobarPedido(idSolicitud,principal.getName(), httpRequest);
+
+    Map<String, String> response =
+            new HashMap<>();
+
+    response.put(
+            "mensaje",
+            "Pedido aprobado"
+    );
+
+    return ResponseEntity.ok(response);
+} 
+@PutMapping("/{idSolicitud}/{prompt}/rechazar")
+public ResponseEntity<?> rechazarPedido(
+        @PathVariable Integer idSolicitud,
+        @PathVariable String prompt,
+        Principal principal,
+        HttpServletRequest httpRequest
+) {
+
+    solicitudService.rechazarPedido(idSolicitud,prompt,principal.getName(), httpRequest);
+
+    Map<String, String> response =
+            new HashMap<>();
+
+    response.put(
+            "mensaje",
+            "Pedido rechazado"
+    );
+
+    return ResponseEntity.ok(response);
+} 
 
 }
