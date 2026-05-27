@@ -185,7 +185,7 @@ public ResponseEntity<List<SolicitudResponse>> listarMisSolicitudesProveedor(
 
     return ResponseEntity.ok(
             solicitudService.listarSolicitudesProveedor(
-                   usuario.getIdUsuario(), proveedor.getIdProveedor(), httpRequest
+                    proveedor.getIdProveedor(), usuario.getIdUsuario(), httpRequest
             )
     );
 }
