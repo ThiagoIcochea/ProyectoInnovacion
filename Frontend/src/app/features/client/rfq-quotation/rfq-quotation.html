@@ -1,33 +1,62 @@
 <div class="quotation-page" *ngIf="provider">
 
   <div class="page-title">
-    <a routerLink="/app/rfq/results" class="back-button">←</a>
+
+    <a
+      routerLink="/app/rfq/results"
+      class="back-button">
+
+      ←
+
+    </a>
+
     <div>
-      <span>Lista para aprobación (Paso 3 de 3)</span>
+
+      <span>
+        Lista para aprobación (Paso 3 de 3)
+      </span>
+
       <h1>Detalle de Cotización</h1>
+
       <p>
         Cotización ID:
         #COT-2026-{{ provider.idProveedor }}-{{ provider.totalCotizacion | number:'1.0-0' }}
       </p>
+
     </div>
+
   </div>
 
   <section class="supplier-card">
+
     <div class="supplier-icon">◎</div>
+
     <div class="supplier-info">
+
       <h2>{{ provider.nombreProveedor }}</h2>
-      <p>⭐ {{ provider.scoreFinal | number:'1.1-1' }}</p>
+
+      <p>
+        ⭐ {{ provider.scoreFinal | number:'1.1-1' }}
+      </p>
 
       <div class="supplier-badges">
+
         <span>Socio de Negocio Verificado</span>
+
         <span>Garantía Local</span>
+
       </div>
+
     </div>
 
     <div class="validity-box">
+
       <span>Válido hasta</span>
+
       <strong>{{ fechaValidez }}</strong>
+
     </div>
+
   </section>
 
   <div class="quotation-grid">
@@ -35,91 +64,226 @@
     <section class="detail-card">
 
       <div class="card-header">
+
         <h2>Productos incluidos</h2>
-        <p>Precios calculados automáticamente.</p>
+
+        <p>
+          Precios calculados automáticamente.
+        </p>
+
       </div>
 
       <div class="quotation-table">
 
         <div class="quotation-table__head">
+
           <div>Producto</div>
           <div>Cant.</div>
           <div>Precio unit.</div>
           <div>Subtotal</div>
+
         </div>
 
-        <div class="quotation-table__row" *ngFor="let product of products">
+        <div
+          class="quotation-table__row"
+          *ngFor="let product of products">
 
           <div class="product-cell">
+
             <div class="product-thumb"></div>
+
             <div>
-              <strong>{{ product.nombreProducto }}</strong>
-              <span>SKU-{{ product.idProducto }}</span>
+
+              <strong>
+                {{ product.nombreProducto }}
+              </strong>
+
+              <span>
+                SKU-{{ product.idProducto }}
+              </span>
+
             </div>
+
           </div>
 
-          <div>{{ product.cantidad }}</div>
+          <div>
+            {{ product.cantidad }}
+          </div>
 
           <div>
 
             <div>
-              <strong>S/ {{ product.precioUnitario }}</strong>
+
+              <strong>
+                S/ {{ product.precioUnitario }}
+              </strong>
+
             </div>
 
-            <div *ngIf="product.precioBase && product.precioBase !== product.precioUnitario">
-              <s>S/ {{ product.precioBase }}</s>
+            <div
+              *ngIf="
+                product.precioBase &&
+                product.precioBase !== product.precioUnitario
+              ">
+
+              <s>
+                S/ {{ product.precioBase }}
+              </s>
+
             </div>
 
             <div *ngIf="product.tipoDescuento">
-              {{ product.tipoDescuento }} - {{ product.valorDescuento }}
-              <span *ngIf="product.tipoDescuento === 'PRODUCTO'">%</span>
+
+              {{ product.tipoDescuento }}
+              -
+              {{ product.valorDescuento }}
+
+              <span
+                *ngIf="
+                  product.tipoDescuento === 'PRODUCTO'
+                ">
+
+                %
+
+              </span>
+
             </div>
 
           </div>
 
-          <div>S/ {{ product.subtotal }}</div>
+          <div>
+            S/ {{ product.subtotal }}
+          </div>
 
         </div>
 
       </div>
+
     </section>
 
     <aside class="summary-card">
 
-      <h2>Resumen de Cotización</h2>
+      <h2>
+        Resumen de Cotización
+      </h2>
 
       <div class="summary-list">
+
         <div>
+
           <span>Subtotal</span>
-          <strong>S/ {{ subtotal }}</strong>
+
+          <strong>
+            S/ {{ subtotal }}
+          </strong>
+
         </div>
 
         <div>
+
           <span>IGV (18%)</span>
-          <strong>S/ {{ igv }}</strong>
+
+          <strong>
+            S/ {{ igv }}
+          </strong>
+
         </div>
 
         <div>
+
           <span>Total</span>
-          <strong>S/ {{ total }}</strong>
+
+          <strong>
+            S/ {{ total }}
+          </strong>
+
         </div>
+
       </div>
 
       <div class="ruc-box">
-        <label>RUC de la empresa compradora</label>
+
+        <label>
+          RUC de la empresa compradora
+        </label>
+
         <input
           type="text"
           [(ngModel)]="rucEmpresa"
           placeholder="Ingrese RUC (11 dígitos)"
           maxlength="11"
         />
+
       </div>
 
-      <button (click)="confirmarOrden()" class="btn-primary">
-        Aceptar y Proceder al Pago
+      <!-- DIRECCION -->
+      <div class="ruc-box">
+
+        <label>
+          Dirección de entrega
+        </label>
+
+        <div class="direccion-wrapper">
+
+          <input
+            type="text"
+            [(ngModel)]="direccionEntrega"
+            placeholder="Selecciona una ubicación"
+            readonly
+          />
+
+          <button
+            type="button"
+            class="map-btn"
+            (click)="abrirMapaModal()">
+
+            📍
+
+          </button>
+
+        </div>
+
+      </div>
+
+      <button
+        (click)="confirmarOrden()"
+        class="btn-primary">
+
+        {{ loading
+            ? 'Procesando...'
+            : 'Aceptar y Proceder al Pago'
+        }}
+
       </button>
 
     </aside>
 
   </div>
+
+</div>
+
+<!-- MODAL GIGANTE -->
+<div
+  class="map-overlay"
+  *ngIf="mostrarMapaModal">
+
+  <div class="map-container">
+
+    <button
+      type="button"
+      class="close-map-btn"
+      (click)="cerrarMapaModal()">
+
+      ✕
+
+    </button>
+
+    <div
+      id="quotationMap"
+      class="fullscreen-map">
+
+    </div>
+
+  </div>
+
 </div>

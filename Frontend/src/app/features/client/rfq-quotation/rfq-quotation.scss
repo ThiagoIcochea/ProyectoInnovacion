@@ -416,4 +416,199 @@
     margin-bottom: 1rem;
     padding: 1rem;
   }
+
+
+
+}
+
+
+/* =========================
+   INPUT DIRECCION
+========================= */
+
+.direccion-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.direccion-wrapper input {
+  flex: 1;
+}
+
+/* =========================
+   BOTON MAPA
+========================= */
+
+.map-btn {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+
+  border: none;
+  outline: none;
+
+  border-radius: 16px;
+
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #3b82f6
+  );
+
+  color: white;
+
+  font-size: 1.2rem;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 10px 30px rgba(37, 99, 235, 0.35);
+
+  transition: all 0.25s ease;
+}
+
+.map-btn:hover {
+  transform: scale(1.06);
+}
+
+.map-btn:active {
+  transform: scale(0.95);
+}
+
+/* =========================
+   OVERLAY OSCURO
+========================= */
+
+.map-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  background: rgba(2, 6, 23, 0.78);
+
+  backdrop-filter: blur(8px);
+
+  z-index: 999999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  animation: fadeOverlay 0.25s ease;
+}
+
+/* =========================
+   MODAL MAPA
+========================= */
+
+.map-container {
+  position: relative;
+
+  width: 88vw;
+  height: 88vh;
+
+  border-radius: 28px;
+
+  overflow: hidden;
+
+  background: #0f172a;
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.45);
+
+  animation: scaleModal 0.25s ease;
+}
+
+/* =========================
+   MAPA FULLSCREEN
+========================= */
+
+.fullscreen-map {
+  width: 100%;
+  height: 100%;
+}
+
+/* MUY IMPORTANTE PARA LEAFLET */
+
+.fullscreen-map .leaflet-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* =========================
+   BOTON CERRAR
+========================= */
+
+.close-map-btn {
+  position: absolute;
+
+  top: 18px;
+  right: 18px;
+
+  z-index: 99999;
+
+  width: 44px;
+  height: 44px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: rgba(15, 23, 42, 0.92);
+
+  color: white;
+
+  font-size: 1rem;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 8px 24px rgba(0,0,0,0.35);
+
+  transition: all 0.2s ease;
+}
+
+.close-map-btn:hover {
+  background: #1e293b;
+  transform: scale(1.05);
+}
+
+/* =========================
+   ANIMACIONES
+========================= */
+
+@keyframes fadeOverlay {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleModal {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

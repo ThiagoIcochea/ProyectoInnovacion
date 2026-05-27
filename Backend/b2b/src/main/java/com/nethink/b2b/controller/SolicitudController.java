@@ -146,7 +146,7 @@ listarHistorial(Principal principal) {
         Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         return ResponseEntity.ok(
-                solicitudService.obtenerTracking(usuario.getIdUsuario(),idSolicitud,httpRequest)
+                solicitudService.obtenerTracking(idSolicitud, usuario.getIdUsuario(),httpRequest)
         );
     }
  @PutMapping("/{idSolicitud}/cancelar")
