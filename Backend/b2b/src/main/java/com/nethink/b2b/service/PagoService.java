@@ -384,7 +384,7 @@ public void rechazarPago(Integer idPago, Integer idUsuario) {
     Solicitud solicitud = pago.getSolicitud();
 
     solicitud.setEstado(
-            Solicitud.EstadoSolicitud.RECHAZADA
+            Solicitud.EstadoSolicitud.CANCELADA
     );
     
     
@@ -398,7 +398,7 @@ public void rechazarPago(Integer idPago, Integer idUsuario) {
     historial.setIdUsuario(idUsuario);
 
     historial.setEstado(
-            Solicitud.EstadoSolicitud.RECHAZADA.name()
+            Solicitud.EstadoSolicitud.CANCELADA.name()
     );
 
     historial.setDescripcion(
