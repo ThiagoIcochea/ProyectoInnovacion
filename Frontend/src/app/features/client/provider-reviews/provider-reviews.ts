@@ -1,10 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import {
-  HttpClient,
-  HttpHeaders
-} from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -24,15 +21,14 @@ export class ProviderReviewsComponent implements OnInit {
   selectedProvider: any = null;
   origin: string | null = null;
 
+  idProductoActual: number | null = null;
+
   requestItems: any[] = [];
   providers: any[] = [];
 
   qty: number = 1;
-
   loadingProviders: boolean = true;
-
   expandedProviderKey: string | null = null;
-
   productImageFailed = false;
 
   reviewDrafts: {
@@ -43,66 +39,50 @@ export class ProviderReviewsComponent implements OnInit {
     }
   } = {};
 
-  private readonly API_BASE =
-    'https://proyectoinnovacion.onrender.com/api';
+  private readonly API_BASE = 'https://proyectoinnovacion.onrender.com/api';
 
   constructor(
     private router: Router,
     private http: HttpClient,
     private cdr: ChangeDetectorRef
   ) {
-
     const nav = this.router.getCurrentNavigation();
+    const state = nav?.extras?.state ?? history.state;
 
-    const state =
-      nav?.extras?.state
-      ?? history.state;
+    this.product = state?.['product'] ?? null;
+    this.origin = state?.['origen'] ?? state?.['origin'] ?? null;
 
-    this.product =
-      state?.['product']
-      ?? null;
-
-    this.origin =
-      state?.['origen']
-      ?? null;
+    this.idProductoActual =
+      state?.['idProducto'] ||
+      this.product?.idProducto ||
+      this.product?.id_producto ||
+      null;
 
     const stateProvider =
-      state?.['proveedor']
-      ?? state?.['provider']
-      ?? null;
+      state?.['proveedor'] ??
+      state?.['provider'] ??
+      null;
 
     if (stateProvider) {
+      this.selectedProvider = this.normalizarProveedor(stateProvider);
+      this.providers = [this.selectedProvider];
 
-      this.selectedProvider =
-        this.normalizarProveedor(
-          stateProvider
-        );
-
-      this.providers = [
-        this.selectedProvider
-      ];
-
-      this.expandedProviderKey =
-        this.getProviderKey(
-          this.selectedProvider,
-          0
-        );
+      this.expandedProviderKey = this.getProviderKey(
+        this.selectedProvider,
+        0
+      );
 
       this.loadingProviders = false;
-
       return;
     }
 
     const stateProviders =
-      state?.['proveedores']
-      ?? state?.['providers'];
+      state?.['proveedores'] ??
+      state?.['providers'];
 
     if (Array.isArray(stateProviders)) {
-
       this.setProviderList(
-        this.filterProvidersForProduct(
-          stateProviders
-        )
+        this.filterProvidersForProduct(stateProviders)
       );
 
       this.loadingProviders = false;
@@ -110,45 +90,41 @@ export class ProviderReviewsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
     this.cargarCarritoLocal();
 
-    if (
-      !this.product
-      && !this.selectedProvider
-    ) {
-
-      this.router.navigate([
-        '/app/rfq/catalog'
-      ]);
-
+    if (!this.product && !this.selectedProvider) {
+      this.router.navigate(['/app/rfq/catalog']);
       return;
     }
 
     if (this.selectedProvider) {
+      this.cargarIndicadoresProveedor(this.selectedProvider);
 
-      this.cargarIndicadoresProveedor(
-        this.selectedProvider
-      );
-
-      this.cargarComentariosProveedor(
-        this.selectedProvider
-      );
+      if (this.idProductoActual) {
+        this.cargarComentariosProveedor(this.selectedProvider);
+      } else {
+        this.recalcularMetricasProveedor(this.selectedProvider);
+      }
 
       this.loadingProviders = false;
-
       return;
     }
 
     if (this.loadingProviders) {
       this.cargarProveedoresDelProducto();
+      return;
+    }
+
+    if (this.providers.length > 0) {
+      this.providers.forEach(provider => {
+        this.cargarIndicadoresProveedor(provider);
+        this.cargarComentariosProveedor(provider);
+      });
     }
   }
 
   private getHeaders(): HttpHeaders {
-
-    const token =
-      localStorage.getItem('token');
+    const token = localStorage.getItem('token');
 
     return new HttpHeaders({
       Authorization: `Bearer ${token}`,
@@ -157,65 +133,56 @@ export class ProviderReviewsComponent implements OnInit {
   }
 
   cargarCarritoLocal(): void {
-
-    const saved =
-      localStorage.getItem('rfq_cart');
+    const saved = localStorage.getItem('rfq_cart');
 
     if (saved) {
-
-      this.requestItems =
-        JSON.parse(saved);
+      this.requestItems = JSON.parse(saved);
     }
   }
 
   guardarCarritoLocal(): void {
-
-    localStorage.setItem(
-      'rfq_cart',
-      JSON.stringify(this.requestItems)
-    );
+    localStorage.setItem('rfq_cart', JSON.stringify(this.requestItems));
   }
 
   cargarProveedoresDelProducto(): void {
-
     if (!this.product) {
+      return;
+    }
+
+    const idProducto =
+      this.idProductoActual ||
+      this.product?.idProducto ||
+      this.product?.id_producto;
+
+    if (!idProducto) {
+      console.error('No se encontró idProducto para cargar proveedores.');
+      this.providers = [];
+      this.loadingProviders = false;
+      this.cdr.detectChanges();
       return;
     }
 
     this.loadingProviders = true;
 
-    const providersFromProduct =
-      this.getProvidersFromProduct();
+    const providersFromProduct = this.getProvidersFromProduct();
 
     if (providersFromProduct.length > 0) {
-
-      this.setProviderList(
-        providersFromProduct
-      );
+      this.setProviderList(providersFromProduct);
 
       this.providers.forEach(provider => {
-
-        this.cargarIndicadoresProveedor(
-          provider
-        );
-
-        this.cargarComentariosProveedor(
-          provider
-        );
+        this.cargarIndicadoresProveedor(provider);
+        this.cargarComentariosProveedor(provider);
       });
 
       this.loadingProviders = false;
-
       this.cdr.detectChanges();
-
       return;
     }
 
     const request = {
       items: [
         {
-          idProducto:
-            this.product.idProducto,
+          idProducto,
           cantidad: 1
         }
       ],
@@ -228,132 +195,190 @@ export class ProviderReviewsComponent implements OnInit {
       prioridad: 'BALANCEADO'
     };
 
-    this.http.post<any[]>(
+    this.http.post<any>(
       `${this.API_BASE}/rfq/buscar-proveedores`,
       request,
-      {
-        headers: this.getHeaders()
-      }
+      { headers: this.getHeaders() }
     ).subscribe({
-
       next: (res) => {
-
-        this.setProviderList(
+        const proveedoresRaw =
           Array.isArray(res)
             ? res
-            : []
-        );
+            : res?.proveedores ||
+              res?.proveedoresSeleccionados ||
+              res?.data ||
+              [];
+
+        this.setProviderList(proveedoresRaw);
 
         this.providers.forEach(provider => {
-
-          this.cargarIndicadoresProveedor(
-            provider
-          );
-
-          
-          this.cargarComentariosProveedor(
-            provider
-          );
+          this.cargarIndicadoresProveedor(provider);
+          this.cargarComentariosProveedor(provider);
         });
 
         this.loadingProviders = false;
-
         this.cdr.detectChanges();
       },
-
       error: (err) => {
-
-        console.error(
-          'Error al cargar proveedores',
-          err
-        );
+        console.error('Error al cargar proveedores', err);
 
         this.providers = [];
-
         this.loadingProviders = false;
-
         this.cdr.detectChanges();
       }
     });
   }
 
-  cargarComentariosProveedor(
-    provider: any
-  ): void {
+  cargarComentariosProveedor(provider: any): void {
+    const idProveedor =
+      provider?.idProveedor ||
+      provider?.id_proveedor ||
+      provider?.idProvider ||
+      provider?.id;
 
-    const idProvProd =
-      provider?.idProvProd
-      ?? provider?.id_prov_prod
-      ?? provider?.idProveedorProducto
-      ?? provider?.idProveedor;
+    const idProducto =
+      this.idProductoActual ||
+      this.product?.idProducto ||
+      this.product?.id_producto;
 
-    if (!idProvProd) {
+    if (!idProveedor || !idProducto) {
+      console.warn('No se puede cargar comentarios. Falta idProveedor o idProducto.', {
+        idProveedor,
+        idProducto,
+        provider,
+        product: this.product
+      });
 
-      provider.comentarios = [];
+      provider.comentarios = Array.isArray(provider?.comentarios)
+        ? provider.comentarios.map((comentario: any) => this.normalizarComentario(comentario))
+        : [];
 
+      this.recalcularMetricasProveedor(provider);
+      this.cdr.detectChanges();
       return;
     }
 
     this.http.get<any[]>(
-      `${this.API_BASE}/comentarios/${idProvProd}`,
-      {
-        headers: this.getHeaders()
-      }
+      `${this.API_BASE}/comentarios/${idProveedor}/${idProducto}`,
+      { headers: this.getHeaders() }
     ).subscribe({
-
       next: (res) => {
+        provider.comentarios = Array.isArray(res)
+          ? res.map((comentario) => this.normalizarComentario(comentario))
+          : [];
 
-        provider.comentarios =
-          Array.isArray(res)
-            ? res.map(c => ({
-
-                ...c,
-
-                likes:
-                  Number(c.likes ?? 0),
-
-                dislikes:
-                  Number(c.dislikes ?? 0),
-
-                tipo:
-                  c.tipo === 'NEGATIVO'
-                    ? 'DISLIKE'
-                    : 'LIKE',
-
-                userReaction: null
-              }))
-            : [];
-
-        this.recalculateProviderReviewMetrics(
-          provider
-        );
-
+        this.recalcularMetricasProveedor(provider);
         this.cdr.detectChanges();
       },
-
       error: (err) => {
-
         console.error(
-          'Error cargando comentarios',
+          'Error cargando comentarios del proveedor para este producto',
           err
         );
 
         provider.comentarios = [];
-
+        this.recalcularMetricasProveedor(provider);
         this.cdr.detectChanges();
       }
     });
   }
 
-  cargarIndicadoresProveedor(
-    provider: any
-  ): void {
+  normalizarComentario(comentario: any): any {
+    const tipoNormalizado =
+      comentario?.tipo === 'DISLIKE' ||
+      comentario?.tipo === 'NEGATIVO'
+        ? 'DISLIKE'
+        : 'LIKE';
 
+    const reacciones =
+      Array.isArray(comentario?.likes)
+        ? comentario.likes
+        : Array.isArray(comentario?.reacciones)
+          ? comentario.reacciones
+          : [];
+
+    return {
+      ...comentario,
+      idComentario:
+        comentario?.idComentario ||
+        comentario?.id_comentario ||
+        comentario?.id,
+      idProvProd:
+        comentario?.idProvProd ||
+        comentario?.id_prov_prod ||
+        null,
+      idUsuario:
+        comentario?.idUsuario ||
+        comentario?.id_usuario ||
+        null,
+      comentario: comentario?.comentario || '',
+      tipo: tipoNormalizado,
+      fecha: comentario?.fecha || null,
+      likes: reacciones,
+      likesCount:
+        comentario?.likesCount ??
+        comentario?.likes_count ??
+        this.contarReacciones(reacciones, 'LIKE'),
+      dislikesCount:
+        comentario?.dislikesCount ??
+        comentario?.dislikes_count ??
+        this.contarReacciones(reacciones, 'DISLIKE'),
+      userReaction: comentario?.userReaction || null
+    };
+  }
+
+  contarReacciones(reacciones: any[], tipo: 'LIKE' | 'DISLIKE'): number {
+    if (!Array.isArray(reacciones)) {
+      return 0;
+    }
+
+    return reacciones.filter(reaccion => reaccion?.tipo === tipo).length;
+  }
+
+  recalcularMetricasProveedor(provider: any): void {
+    const comentarios = Array.isArray(provider?.comentarios)
+      ? provider.comentarios
+      : [];
+
+    let likes = 0;
+    let dislikes = 0;
+
+    comentarios.forEach((comentario: any) => {
+      likes += this.getReviewLikes(comentario);
+      dislikes += this.getReviewDislikes(comentario);
+
+      if (
+        this.getReviewLikes(comentario) === 0 &&
+        this.getReviewDislikes(comentario) === 0
+      ) {
+        if (comentario?.tipo === 'DISLIKE') {
+          dislikes++;
+        } else {
+          likes++;
+        }
+      }
+    });
+
+    const total = likes + dislikes;
+
+    provider.totalComentarios = comentarios.length;
+    provider.likes = likes;
+    provider.dislikes = dislikes;
+    provider.satisfaccion = total > 0
+      ? Math.round((likes / total) * 100)
+      : 0;
+  }
+
+  private recalculateProviderReviewMetrics(provider: any): void {
+    this.recalcularMetricasProveedor(provider);
+  }
+
+  cargarIndicadoresProveedor(provider: any): void {
     const idProveedor =
-      provider?.idProveedor
-      ?? provider?.id_proveedor
-      ?? provider?.idProvider
-      ?? provider?.id;
+      provider?.idProveedor ??
+      provider?.id_proveedor ??
+      provider?.idProvider ??
+      provider?.id;
 
     if (!idProveedor) {
       return;
@@ -361,67 +386,38 @@ export class ProviderReviewsComponent implements OnInit {
 
     this.http.get<any>(
       `${this.API_BASE}/provider/${idProveedor}/indicadores`,
-      {
-        headers: this.getHeaders()
-      }
+      { headers: this.getHeaders() }
     ).subscribe({
-
       next: (res) => {
+        provider.pedidosCompletados = res?.pedidosCompletados ?? 0;
+        provider.pedidosTotal = res?.pedidosTotal ?? 0;
+        provider.cumplimiento = res?.cumplimiento ?? 0;
+        provider.scoreGeneral = res?.scoreGeneral ?? 0;
 
-        provider.pedidosCompletados =
-          res?.pedidosCompletados ?? 0;
-
-        provider.pedidosTotal =
-          res?.pedidosTotal ?? 0;
-
-        provider.cumplimiento =
-          res?.cumplimiento ?? 0;
-
-        provider.scoreGeneral =
-          res?.scoreGeneral ?? 0;
-
-        provider.scoringGeneral =
-          Math.round(
-            (provider.scoreGeneral || 0)
-            * 100
-          );
+        provider.scoringGeneral = Math.round(
+          (provider.scoreGeneral || 0) * 100
+        );
 
         this.cdr.detectChanges();
       },
-
       error: (err) => {
-
-        console.error(
-          'Error cargando indicadores',
-          err
-        );
+        console.error('Error cargando indicadores', err);
       }
     });
   }
 
-  private setProviderList(
-    providers: any[]
-  ): void {
-
-    this.providers =
-      (providers || []).map(
-        provider =>
-          this.normalizarProveedor(
-            provider
-          )
-      );
+  private setProviderList(providers: any[]): void {
+    this.providers = (providers || []).map(provider =>
+      this.normalizarProveedor(provider)
+    );
 
     this.expandedProviderKey =
       this.providers.length
-        ? this.getProviderKey(
-            this.providers[0],
-            0
-          )
+        ? this.getProviderKey(this.providers[0], 0)
         : null;
   }
 
   private getProvidersFromProduct(): any[] {
-
     const possibleLists = [
       this.product?.proveedores,
       this.product?.providers,
@@ -429,106 +425,145 @@ export class ProviderReviewsComponent implements OnInit {
       this.product?.proveedoresDisponibles
     ];
 
-    const firstList =
-      possibleLists.find(Array.isArray);
+    const firstList = possibleLists.find(Array.isArray);
 
-    return firstList
-      ? [...firstList]
-      : [];
+    return firstList ? [...firstList] : [];
   }
 
-  private filterProvidersForProduct(
-    providers: any[]
-  ): any[] {
+  private filterProvidersForProduct(providers: any[]): any[] {
+    const idProducto =
+      this.idProductoActual ||
+      this.product?.idProducto ||
+      this.product?.id_producto;
 
-    if (!this.product?.idProducto) {
+    if (!idProducto) {
       return providers;
     }
 
-    return providers.filter(
-      provider => {
+    return providers.filter(provider => {
+      const providerProductId =
+        provider?.idProducto ||
+        provider?.id_producto;
 
-        const items =
-          provider?.items;
-
-        if (
-          !Array.isArray(items)
-          || items.length === 0
-        ) {
-          return true;
-        }
-
-        return items.some(
-          (item: any) =>
-            item?.idProducto ===
-            this.product.idProducto
-        );
+      if (providerProductId) {
+        return Number(providerProductId) === Number(idProducto);
       }
-    );
+
+      const items = provider?.items || provider?.productos;
+
+      if (!Array.isArray(items) || items.length === 0) {
+        return true;
+      }
+
+      return items.some((item: any) => {
+        const itemId =
+          item?.idProducto ||
+          item?.id_producto;
+
+        return Number(itemId) === Number(idProducto);
+      });
+    });
   }
 
-  normalizarProveedor(
-    item: any
-  ): any {
-
+  normalizarProveedor(item: any): any {
     return {
-
       ...item,
 
-      comentarios:
-        item?.comentarios
-        ?? item?.reviews
-        ?? [],
+      idProvProd:
+        item?.idProvProd ||
+        item?.id_prov_prod ||
+        item?.idProveedorProducto ||
+        null,
+
+      idProducto:
+        item?.idProducto ||
+        item?.id_producto ||
+        this.idProductoActual ||
+        this.product?.idProducto ||
+        this.product?.id_producto ||
+        null,
 
       idProveedor:
-        item?.idProveedor
-        || item?.id_proveedor
-        || item?.idProvider
-        || item?.id,
+        item?.idProveedor ||
+        item?.id_proveedor ||
+        item?.idProvider ||
+        item?.id ||
+        null,
+
+      proveedor:
+        item?.proveedor ||
+        item?.razonSocial ||
+        item?.razon_social ||
+        item?.nombreProveedor ||
+        item?.nombre ||
+        'Proveedor',
 
       razonSocial:
-        item?.razonSocial
-        || item?.razon_social
-        || item?.nombreProveedor
-        || item?.nombre
-        || 'Proveedor',
+        item?.razonSocial ||
+        item?.razon_social ||
+        item?.proveedor ||
+        item?.nombreProveedor ||
+        item?.nombre ||
+        'Proveedor',
 
       categoriaPrincipal:
-        item?.categoriaPrincipal
-        || item?.categoria
-        || item?.rubro
-        || null,
+        item?.categoriaPrincipal ||
+        item?.categoria ||
+        item?.rubro ||
+        null,
 
       ubicacion:
-        item?.ubicacion
-        || item?.direccion
-        || item?.ciudad
-        || null,
+        item?.ubicacion ||
+        item?.direccion ||
+        item?.ciudad ||
+        null,
 
       descripcion:
-        item?.descripcion
-        || item?.description
-        || null,
+        item?.descripcion ||
+        item?.description ||
+        null,
 
       estado:
-        item?.estado
-        || 'ACTIVO',
+        item?.estado ||
+        'ACTIVO',
+
+      precioUnitario:
+        item?.precioUnitario ||
+        item?.precio_unitario ||
+        item?.precio ||
+        null,
+
+      stock:
+        item?.stock ?? null,
+
+      tiempoEntregaDias:
+        item?.tiempoEntregaDias ||
+        item?.tiempo_entrega_dias ||
+        null,
+
+      garantiaMeses:
+        item?.garantiaMeses ||
+        item?.garantia_meses ||
+        null,
 
       pedidosCompletados:
-        item?.pedidosCompletados
-        ?? 0,
+        item?.pedidosCompletados ?? 0,
 
       pedidosTotal:
-        item?.pedidosTotal
-        ?? 0,
+        item?.pedidosTotal ?? 0,
 
       cumplimiento:
-        item?.cumplimiento
-        ?? 0,
+        item?.cumplimiento ?? 0,
 
       scoringGeneral:
-        item?.scoringGeneral
-        ?? 0,
+        item?.scoringGeneral ?? 0,
+
+      comentarios:
+        Array.isArray(item?.comentarios)
+          ? item.comentarios.map((c: any) => this.normalizarComentario(c))
+          : Array.isArray(item?.reviews)
+            ? item.reviews.map((c: any) => this.normalizarComentario(c))
+            : [],
 
       likes:
         Number(item?.likes ?? 0),
@@ -537,23 +572,23 @@ export class ProviderReviewsComponent implements OnInit {
         Number(item?.dislikes ?? 0),
 
       satisfaccion:
-        item?.satisfaccion
-        ?? 0
+        item?.satisfaccion ?? 0,
+
+      totalComentarios:
+        item?.totalComentarios ||
+        item?.total_comentarios ||
+        0
     };
   }
 
   getProductImage(): string | null {
-
     if (this.productImageFailed) {
       return null;
     }
 
-    const image =
-      this.product?.imagenes?.[0];
+    const image = this.product?.imagenes?.[0];
 
-    return image?.URL
-      || image?.url
-      || null;
+    return image?.URL || image?.url || null;
   }
 
   markProductImageFailed(): void {
@@ -562,29 +597,18 @@ export class ProviderReviewsComponent implements OnInit {
 
   verDetalleProveedor(provider: any): void {
     this.origin = 'PRODUCTO_PROVEEDORES';
+    this.selectedProvider = this.normalizarProveedor(provider);
+    this.providers = [this.selectedProvider];
 
-    this.selectedProvider =
-      this.normalizarProveedor(provider);
-
-    this.providers = [
-      this.selectedProvider
-    ];
-
-    this.expandedProviderKey =
-      this.getProviderKey(
-        this.selectedProvider,
-        0
-      );
+    this.expandedProviderKey = this.getProviderKey(
+      this.selectedProvider,
+      0
+    );
 
     this.loadingProviders = false;
 
-    this.cargarIndicadoresProveedor(
-      this.selectedProvider
-    );
-
-    this.cargarComentariosProveedor(
-      this.selectedProvider
-    );
+    this.cargarIndicadoresProveedor(this.selectedProvider);
+    this.cargarComentariosProveedor(this.selectedProvider);
 
     window.scrollTo({
       top: 0,
@@ -594,29 +618,17 @@ export class ProviderReviewsComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  getProviderKey(
-    provider: any,
-    index: number
-  ): string {
-
+  getProviderKey(provider: any, index: number): string {
     return String(
-      provider?.idProveedor
-      ?? provider?.id
-      ?? provider?.razonSocial
-      ?? index
+      provider?.idProveedor ??
+      provider?.id ??
+      provider?.razonSocial ??
+      index
     );
   }
 
-  toggleProvider(
-    provider: any,
-    index: number
-  ): void {
-
-    const key =
-      this.getProviderKey(
-        provider,
-        index
-      );
+  toggleProvider(provider: any, index: number): void {
+    const key = this.getProviderKey(provider, index);
 
     this.expandedProviderKey =
       this.expandedProviderKey === key
@@ -624,150 +636,87 @@ export class ProviderReviewsComponent implements OnInit {
         : key;
 
     if (this.expandedProviderKey) {
-
-      this.cargarComentariosProveedor(
-        provider
-      );
+      this.cargarComentariosProveedor(provider);
     }
   }
 
-  isProviderExpanded(
-    provider: any,
-    index: number
-  ): boolean {
-
-    return this.expandedProviderKey ===
-      this.getProviderKey(
-        provider,
-        index
-      );
+  isProviderExpanded(provider: any, index: number): boolean {
+    return this.expandedProviderKey === this.getProviderKey(provider, index);
   }
 
-  getProviderName(
-    provider: any
-  ): string {
-
-    return provider?.razonSocial
-      || provider?.nombreProveedor
-      || provider?.nombre
-      || 'Proveedor';
+  getProviderName(provider: any): string {
+    return provider?.razonSocial ||
+      provider?.nombreProveedor ||
+      provider?.nombre ||
+      'Proveedor';
   }
 
-  getProviderCategory(
-    provider: any
-  ): string | null {
-
-    return provider?.categoriaPrincipal
-      || provider?.categoria
-      || provider?.rubro
-      || null;
+  getProviderCategory(provider: any): string | null {
+    return provider?.categoriaPrincipal ||
+      provider?.categoria ||
+      provider?.rubro ||
+      null;
   }
 
-  getProviderStatus(
-    provider: any
-  ): string | null {
-
-    return provider?.estado
-      || null;
+  getProviderStatus(provider: any): string | null {
+    return provider?.estado || null;
   }
 
-  getProviderLocation(
-    provider: any
-  ): string | null {
-
-    return provider?.ubicacion
-      || provider?.direccion
-      || provider?.ciudad
-      || null;
+  getProviderLocation(provider: any): string | null {
+    return provider?.ubicacion ||
+      provider?.direccion ||
+      provider?.ciudad ||
+      null;
   }
 
-  getProviderDescription(
-    provider: any
-  ): string | null {
-
-    return provider?.descripcion
-      || null;
+  getProviderDescription(provider: any): string | null {
+    return provider?.descripcion || null;
   }
 
-  getProviderSince(
-    provider: any
-  ): string {
-
+  getProviderSince(provider: any): string {
     return provider?.fechaRegistro
-      ? this.formatFecha(
-          provider.fechaRegistro
-        )
+      ? this.formatFecha(provider.fechaRegistro)
       : 'No disponible';
   }
 
-  getProviderDelivery(
-    provider: any
-  ): number | null {
-
-    return provider?.tiempoEntregaPromedio
-      ?? null;
+  getProviderDelivery(provider: any): number | null {
+    return provider?.tiempoEntregaPromedio ??
+      provider?.tiempoEntregaDias ??
+      null;
   }
 
-  getProviderResponse(
-    provider: any
-  ): number | null {
-
-    return provider?.tiempoRespuestaPromedio
-      ?? null;
+  getProviderResponse(provider: any): number | null {
+    return provider?.tiempoRespuestaPromedio ?? null;
   }
 
-  getProviderResponseLabel(
-    provider: any
-  ): string {
-
-    const value =
-      this.getProviderResponse(
-        provider
-      );
+  getProviderResponseLabel(provider: any): string {
+    const value = this.getProviderResponse(provider);
 
     if (value === null) {
       return 'No disponible';
     }
 
-    return `${value} dias`;
+    return `${value} días`;
   }
 
-  getProviderCompliance(
-    provider: any
-  ): number | null {
-
-    return provider?.cumplimiento
-      ?? 0;
+  getProviderCompliance(provider: any): number | null {
+    return provider?.cumplimiento ?? 0;
   }
 
-  getProviderOnTime(
-    provider: any
-  ): number | null {
-
-    return provider?.cumplimiento
-      ?? 0;
+  getProviderOnTime(provider: any): number | null {
+    return provider?.cumplimiento ?? 0;
   }
 
-  getCompletedOrders(
-    provider: any
-  ): number | null {
-
-    return provider?.pedidosCompletados
-      ?? 0;
+  getCompletedOrders(provider: any): number | null {
+    return provider?.pedidosCompletados ?? 0;
   }
 
-  getProviderScore100(
-    provider: any
-  ): number | null {
-
+  getProviderScore100(provider: any): number | null {
     const score =
-      provider?.scoringGeneral
-      ?? provider?.scoreGeneral;
+      provider?.scoringGeneral ??
+      provider?.scoreGeneral;
 
-    if (
-      score === null
-      || score === undefined
-    ) {
+    if (score === null || score === undefined) {
       return 0;
     }
 
@@ -778,66 +727,31 @@ export class ProviderReviewsComponent implements OnInit {
     return Math.round(score);
   }
 
-  getProviderReputation(
-    provider: any
-  ): number | null {
-
-    return this.getProviderScore100(
-      provider
-    );
+  getProviderReputation(provider: any): number | null {
+    return this.getProviderScore100(provider);
   }
 
-  getReviews(
-    provider: any
-  ): any[] {
-
+  getReviews(provider: any): any[] {
     const reviews =
-      provider?.comentarios
-      ?? provider?.reviews
-      ?? [];
+      provider?.comentarios ??
+      provider?.reviews ??
+      [];
 
-    return Array.isArray(reviews)
-      ? reviews
-      : [];
+    return Array.isArray(reviews) ? reviews : [];
   }
 
-  getReviewCommentDraft(
-    provider: any,
-    index: number
-  ): string {
-
-    return this.ensureReviewDraft(
-      provider,
-      index
-    ).comentario;
+  getReviewCommentDraft(provider: any, index: number): string {
+    return this.ensureReviewDraft(provider, index).comentario;
   }
 
-  setReviewCommentDraft(
-    provider: any,
-    index: number,
-    value: string
-  ): void {
-
-    const draft =
-      this.ensureReviewDraft(
-        provider,
-        index
-      );
-
+  setReviewCommentDraft(provider: any, index: number, value: string): void {
+    const draft = this.ensureReviewDraft(provider, index);
     draft.comentario = value;
-
     draft.error = '';
   }
 
-  getReviewTypeDraft(
-    provider: any,
-    index: number
-  ): 'LIKE' | 'DISLIKE' {
-
-    return this.ensureReviewDraft(
-      provider,
-      index
-    ).tipo;
+  getReviewTypeDraft(provider: any, index: number): 'LIKE' | 'DISLIKE' {
+    return this.ensureReviewDraft(provider, index).tipo;
   }
 
   setReviewTypeDraft(
@@ -845,392 +759,238 @@ export class ProviderReviewsComponent implements OnInit {
     index: number,
     tipo: 'LIKE' | 'DISLIKE'
   ): void {
-
-    this.ensureReviewDraft(
-      provider,
-      index
-    ).tipo = tipo;
+    this.ensureReviewDraft(provider, index).tipo = tipo;
   }
 
-  getReviewDraftError(
-    provider: any,
-    index: number
-  ): string {
-
-    return this.ensureReviewDraft(
-      provider,
-      index
-    ).error;
+  getReviewDraftError(provider: any, index: number): string {
+    return this.ensureReviewDraft(provider, index).error;
   }
 
-  canSubmitReview(
-    provider: any,
-    index: number
-  ): boolean {
-
-    return this.ensureReviewDraft(
-      provider,
-      index
-    ).comentario
+  canSubmitReview(provider: any, index: number): boolean {
+    return this.ensureReviewDraft(provider, index)
+      .comentario
       .trim()
       .length > 0;
   }
 
-  agregarComentarioProveedor(
-    provider: any,
-    index: number
-  ): void {
+  agregarComentarioProveedor(provider: any, index: number): void {
+  const draft = this.ensureReviewDraft(provider, index);
+  const comentario = draft.comentario.trim();
 
-    const draft =
-      this.ensureReviewDraft(
-        provider,
-        index
-      );
+  if (!comentario) {
+    draft.error = 'Escribe un comentario';
+    return;
+  }
 
-    const comentario =
-      draft.comentario.trim();
+  const idProveedor =
+    provider?.idProveedor ||
+    provider?.id_proveedor ||
+    provider?.idProvider ||
+    provider?.id;
 
-    if (!comentario) {
+  const idProducto =
+    this.idProductoActual ||
+    this.product?.idProducto ||
+    this.product?.id_producto ||
+    provider?.idProducto ||
+    provider?.id_producto;
 
-      draft.error =
-        'Escribe un comentario';
-
-      return;
-    }
-    console.log(provider);
-    const request = {
-
-      idProvProd:
-        provider?.idProvProd
-        ?? provider?.id_prov_prod
-        ?? provider?.idProveedorProducto
-        ?? provider?.idProveedor,
-
-     
-
-      comentario: comentario
-    };
-
-    this.http.post<any>(
-      `${this.API_BASE}/comentarios`,
-      request,
-      {
-        headers: this.getHeaders()
-      }
-    ).subscribe({
-
-      next: (res) => {
-
-        const nuevoComentario = {
-
-          ...res,
-
-          usuario: 'Tu comentario',
-
-          comentario: comentario,
-
-          tipo: draft.tipo,
-
-          fecha:
-            new Date().toISOString(),
-
-          likes: 0,
-
-          dislikes: 0,
-
-          userReaction: null
-        };
-
-        this.getWritableReviews(
-          provider
-        ).unshift(
-          nuevoComentario
-        );
-
-        this.recalculateProviderReviewMetrics(
-          provider
-        );
-
-        draft.comentario = '';
-
-        draft.error = '';
-
-        this.cdr.detectChanges();
-      },
-
-      error: (err) => {
-
-        console.error(
-          'Comentario rechazado',
-          err
-        );
-
-        draft.error =
-          'No se pudo registrar el comentario';
-      }
+  if (!idProveedor || !idProducto) {
+    draft.error = 'No se encontró la relación proveedor-producto.';
+    console.warn('Faltan datos para registrar comentario', {
+      idProveedor,
+      idProducto,
+      provider,
+      product: this.product
     });
+    return;
   }
 
-  getReviewCount(
-    provider: any
-  ): number {
+  const request = {
+    idProv: idProveedor,
+    idProd: idProducto,
+    comentario
+  };
 
-    return this.getReviews(
-      provider
-    ).length;
+  this.http.post<any>(
+    `${this.API_BASE}/comentarios`,
+    request,
+    { headers: this.getHeaders() }
+  ).subscribe({
+    next: () => {
+      draft.comentario = '';
+      draft.error = '';
+
+      this.cargarComentariosProveedor(provider);
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Comentario rechazado', err);
+      draft.error = 'No se pudo registrar el comentario';
+    }
+  });
+}
+
+  getReviewCount(provider: any): number {
+    return this.getReviews(provider).length;
   }
 
-  getProviderTotalComments(
-    provider: any
-  ): number {
-
-    return this.getReviewCount(
-      provider
-    );
+  getProviderTotalComments(provider: any): number {
+    return this.getReviewCount(provider);
   }
 
-  getProviderLikes(
-    provider: any
-  ): number {
+  getProviderLikes(provider: any): number {
+    return Number(provider?.likes ?? 0);
+  }
+
+  getProviderDislikes(provider: any): number {
+    return Number(provider?.dislikes ?? 0);
+  }
+
+  getReviewLikes(review: any): number {
+    if (typeof review?.likes === 'number') {
+      return Number(review.likes);
+    }
+
+    if (Array.isArray(review?.likes)) {
+      return this.contarReacciones(review.likes, 'LIKE');
+    }
 
     return Number(
-      provider?.likes ?? 0
+      review?.likesCount ??
+      review?.likes_count ??
+      0
     );
   }
 
-  getProviderDislikes(
-    provider: any
-  ): number {
+  getReviewDislikes(review: any): number {
+    if (typeof review?.dislikes === 'number') {
+      return Number(review.dislikes);
+    }
+
+    if (Array.isArray(review?.likes)) {
+      return this.contarReacciones(review.likes, 'DISLIKE');
+    }
 
     return Number(
-      provider?.dislikes ?? 0
+      review?.dislikesCount ??
+      review?.dislikes_count ??
+      0
     );
   }
 
-  getReviewLikes(
-    review: any
-  ): number {
-
-    return Number(
-      review?.likes ?? 0
-    );
+  getCommentLikes(comentario: any): number {
+    return this.getReviewLikes(comentario);
   }
 
-  getReviewDislikes(
-    review: any
-  ): number {
-
-    return Number(
-      review?.dislikes ?? 0
-    );
-  }
-
-  getCommentLikes(
-    comentario: any
-  ): number {
-
-    return this.getReviewLikes(
-      comentario
-    );
-  }
-
-  getCommentDislikes(
-    comentario: any
-  ): number {
-
-    return this.getReviewDislikes(
-      comentario
-    );
+  getCommentDislikes(comentario: any): number {
+    return this.getReviewDislikes(comentario);
   }
 
   hasUserReaction(
     comentario: any,
     tipo: 'LIKE' | 'DISLIKE'
   ): boolean {
-
-    return comentario?.userReaction
-      === tipo;
+    return comentario?.userReaction === tipo;
   }
 
   reactToComment(
-  comentario: any,
-  tipo: 'LIKE' | 'DISLIKE',
-  provider?: any
-): void {
-
-  if (!comentario?.idComentario) {
-    return;
-  }
-
-  const request = {
-
-    idComentario:
-      comentario.idComentario,
-
-  
-
-    tipo: tipo
-  };
-
-  this.http.post(
-    `${this.API_BASE}/comentarios/reaccion`,
-    request,
-    {
-      headers: this.getHeaders()
+    comentario: any,
+    tipo: 'LIKE' | 'DISLIKE',
+    provider?: any
+  ): void {
+    if (!comentario?.idComentario) {
+      return;
     }
-  ).subscribe({
 
-    next: () => {
+    const request = {
+      idComentario: comentario.idComentario,
+      tipo
+    };
 
-      comentario.userReaction =
-        tipo;
+    this.http.post(
+      `${this.API_BASE}/comentarios/reaccion`,
+      request,
+      { headers: this.getHeaders() }
+    ).subscribe({
+      next: () => {
+        comentario.userReaction = tipo;
 
-      if (provider) {
+        if (provider) {
+          this.cargarComentariosProveedor(provider);
+        }
 
-        this.cargarComentariosProveedor(
-          provider
-        );
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error reaccionando comentario', err);
       }
-
-      this.cdr.detectChanges();
-    },
-
-    error: (err) => {
-
-      console.error(
-        'Error reaccionando comentario',
-        err
-      );
-    }
-  });
-}
-
-  getTotalReactions(
-    provider: any
-  ): number {
-
-    return this.getProviderLikes(
-      provider
-    )
-    + this.getProviderDislikes(
-      provider
-    );
+    });
   }
 
-  getProviderSatisfaction(
-    provider: any
-  ): number {
-
-    return provider?.satisfaccion
-      ?? 0;
+  getTotalReactions(provider: any): number {
+    return this.getProviderLikes(provider) + this.getProviderDislikes(provider);
   }
 
-  getReviewAuthor(
-    review: any
-  ): string {
-
-    return review?.usuario
-      || review?.autor
-      || 'Cliente';
+  getProviderSatisfaction(provider: any): number {
+    return provider?.satisfaccion ?? 0;
   }
 
-  getReviewComment(
-    review: any
-  ): string {
-
-    return review?.comentario
-      || '';
+  getReviewAuthor(review: any): string {
+    return review?.usuario ||
+      review?.autor ||
+      `Usuario ${review?.idUsuario || ''}`.trim() ||
+      'Cliente';
   }
 
-  getReviewDate(
-    review: any
-  ): string {
-
-    return review?.fecha
-      || '';
+  getReviewComment(review: any): string {
+    return review?.comentario || '';
   }
 
-  getReviewReactionType(
-    review: any
-  ): 'LIKE' | 'DISLIKE' | '' {
+  getReviewDate(review: any): string {
+    return review?.fecha || '';
+  }
 
+  getReviewReactionType(review: any): 'LIKE' | 'DISLIKE' | '' {
     return review?.tipo || '';
   }
 
-  formatFecha(
-    value: string
-  ): string {
-
+  formatFecha(value: string): string {
     if (!value) {
       return '';
     }
 
-    const date =
-      new Date(value);
+    const date = new Date(value);
 
-    if (
-      Number.isNaN(
-        date.getTime()
-      )
-    ) {
+    if (Number.isNaN(date.getTime())) {
       return value;
     }
 
-    return date.toLocaleDateString(
-      'es-PE',
-      {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      }
-    );
+    return date.toLocaleDateString('es-PE', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   }
 
-  formatPercent(
-    value:
-      number
-      | null
-      | undefined
-  ): string {
-
-    if (
-      value === null
-      || value === undefined
-    ) {
+  formatPercent(value: number | null | undefined): string {
+    if (value === null || value === undefined) {
       return '0%';
     }
 
     return `${Math.round(value)}%`;
   }
 
-  formatDays(
-    value:
-      number
-      | null
-      | undefined
-  ): string {
-
-    if (
-      value === null
-      || value === undefined
-    ) {
+  formatDays(value: number | null | undefined): string {
+    if (value === null || value === undefined) {
       return 'No disponible';
     }
 
-    return `${value} dias`;
+    return `${value} días`;
   }
 
-  progressValue(
-    value:
-      number
-      | null
-      | undefined
-  ): number {
-
-    if (
-      value === null
-      || value === undefined
-    ) {
+  progressValue(value: number | null | undefined): number {
+    if (value === null || value === undefined) {
       return 0;
     }
 
@@ -1238,9 +998,7 @@ export class ProviderReviewsComponent implements OnInit {
       0,
       Math.min(
         100,
-        Math.round(
-          Number(value)
-        )
+        Math.round(Number(value))
       )
     );
   }
@@ -1253,21 +1011,12 @@ export class ProviderReviewsComponent implements OnInit {
     tipo: 'LIKE' | 'DISLIKE';
     error: string;
   } {
-
-    const key =
-      this.getReviewDraftKey(
-        provider,
-        index
-      );
+    const key = this.getReviewDraftKey(provider, index);
 
     if (!this.reviewDrafts[key]) {
-
       this.reviewDrafts[key] = {
-
         comentario: '',
-
         tipo: 'LIKE',
-
         error: ''
       };
     }
@@ -1275,94 +1024,21 @@ export class ProviderReviewsComponent implements OnInit {
     return this.reviewDrafts[key];
   }
 
-  private getReviewDraftKey(
-    provider: any,
-    index: number
-  ): string {
-
-    return this.getProviderKey(
-      provider,
-      index
-    );
+  private getReviewDraftKey(provider: any, index: number): string {
+    return this.getProviderKey(provider, index);
   }
 
-  private getWritableReviews(
-    provider: any
-  ): any[] {
-
-    if (
-      !Array.isArray(
-        provider.comentarios
-      )
-    ) {
-
+  private getWritableReviews(provider: any): any[] {
+    if (!Array.isArray(provider.comentarios)) {
       provider.comentarios = [];
     }
 
     return provider.comentarios;
   }
 
-  private recalculateProviderReviewMetrics(
-    provider: any
-  ): void {
-
-    const comentarios =
-      this.getReviews(provider);
-
-    let likes = 0;
-
-    let dislikes = 0;
-
-    comentarios.forEach(review => {
-
-      likes += Number(
-        review?.likes || 0
-      );
-
-      dislikes += Number(
-        review?.dislikes || 0
-      );
-
-      if (
-        Number(review?.likes || 0) === 0
-        && Number(review?.dislikes || 0) === 0
-      ) {
-
-        if (
-          review?.tipo === 'LIKE'
-        ) {
-          likes++;
-        }
-
-        if (
-          review?.tipo === 'DISLIKE'
-        ) {
-          dislikes++;
-        }
-      }
-    });
-
-    provider.likes = likes;
-
-    provider.dislikes = dislikes;
-
-    const total =
-      likes + dislikes;
-
-    provider.satisfaccion =
-      total > 0
-        ? Math.round(
-            (likes / total) * 100
-          )
-        : 0;
-  }
-
   get yaEnCarrito(): boolean {
-
     return this.requestItems.some(
-      x =>
-        x.idProducto ===
-        this.product?.idProducto
+      x => x.idProducto === this.product?.idProducto
     );
   }
 
@@ -1371,76 +1047,45 @@ export class ProviderReviewsComponent implements OnInit {
   }
 
   disminuirQty(): void {
-
     if (this.qty > 1) {
       this.qty--;
     }
   }
 
   agregarAlCarrito(): void {
-
     if (!this.product) {
       return;
     }
 
-    const existe =
-      this.requestItems.find(
-        x =>
-          x.idProducto ===
-          this.product.idProducto
-      );
+    const existe = this.requestItems.find(
+      x => x.idProducto === this.product.idProducto
+    );
 
     if (!existe) {
-
       this.requestItems.push({
-
-        idProducto:
-          this.product.idProducto,
-
-        name:
-          this.product.producto,
-
-        detail:
-          `${this.product.marca}`,
-
+        idProducto: this.product.idProducto,
+        name: this.product.producto,
+        detail: `${this.product.marca}`,
         qty: this.qty,
-
-        precioReferencia:
-          this.product.precioUnitario
-          ?? null,
-
-        categoria:
-          this.product.categoria,
-
-        marca:
-          this.product.marca
+        precioReferencia: this.product.precioUnitario ?? null,
+        categoria: this.product.categoria,
+        marca: this.product.marca
       });
-
     } else {
-
       existe.qty += this.qty;
     }
 
     this.guardarCarritoLocal();
-
     this.cdr.detectChanges();
   }
 
   irAlCarrito(): void {
-
-    this.router.navigate([
-      '/app/rfq/catalog'
-    ]);
+    this.router.navigate(['/app/rfq/catalog']);
   }
 
   volverAlDetalle(): void {
-
     if (!this.product) {
-
-      this.router.navigate([
-        '/app/rfq/catalog'
-      ]);
-
+      this.router.navigate(['/app/rfq/catalog']);
       return;
     }
 
