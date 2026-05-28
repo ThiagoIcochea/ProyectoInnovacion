@@ -155,10 +155,21 @@ export class ProductDetailComponent implements OnInit {
   // ── Helpers de display ─────────────────────────────────────
   // Navega a provider-reviews pasando el producto como state
   verResenasProveedores(): void {
-    this.router.navigate(['/app/rfq/provider-reviews'], {
-      state: { product: this.product }
-    });
+  const idProducto = this.product?.idProducto || this.product?.id_producto;
+
+  if (!idProducto) {
+    console.error('No se encontró idProducto para cargar proveedores y reseñas.');
+    return;
   }
+
+  this.router.navigate(['/app/rfq/provider-reviews'], {
+    state: {
+      product: this.product,
+      idProducto,
+      origen: 'PRODUCT_DETAIL'
+    }
+  });
+}
 
   volver(): void {
     this.router.navigate(['/app/rfq/catalog']);
