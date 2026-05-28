@@ -1,6 +1,6 @@
 // Backend touchpoint: provider registration payload, payment methods and certifications.
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
@@ -34,7 +34,10 @@ export class RegisterProviderComponent implements OnInit {
 
   private baseUrl = `${APP_API_BASE_URL}/provider`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   headers() {
     const token = localStorage.getItem(APP_STORAGE_KEYS.token);
@@ -113,7 +116,7 @@ export class RegisterProviderComponent implements OnInit {
 
   certificaciones: any[] = [];
   selectedCerts: any = {};
-  certificacionesLoading = false;
+  certificacionesLoading = true;
   certificacionesError = '';
 
   fechaObtencionMap: any = {};
@@ -137,6 +140,7 @@ export class RegisterProviderComponent implements OnInit {
               : [];
 
           this.certificacionesLoading = false;
+          this.cdr.detectChanges();
         },
         error: err => {
           console.error(err);
@@ -145,6 +149,7 @@ export class RegisterProviderComponent implements OnInit {
           this.certificacionesError = err?.status === 403
             ? 'El backend no esta permitiendo cargar certificaciones en el registro publico.'
             : 'No se pudieron cargar las certificaciones desde el backend.';
+          this.cdr.detectChanges();
         }
       });
   }
