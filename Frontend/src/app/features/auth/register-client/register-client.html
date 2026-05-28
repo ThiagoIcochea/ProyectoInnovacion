@@ -212,9 +212,9 @@
 
           <span>
             He leído y acepto los
-            <a href="#">Términos y Condiciones</a>
+            <button type="button" class="legal-link" (click)="openLegalModal('terms')">Términos y Condiciones</button>
             y la
-            <a href="#">Política de Privacidad</a>.
+            <button type="button" class="legal-link" (click)="openLegalModal('privacy')">Política de Privacidad</button>.
           </span>
 
         </label>
@@ -243,5 +243,32 @@
 
     </section>
 
+  </div>
+
+  <div *ngIf="showLegalModal" class="legal-modal-backdrop">
+    <section class="legal-modal" role="dialog" aria-modal="true" aria-labelledby="client-legal-title">
+      <header class="legal-modal__header">
+        <div>
+          <span>Nethink Cliente</span>
+          <h3 id="client-legal-title">{{ legalModalTitle }}</h3>
+        </div>
+
+        <button type="button" class="legal-modal__close" (click)="closeLegalModal()" aria-label="Cerrar modal">
+          &times;
+        </button>
+      </header>
+
+      <div class="legal-modal__body">
+        <p>{{ legalModalIntro }}</p>
+
+        <ul>
+          <li *ngFor="let item of legalModalItems">{{ item }}</li>
+        </ul>
+      </div>
+
+      <footer class="legal-modal__footer">
+        <button type="button" class="btn-primary" (click)="closeLegalModal()">Entendido</button>
+      </footer>
+    </section>
   </div>
 </div>

@@ -294,6 +294,25 @@
           </div>
         </section>
 
+        <label class="legal-consent" [class.has-error]="submitted && !aceptaLegal">
+          <input
+            type="checkbox"
+            [(ngModel)]="aceptaLegal"
+            name="aceptaLegal"
+          />
+
+          <span>
+            He leido y acepto los
+            <button type="button" class="legal-link" (click)="openLegalModal('terms')">Terminos y Condiciones</button>
+            y la
+            <button type="button" class="legal-link" (click)="openLegalModal('privacy')">Politica de Privacidad</button>.
+          </span>
+        </label>
+
+        <div *ngIf="submitted && !aceptaLegal" class="form-error">
+          Debes aceptar los terminos, condiciones y politica de privacidad.
+        </div>
+
         <div class="form-actions">
           <button type="button" class="btn btn-primary" (click)="register()">
             Registrar proveedor
@@ -363,5 +382,32 @@
         <button type="button" class="btn btn-primary" (click)="addMetodoPago()">Guardar metodo</button>
       </div>
     </div>
+  </div>
+
+  <div *ngIf="showLegalModal" class="modal-backdrop">
+    <section class="legal-modal" role="dialog" aria-modal="true" aria-labelledby="provider-legal-title">
+      <header class="legal-modal__header">
+        <div>
+          <span>Nethink Proveedor</span>
+          <h3 id="provider-legal-title">{{ legalModalTitle }}</h3>
+        </div>
+
+        <button type="button" class="btn-icon" (click)="closeLegalModal()" aria-label="Cerrar modal">
+          &times;
+        </button>
+      </header>
+
+      <div class="legal-modal__body">
+        <p>{{ legalModalIntro }}</p>
+
+        <ul>
+          <li *ngFor="let item of legalModalItems">{{ item }}</li>
+        </ul>
+      </div>
+
+      <footer class="legal-modal__actions">
+        <button type="button" class="btn btn-primary" (click)="closeLegalModal()">Entendido</button>
+      </footer>
+    </section>
   </div>
 </div>

@@ -190,9 +190,112 @@
   accent-color: #3b82f6;
 }
 
-.checkbox-row a {
+.checkbox-row a,
+.legal-link {
   color: #60a5fa;
   text-decoration: none;
+}
+
+.legal-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.legal-link:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
+.legal-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+.legal-modal {
+  width: min(100%, 640px);
+  max-height: min(760px, calc(100vh - 2rem));
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 20px;
+  background: #111827;
+  box-shadow: 0 28px 90px rgba(2, 6, 23, 0.58);
+  overflow: hidden;
+}
+
+.legal-modal__header,
+.legal-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.legal-modal__header {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.legal-modal__header span {
+  color: #60a5fa;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.legal-modal__header h3 {
+  margin: 0.3rem 0 0;
+  color: #f8fafc;
+  font-size: 1.35rem;
+}
+
+.legal-modal__close {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #e5e7eb;
+  cursor: pointer;
+  font-size: 1.35rem;
+}
+
+.legal-modal__body {
+  padding: 1.25rem;
+  overflow: auto;
+  color: #cbd5e1;
+  line-height: 1.65;
+}
+
+.legal-modal__body p {
+  margin: 0 0 1rem;
+}
+
+.legal-modal__body ul {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0;
+  padding-left: 1.15rem;
+}
+
+.legal-modal__footer {
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+  justify-content: flex-end;
+}
+
+.legal-modal__footer .btn-primary {
+  width: min(100%, 180px);
 }
 
 .btn-primary {

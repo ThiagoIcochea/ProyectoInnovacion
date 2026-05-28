@@ -31,6 +31,11 @@ export class RegisterProviderComponent implements OnInit {
   apiToken = '';
   submitted = false;
   formError = '';
+  aceptaLegal = false;
+  showLegalModal = false;
+  legalModalTitle = '';
+  legalModalIntro = '';
+  legalModalItems: string[] = [];
 
   private baseUrl = `${APP_API_BASE_URL}/provider`;
 
@@ -38,6 +43,36 @@ export class RegisterProviderComponent implements OnInit {
     private http: HttpClient,
     private cdr: ChangeDetectorRef
   ) {}
+
+  openLegalModal(type: 'terms' | 'privacy'): void {
+    if (type === 'terms') {
+      this.legalModalTitle = 'Terminos y Condiciones para Proveedores';
+      this.legalModalIntro = 'Estos terminos regulan la participacion de proveedores en Nethink para recibir RFQs, publicar informacion comercial y cotizar productos B2B.';
+      this.legalModalItems = [
+        'El proveedor declara que la informacion de empresa, RUC, contacto, catalogo, API, certificaciones y metodos de pago es veraz y esta actualizada.',
+        'Las cotizaciones enviadas deben respetar precio, stock, condiciones de entrega, vigencia y disponibilidad informadas al cliente.',
+        'La integracion API debe usarse para sincronizar informacion operativa legitima, sin exponer credenciales, datos sensibles innecesarios o servicios no autorizados.',
+        'Nethink puede registrar actividad, pruebas de conexion, cambios de configuracion y eventos comerciales para trazabilidad, seguridad y soporte.',
+        'El proveedor es responsable de cumplir las condiciones acordadas con clientes y de mantener sus certificaciones vigentes cuando las use como respaldo comercial.'
+      ];
+    } else {
+      this.legalModalTitle = 'Politica de Privacidad para Proveedores';
+      this.legalModalIntro = 'Esta politica explica como Nethink trata los datos del proveedor durante el registro, validacion, integracion API y participacion en oportunidades RFQ.';
+      this.legalModalItems = [
+        'Recolectamos datos de usuario, empresa, RUC, contacto, descripcion comercial, configuracion API, metodos de pago y certificaciones seleccionadas.',
+        'La informacion comercial necesaria puede mostrarse a clientes para evaluar cotizaciones, proveedores disponibles, cumplimiento y condiciones de compra.',
+        'Los tokens o datos de API se usan para operar integraciones y pruebas de conexion; deben mantenerse protegidos y actualizarse si existe riesgo de exposicion.',
+        'No vendemos datos personales. La informacion se usa para autenticacion, seguridad, trazabilidad, soporte, sincronizacion y mejora del marketplace B2B.',
+        'El proveedor puede solicitar revision o correccion de sus datos mediante los canales internos definidos por Nethink.'
+      ];
+    }
+
+    this.showLegalModal = true;
+  }
+
+  closeLegalModal(): void {
+    this.showLegalModal = false;
+  }
 
   headers() {
     const token = localStorage.getItem(APP_STORAGE_KEYS.token);
@@ -241,6 +276,11 @@ export class RegisterProviderComponent implements OnInit {
 
     if (!this.hasCertificationDates()) {
       this.formError = 'Completa las fechas de cada certificacion seleccionada.';
+      return;
+    }
+
+    if (!this.aceptaLegal) {
+      this.formError = 'Debes aceptar los terminos, condiciones y politica de privacidad.';
       return;
     }
 

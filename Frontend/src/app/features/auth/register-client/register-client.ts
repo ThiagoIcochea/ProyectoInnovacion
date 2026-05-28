@@ -22,6 +22,10 @@ export class RegisterClientComponent {
   acepta = false;
   submitted = false;
   formError = '';
+  showLegalModal = false;
+  legalModalTitle = '';
+  legalModalIntro = '';
+  legalModalItems: string[] = [];
 
   form = {
     nombres: '',
@@ -38,6 +42,36 @@ export class RegisterClientComponent {
     private http: HttpClient,
     private router: Router
   ) {}
+
+  openLegalModal(type: 'terms' | 'privacy'): void {
+    if (type === 'terms') {
+      this.legalModalTitle = 'Terminos y Condiciones para Clientes';
+      this.legalModalIntro = 'Estos terminos regulan el uso de Nethink por clientes empresariales que solicitan cotizaciones RFQ y gestionan compras B2B de infraestructura TI.';
+      this.legalModalItems = [
+        'La cuenta debe usarse con informacion real de contacto, entrega y comunicacion corporativa.',
+        'Las solicitudes RFQ deben representar una necesidad comercial legitima y contener datos claros sobre productos, cantidades y condiciones esperadas.',
+        'Las cotizaciones, precios, tiempos de entrega y disponibilidad pueden variar segun la respuesta final del proveedor.',
+        'El cliente es responsable de revisar la informacion del proveedor, confirmar condiciones de pago y validar la recepcion del pedido.',
+        'Nethink puede registrar actividad operativa para trazabilidad, seguridad, soporte y mejora del proceso de compra.'
+      ];
+    } else {
+      this.legalModalTitle = 'Politica de Privacidad para Clientes';
+      this.legalModalIntro = 'Esta politica explica como Nethink trata los datos del cliente durante el registro, creacion de RFQs, seguimiento y gestion de compras.';
+      this.legalModalItems = [
+        'Recolectamos datos de identificacion, contacto, direccion de entrega y actividad dentro del sistema para operar la plataforma.',
+        'Los datos de una RFQ pueden compartirse con proveedores participantes para responder cotizaciones y gestionar oportunidades comerciales.',
+        'No vendemos datos personales. La informacion se usa para autenticacion, trazabilidad, soporte, seguridad y mejora del servicio.',
+        'El usuario debe mantener sus credenciales protegidas y reportar accesos no autorizados.',
+        'El cliente puede solicitar correccion o revision de sus datos conforme a los canales internos definidos por Nethink.'
+      ];
+    }
+
+    this.showLegalModal = true;
+  }
+
+  closeLegalModal(): void {
+    this.showLegalModal = false;
+  }
 
   isFieldMissing(field: keyof RegisterClientComponent['form']): boolean {
     if (field === 'fotoPerfil') {
@@ -69,7 +103,7 @@ export class RegisterClientComponent {
     }
 
     if (!this.acepta) {
-      this.formError = 'Debes aceptar los terminos y condiciones.';
+      this.formError = 'Debes aceptar los terminos, condiciones y politica de privacidad.';
       return;
     }
 
