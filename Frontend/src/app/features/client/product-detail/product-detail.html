@@ -60,19 +60,49 @@
       </header>
 
       <section class="summary-panel">
-        <div class="summary-item" *ngIf="product.sku">
-          <span>SKU</span>
-          <strong>{{ product.sku }}</strong>
+        <div class="summary-item" *ngFor="let item of resumenCards">
+          <span>{{ item.label }}</span>
+          <strong>{{ item.value }}</strong>
+          <small>{{ item.hint }}</small>
+        </div>
+      </section>
+
+      <section class="pd-intelligence">
+        <div class="pd-score">
+          <div class="pd-score__header">
+            <span>Calidad de ficha</span>
+            <strong>{{ fichaCompletaPercent }}%</strong>
+          </div>
+
+          <div class="pd-score__track">
+            <span [style.width.%]="fichaCompletaPercent"></span>
+          </div>
+
+          <p>Mientras mas completa este la ficha, mas facil es comparar proveedores dentro del RFQ.</p>
         </div>
 
-        <div class="summary-item" *ngIf="product.marca">
-          <span>Marca</span>
-          <strong>{{ product.marca }}</strong>
+        <div class="pd-signal-list">
+          <div class="pd-signal" *ngFor="let signal of rfqSignals">
+            <span></span>
+            <div>
+              <strong>{{ signal.title }}</strong>
+              <p>{{ signal.text }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="pd-quick-specs" *ngIf="specsDestacadas.length > 0">
+        <div class="section-heading">
+          <span>Resumen tecnico</span>
+          <h2>Datos clave del producto</h2>
         </div>
 
-        <div class="summary-item" *ngIf="product.categoria">
-          <span>Categoria</span>
-          <strong>{{ product.categoria }}</strong>
+        <div class="quick-spec-grid">
+          <div class="quick-spec" *ngFor="let spec of specsDestacadas">
+            <span>{{ spec.nombre }}</span>
+            <strong>{{ spec.valor }}</strong>
+          </div>
         </div>
       </section>
 
@@ -120,7 +150,12 @@
             <strong>{{ product.estado }}</strong>
           </div>
 
-          <div class="empty-tab empty-tab--boxed" *ngIf="product.tiempoEntregaDias == null && product.garantiaMeses == null && !product.estado">
+          <div class="delivery-card" *ngIf="precioReferenciaLabel">
+            <span>Precio referencial</span>
+            <strong>{{ precioReferenciaLabel }}</strong>
+          </div>
+
+          <div class="empty-tab empty-tab--boxed" *ngIf="!hasDeliveryInfo && !precioReferenciaLabel">
             Las condiciones se confirmaran con los proveedores compatibles del RFQ.
           </div>
         </div>
@@ -150,6 +185,23 @@
         <div class="ap-product">
           <span>{{ product.marca }}</span>
           <strong>{{ product.producto }}</strong>
+        </div>
+
+        <div class="ap-reference" *ngIf="precioReferenciaLabel || product.categoria || product.sku">
+          <div *ngIf="precioReferenciaLabel">
+            <span>Precio ref.</span>
+            <strong>{{ precioReferenciaLabel }}</strong>
+          </div>
+
+          <div *ngIf="product.categoria">
+            <span>Categoria</span>
+            <strong>{{ product.categoria }}</strong>
+          </div>
+
+          <div *ngIf="product.sku">
+            <span>SKU</span>
+            <strong>{{ product.sku }}</strong>
+          </div>
         </div>
 
         <div class="ap-qty-section">

@@ -3,6 +3,20 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
+
+type ProductDetailTab = 'specs' | 'delivery' | 'providers';
+
+interface DetailCard {
+  label: string;
+  value: string;
+  hint?: string;
+}
+
+interface RfqSignal {
+  title: string;
+  text: string;
+}
 
 @Component({
   selector: 'app-product-detail',
@@ -17,12 +31,12 @@ export class ProductDetailComponent implements OnInit {
   requestItems: any[] = [];
   selectedImageIndex: number = 0;
   qty: number = 1;
-  activeTab: 'specs' | 'delivery' | 'providers' = 'specs';
+  activeTab: ProductDetailTab = 'specs';
   loading: boolean = true;
   imageZoomed: boolean = false;
   imageLoadFailures: { [key: string]: boolean } = {};
 
-  private readonly API_BASE = 'https://proyectoinnovacion.onrender.com/api';
+  private readonly API_BASE = APP_API_BASE_URL;
 
   constructor(
     private route: ActivatedRoute,
@@ -51,7 +65,7 @@ export class ProductDetailComponent implements OnInit {
   }
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem(APP_STORAGE_KEYS.token);
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -59,12 +73,12 @@ export class ProductDetailComponent implements OnInit {
   }
 
   cargarCarritoLocal(): void {
-    const saved = localStorage.getItem('rfq_cart');
+    const saved = localStorage.getItem(APP_STORAGE_KEYS.rfqCart);
     if (saved) this.requestItems = JSON.parse(saved);
   }
 
   guardarCarritoLocal(): void {
-    localStorage.setItem('rfq_cart', JSON.stringify(this.requestItems));
+    localStorage.setItem(APP_STORAGE_KEYS.rfqCart, JSON.stringify(this.requestItems));
   }
 
   // Carga el producto filtrando por ID cuando no viene por state
@@ -115,7 +129,7 @@ export class ProductDetailComponent implements OnInit {
   }
 
   // ── Tabs ───────────────────────────────────────────────────
-  setTab(tab: 'specs' | 'delivery' | 'providers'): void {
+  setTab(tab: ProductDetailTab): void {
     this.activeTab = tab;
   }
 
@@ -153,6 +167,115 @@ export class ProductDetailComponent implements OnInit {
   }
 
   // ── Helpers de display ─────────────────────────────────────
+  get especificaciones(): any[] {
+    return Array.isArray(this.product?.especificaciones)
+      ? this.product.especificaciones
+      : [];
+  }
+
+  get specsDestacadas(): any[] {
+    return this.especificaciones
+      .filter((spec: any) => spec?.nombre || spec?.valor)
+      .slice(0, 6);
+  }
+
+  get resumenCards(): DetailCard[] {
+    if (!this.product) return [];
+
+    return [
+      {
+        label: 'Marca',
+        value: this.displayValue(this.product.marca),
+        hint: 'Fabricante o linea comercial'
+      },
+      {
+        label: 'Categoria',
+        value: this.displayValue(this.product.categoria),
+        hint: 'Familia para filtrar proveedores'
+      },
+      {
+        label: 'Ficha tecnica',
+        value: `${this.especificaciones.length} dato${this.especificaciones.length === 1 ? '' : 's'}`,
+        hint: this.especificaciones.length ? 'Especificaciones disponibles' : 'Pendiente de completar'
+      },
+      {
+        label: 'Galeria',
+        value: `${this.imagenes.length || 0} imagen${this.imagenes.length === 1 ? '' : 'es'}`,
+        hint: this.imagenes.length ? 'Material visual disponible' : 'Sin imagen cargada'
+      }
+    ];
+  }
+
+  get rfqSignals(): RfqSignal[] {
+    const deliveryText = this.product?.tiempoEntregaDias != null
+      ? `Entrega estimada de ${this.product.tiempoEntregaDias} dias habiles.`
+      : 'La entrega se confirma al comparar proveedores.';
+
+    const warrantyText = this.product?.garantiaMeses != null
+      ? `Garantia referencial de ${this.product.garantiaMeses} meses.`
+      : 'La garantia se valida dentro de la cotizacion.';
+
+    return [
+      {
+        title: 'Comparacion preparada',
+        text: 'Agrega el producto a tu solicitud y evalua proveedores con resenas y metricas comerciales.'
+      },
+      {
+        title: 'Condiciones comerciales',
+        text: deliveryText
+      },
+      {
+        title: 'Validacion de compra',
+        text: warrantyText
+      }
+    ];
+  }
+
+  get hasDeliveryInfo(): boolean {
+    return this.product?.tiempoEntregaDias != null
+      || this.product?.garantiaMeses != null
+      || !!this.product?.estado;
+  }
+
+  get precioReferenciaLabel(): string | null {
+    const price = this.product?.precioUnitario ?? this.product?.precioReferencia;
+
+    if (price === null || price === undefined || price === '') {
+      return null;
+    }
+
+    const numericPrice = Number(price);
+
+    if (Number.isNaN(numericPrice)) {
+      return String(price);
+    }
+
+    return new Intl.NumberFormat('es-PE', {
+      style: 'currency',
+      currency: 'PEN',
+      maximumFractionDigits: 2
+    }).format(numericPrice);
+  }
+
+  get fichaCompletaPercent(): number {
+    const checks = [
+      !!this.product?.producto,
+      !!this.product?.descripcion,
+      !!this.product?.marca,
+      !!this.product?.categoria,
+      this.especificaciones.length > 0,
+      this.imagenes.length > 0
+    ];
+
+    const completed = checks.filter(Boolean).length;
+    return Math.round((completed / checks.length) * 100);
+  }
+
+  displayValue(value: unknown, fallback = 'Por confirmar'): string {
+    if (value === null || value === undefined || value === '') return fallback;
+    return String(value);
+  }
+
   // Navega a provider-reviews pasando el producto como state
   verResenasProveedores(): void {
   const idProducto = this.product?.idProducto || this.product?.id_producto;
