@@ -25,14 +25,14 @@ import com.nethink.b2b.dto.response.PagoResponse;
 import com.nethink.b2b.entity.Proveedor;
 import com.nethink.b2b.repository.ProveedorRepository;
 import com.nethink.b2b.service.PagoService;
-<<<<<<< HEAD
+
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
-=======
+
 import com.nethink.b2b.entity.Usuario; 
 import com.nethink.b2b.repository.UsuarioRepository; 
->>>>>>> origin/feature/pestaña-pagos-validacion
+
 
 
 

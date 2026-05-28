@@ -697,7 +697,7 @@ BigDecimal totalItem =
     
     
     public List<SolicitudResponse> listarSolicitudesProveedor(
-<<<<<<< HEAD
+
         Integer idProveedor,Integer idUsuario, HttpServletRequest request) {
         
         logsSistemaService.registrarLog(
@@ -709,10 +709,9 @@ BigDecimal totalItem =
    request
 );
 
-=======
-        Integer idProveedor) {
+
 System.err.println("ID PROVEEDOR = " + idProveedor);
->>>>>>> origin/feature/pestaña-pagos-validacion
+
     List<Solicitud> solicitudes =
             solicitudRepo.listarSolicitudes(idProveedor);
 
@@ -1002,7 +1001,7 @@ public void aprobarPedido(Integer idSolicitud, String correoUsuario,HttpServletR
 
   
     
-<<<<<<< HEAD
+
     logsSistemaService.registrarLog(
     usuario.getIdUsuario(),
     "APROBAR PEDIDOS",
@@ -1024,7 +1023,7 @@ public void aprobarPedido(Integer idSolicitud, String correoUsuario,HttpServletR
 
 }
   
-=======
+
   // listar los detalles de las solicitudes que estan en fase de entregas
 
 
@@ -1046,7 +1045,6 @@ listarDetallesEntregaProveedor(
 
 
 
->>>>>>> origin/feature/pestaña-pagos-validacion
     
             @Transactional
 public void rechazarPedido(Integer idSolicitud,String prompt, String correoUsuario,HttpServletRequest req) {

@@ -276,12 +276,12 @@ public class PagoService {
     
     
     @Transactional
-public void aprobarPago(Integer idPago, String correoUsuario,HttpServletRequest req) {
+public void aprobarPago(Integer idPago, Integer idUsuario,HttpServletRequest req) {
 
     Pago pago = pagoRepo.findById(idPago)
             .orElseThrow(() ->
                     new RuntimeException("Pago no encontrado"));
-         Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
+         Usuario usuario = usuarioRepo.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
     // =========================
@@ -347,14 +347,8 @@ public void aprobarPago(Integer idPago, String correoUsuario,HttpServletRequest 
     req
 );
     
-        SolicitudHistorial historial = new SolicitudHistorial();
-        historial.setSolicitud(solicitud);
-        historial.setEstado("PAGADA");
-        historial.setIdUsuario(usuario.getIdUsuario());
-        historial.setDescripcion("Pago aprobado");
-        historial.setFecha(LocalDateTime.now());
-
-        historialRepo.save(historial);
+        
+      
 
 }
     

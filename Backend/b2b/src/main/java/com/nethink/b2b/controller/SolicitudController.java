@@ -373,10 +373,6 @@ public ResponseEntity<
 //}
 
 
-
-@GetMapping("/test-auth")
-public Object testAuth(Authentication auth) {
-
 @GetMapping("/admin/listar")
 public ResponseEntity<List<SolicitudResponse>> listarTodas(Principal principal, HttpServletRequest httpRequest) {
    Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
