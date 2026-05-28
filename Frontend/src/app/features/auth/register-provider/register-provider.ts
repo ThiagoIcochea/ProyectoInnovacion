@@ -116,6 +116,7 @@ export class RegisterProviderComponent implements OnInit {
   fechaExpiracionMap: any = {};
 
   ngOnInit(): void {
+
     this.http.get<any>(`${APP_API_BASE_URL}/certificaciones`)
       .subscribe(res => this.certificaciones = res);
   }

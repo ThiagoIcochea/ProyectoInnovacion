@@ -150,7 +150,7 @@ implements OnInit {
 
     return this.filteredProviders.filter(
       p =>
-        p.estadoApi?.toUpperCase() === 'CONECTADA'
+        p.estadoApi?.toUpperCase() === 'OK'
     ).length;
   }
 
