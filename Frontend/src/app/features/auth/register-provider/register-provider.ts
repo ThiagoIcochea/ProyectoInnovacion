@@ -29,6 +29,8 @@ export class RegisterProviderComponent implements OnInit {
   apiUrl = '';
   apiTipo = 'REST';
   apiToken = '';
+  submitted = false;
+  formError = '';
 
   private baseUrl = `${APP_API_BASE_URL}/provider`;
 
@@ -44,23 +46,31 @@ export class RegisterProviderComponent implements OnInit {
 
   metodosPago: any[] = [];
   showPagoModal = false;
+  pagoSubmitted = false;
+  pagoError = '';
 
   tipoPago = '';
   entidadPago = '';
   numeroCuenta = '';
 
   openPagoModal() {
+    this.pagoSubmitted = false;
+    this.pagoError = '';
     this.showPagoModal = true;
   }
 
   closePagoModal() {
+    this.pagoSubmitted = false;
+    this.pagoError = '';
     this.showPagoModal = false;
   }
 
   addMetodoPago() {
+    this.pagoSubmitted = true;
+    this.pagoError = '';
 
     if (!this.tipoPago || !this.entidadPago || !this.numeroCuenta) {
-      alert('Completa todos los campos');
+      this.pagoError = 'Completa todos los campos del metodo de pago.';
       return;
     }
 
@@ -74,6 +84,27 @@ export class RegisterProviderComponent implements OnInit {
     this.entidadPago = '';
     this.numeroCuenta = '';
     this.showPagoModal = false;
+  }
+
+  removeMetodoPago(index: number): void {
+    this.metodosPago.splice(index, 1);
+  }
+
+  maskCuenta(numeroCuenta: string): string {
+    if (!numeroCuenta) {
+      return 'Sin numero';
+    }
+
+    const visibleDigits = numeroCuenta.slice(-4);
+    return `**** **** ${visibleDigits}`;
+  }
+
+  isMissing(value: string | null | undefined): boolean {
+    return this.submitted && !String(value || '').trim();
+  }
+
+  isPaymentFieldMissing(value: string | null | undefined): boolean {
+    return this.pagoSubmitted && !String(value || '').trim();
   }
 
   /* ================= CERTIFICACIONES ================= */
@@ -100,10 +131,67 @@ export class RegisterProviderComponent implements OnInit {
     }
   }
 
+  isCertDateMissing(id: number, field: 'obtencion' | 'expiracion'): boolean {
+    if (!this.submitted || !this.selectedCerts[id]) {
+      return false;
+    }
+
+    const map = field === 'obtencion'
+      ? this.fechaObtencionMap
+      : this.fechaExpiracionMap;
+
+    return !map[id];
+  }
+
+  private hasRequiredFields(): boolean {
+    return Boolean(
+      this.nombres.trim() &&
+      this.apellidos.trim() &&
+      this.correo.trim() &&
+      this.password.trim() &&
+      this.telefono.trim() &&
+      this.whatsapp.trim() &&
+      this.direccion.trim() &&
+      this.razonSocial.trim() &&
+      this.ruc.trim() &&
+      this.descripcion.trim() &&
+      this.apiUrl.trim() &&
+      this.apiTipo.trim() &&
+      this.apiToken.trim()
+    );
+  }
+
+  hasSelectedCertification(): boolean {
+    return Object.keys(this.selectedCerts).length > 0;
+  }
+
+  private hasCertificationDates(): boolean {
+    return Object.keys(this.selectedCerts).every(id =>
+      Boolean(this.fechaObtencionMap[id] && this.fechaExpiracionMap[id])
+    );
+  }
+
   register() {
+    this.submitted = true;
+    this.formError = '';
+
+    if (!this.hasRequiredFields()) {
+      this.formError = 'Completa todos los campos obligatorios antes de registrar el proveedor.';
+      return;
+    }
 
     if (this.metodosPago.length < 1) {
-      alert('Debes agregar al menos 1 método de pago');
+      this.formError = 'Debes agregar al menos 1 metodo de pago.';
+      return;
+    }
+
+    if (!this.hasSelectedCertification()) {
+      this.formError = 'Debes seleccionar al menos 1 certificacion.';
+      return;
+    }
+
+    if (!this.hasCertificationDates()) {
+      this.formError = 'Completa las fechas de cada certificacion seleccionada.';
       return;
     }
 

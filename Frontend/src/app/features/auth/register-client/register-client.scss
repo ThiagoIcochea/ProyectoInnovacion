@@ -154,6 +154,28 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
 }
 
+.form-group.has-error input {
+  border-color: rgba(248, 113, 113, 0.68);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+.form-group small {
+  color: #fca5a5;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.form-error {
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(248, 113, 113, 0.22);
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
 .checkbox-row {
   display: flex;
   align-items: flex-start;

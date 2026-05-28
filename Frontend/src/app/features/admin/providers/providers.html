@@ -94,19 +94,20 @@
 
       </div>
 
-      <div
-        class="providers-table__row providers-table__row--skeleton"
-        *ngFor="let row of skeletonRows"
-        [hidden]="!loading"
-      >
-        <div class="skeleton-line" *ngFor="let item of [1, 2, 3, 4, 5, 6]"></div>
-      </div>
+      <ng-container *ngIf="loading">
+        <div
+          class="providers-table__row providers-table__row--skeleton"
+          *ngFor="let row of skeletonRows"
+        >
+          <div class="skeleton-line" *ngFor="let item of [1, 2, 3, 4, 5, 6]"></div>
+        </div>
+      </ng-container>
 
-      <div
-        class="providers-table__row"
-        *ngFor="let provider of filteredProviders"
-        [hidden]="loading"
-      >
+      <ng-container *ngIf="!loading">
+        <div
+          class="providers-table__row"
+          *ngFor="let provider of filteredProviders"
+        >
 
         <div class="provider-cell">
 
@@ -194,7 +195,8 @@
 
         </div>
 
-      </div>
+        </div>
+      </ng-container>
 
       <div
         class="empty-state"

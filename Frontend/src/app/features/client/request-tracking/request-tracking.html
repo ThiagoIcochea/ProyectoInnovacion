@@ -87,21 +87,17 @@
             <strong>S/ {{ tracking.total }}</strong>
           </div>
 
-    <div *ngIf="tracking">
+          <div class="company-block">
+            <span>Empresa</span>
+            <strong>
+              {{ tracking.empresaCompradora?.razonSocial || 'Sin nombre' }}
+            </strong>
 
-      <div class="company-block">
-    <span>Empresa</span>
-    <strong>
-      {{ tracking.empresaCompradora?.razonSocial || 'Sin nombre' }}
-    </strong>
-
-    <span>RUC</span>
-    <strong>
-      {{ tracking.empresaCompradora?.ruc || 'Sin RUC' }}
-    </strong>
-  </div>
-
-</div>
+            <span>RUC</span>
+            <strong>
+              {{ tracking.empresaCompradora?.ruc || 'Sin RUC' }}
+            </strong>
+          </div>
 
           <div>
             <span>Entrega</span>

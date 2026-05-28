@@ -98,19 +98,20 @@
 
       </div>
 
-      <div
-        class="users-table__row users-table__row--skeleton"
-        *ngFor="let row of skeletonRows"
-        [hidden]="!loading"
-      >
-        <div class="skeleton-line" *ngFor="let item of [1, 2, 3, 4, 5, 6]"></div>
-      </div>
+      <ng-container *ngIf="loading">
+        <div
+          class="users-table__row users-table__row--skeleton"
+          *ngFor="let row of skeletonRows"
+        >
+          <div class="skeleton-line" *ngFor="let item of [1, 2, 3, 4, 5, 6]"></div>
+        </div>
+      </ng-container>
 
-      <div
-        class="users-table__row"
-        *ngFor="let user of filteredUsers"
-        [hidden]="loading"
-      >
+      <ng-container *ngIf="!loading">
+        <div
+          class="users-table__row"
+          *ngFor="let user of filteredUsers"
+        >
 
         <div class="user-cell">
 
@@ -183,7 +184,8 @@
 
         </div>
 
-      </div>
+        </div>
+      </ng-container>
 
       <div
         class="empty-state"

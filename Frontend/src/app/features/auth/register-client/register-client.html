@@ -41,9 +41,13 @@
 
       <form class="auth-form">
 
+        <div class="form-error" *ngIf="formError">
+          {{ formError }}
+        </div>
+
         <div class="form-grid form-grid--2">
 
-          <div class="form-group">
+          <div class="form-group" [class.has-error]="isFieldMissing('nombres')">
 
             <label for="nombres">
               Nombres
@@ -55,11 +59,14 @@
               placeholder="Tus nombres"
               [(ngModel)]="form.nombres"
               name="nombres"
+              required
             />
+
+            <small *ngIf="isFieldMissing('nombres')">Campo obligatorio.</small>
 
           </div>
 
-          <div class="form-group">
+          <div class="form-group" [class.has-error]="isFieldMissing('apellidos')">
 
             <label for="apellidos">
               Apellidos
@@ -71,13 +78,16 @@
               placeholder="Tus apellidos"
               [(ngModel)]="form.apellidos"
               name="apellidos"
+              required
             />
+
+            <small *ngIf="isFieldMissing('apellidos')">Campo obligatorio.</small>
 
           </div>
 
         </div>
 
-        <div class="form-group">
+        <div class="form-group" [class.has-error]="isFieldMissing('correo')">
 
           <label for="correo">
             Correo electrónico
@@ -89,13 +99,16 @@
             placeholder="correo@empresa.com"
             [(ngModel)]="form.correo"
             name="correo"
+            required
           />
+
+          <small *ngIf="isFieldMissing('correo')">Campo obligatorio.</small>
 
         </div>
 
         <div class="form-grid form-grid--2">
 
-          <div class="form-group">
+          <div class="form-group" [class.has-error]="isFieldMissing('telefono')">
 
             <label for="telefono">
               Teléfono
@@ -107,11 +120,14 @@
               placeholder="+51 987 654 321"
               [(ngModel)]="form.telefono"
               name="telefono"
+              required
             />
+
+            <small *ngIf="isFieldMissing('telefono')">Campo obligatorio.</small>
 
           </div>
 
-          <div class="form-group">
+          <div class="form-group" [class.has-error]="isFieldMissing('whatsapp')">
 
             <label for="whatsapp">
               WhatsApp
@@ -123,13 +139,16 @@
               placeholder="+51 987 654 321"
               [(ngModel)]="form.whatsapp"
               name="whatsapp"
+              required
             />
+
+            <small *ngIf="isFieldMissing('whatsapp')">Campo obligatorio.</small>
 
           </div>
 
         </div>
 
-        <div class="form-group">
+        <div class="form-group" [class.has-error]="isFieldMissing('password')">
 
           <label for="password">
             Contraseña
@@ -141,11 +160,14 @@
             placeholder="••••••••"
             [(ngModel)]="form.password"
             name="password"
+            required
           />
+
+          <small *ngIf="isFieldMissing('password')">Campo obligatorio.</small>
 
         </div>
 
-        <div class="form-group">
+        <div class="form-group" [class.has-error]="isFieldMissing('direccion')">
 
           <label for="direccion">
             Dirección de domicilio / entrega
@@ -157,7 +179,10 @@
             placeholder="Av. Principal 123, Distrito, Ciudad"
             [(ngModel)]="form.direccion"
             name="direccion"
+            required
           />
+
+          <small *ngIf="isFieldMissing('direccion')">Campo obligatorio.</small>
 
         </div>
 

@@ -18,6 +18,9 @@ export class DashboardComponent implements OnInit {
   recommendedProducts: any[] = [];
   requestItems: any[] = [];
   mostrarCarritoMovil = false;
+  loadingRecommended = true;
+  loadingPublicidad = true;
+  readonly productSkeletons = Array.from({ length: 6 });
 
   publicidades: any[] = [];
   currentPublicidadIndex: number = 0;
@@ -55,22 +58,28 @@ export class DashboardComponent implements OnInit {
 
   cargarRecomendados(): void {
 
+    this.loadingRecommended = true;
+
     this.http.get<any[]>(
       `${this.API}/recomendados/productos`,
       this.getHeaders()
     ).subscribe({
       next: (data) => {
         this.recommendedProducts = Array.isArray(data) ? data : [];
+        this.loadingRecommended = false;
         this.cdr.detectChanges();
       },
       error: () => {
         this.recommendedProducts = [];
+        this.loadingRecommended = false;
         this.cdr.detectChanges();
       }
     });
   }
 
   cargarPublicidad(): void {
+
+    this.loadingPublicidad = true;
 
     this.http.get<any[]>(
       `${this.API}/publicidad/activas`,
@@ -80,6 +89,7 @@ export class DashboardComponent implements OnInit {
 
         this.publicidades = Array.isArray(data) ? data : [];
         this.currentPublicidadIndex = 0;
+        this.loadingPublicidad = false;
 
         this.cdr.detectChanges();
 
@@ -90,6 +100,7 @@ export class DashboardComponent implements OnInit {
       },
       error: () => {
         this.publicidades = [];
+        this.loadingPublicidad = false;
         this.cdr.detectChanges();
       }
     });

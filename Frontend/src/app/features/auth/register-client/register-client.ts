@@ -20,6 +20,8 @@ import { APP_API_BASE_URL, APP_ROUTE_PATHS } from '../../../core/constants/app.c
 export class RegisterClientComponent {
 
   acepta = false;
+  submitted = false;
+  formError = '';
 
   form = {
     nombres: '',
@@ -37,10 +39,37 @@ export class RegisterClientComponent {
     private router: Router
   ) {}
 
+  isFieldMissing(field: keyof RegisterClientComponent['form']): boolean {
+    if (field === 'fotoPerfil') {
+      return false;
+    }
+
+    return this.submitted && !String(this.form[field] || '').trim();
+  }
+
+  private hasRequiredFields(): boolean {
+    return Boolean(
+      this.form.nombres.trim() &&
+      this.form.apellidos.trim() &&
+      this.form.correo.trim() &&
+      this.form.telefono.trim() &&
+      this.form.whatsapp.trim() &&
+      this.form.password.trim() &&
+      this.form.direccion.trim()
+    );
+  }
+
   registrar(): void {
+    this.submitted = true;
+    this.formError = '';
+
+    if (!this.hasRequiredFields()) {
+      this.formError = 'Completa todos los campos obligatorios antes de crear tu cuenta.';
+      return;
+    }
 
     if (!this.acepta) {
-      alert('Debes aceptar los términos y condiciones');
+      this.formError = 'Debes aceptar los terminos y condiciones.';
       return;
     }
 

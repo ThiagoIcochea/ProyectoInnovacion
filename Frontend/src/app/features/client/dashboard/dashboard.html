@@ -37,7 +37,7 @@
         </a>
       </div>
 
-      <div class="promo-card" *ngIf="publicidades.length > 0">
+      <div class="promo-card" *ngIf="!loadingPublicidad && publicidades.length > 0">
         <span>{{ publicidades[currentPublicidadIndex]?.origen }}</span>
         <div class="promo-card__icon">▣</div>
         <h3>{{ publicidades[currentPublicidadIndex]?.titulo }}</h3>
@@ -55,6 +55,15 @@
         </button>
       </div>
 
+      <div class="promo-card promo-card--skeleton" *ngIf="loadingPublicidad">
+        <div class="skeleton-line skeleton-line--badge"></div>
+        <div class="skeleton-block skeleton-block--icon"></div>
+        <div class="skeleton-line skeleton-line--title"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-block skeleton-block--image"></div>
+        <div class="skeleton-block skeleton-block--button"></div>
+      </div>
+
     </div>
 
     <div class="section-header">
@@ -67,7 +76,23 @@
       <span>Top productos</span>
     </div>
 
-    <div class="product-grid">
+    <div class="product-grid" *ngIf="loadingRecommended">
+
+      <div class="product-card product-card--skeleton" *ngFor="let item of productSkeletons">
+        <div class="skeleton-block skeleton-block--product-image"></div>
+        <div class="skeleton-tags">
+          <div class="skeleton-line skeleton-line--tag"></div>
+          <div class="skeleton-line skeleton-line--tag"></div>
+        </div>
+        <div class="skeleton-line skeleton-line--title"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line skeleton-line--short"></div>
+        <div class="skeleton-block skeleton-block--button-wide"></div>
+      </div>
+
+    </div>
+
+    <div class="product-grid" *ngIf="!loadingRecommended && recommendedProducts.length > 0">
 
       <div class="product-card" *ngFor="let product of recommendedProducts">
         <div class="product-card__image">
@@ -107,6 +132,10 @@
         </button>
       </div>
 
+    </div>
+
+    <div class="empty-state" *ngIf="!loadingRecommended && recommendedProducts.length === 0">
+      No hay productos recomendados disponibles por ahora.
     </div>
 
   </section>

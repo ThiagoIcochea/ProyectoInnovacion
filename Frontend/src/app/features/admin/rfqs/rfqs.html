@@ -18,7 +18,7 @@
 
   <div class="summary-grid">
 
-    <div class="summary-card">
+    <div class="summary-card summary-card--total">
 
       <span>Total RFQs</span>
 
@@ -28,7 +28,7 @@
 
     </div>
 
-    <div class="summary-card">
+    <div class="summary-card summary-card--success">
 
       <span>Pagadas</span>
 
@@ -38,7 +38,7 @@
 
     </div>
 
-    <div class="summary-card">
+    <div class="summary-card summary-card--warning">
 
       <span>Pendientes</span>
 
@@ -48,7 +48,7 @@
 
     </div>
 
-    <div class="summary-card">
+    <div class="summary-card summary-card--danger">
 
       <span>Canceladas</span>
 
@@ -98,24 +98,25 @@
 
       </div>
 
-      <div
-        class="rfqs-table__row rfqs-table__row--skeleton"
-        *ngFor="let row of skeletonRows"
-        [hidden]="!loading"
-      >
-
+      <ng-container *ngIf="loading">
         <div
-          class="skeleton-line"
-          *ngFor="let item of [1,2,3,4,5,6,7]"
-        ></div>
+          class="rfqs-table__row rfqs-table__row--skeleton"
+          *ngFor="let row of skeletonRows"
+        >
 
-      </div>
+          <div
+            class="skeleton-line"
+            *ngFor="let item of [1,2,3,4,5,6,7]"
+          ></div>
 
-      <div
-        class="rfqs-table__row"
-        *ngFor="let rfq of filteredRfqs"
-        [hidden]="loading"
-      >
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="!loading">
+        <div
+          class="rfqs-table__row"
+          *ngFor="let rfq of filteredRfqs"
+        >
 
         <div class="code">
           RFQ-{{ rfq.idSolicitud }}
@@ -167,7 +168,8 @@
           {{ formatearFecha(rfq.fechaCreacion) }}
         </div>
 
-      </div>
+        </div>
+      </ng-container>
 
       <div
         class="empty-state"

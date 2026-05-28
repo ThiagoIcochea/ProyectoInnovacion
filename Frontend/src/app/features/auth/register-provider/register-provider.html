@@ -1,293 +1,356 @@
 <!-- Backend touchpoint: provider registration flow, including RUC, API and payment data. -->
-<div class="auth-page">
-  <div class="auth-shell auth-shell--provider">
+<div class="provider-register-page">
+  <div class="provider-register-shell">
 
-    <section class="auth-side auth-side--provider">
-      <div class="auth-brand">Nethink</div>
+    <section class="provider-hero">
+      <div class="provider-hero__brand">Nethink</div>
 
-      <div class="auth-side__content">
-        <span class="auth-kicker">Registro de proveedor</span>
+      <div class="provider-hero__content">
+        <span class="provider-hero__badge">Registro de proveedor</span>
 
-        <h1>Conecta tu catálogo y vende más en B2B.</h1>
+        <h1>Conecta tu cat&aacute;logo y vende m&aacute;s en B2B.</h1>
 
         <p>
-          Registra tu empresa para recibir solicitudes RFQ, cotizar productos de red
-          y participar en oportunidades de negocio con clientes empresariales.
+          Registra tu empresa para recibir solicitudes RFQ, cotizar productos y
+          participar en oportunidades comerciales.
         </p>
 
-        <ul class="auth-benefits">
-          <li>Acceso a solicitudes diarias de infraestructura de red</li>
-          <li>Integración de inventario y stock vía API</li>
-          <li>Proceso de cotización claro y centralizado</li>
+        <ul class="provider-benefits">
+          <li>
+            <span>&#10003;</span>
+            Acceso a solicitudes reales de infraestructura TI.
+          </li>
+          <li>
+            <span>&#10003;</span>
+            Integraci&oacute;n de inventario y stock v&iacute;a API.
+          </li>
+          <li>
+            <span>&#10003;</span>
+            Proceso de cotizaci&oacute;n claro y controlado.
+          </li>
+          <li>
+            <span>&#10003;</span>
+            Mayor visibilidad frente a clientes empresariales.
+          </li>
         </ul>
+
+        <div class="provider-stats">
+          <div>
+            <strong>Marketplace B2B</strong>
+            <span>Clientes empresariales activos</span>
+          </div>
+          <div>
+            <strong>RFQ inteligente</strong>
+            <span>Comparacion por precio, stock y entrega</span>
+          </div>
+          <div>
+            <strong>Proveedores verificados</strong>
+            <span>Operacion controlada y trazable</span>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="auth-form-panel auth-form-panel--scroll">
-
-      <div class="auth-form-header">
+    <section class="provider-form-panel">
+      <div class="provider-form-header">
+        <span>Alta de cuenta</span>
         <h2>Registro de Proveedor</h2>
+        <p>Completa la informacion de usuario, empresa, API, pagos y certificaciones.</p>
       </div>
 
-      <form class="auth-form">
+      <form class="provider-form">
+        <div class="form-error" *ngIf="formError">
+          {{ formError }}
+        </div>
 
-        <div class="section-title">1. Datos de Usuario</div>
-
-        <div class="form-grid form-grid--2">
-          <div class="form-group">
-            <label for="nombres">Nombres</label>
-            <input
-              id="nombres"
-              type="text"
-              [(ngModel)]="nombres"
-              name="nombres"
-              placeholder="Tus nombres"
-            />
+        <section class="form-section">
+          <div class="form-section__header">
+            <span>1</span>
+            <div>
+              <h3>Datos de Usuario</h3>
+              <p>Credenciales y datos de contacto del responsable comercial.</p>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="apellidos">Apellidos</label>
-            <input
-              id="apellidos"
-              type="text"
-              [(ngModel)]="apellidos"
-              name="apellidos"
-              placeholder="Tus apellidos"
-            />
-          </div>
-        </div>
+          <div class="form-grid form-grid--2">
+            <div class="form-group" [class.has-error]="isMissing(nombres)">
+              <label for="nombres">Nombres</label>
+              <input id="nombres" type="text" [(ngModel)]="nombres" name="nombres" placeholder="Tus nombres" required />
+              <small *ngIf="isMissing(nombres)">Campo obligatorio.</small>
+            </div>
 
-        <div class="form-group">
-          <label for="correo">Correo</label>
-          <input
-            id="correo"
-            type="email"
-            [(ngModel)]="correo"
-            name="correo"
-            placeholder="correo@empresa.com"
-          />
-        </div>
-
-        <div class="form-grid form-grid--2">
-          <div class="form-group">
-            <label for="password">Contraseña</label>
-            <input
-              id="password"
-              type="password"
-              [(ngModel)]="password"
-              name="password"
-              placeholder="••••••••"
-            />
+            <div class="form-group" [class.has-error]="isMissing(apellidos)">
+              <label for="apellidos">Apellidos</label>
+              <input id="apellidos" type="text" [(ngModel)]="apellidos" name="apellidos" placeholder="Tus apellidos" required />
+              <small *ngIf="isMissing(apellidos)">Campo obligatorio.</small>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="whatsapp">WhatsApp</label>
-            <input
-              id="whatsapp"
-              type="text"
-              [(ngModel)]="whatsapp"
-              name="whatsapp"
-              placeholder="+51 987 654 321"
-            />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="telefono">Teléfono</label>
-          <input
-            id="telefono"
-            type="text"
-            [(ngModel)]="telefono"
-            name="telefono"
-            placeholder="+51 987 654 321"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="direccion">Dirección</label>
-          <input
-            id="direccion"
-            type="text"
-            [(ngModel)]="direccion"
-            name="direccion"
-            placeholder="Av. Principal 123"
-          />
-        </div>
-
-        <div class="section-title">2. Datos de la Empresa</div>
-
-        <div class="form-group">
-          <label for="razonSocial">Razón Social</label>
-          <input
-            id="razonSocial"
-            type="text"
-            [(ngModel)]="razonSocial"
-            name="razonSocial"
-            placeholder="Razón social"
-          />
-        </div>
-
-        <div class="form-grid form-grid--2">
-          <div class="form-group">
-            <label for="ruc">RUC</label>
-            <input
-              id="ruc"
-              type="text"
-              [(ngModel)]="ruc"
-              name="ruc"
-              placeholder="11 dígitos"
-            />
+          <div class="form-group" [class.has-error]="isMissing(correo)">
+            <label for="correo">Correo</label>
+            <input id="correo" type="email" [(ngModel)]="correo" name="correo" placeholder="correo@empresa.com" required />
+            <small *ngIf="isMissing(correo)">Campo obligatorio.</small>
           </div>
 
-          <div class="form-group">
-            <label for="descripcion">Descripción</label>
-            <input
-              id="descripcion"
-              type="text"
-              [(ngModel)]="descripcion"
-              name="descripcion"
-              placeholder="Describe tu empresa"
-            />
-          </div>
-        </div>
+          <div class="form-grid form-grid--2">
+            <div class="form-group" [class.has-error]="isMissing(password)">
+              <label for="password">Contrase&ntilde;a</label>
+              <input id="password" type="password" [(ngModel)]="password" name="password" placeholder="Ingresa una contrasena" required />
+              <small *ngIf="isMissing(password)">Campo obligatorio.</small>
+            </div>
 
-        <div class="section-title">3. Configuración de API</div>
-
-        <div class="form-group">
-          <label for="apiUrl">Endpoint URL</label>
-          <input
-            id="apiUrl"
-            type="text"
-            [(ngModel)]="apiUrl"
-            name="apiUrl"
-            placeholder="https://api.tuempresa.com"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="apiTipo">Tipo de API</label>
-          <select id="apiTipo" [(ngModel)]="apiTipo" name="apiTipo">
-            <option value="REST">REST</option>
-            <option value="GRAPHQL">GRAPHQL</option>
-            <option value="WEBHOOK">WEBHOOK</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="apiToken">API Token</label>
-          <input
-            id="apiToken"
-            type="text"
-            [(ngModel)]="apiToken"
-            name="apiToken"
-            placeholder="Token de autenticación"
-          />
-        </div>
-
-        <!-- ================= METODOS DE PAGO ================= -->
-
-        <div class="section-title">4. Métodos de Pago</div>
-
-        <button type="button" (click)="openPagoModal()">
-          Agregar método de pago
-        </button>
-
-        <div *ngIf="metodosPago.length < 1" class="auth-warning">
-          Debes agregar al menos 1 método de pago
-        </div>
-
-        <div *ngFor="let mp of metodosPago">
-          {{ mp.tipo }} - {{ mp.entidad }} - {{ mp.numeroCuenta }}
-        </div>
-
-        <div *ngIf="showPagoModal" class="modal">
-          <div class="modal-content">
-
-            <h3>Nuevo método de pago</h3>
-
-            <label for="tipoPago">Tipo</label>
-            <select id="tipoPago" [(ngModel)]="tipoPago" name="tipoPago">
-              <option value="TRANSFERENCIA">TRANSFERENCIA</option>
-              <option value="DEPOSITO">DEPOSITO</option>
-              <option value="YAPE">YAPE</option>
-              <option value="PLIN">PLIN</option>
-              <option value="CHEQUE">CHEQUE</option>
-            </select>
-
-            <label for="entidadPago">Entidad</label>
-            <select id="entidadPago" [(ngModel)]="entidadPago" name="entidadPago">
-
-              <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="BCP">BCP</option>
-              <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="BBVA">BBVA</option>
-              <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="INTERBANK">INTERBANK</option>
-              <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="SCOTIABANK">SCOTIABANK</option>
-
-              <option *ngIf="tipoPago === 'DEPOSITO'" value="AGENTE">AGENTE</option>
-              <option *ngIf="tipoPago === 'DEPOSITO'" value="BANCO">BANCO</option>
-
-              <option *ngIf="tipoPago === 'YAPE'" value="YAPE">YAPE</option>
-              <option *ngIf="tipoPago === 'PLIN'" value="PLIN">PLIN</option>
-
-            </select>
-
-            <label for="numeroCuenta">Número de cuenta</label>
-            <input
-              id="numeroCuenta"
-              type="text"
-              [(ngModel)]="numeroCuenta"
-              name="numeroCuenta"
-              placeholder="N° de cuenta"
-            />
-
-            <button type="button" (click)="addMetodoPago()">Guardar</button>
-            <button type="button" (click)="closePagoModal()">Cerrar</button>
-
-          </div>
-        </div>
-
-        <!-- ================= CERTIFICACIONES ================= -->
-
-        <div class="section-title">5. Certificaciones</div>
-
-        <div *ngFor="let c of certificaciones">
-
-          <label [attr.for]="'cert-' + c.idCertificacion">
-              <input
-              [id]="'cert-' + c.idCertificacion"
-              type="checkbox"
-              title="Seleccionar certificación"
-              aria-label="Seleccionar certificación"
-              (change)="toggleCertificacion($event, c.idCertificacion)">
-            {{ c.nombre }}
-          </label>
-
-          <div *ngIf="selectedCerts[c.idCertificacion]">
-
-            <input
-              type="date"
-              [(ngModel)]="fechaObtencionMap[c.idCertificacion]"
-              name="fo{{c.idCertificacion}}"
-              [attr.aria-label]="'Fecha de obtención - ' + c.nombre"
-              title="Fecha de obtención"
-            />
-
-            <input
-              type="date"
-              [(ngModel)]="fechaExpiracionMap[c.idCertificacion]"
-              name="fe{{c.idCertificacion}}"
-              [attr.aria-label]="'Fecha de expiración - ' + c.nombre"
-              title="Fecha de expiración"
-            />
-
+            <div class="form-group" [class.has-error]="isMissing(whatsapp)">
+              <label for="whatsapp">WhatsApp</label>
+              <input id="whatsapp" type="text" [(ngModel)]="whatsapp" name="whatsapp" placeholder="+51 987 654 321" required />
+              <small *ngIf="isMissing(whatsapp)">Campo obligatorio.</small>
+            </div>
           </div>
 
-        </div>
+          <div class="form-grid form-grid--2">
+            <div class="form-group" [class.has-error]="isMissing(telefono)">
+              <label for="telefono">Telefono</label>
+              <input id="telefono" type="text" [(ngModel)]="telefono" name="telefono" placeholder="+51 987 654 321" required />
+              <small *ngIf="isMissing(telefono)">Campo obligatorio.</small>
+            </div>
 
-        <button type="button" (click)="register()">
-          Registrar proveedor
-        </button>
+            <div class="form-group" [class.has-error]="isMissing(direccion)">
+              <label for="direccion">Direccion</label>
+              <input id="direccion" type="text" [(ngModel)]="direccion" name="direccion" placeholder="Av. Principal 123" required />
+              <small *ngIf="isMissing(direccion)">Campo obligatorio.</small>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="form-section__header">
+            <span>2</span>
+            <div>
+              <h3>Datos de la Empresa</h3>
+              <p>Identifica la razon social que participara en las cotizaciones.</p>
+            </div>
+          </div>
+
+          <div class="form-group" [class.has-error]="isMissing(razonSocial)">
+            <label for="razonSocial">Razon Social</label>
+            <input id="razonSocial" type="text" [(ngModel)]="razonSocial" name="razonSocial" placeholder="Razon social" required />
+            <small *ngIf="isMissing(razonSocial)">Campo obligatorio.</small>
+          </div>
+
+          <div class="form-grid form-grid--2">
+            <div class="form-group" [class.has-error]="isMissing(ruc)">
+              <label for="ruc">RUC</label>
+              <input id="ruc" type="text" [(ngModel)]="ruc" name="ruc" placeholder="11 digitos" required />
+              <small *ngIf="isMissing(ruc)">Campo obligatorio.</small>
+            </div>
+
+            <div class="form-group" [class.has-error]="isMissing(descripcion)">
+              <label for="descripcion">Descripcion</label>
+              <input id="descripcion" type="text" [(ngModel)]="descripcion" name="descripcion" placeholder="Describe tu empresa" required />
+              <small *ngIf="isMissing(descripcion)">Campo obligatorio.</small>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="form-section__header">
+            <span>3</span>
+            <div>
+              <h3>Configuracion de API</h3>
+              <p>Conecta catalogo, inventario y disponibilidad de tus productos.</p>
+            </div>
+          </div>
+
+          <div class="form-group" [class.has-error]="isMissing(apiUrl)">
+            <label for="apiUrl">Endpoint URL</label>
+            <input id="apiUrl" type="text" [(ngModel)]="apiUrl" name="apiUrl" placeholder="https://api.tuempresa.com" required />
+            <small *ngIf="isMissing(apiUrl)">Campo obligatorio.</small>
+          </div>
+
+          <div class="form-grid form-grid--2">
+            <div class="form-group" [class.has-error]="isMissing(apiTipo)">
+              <label for="apiTipo">Tipo de API</label>
+              <select id="apiTipo" [(ngModel)]="apiTipo" name="apiTipo" required>
+                <option value="REST">REST</option>
+                <option value="GRAPHQL">GRAPHQL</option>
+                <option value="WEBHOOK">WEBHOOK</option>
+              </select>
+              <small *ngIf="isMissing(apiTipo)">Campo obligatorio.</small>
+            </div>
+
+            <div class="form-group" [class.has-error]="isMissing(apiToken)">
+              <label for="apiToken">API Token</label>
+              <input id="apiToken" type="text" [(ngModel)]="apiToken" name="apiToken" placeholder="Token de autenticacion" required />
+              <small *ngIf="isMissing(apiToken)">Campo obligatorio.</small>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="form-section__header form-section__header--with-action">
+            <div class="form-section__title-row">
+              <span>4</span>
+              <div>
+                <h3>Metodos de Pago</h3>
+                <p>Agrega al menos una opcion para liquidar operaciones aprobadas.</p>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-outline btn-add-payment" (click)="openPagoModal()">
+              + Agregar metodo de pago
+            </button>
+          </div>
+
+          <div *ngIf="metodosPago.length < 1" class="empty-state">
+            Aun no agregaste metodos de pago.
+          </div>
+
+          <div *ngIf="submitted && metodosPago.length < 1" class="form-error">
+            Debes agregar al menos 1 metodo de pago.
+          </div>
+
+          <div class="payment-grid" *ngIf="metodosPago.length > 0">
+            <div class="payment-card" *ngFor="let mp of metodosPago; let i = index">
+              <div>
+                <span>{{ mp.tipo }}</span>
+                <strong>{{ mp.entidad }}</strong>
+                <small>{{ maskCuenta(mp.numeroCuenta) }}</small>
+              </div>
+
+              <button type="button" class="btn-icon-danger" (click)="removeMetodoPago(i)" aria-label="Eliminar metodo de pago">
+                &times;
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="form-section__header">
+            <span>5</span>
+            <div>
+              <h3>Certificaciones</h3>
+              <p>Selecciona certificaciones comerciales o tecnicas disponibles.</p>
+            </div>
+          </div>
+
+          <div *ngIf="certificaciones.length === 0" class="empty-state">
+            No hay certificaciones disponibles por ahora.
+          </div>
+
+          <div *ngIf="submitted && certificaciones.length > 0 && !hasSelectedCertification()" class="form-error">
+            Debes seleccionar al menos 1 certificacion.
+          </div>
+
+          <div class="cert-grid" *ngIf="certificaciones.length > 0">
+            <div class="cert-card" *ngFor="let c of certificaciones" [class.is-selected]="selectedCerts[c.idCertificacion]">
+              <label class="cert-card__label" [attr.for]="'cert-' + c.idCertificacion">
+                <input
+                  [id]="'cert-' + c.idCertificacion"
+                  type="checkbox"
+                  title="Seleccionar certificacion"
+                  aria-label="Seleccionar certificacion"
+                  (change)="toggleCertificacion($event, c.idCertificacion)">
+                <span>{{ c.nombre }}</span>
+              </label>
+
+              <div class="cert-card__dates" *ngIf="selectedCerts[c.idCertificacion]">
+                <div class="form-group" [class.has-error]="isCertDateMissing(c.idCertificacion, 'obtencion')">
+                  <label>Fecha de obtencion</label>
+                  <input
+                    type="date"
+                    [(ngModel)]="fechaObtencionMap[c.idCertificacion]"
+                    name="fo{{c.idCertificacion}}"
+                    [attr.aria-label]="'Fecha de obtencion - ' + c.nombre"
+                    title="Fecha de obtencion"
+                    required
+                  />
+                  <small *ngIf="isCertDateMissing(c.idCertificacion, 'obtencion')">Campo obligatorio.</small>
+                </div>
+
+                <div class="form-group" [class.has-error]="isCertDateMissing(c.idCertificacion, 'expiracion')">
+                  <label>Fecha de expiracion</label>
+                  <input
+                    type="date"
+                    [(ngModel)]="fechaExpiracionMap[c.idCertificacion]"
+                    name="fe{{c.idCertificacion}}"
+                    [attr.aria-label]="'Fecha de expiracion - ' + c.nombre"
+                    title="Fecha de expiracion"
+                    required
+                  />
+                  <small *ngIf="isCertDateMissing(c.idCertificacion, 'expiracion')">Campo obligatorio.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" (click)="register()">
+            Registrar proveedor
+          </button>
+        </div>
 
       </form>
     </section>
+  </div>
+
+  <div *ngIf="showPagoModal" class="modal-backdrop">
+    <div class="payment-modal" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+      <div class="payment-modal__header">
+        <div>
+          <span>Metodo de pago</span>
+          <h3 id="payment-modal-title">Nuevo metodo de pago</h3>
+        </div>
+
+        <button type="button" class="btn-icon" (click)="closePagoModal()" aria-label="Cerrar modal">
+          &times;
+        </button>
+      </div>
+
+      <div class="payment-modal__body">
+        <div class="form-error" *ngIf="pagoError">
+          {{ pagoError }}
+        </div>
+
+        <div class="form-group" [class.has-error]="isPaymentFieldMissing(tipoPago)">
+          <label for="tipoPago">Tipo</label>
+          <select id="tipoPago" [(ngModel)]="tipoPago" name="tipoPago" required>
+            <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+            <option value="DEPOSITO">DEPOSITO</option>
+            <option value="YAPE">YAPE</option>
+            <option value="PLIN">PLIN</option>
+            <option value="CHEQUE">CHEQUE</option>
+          </select>
+          <small *ngIf="isPaymentFieldMissing(tipoPago)">Campo obligatorio.</small>
+        </div>
+
+        <div class="form-group" [class.has-error]="isPaymentFieldMissing(entidadPago)">
+          <label for="entidadPago">Entidad</label>
+          <select id="entidadPago" [(ngModel)]="entidadPago" name="entidadPago" required>
+            <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="BCP">BCP</option>
+            <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="BBVA">BBVA</option>
+            <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="INTERBANK">INTERBANK</option>
+            <option *ngIf="tipoPago === 'TRANSFERENCIA'" value="SCOTIABANK">SCOTIABANK</option>
+
+            <option *ngIf="tipoPago === 'DEPOSITO'" value="AGENTE">AGENTE</option>
+            <option *ngIf="tipoPago === 'DEPOSITO'" value="BANCO">BANCO</option>
+
+            <option *ngIf="tipoPago === 'YAPE'" value="YAPE">YAPE</option>
+            <option *ngIf="tipoPago === 'PLIN'" value="PLIN">PLIN</option>
+          </select>
+          <small *ngIf="isPaymentFieldMissing(entidadPago)">Campo obligatorio.</small>
+        </div>
+
+        <div class="form-group" [class.has-error]="isPaymentFieldMissing(numeroCuenta)">
+          <label for="numeroCuenta">Numero de cuenta</label>
+          <input id="numeroCuenta" type="text" [(ngModel)]="numeroCuenta" name="numeroCuenta" placeholder="Numero de cuenta" required />
+          <small *ngIf="isPaymentFieldMissing(numeroCuenta)">Campo obligatorio.</small>
+        </div>
+      </div>
+
+      <div class="payment-modal__actions">
+        <button type="button" class="btn btn-secondary" (click)="closePagoModal()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="addMetodoPago()">Guardar metodo</button>
+      </div>
+    </div>
   </div>
 </div>
