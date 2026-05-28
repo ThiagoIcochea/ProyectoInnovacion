@@ -2,6 +2,7 @@ package com.nethink.b2b.controller;
 
 import com.nethink.b2b.dto.request.CrearComentarioRequest;
 import com.nethink.b2b.dto.request.ReaccionComentarioRequest;
+import com.nethink.b2b.dto.response.ListarComentarioResponse;
 import com.nethink.b2b.entity.Comentario;
 import com.nethink.b2b.entity.ProveedorProducto;
 import com.nethink.b2b.entity.Usuario;
@@ -49,13 +50,13 @@ public class ComentarioController {
     }
 
     @GetMapping("/{idProv}/{idProd}")
-    public ResponseEntity<List<Comentario>> listar(
+    public ResponseEntity<List<ListarComentarioResponse>> listar(
             @PathVariable Integer idProv,
             @PathVariable Integer idProd
             
     ) {
         
-       ProveedorProducto provProd = proveedorProductoRepo.findByProveedor_IdProveedorAndProducto_IdProducto(idProv, idProd).orElseThrow();
+       ProveedorProducto provProd = proveedorProductoRepo.findByProveedor_IdProveedorAndProducto_IdProducto(idProv, idProd).orElseThrow( () -> new RuntimeException("Proveedor producto no encontrado"));
 
         
         

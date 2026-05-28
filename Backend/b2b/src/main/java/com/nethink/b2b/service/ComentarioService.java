@@ -3,16 +3,20 @@ package com.nethink.b2b.service;
 import com.nethink.b2b.dto.request.CrearComentarioRequest;
 import com.nethink.b2b.dto.request.ReaccionComentarioRequest;
 import com.nethink.b2b.dto.response.IAComentarioResponse;
+import com.nethink.b2b.dto.response.ListarComentarioResponse;
 import com.nethink.b2b.entity.Comentario;
 import com.nethink.b2b.entity.ComentarioLike;
 import com.nethink.b2b.entity.ProveedorProducto;
+import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.repository.ComentarioLikeRepository;
 import com.nethink.b2b.repository.ComentarioRepository;
 import com.nethink.b2b.repository.ProveedorProductoRepository;
+import com.nethink.b2b.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
@@ -20,6 +24,7 @@ public class ComentarioService {
 
     private final ComentarioRepository comentarioRepository;
     private final ComentarioLikeRepository likeRepository;
+     private final UsuarioRepository usuarioRepo;
     private final ModeracionService moderacionService;
     
          @Autowired
@@ -29,11 +34,13 @@ public class ComentarioService {
     public ComentarioService(
             ComentarioRepository comentarioRepository,
             ComentarioLikeRepository likeRepository,
+            UsuarioRepository usuarioRepo,
             ModeracionService moderacionService
     ) {
         this.comentarioRepository = comentarioRepository;
         this.likeRepository = likeRepository;
         this.moderacionService = moderacionService;
+        this.usuarioRepo= usuarioRepo;
     }
 
     public Comentario crearComentario(
@@ -41,7 +48,7 @@ public class ComentarioService {
             Integer idUsuario
     ) {
 
-         ProveedorProducto provProd = proveedorProductoRepo.findByProveedor_IdProveedorAndProducto_IdProducto(request.getIdProv(), request.getIdProd()).orElseThrow();
+         ProveedorProducto provProd = proveedorProductoRepo.findByProveedor_IdProveedorAndProducto_IdProducto(request.getIdProv(), request.getIdProd()).orElseThrow( () -> new RuntimeException("Proveedor producto no encontrado"));
         IAComentarioResponse ia =
                 moderacionService.moderar(
                         request.getComentario()
@@ -96,15 +103,43 @@ public class ComentarioService {
         );
     }
 
-    public List<Comentario> listar(
-            Integer idProvProd
-    ) {
+   public List<ListarComentarioResponse> listar(Integer idProvProd) {
 
-        return comentarioRepository
-                .findByIdProvProdOrderByFechaDesc(
-                        idProvProd
-                );
+    List<Comentario> comentarios = comentarioRepository
+            .findByIdProvProdOrderByFechaDesc(idProvProd);
+
+    return comentarios.stream().map(comentario -> {
+
+        ListarComentarioResponse response = new ListarComentarioResponse();
+
+        response.setIdComentario(comentario.getIdComentario());
+        response.setIdProvProd(comentario.getIdProvProd());
+        response.setIdUsuario(comentario.getIdUsuario());
+         Optional<Usuario> user = usuarioRepo.findById(comentario.getIdUsuario());
+
+    if (user.isPresent()) {
+
+        response.setNombreUsuario(
+            user.get().getNombres() + " " + user.get().getApellidos()
+        );
+
+    } else {
+
+        response.setNombreUsuario("Usuario");
+
     }
+        response.setComentario(comentario.getComentario());
+        response.setTipo(comentario.getTipo());
+        
+        response.setLikes(comentario.getLikes());
+        response.setDislikes(comentario.getDislikes());
+
+        response.setFecha(comentario.getFecha());
+
+        return response;
+
+    }).toList();
+}
 
     public void reaccionar(
             ReaccionComentarioRequest request,
