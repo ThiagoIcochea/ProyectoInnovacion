@@ -152,7 +152,7 @@ export class RequestTrackingComponent implements OnInit {
 
     const map: any = {
       CREADA: 'Creada',
-      PAGO_PENDIENTE: 'Pago pendiente',
+      PAGO_PENDIENTE: 'Pedido en revisión',
       PEDIDO_APROBADO: "Pedido aprobado",
       PAGO_VALIDANDO: 'Validando pago',
       PAGADA : "Pagado",
@@ -175,6 +175,10 @@ export class RequestTrackingComponent implements OnInit {
 
   esPedidoAprobado(): boolean {
     return this.normalizarEstado(this.tracking?.estado) === 'PEDIDO_APROBADO';
+  }
+
+   esPosibleCancelar(): boolean {
+    return this.normalizarEstado(this.tracking?.estado) === 'PAGO_PENDIENTE';
   }
    esPagado(): boolean {
     

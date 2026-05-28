@@ -871,12 +871,7 @@ export class ProviderReviewsComponent implements OnInit {
         ?? provider?.idProveedorProducto
         ?? provider?.idProveedor,
 
-      idUsuario:
-        Number(
-          localStorage.getItem(
-            'idUsuario'
-          )
-        ) || 1,
+     
 
       comentario: comentario
     };

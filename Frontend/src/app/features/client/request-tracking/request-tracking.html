@@ -130,16 +130,16 @@
           <p>Usa este código para verificar la entrega una vez que el pedido llegue a destino.</p>
         </div>
 
-        <div class="actions-box" *ngIf="esPedidoAprobado()">
+        <div class="actions-box" >
 
           <button class="btn-primary"
                   type="button"
-                  (click)="irAPago()">
+                  (click)="irAPago()" *ngIf="esPedidoAprobado()">
             Pagar ahora
           </button>
 
           <button class="btn-danger"
-                  (click)="cancelarSolicitud()">
+                  (click)="cancelarSolicitud()" *ngIf="esPosibleCancelar()">
             Cancelar solicitud
           </button>
 
