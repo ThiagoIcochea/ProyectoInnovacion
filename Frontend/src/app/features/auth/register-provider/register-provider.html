@@ -162,7 +162,17 @@
 
           <div class="form-group" [class.has-error]="isMissing(apiUrl)">
             <label for="apiUrl">Endpoint URL</label>
-            <input id="apiUrl" type="text" [(ngModel)]="apiUrl" name="apiUrl" placeholder="https://api.tuempresa.com" required />
+            <div class="endpoint-control">
+              <input id="apiUrl" type="text" [(ngModel)]="apiUrl" name="apiUrl" placeholder="https://api.tuempresa.com" required />
+              <button
+                type="button"
+                class="api-info-button"
+                (click)="openApiGuideModal()"
+                aria-label="Ver guia de integracion API"
+                title="Ver guia de integracion API">
+                i
+              </button>
+            </div>
             <small *ngIf="isMissing(apiUrl)">Campo obligatorio.</small>
           </div>
 
@@ -407,6 +417,77 @@
 
       <footer class="legal-modal__actions">
         <button type="button" class="btn btn-primary" (click)="closeLegalModal()">Entendido</button>
+      </footer>
+    </section>
+  </div>
+
+  <div *ngIf="showApiGuideModal" class="modal-backdrop">
+    <section class="api-guide-modal" role="dialog" aria-modal="true" aria-labelledby="api-guide-title">
+      <header class="api-guide-modal__header">
+        <div>
+          <span>{{ apiTipo }} catalogo</span>
+          <h3 id="api-guide-title">{{ apiGuideTitle }}</h3>
+        </div>
+
+        <button type="button" class="btn-icon" (click)="closeApiGuideModal()" aria-label="Cerrar modal">
+          &times;
+        </button>
+      </header>
+
+      <div class="api-guide-modal__body">
+        <p class="api-guide-description">{{ apiGuideDescription }}</p>
+
+        <ng-container *ngIf="isRestGuide">
+          <section class="api-guide-section">
+            <h4>Endpoint sugerido</h4>
+            <pre><code>GET /api/catalogo</code></pre>
+          </section>
+
+          <section class="api-guide-section">
+            <h4>Ejemplo de respuesta REST</h4>
+            <pre><code>{{ restResponseExample }}</code></pre>
+          </section>
+
+          <section class="api-guide-section">
+            <h4>Nota informativa</h4>
+            <pre><code>{{ restExpectedFields }}</code></pre>
+          </section>
+        </ng-container>
+
+        <ng-container *ngIf="isGraphqlGuide">
+          <section class="api-guide-section">
+            <h4>Endpoint sugerido</h4>
+            <pre><code>POST /graphql</code></pre>
+          </section>
+
+          <section class="api-guide-section">
+            <h4>Query GraphQL</h4>
+            <pre><code>{{ graphqlQueryExample }}</code></pre>
+          </section>
+
+          <section class="api-guide-section">
+            <h4>Ejemplo de respuesta GraphQL</h4>
+            <pre><code>{{ graphqlResponseExample }}</code></pre>
+          </section>
+
+          <section class="api-guide-section">
+            <h4>Ejemplo opcional con filtro</h4>
+            <pre><code>{{ graphqlFilterExample }}</code></pre>
+          </section>
+
+          <section class="api-guide-section">
+            <h4>Variables</h4>
+            <pre><code>{{ graphqlVariablesExample }}</code></pre>
+          </section>
+        </ng-container>
+
+        <div *ngIf="!isRestGuide && !isGraphqlGuide" class="api-guide-empty">
+          La guia detallada esta disponible para integraciones REST y GraphQL.
+        </div>
+      </div>
+
+      <footer class="api-guide-modal__actions">
+        <button type="button" class="btn btn-primary" (click)="closeApiGuideModal()">Entendido</button>
       </footer>
     </section>
   </div>

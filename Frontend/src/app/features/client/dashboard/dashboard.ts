@@ -21,6 +21,7 @@ export class DashboardComponent implements OnInit {
   loadingRecommended = true;
   loadingPublicidad = true;
   readonly productSkeletons = Array.from({ length: 6 });
+  imageLoadFailures: { [key: string]: boolean } = {};
 
   publicidades: any[] = [];
   currentPublicidadIndex: number = 0;
@@ -160,6 +161,44 @@ export class DashboardComponent implements OnInit {
     }
 
     this.guardarCarrito();
+    this.cdr.detectChanges();
+  }
+
+  verDetalle(product: any): void {
+    if (!product?.idProducto) {
+      return;
+    }
+
+    this.router.navigate(['/app/rfq/product', product.idProducto], {
+      state: { product }
+    });
+  }
+
+  getProductImage(product: any): string | null {
+    const productId = product?.idProducto;
+
+    if (productId && this.imageLoadFailures[productId]) {
+      return null;
+    }
+
+    const image = product?.imagenes?.[0];
+    return image?.url || image?.URL || null;
+  }
+
+  markImageAsFailed(product: any): void {
+    if (product?.idProducto) {
+      this.imageLoadFailures[product.idProducto] = true;
+      this.cdr.detectChanges();
+    }
+  }
+
+  getPrimarySpec(product: any): any | null {
+    return product?.especificaciones?.find((spec: any) => spec?.nombre || spec?.valor) ?? null;
+  }
+
+  formatRecommendedCount(value: any): string {
+    const count = Number(value || 0);
+    return `${count} pedido${count === 1 ? '' : 's'}`;
   }
 
   aumentar(item: any): void {

@@ -36,6 +36,152 @@ export class RegisterProviderComponent implements OnInit {
   legalModalTitle = '';
   legalModalIntro = '';
   legalModalItems: string[] = [];
+  showApiGuideModal = false;
+
+  readonly restResponseExample = `{
+  "catalogo": [
+    {
+      "idProducto": 100,
+      "producto": "Cisco Catalyst 9200L",
+      "sku": null,
+      "marca": "Cisco",
+      "categoria": "Switching",
+      "descripcion": "Switch acceso L2",
+      "precioUnitario": 2800,
+      "stock": 10000,
+      "garantiaMeses": 6,
+      "tiempoEntregaDias": 2,
+      "enOferta": true,
+      "porcentajeDescuento": 5,
+      "estado": "ACTIVO",
+      "especificaciones": [
+        {
+          "nombre": "Puertos",
+          "valor": "24x Gigabit"
+        }
+      ],
+      "imagenes": [
+        {
+          "url": "https://www.aloinfousa.com/cdn/shop/files/26324805.jpg",
+          "principal": true,
+          "orden": 1
+        }
+      ],
+      "descuentosVolumen": [
+        {
+          "cantidadMin": 20,
+          "precioUnitario": 2520
+        }
+      ]
+    }
+  ]
+}`;
+
+  readonly graphqlQueryExample = `query ObtenerCatalogo {
+  catalogo {
+    idProducto
+    producto
+    sku
+    marca
+    categoria
+    descripcion
+    precioUnitario
+    stock
+    garantiaMeses
+    tiempoEntregaDias
+    enOferta
+    porcentajeDescuento
+    estado
+    especificaciones {
+      nombre
+      valor
+    }
+    imagenes {
+      url
+      principal
+      orden
+    }
+    descuentosVolumen {
+      cantidadMin
+      precioUnitario
+    }
+  }
+}`;
+
+  readonly graphqlResponseExample = `{
+  "data": {
+    "catalogo": [
+      {
+        "idProducto": 100,
+        "producto": "Cisco Catalyst 9200L",
+        "sku": null,
+        "marca": "Cisco",
+        "categoria": "Switching",
+        "descripcion": "Switch acceso L2",
+        "precioUnitario": 2800,
+        "stock": 10000,
+        "garantiaMeses": 6,
+        "tiempoEntregaDias": 2,
+        "enOferta": true,
+        "porcentajeDescuento": 5,
+        "estado": "ACTIVO",
+        "especificaciones": [
+          {
+            "nombre": "Puertos",
+            "valor": "24x Gigabit"
+          }
+        ],
+        "imagenes": [
+          {
+            "url": "https://www.aloinfousa.com/cdn/shop/files/26324805.jpg",
+            "principal": true,
+            "orden": 1
+          }
+        ],
+        "descuentosVolumen": [
+          {
+            "cantidadMin": 20,
+            "precioUnitario": 2520
+          }
+        ]
+      }
+    ]
+  }
+}`;
+
+  readonly graphqlFilterExample = `query ObtenerCatalogoPorCategoria($categoria: String!) {
+  catalogo(categoria: $categoria) {
+    idProducto
+    producto
+    marca
+    categoria
+    precioUnitario
+    stock
+    estado
+  }
+}`;
+
+  readonly graphqlVariablesExample = `{
+  "categoria": "Switching"
+}`;
+
+  readonly restExpectedFields = `Campos principales esperados:
+- idProducto
+- producto
+- sku
+- marca
+- categoria
+- descripcion
+- precioUnitario
+- stock
+- garantiaMeses
+- tiempoEntregaDias
+- enOferta
+- porcentajeDescuento
+- estado
+- especificaciones
+- imagenes
+- descuentosVolumen`;
 
   private baseUrl = `${APP_API_BASE_URL}/provider`;
 
@@ -72,6 +218,46 @@ export class RegisterProviderComponent implements OnInit {
 
   closeLegalModal(): void {
     this.showLegalModal = false;
+  }
+
+  openApiGuideModal(): void {
+    this.showApiGuideModal = true;
+  }
+
+  closeApiGuideModal(): void {
+    this.showApiGuideModal = false;
+  }
+
+  get isRestGuide(): boolean {
+    return this.apiTipo === 'REST';
+  }
+
+  get isGraphqlGuide(): boolean {
+    return this.apiTipo === 'GRAPHQL';
+  }
+
+  get apiGuideTitle(): string {
+    if (this.isGraphqlGuide) {
+      return 'Guia de integracion GraphQL';
+    }
+
+    if (this.isRestGuide) {
+      return 'Guia de integracion REST';
+    }
+
+    return 'Guia de integracion API';
+  }
+
+  get apiGuideDescription(): string {
+    if (this.isGraphqlGuide) {
+      return 'Usa un endpoint GraphQL para consultar el catalogo de productos. El sistema puede solicitar unicamente los campos necesarios para construir el catalogo RFQ.';
+    }
+
+    if (this.isRestGuide) {
+      return 'Usa un endpoint REST que devuelva el catalogo de productos en formato JSON. El sistema espera productos con informacion comercial, stock, imagenes, especificaciones y descuentos por volumen.';
+    }
+
+    return 'Selecciona REST o GRAPHQL como tipo de API para ver una guia tecnica de integracion del catalogo.';
   }
 
   headers() {
