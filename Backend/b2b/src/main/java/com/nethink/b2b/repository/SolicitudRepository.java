@@ -41,8 +41,7 @@ Optional<Solicitud> buscarTracking(@Param("idSolicitud") Integer idSolicitud);
    @Modifying
 @Query("""
 update Solicitud s
-set s.estado = :estado,
-    s.direccionEnvio = :direccion
+set s.estado = :estado
 where s.idSolicitud = :id
 """)
 void actualizarPago(
