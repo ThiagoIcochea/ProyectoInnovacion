@@ -37,6 +37,8 @@ export class RfqCatalogComponent implements OnInit {
 
   topProviders: any[] = [];
 
+  usarTopProveedoresSimulado = false;
+
   readonly skeletonCards = Array.from({ length: 8 });
 
   imageLoadFailures: { [key: number]: boolean } = {};
@@ -503,7 +505,7 @@ export class RfqCatalogComponent implements OnInit {
     this.loadingTopProviders = true;
 
     this.http.get<any[]>(
-      `${this.API_BASE}/proveedores/top`,
+      `${this.API_BASE}/provider/proveedores/top`,
       {
         headers: this.getHeaders()
       }

@@ -307,7 +307,7 @@
         </div>
       </section>
 
-      <section class="top-provider-grid" *ngIf="loadingProducts">
+      <section class="top-provider-grid" *ngIf="loadingTopProviders">
         <article class="top-provider-card top-provider-card--skeleton" *ngFor="let item of [1, 2, 3, 4]">
           <div class="skeleton-block ranking-skeleton-rank"></div>
           <div class="ranking-skeleton-body">
@@ -319,7 +319,7 @@
         </article>
       </section>
 
-      <section class="top-provider-grid" *ngIf="!loadingProducts && topProviders.length > 0">
+      <section class="top-provider-grid" *ngIf="!loadingTopProviders && topProviders.length > 0">
         <article class="top-provider-card" *ngFor="let proveedor of topProviders; let i = index">
           <div class="ranking-number">#{{ i + 1 }}</div>
 
@@ -327,7 +327,7 @@
             <div class="top-provider-header">
               <div class="top-provider-title">
                 <h3>{{ proveedor.razonSocial }}</h3>
-                <p>{{ proveedor.categoriaPrincipal || 'Rubro no disponible' }}</p>
+                <p>{{ proveedor.categoriaPrincipal || 'Equipos de red' }}</p>
               </div>
 
               <div class="top-provider-badges">
@@ -346,17 +346,17 @@
             <div class="top-provider-metrics">
               <div class="ranking-metric">
                 <span>Rese&ntilde;as</span>
-                <strong>{{ proveedor.totalComentarios || 0 }}</strong>
+               <strong>{{ proveedor.totalResenas || 0 }}</strong>
               </div>
 
               <div class="ranking-metric">
                 <span>Likes</span>
-                <strong>{{ proveedor.totalLikes || 0 }}</strong>
+             <strong>{{ proveedor.likes || 0 }}</strong>
               </div>
 
               <div class="ranking-metric">
                 <span>Dislikes</span>
-                <strong>{{ proveedor.totalDislikes || 0 }}</strong>
+                <strong>{{ proveedor.dislikes || 0 }}</strong>
               </div>
 
               <div class="ranking-metric">
@@ -401,7 +401,8 @@
         </article>
       </section>
 
-      <div class="empty-state empty-state--providers" *ngIf="!loadingProducts && topProviders.length === 0">
+      <div class="empty-state empty-state--providers"
+     *ngIf="!loadingTopProviders && topProviders.length === 0">
         No hay informacion de proveedores disponible.
       </div>
     </ng-container>

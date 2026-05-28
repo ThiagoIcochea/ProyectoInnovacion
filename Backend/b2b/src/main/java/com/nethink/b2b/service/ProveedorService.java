@@ -307,7 +307,7 @@ private LogsApiRepository logsApiRepository;
     return dto;
 }
    
- public List<IndicadorProveedorResponse> top10Proveedores() {
+public List<IndicadorProveedorResponse> top10Proveedores() {
 
     List<Proveedor> proveedores = proveedorRepository.findAll();
 
@@ -326,14 +326,20 @@ private LogsApiRepository logsApiRepository;
                         p.getIdProveedor()
                 );
 
-        double cumplimiento = total == 0
-                ? 0
-                : ((double) completadas / total) * 100.0;
+        if (total <= 0) {
+            continue;
+        }
+
+        double cumplimiento = ((double) completadas / total) * 100.0;
 
         double score = scoringService
                 .calcularScoreProveedorCompleto(
                         p.getIdProveedor()
                 );
+
+        if (score <= 0) {
+            continue;
+        }
 
         IndicadorProveedorResponse dto =
                 new IndicadorProveedorResponse();
