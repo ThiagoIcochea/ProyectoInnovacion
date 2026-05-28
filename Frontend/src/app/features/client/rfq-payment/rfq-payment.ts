@@ -144,7 +144,7 @@ export class RfqPaymentComponent implements OnInit {
     formData.append('codigoOperacion', this.codigoOperacion);
     formData.append('entidad', this.selectedMetodo.entidad);
     formData.append('metodo', this.selectedMetodo.tipo);
-    formData.append('direccion', this.direccionEntrega);
+
     formData.append('monto', String(this.totalSolicitud));
 
     this.http.post(

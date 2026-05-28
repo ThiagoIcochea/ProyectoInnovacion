@@ -124,7 +124,6 @@ listarHistorial(Principal principal) {
             @RequestParam("entidad") String entidad,
             @RequestParam("codigoOperacion") String codigoOperacion,
             @RequestParam("metodo") String metodo,
-            @RequestParam("direccion") String direccion,
             Principal principal,
             HttpServletRequest httpRequest
     ) {
