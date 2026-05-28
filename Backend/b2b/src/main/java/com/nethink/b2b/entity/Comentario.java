@@ -19,7 +19,18 @@ public class Comentario {
 
     private String comentario;
 
-    private String tipo; // POSITIVO / NEGATIVO
+    /*
+      POSITIVO / NEGATIVO
+      viene desde IA
+    */
+    private String tipo;
+
+    /*
+      contadores acumulados
+    */
+    private Integer likes = 0;
+
+    private Integer dislikes = 0;
 
     private LocalDateTime fecha;
 
@@ -61,6 +72,22 @@ public class Comentario {
 
     public void setTipo(String tipo) {
         this.tipo = tipo;
+    }
+
+    public Integer getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Integer likes) {
+        this.likes = likes;
+    }
+
+    public Integer getDislikes() {
+        return dislikes;
+    }
+
+    public void setDislikes(Integer dislikes) {
+        this.dislikes = dislikes;
     }
 
     public LocalDateTime getFecha() {

@@ -33,9 +33,6 @@ export class ProviderReviewsComponent implements OnInit {
 
   private readonly API_BASE = 'https://proyectoinnovacion.onrender.com/api';
 
-  private readonly LOCAL_REVIEW_STORAGE_KEY = 'rfq_provider_local_reviews';
-  private readonly LOCAL_REACTION_STORAGE_KEY = 'rfq_provider_comment_reactions';
-
   constructor(
     private router: Router,
     private http: HttpClient,
@@ -95,6 +92,8 @@ export class ProviderReviewsComponent implements OnInit {
     if (this.selectedProvider) {
 
       this.cargarIndicadoresProveedor(this.selectedProvider);
+      this.cargarComentariosProveedor(this.selectedProvider);
+
       this.loadingProviders = false;
       return;
     }
@@ -145,6 +144,7 @@ export class ProviderReviewsComponent implements OnInit {
 
       this.providers.forEach(provider => {
         this.cargarIndicadoresProveedor(provider);
+        this.cargarComentariosProveedor(provider);
       });
 
       this.loadingProviders = false;
@@ -185,6 +185,7 @@ export class ProviderReviewsComponent implements OnInit {
 
         this.providers.forEach(provider => {
           this.cargarIndicadoresProveedor(provider);
+          this.cargarComentariosProveedor(provider);
         });
 
         this.loadingProviders = false;
@@ -200,6 +201,57 @@ export class ProviderReviewsComponent implements OnInit {
 
         this.providers = [];
         this.loadingProviders = false;
+
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  cargarComentariosProveedor(provider: any): void {
+
+    const idProvProd =
+      provider?.idProvProd
+      ?? provider?.id_prov_prod
+      ?? provider?.idProveedorProducto
+      ?? provider?.idProveedor;
+
+    if (!idProvProd) {
+      provider.comentarios = [];
+      return;
+    }
+
+    this.http.get<any[]>(
+      `${this.API_BASE}/comentarios/${idProvProd}`,
+      {
+        headers: this.getHeaders()
+      }
+    ).subscribe({
+
+      next: (res) => {
+
+        provider.comentarios =
+          Array.isArray(res)
+            ? res.map(c => ({
+                ...c,
+                likes: c.likes ?? 0,
+                dislikes: c.dislikes ?? 0,
+                userReaction: null
+              }))
+            : [];
+
+        this.recalculateProviderReviewMetrics(provider);
+
+        this.cdr.detectChanges();
+      },
+
+      error: (err) => {
+
+        console.error(
+          'Error cargando comentarios',
+          err
+        );
+
+        provider.comentarios = [];
 
         this.cdr.detectChanges();
       }
@@ -408,6 +460,10 @@ export class ProviderReviewsComponent implements OnInit {
       this.expandedProviderKey === key
         ? null
         : key;
+
+    if (this.expandedProviderKey) {
+      this.cargarComentariosProveedor(provider);
+    }
   }
 
   isProviderExpanded(provider: any, index: number): boolean {
@@ -613,28 +669,44 @@ export class ProviderReviewsComponent implements OnInit {
       return;
     }
 
+    const request = {
+      idProvProd:
+        provider?.idProvProd
+        ?? provider?.id_prov_prod
+        ?? provider?.idProveedorProducto
+        ?? provider?.idProveedor,
+
+      idUsuario:
+        Number(localStorage.getItem('idUsuario')) || 1,
+
+      comentario: comentario,
+
+      tipo: draft.tipo
+    };
+
     this.http.post<any>(
-      `${this.API_BASE}/comentarios/validar`,
-      {
-        comentario
-      },
+      `${this.API_BASE}/comentarios`,
+      request,
       {
         headers: this.getHeaders()
       }
     ).subscribe({
 
-      next: () => {
+      next: (res) => {
 
-        const review = {
+        const nuevoComentario = {
+          ...res,
           usuario: 'Tu comentario',
-          comentario,
+          comentario: comentario,
           tipo: draft.tipo,
           fecha: new Date().toISOString(),
-          likes: []
+          likes: 0,
+          dislikes: 0,
+          userReaction: null
         };
 
         this.getWritableReviews(provider)
-          .unshift(review);
+          .unshift(nuevoComentario);
 
         this.recalculateProviderReviewMetrics(provider);
 
@@ -652,7 +724,7 @@ export class ProviderReviewsComponent implements OnInit {
         );
 
         draft.error =
-          'Comentario inapropiado o no permitido';
+          'No se pudo registrar el comentario';
       }
     });
   }
@@ -674,11 +746,11 @@ export class ProviderReviewsComponent implements OnInit {
   }
 
   getReviewLikes(review: any): number {
-    return review?.likes?.length ?? 0;
+    return review?.likes ?? 0;
   }
 
   getReviewDislikes(review: any): number {
-    return review?.dislikes?.length ?? 0;
+    return review?.dislikes ?? 0;
   }
 
   getCommentLikes(comentario: any): number {
@@ -703,13 +775,70 @@ export class ProviderReviewsComponent implements OnInit {
     provider?: any
   ): void {
 
-    comentario.userReaction = tipo;
-
-    if (provider) {
-      this.recalculateProviderReviewMetrics(provider);
+    if (!comentario?.idComentario) {
+      return;
     }
 
-    this.cdr.detectChanges();
+    const request = {
+      idComentario: comentario.idComentario,
+      idUsuario:
+        Number(localStorage.getItem('idUsuario')) || 1,
+      tipo: tipo
+    };
+
+    this.http.post(
+      `${this.API_BASE}/comentarios/reaccion`,
+      request,
+      {
+        headers: this.getHeaders()
+      }
+    ).subscribe({
+
+      next: () => {
+
+        if (comentario.userReaction === tipo) {
+          return;
+        }
+
+        if (tipo === 'LIKE') {
+
+          comentario.likes =
+            (comentario.likes || 0) + 1;
+
+          if (comentario.userReaction === 'DISLIKE') {
+            comentario.dislikes =
+              Math.max(0, (comentario.dislikes || 0) - 1);
+          }
+        }
+
+        if (tipo === 'DISLIKE') {
+
+          comentario.dislikes =
+            (comentario.dislikes || 0) + 1;
+
+          if (comentario.userReaction === 'LIKE') {
+            comentario.likes =
+              Math.max(0, (comentario.likes || 0) - 1);
+          }
+        }
+
+        comentario.userReaction = tipo;
+
+        if (provider) {
+          this.recalculateProviderReviewMetrics(provider);
+        }
+
+        this.cdr.detectChanges();
+      },
+
+      error: (err) => {
+
+        console.error(
+          'Error reaccionando comentario',
+          err
+        );
+      }
+    });
   }
 
   getTotalReactions(provider: any): number {
@@ -854,12 +983,21 @@ export class ProviderReviewsComponent implements OnInit {
 
     comentarios.forEach(review => {
 
-      if (review?.tipo === 'LIKE') {
-        likes++;
-      }
+      likes += Number(review?.likes || 0);
+      dislikes += Number(review?.dislikes || 0);
 
-      if (review?.tipo === 'DISLIKE') {
-        dislikes++;
+      if (
+        review?.likes === 0 &&
+        review?.dislikes === 0
+      ) {
+
+        if (review?.tipo === 'LIKE') {
+          likes++;
+        }
+
+        if (review?.tipo === 'DISLIKE') {
+          dislikes++;
+        }
       }
     });
 
