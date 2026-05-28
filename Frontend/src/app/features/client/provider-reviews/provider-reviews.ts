@@ -560,6 +560,40 @@ export class ProviderReviewsComponent implements OnInit {
     this.productImageFailed = true;
   }
 
+  verDetalleProveedor(provider: any): void {
+    this.origin = 'PRODUCTO_PROVEEDORES';
+
+    this.selectedProvider =
+      this.normalizarProveedor(provider);
+
+    this.providers = [
+      this.selectedProvider
+    ];
+
+    this.expandedProviderKey =
+      this.getProviderKey(
+        this.selectedProvider,
+        0
+      );
+
+    this.loadingProviders = false;
+
+    this.cargarIndicadoresProveedor(
+      this.selectedProvider
+    );
+
+    this.cargarComentariosProveedor(
+      this.selectedProvider
+    );
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+
+    this.cdr.detectChanges();
+  }
+
   getProviderKey(
     provider: any,
     index: number
