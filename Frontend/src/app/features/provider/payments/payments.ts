@@ -21,11 +21,12 @@ import { tap } from 'rxjs/operators';
 export class ProviderPaymentsComponent  implements OnInit    {
 
  
-payments$!: Observable<Payment[]>;
+  payments$!: Observable<Payment[]>;
 
   selectedPayment: Payment | null = null;
 
-  mostrarModal=false; 
+  accionModal: 'APROBAR' | 'RECHAZAR' | null = null;
+  mostrarModal = false;
 
   constructor(private pagoService: PagoService) {}
 
@@ -54,40 +55,54 @@ seleccionarPago(pago: Payment): void {
 
 
 
-abrirModalAprobacion(): void {
-
+abrirModal(accion: 'APROBAR' | 'RECHAZAR'): void {
   if (!this.selectedPayment) return;
 
+  this.accionModal = accion;
   this.mostrarModal = true;
-
 }
+
 
 
 
 cerrarModal(): void {
 
   this.mostrarModal = false;
+  this.accionModal=null; 
+
 
 }
 
 
 
 
+confirmarAccion(): void {
+  if (!this.selectedPayment) return;
 
+  const idPago = this.selectedPayment.idPago;
 
-
-
-
-aprobarPago(): void {
-
-    if (!this.selectedPayment) return;
-
-    const idPago = this.selectedPayment?.idPago;
-
-  if (!idPago) {
-    console.error("idPago no válido");
-    return;
+  if (this.accionModal === 'APROBAR') {
+    this.aprobarPago(idPago);
   }
+
+  if (this.accionModal === 'RECHAZAR') {
+    this.rechazarPago(idPago);
+  }
+}
+
+
+
+
+aprobarPago(idPago:number): void {
+
+    //if (!this.selectedPayment) return;
+
+    //const idPago = this.selectedPayment?.idPago;
+
+  //if (!idPago) {
+   // console.error("idPago no válido");
+   //return;
+  //}
 
     this.pagoService
       .aprobarPago(idPago)
@@ -96,23 +111,26 @@ aprobarPago(): void {
         next: (resp) => {
            console.log(resp.mensaje); 
           //alert('Pago aprobado correctamente');
-            this.mostrarModal=false; 
+
+
+
+            this.cerrarModal(); 
           // recargar lista
-          this.payments$ =
-            this.pagoService.listarMisPagos()
+          //this.payments$ =
+          //  this.pagoService.listarMisPagos()
 
-            .pipe(
+           // .pipe(
 
-              tap((pagos) => {
+            //  tap((pagos) => {
 
-                this.selectedPayment =
-                  pagos.length > 0
-                    ? pagos[0]
-                    : null;
+            //    this.selectedPayment =
+             //     pagos.length > 0
+             //       ? pagos[0]
+             //       : null;
 
-              })
+             // })
 
-            );  
+            //);  
 
 
         },
@@ -133,16 +151,16 @@ aprobarPago(): void {
   }
 
 
-rechazarPago(): void {
+rechazarPago(idPago:number): void {
 
-    if (!this.selectedPayment) return;
+    //if (!this.selectedPayment) return;
 
-    const idPago = this.selectedPayment?.idPago;
+   // const idPago = this.selectedPayment?.idPago;
 
-  if (!idPago) {
-    console.error("idPago no válido");
-    return;
-  }
+  //if (!idPago) {
+  //  console.error("idPago no válido");
+  //  return;
+  //}
 
     this.pagoService
       .rechazarPago(idPago)
@@ -151,23 +169,25 @@ rechazarPago(): void {
         next: (resp) => {
            console.log(resp.mensaje); 
           //alert('Pago no aprobado');
-            this.mostrarModal=false; 
+
+            this.recargarPagos(); 
+            this.cerrarModal(); 
           // recargar lista
-          this.payments$ =
-            this.pagoService.listarMisPagos()
+          //this.payments$ =
+          //  this.pagoService.listarMisPagos()
 
-            .pipe(
+           // .pipe(
 
-              tap((pagos) => {
+            //  tap((pagos) => {
 
-                this.selectedPayment =
-                  pagos.length > 0
-                    ? pagos[0]
-                    : null;
+            //    this.selectedPayment =
+            //      pagos.length > 0
+            //        ? pagos[0]
+            //        : null;
 
-              })
+            //  })
 
-            );  
+           // );  
 
 
         },
@@ -189,7 +209,13 @@ rechazarPago(): void {
 
 
 
-
+private recargarPagos(): void {
+  this.payments$ = this.pagoService.listarMisPagos().pipe(
+    tap((pagos) => {
+      this.selectedPayment = pagos.length > 0 ? pagos[0] : null;
+    })
+  );
+}
 
 
 

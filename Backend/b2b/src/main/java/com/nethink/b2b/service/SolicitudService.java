@@ -4,6 +4,7 @@ import com.nethink.b2b.dto.request.SolicitudCrearRequest;
 import com.nethink.b2b.dto.response.SolicitudHistorialResponse;
 import com.nethink.b2b.dto.response.SolicitudResponse;
 import com.nethink.b2b.dto.response.TrackingResponse;
+import com.nethink.b2b.dto.response.TrackingStepEntregaResponse; 
 import com.nethink.b2b.dto.response.TrackingStepResponse;
 import com.nethink.b2b.entity.DescuentoVolumen;
 import com.nethink.b2b.entity.DetalleSolicitud;
@@ -31,6 +32,8 @@ import com.nethink.b2b.dto.response.DetalleSolicitudResponse;
 import com.nethink.b2b.dto.response.EspecificacionResponse;
 import com.nethink.b2b.entity.ProductoEspecificacion;
 import com.nethink.b2b.repository.ProductoEspecificacionRepository; 
+import com.nethink.b2b.dto.response.SolicitudEntregaResponse; 
+import com.nethink.b2b.dto.response.SolicitudDetalleEntregaResponse; 
 
 
 import java.math.BigDecimal;
@@ -636,7 +639,7 @@ BigDecimal totalItem =
     
     public List<SolicitudResponse> listarSolicitudesProveedor(
         Integer idProveedor) {
-
+System.err.println("ID PROVEEDOR = " + idProveedor);
     List<Solicitud> solicitudes =
             solicitudRepo.listarSolicitudes(idProveedor);
 
@@ -781,13 +784,66 @@ BigDecimal totalItem =
     
     
     
+// listar solicitudes pagadas, en preparacion, en camino y entregadas
     
     
+    public List<SolicitudEntregaResponse>
+listarSolicitudesEntregaProveedor(
+        Integer idProveedor
+) {
+
+    return solicitudRepo
+            .listarSolicitudesEntrega(
+                    idProveedor
+            );
+
+}
     
     
+  // listar el tracking para proveedor
+
+public List<TrackingStepEntregaResponse>
+listarTrackingSolicitud(
+
+        Integer idSolicitud,
+
+        Integer idProveedor
+
+) {
+
+    return historialRepo
+            .listarTrackingSolicitud(
+
+                    idSolicitud,
+
+                    idProveedor
+
+            );
+
+}
     
     
-    
+  // listar los detalles de las solicitudes que estan en fase de entregas
+
+
+public List<SolicitudDetalleEntregaResponse>
+listarDetallesEntregaProveedor(
+
+        Integer idProveedor
+
+) {
+
+    return detalleRepo
+            .listarDetallesEntregaProveedor(
+                    idProveedor
+            );
+
+}
+
+
+
+
+
     
     
     

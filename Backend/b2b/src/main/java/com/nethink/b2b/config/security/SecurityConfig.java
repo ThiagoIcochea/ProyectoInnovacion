@@ -39,10 +39,14 @@ public class SecurityConfig {
                                 "/files"
                                 
                                 
+                                
                         ).permitAll()
 
                         .requestMatchers("/api/config/**")
                         .hasRole(AppConstants.ROLE_ADMIN)
+                        
+                        .requestMatchers("/api/solicitudes/proveedor/**")
+                        .hasAuthority("ROLE_PROVEEDOR")
 
                         .anyRequest().authenticated()
                 )

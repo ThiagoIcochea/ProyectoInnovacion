@@ -121,8 +121,8 @@
             <p>Confirma si el monto y código de operación coinciden con tu cuenta bancaria.</p>
 
             <div class="validation-actions">
-              <button class="btn-danger"       >Rechazar pago</button>
-              <button class="btn-primary" (click)="abrirModalAprobacion()"    >Aprobar pago</button>
+              <button class="btn-danger"  (click)="abrirModal('RECHAZAR')"     >Rechazar pago</button>
+              <button class="btn-primary" (click)="abrirModal('APROBAR')"    >Aprobar pago</button>
             </div>
           </div>
         </div>
@@ -156,27 +156,35 @@
 
 
 
-<div
-  class="modal-backdrop"
-  *ngIf="mostrarModal"
->
 
-  <div class="modal-box">
+<div class="modal" *ngIf="mostrarModal">
 
-    <h3>Confirmar aprobación</h3>
+  <div class="modal-content">
+
+    <h3>
+      {{ accionModal === 'APROBAR'
+          ? 'Confirmar aprobación'
+          : 'Confirmar rechazo' }}
+    </h3>
 
     <p>
-      ¿Deseas aprobar este pago?
+      ¿Estás seguro de que deseas
+      {{ accionModal === 'APROBAR'
+          ? 'aprobar'
+          : 'rechazar' }}
+      este pago?
     </p>
 
     <div class="modal-actions">
 
-      <button (click)="cerrarModal()">
-        Cancelar
+      <button class="btn-primary"
+              (click)="confirmarAccion()">
+        Sí, confirmar
       </button>
 
-      <button (click)="aprobarPago()">
-        Aprobar
+      <button class="btn-secondary"
+              (click)="cerrarModal()">
+        Cancelar
       </button>
 
     </div>
@@ -184,6 +192,7 @@
   </div>
 
 </div>
+
 
 
 

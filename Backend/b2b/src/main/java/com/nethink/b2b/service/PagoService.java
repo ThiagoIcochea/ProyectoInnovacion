@@ -266,7 +266,31 @@ public void aprobarPago(Integer idPago, Integer idUsuario) {
     solicitud.setEstado(
             Solicitud.EstadoSolicitud.PAGADA
     );
+    
+    
+    
+    SolicitudHistorial historial =
+            new SolicitudHistorial();
 
+    historial.setSolicitud(solicitud);
+
+    historial.setIdUsuario(idUsuario);
+
+    historial.setEstado(
+            Solicitud.EstadoSolicitud.PAGADA.name()
+    );
+
+    historial.setDescripcion(
+            "Pago aprobado por proveedor"
+    );
+
+    historial.setFecha(
+            LocalDateTime.now()
+    ); 
+    
+    
+    historialRepo.save(historial); 
+    
     pagoRepo.save(pago);
 
 }
@@ -305,7 +329,32 @@ public void rechazarPago(Integer idPago, Integer idUsuario) {
     solicitud.setEstado(
             Solicitud.EstadoSolicitud.RECHAZADA
     );
+    
+    
+    
+    
+   SolicitudHistorial historial =
+            new SolicitudHistorial();
 
+    historial.setSolicitud(solicitud);
+
+    historial.setIdUsuario(idUsuario);
+
+    historial.setEstado(
+            Solicitud.EstadoSolicitud.RECHAZADA.name()
+    );
+
+    historial.setDescripcion(
+            "Pago rechazado por proveedor"
+    );
+
+    historial.setFecha(
+            LocalDateTime.now()
+    ); 
+    
+    
+    historialRepo.save(historial);  
+    
     pagoRepo.save(pago);
 
 } 

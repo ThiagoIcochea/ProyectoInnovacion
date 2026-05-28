@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 //se añadio para que detalle solicitud pueda gestionarse en la lista val
 import com.nethink.b2b.entity.DetalleSolicitud;
+import com.nethink.b2b.dto.response.SolicitudEntregaResponse;
+
 
 
 
@@ -60,6 +62,77 @@ JOIN FETCH s.empresaCompradora
 WHERE s.proveedor.idProveedor = :idProveedor
 """)
 List<Solicitud> listarSolicitudes(@Param("idProveedor") Integer idProveedor);
+
+
+
+// listar solicitudes pagadas para proveedor
+
+
+
+    @Query("""
+    SELECT new com.nethink.b2b.dto.response.SolicitudEntregaResponse(
+        s.idSolicitud,
+        s.estado,
+        s.total,
+        s.fechaCreacion,
+        emp.razonSocial,
+        u.nombres,
+        u.apellidos,
+        SUM(d.cantidad)
+    )
+    FROM Solicitud s
+    JOIN s.usuario u
+    JOIN s.empresaCompradora emp
+    JOIN s.detalles d
+    WHERE s.proveedor.idProveedor = :idProveedor
+    AND s.estado IN  (
+           
+               'PAGADA',
+           
+               'EN_PREPARACION',
+           
+               'EN_CAMINO',
+           
+               'ENTREGADA'
+           
+           )        
+           
+           
+           
+           
+    GROUP BY
+        s.idSolicitud,
+        s.estado,
+        s.total,
+        s.fechaCreacion,
+        emp.razonSocial,
+        u.nombres,
+        u.apellidos
+           
+     ORDER BY s.fechaCreacion DESC      
+           
+           
+    """)
+    List<SolicitudEntregaResponse>
+    listarSolicitudesEntrega(
+            @Param("idProveedor")
+            Integer idProveedor
+    );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

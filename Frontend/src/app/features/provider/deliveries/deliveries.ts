@@ -1,74 +1,185 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { DeliveriesService } from './deliveries.service';
+import { DeliveryRequest } from './delivery.model';
+import { TrackingStep } from './tracking-step.model';
+import { DeliveryDetail } from './delivery-detail.model';
 
 @Component({
   selector: 'app-provider-deliveries',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './deliveries.html',
-  styleUrl: './deliveries.scss'
+  styleUrls: ['./deliveries.scss']
 })
-export class ProviderDeliveriesComponent {
-  orders = [
-    {
-      id: 'ORD-2026-1045',
-      client: 'TechNova S.A.',
-      items: '12 equipos',
-      time: 'Hace 2 horas',
-      status: 'En preparación',
-      active: true
-    },
-    {
-      id: 'ORD-2026-1042',
-      client: 'Corporación Andes',
-      items: '5 equipos',
-      time: 'Ayer',
-      status: 'En camino',
-      active: false
-    },
-    {
-      id: 'ORD-2026-1038',
-      client: 'InfraRed Corp',
-      items: '45 equipos',
-      time: '23 Abr 2026',
-      status: 'Entregado',
-      active: false
-    }
-  ];
+export class ProviderDeliveriesComponent implements OnInit {
 
-  shipmentProducts = [
-    {
-      product: 'Cisco Catalyst 9300 48-port PoE+',
-      sku: 'C9300-48P-E',
-      qty: 2
-    },
-    {
-      product: 'Ubiquiti UniFi UAP-AC-PRO',
-      sku: 'UAP-AC-PRO-US',
-      qty: 10
-    }
-  ];
+  
+deliveries$: Observable<DeliveryRequest[]> = of([]);
 
-  steps = [
-    {
-      title: 'Pago validado',
-      description: '25 Abr 2026, 10:30 AM',
-      status: 'done'
-    },
-    {
-      title: 'En preparación',
-      description: 'Equipos en almacén',
-      status: 'active'
-    },
-    {
-      title: 'En camino',
-      description: 'Pendiente',
-      status: 'pending'
-    },
-    {
-      title: 'Entregado',
-      description: 'Pendiente confirmación',
-      status: 'pending'
-    }
-  ];
-} 
+tracking$: Observable<TrackingStep[]> = of([]);
+
+details$: Observable<DeliveryDetail[]> = of([]);
+
+  selectedRequest:
+      DeliveryRequest | null = null;
+
+  constructor(
+      private deliveriesService:
+      DeliveriesService
+  ) {}
+
+  ngOnInit(): void {
+
+    this.recargarSolicitudes();
+
+     
+
+  }
+
+  // =========================
+  // RECARGAR
+  // =========================
+
+  recargarSolicitudes(): void {
+
+    this.deliveries$ =
+      this.deliveriesService
+        .listarSolicitudesEntrega()
+        .pipe(
+
+          tap((data) => {
+
+
+             if (data.length > 0) {
+
+              this.selectedRequest =
+                data[0];
+
+              // cargar tracking inicial
+
+              this.cargarTracking(
+                  data[0].idSolicitud
+              );
+
+
+               this.cargarDetalles(
+                  data[0].idSolicitud
+              );
+
+
+            }else{
+
+
+                  this.selectedRequest = null;
+                  this.tracking$ = of([]);
+                  this.details$ = of([]);
+
+
+            }
+
+
+            
+
+
+            //this.selectedRequest =
+            //  data.length > 0
+             //   ? data[0]
+             //   : null;
+
+          })
+
+        );
+
+  }
+
+  // =========================
+  // SELECCIONAR
+  // =========================
+
+  seleccionarSolicitud(
+      solicitud: DeliveryRequest
+  ): void {
+
+    this.selectedRequest = solicitud;
+
+    this.cargarTracking(
+        solicitud.idSolicitud
+    );
+
+
+// detalles
+
+    this.cargarDetalles(
+        solicitud.idSolicitud
+    );
+
+
+
+
+
+  }
+
+
+
+cargarTracking(
+      idSolicitud: number
+  ): void {
+
+    this.tracking$ =
+
+      this.deliveriesService
+        .listarTrackingSolicitud(
+            idSolicitud
+        );
+
+  }
+
+
+
+
+cargarDetalles(
+      idSolicitud: number
+  ): void {
+
+    this.details$ =
+
+      this.deliveriesService
+        .listarDetallesEntrega(
+            idSolicitud
+        );
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

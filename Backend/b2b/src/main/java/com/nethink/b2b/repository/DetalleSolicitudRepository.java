@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
+import com.nethink.b2b.dto.response.SolicitudDetalleEntregaResponse; 
 
 @Repository
 public interface DetalleSolicitudRepository extends JpaRepository<DetalleSolicitud, Integer> {
@@ -38,9 +39,104 @@ public interface DetalleSolicitudRepository extends JpaRepository<DetalleSolicit
 List<DetalleSolicitud> listarDetalles(@Param("idSolicitud") Integer idSolicitud);
 
 
+// listar detalles de solicitudes en fase entregas
 
 
 
+
+@Query("""
+SELECT new com.nethink.b2b.dto.response.SolicitudDetalleEntregaResponse(
+
+    s.idSolicitud,
+
+    p.nombre,
+
+    ds.cantidad,
+
+    CAST(s.estado AS string),
+
+    s.fechaCreacion
+
+)
+
+FROM DetalleSolicitud ds
+
+JOIN ds.proveedorProducto pp
+
+JOIN pp.producto p
+
+JOIN ds.solicitud s
+
+WHERE s.proveedor.idProveedor = :idProveedor
+
+AND s.estado IN (
+    'PAGADA',
+    'EN_PREPARACION',
+    'EN_CAMINO',
+    'ENTREGADA'
+)
+
+ORDER BY s.fechaCreacion DESC
+""")
+List<SolicitudDetalleEntregaResponse>
+listarDetallesEntregaProveedor(
+    @Param("idProveedor") Integer idProveedor
+);
+
+
+
+
+
+
+
+
+//version dos
+
+/*   @Query("""
+SELECT new com.nethink.b2b.dto.response.SolicitudDetalleEntregaResponse(
+
+    ds.solicitud.idSolicitud,
+
+    p.nombre,
+
+    ds.cantidad,
+
+    ds.solicitud.estado.name(),
+
+    ds.solicitud.fechaCreacion
+
+)
+
+FROM DetalleSolicitud ds
+
+JOIN ds.proveedorProducto pp
+
+JOIN pp.producto p
+
+JOIN ds.solicitud s
+
+WHERE s.proveedor.idProveedor = :idProveedor
+
+AND s.estado IN (
+
+    'PAGADA',
+
+    'EN_PREPARACION',
+
+    'EN_CAMINO',
+
+    'ENTREGADA'
+
+)
+
+ORDER BY s.fechaCreacion DESC
+""")
+List<SolicitudDetalleEntregaResponse>
+listarDetallesEntregaProveedordos(
+
+        @Param("idProveedor")
+        Integer idProveedor
+); */
 
 
 

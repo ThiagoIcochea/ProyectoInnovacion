@@ -11,6 +11,10 @@ import com.nethink.b2b.repository.SolicitudRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
 import com.nethink.b2b.service.PagoService;
 import com.nethink.b2b.service.SolicitudService;
+import com.nethink.b2b.dto.response.SolicitudEntregaResponse; 
+
+import com.nethink.b2b.dto.response.TrackingStepResponse; 
+import com.nethink.b2b.dto.response.SolicitudDetalleEntregaResponse; 
 //se añadio val
 import com.nethink.b2b.entity.Proveedor; 
 
@@ -28,6 +32,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.repository.query.Param;
+import com.nethink.b2b.dto.response.TrackingStepEntregaResponse; 
 
 @RestController
 @RequestMapping("/api/solicitudes")
@@ -183,6 +189,166 @@ public ResponseEntity<List<SolicitudResponse>> listarMisSolicitudesProveedor(
 }
 
 
+
+
+
+
+@GetMapping("/proveedor/entregas")
+public ResponseEntity<List<SolicitudEntregaResponse>>
+listarSolicitudesEntrega(
+
+        Principal principal
+
+) {
+
+    // =========================
+    // PROVEEDOR AUTENTICADO
+    // =========================
+
+    Proveedor proveedor =
+            proveedorRepo.findByUsuario_Correo(
+                    principal.getName()
+            ).orElseThrow(() ->
+
+                    new ResponseStatusException(
+
+                            HttpStatus.FORBIDDEN,
+
+                            "Proveedor no encontrado"
+
+                    )
+            );
+
+    // =========================
+    // LISTAR SOLICITUDES
+    // =========================
+
+    return ResponseEntity.ok(
+
+            solicitudService
+                    .listarSolicitudesEntregaProveedor(
+
+                            proveedor.getIdProveedor()
+
+                    )
+
+    );
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+@GetMapping("/proveedor/solicitudes/{idSolicitud}/tracking")
+public ResponseEntity<List<TrackingStepEntregaResponse>>
+listarTrackingSolicitud(
+
+        @PathVariable Integer idSolicitud,
+
+        Principal principal
+
+) {
+
+    // =========================
+    // PROVEEDOR AUTENTICADO
+    // =========================
+
+    Proveedor proveedor =
+            proveedorRepo.findByUsuario_Correo(
+                    principal.getName()
+            ).orElseThrow(() ->
+
+                    new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "Proveedor no encontrado"
+                    )
+            );
+
+    // =========================
+    // TRACKING
+    // =========================
+
+    return ResponseEntity.ok(
+
+            solicitudService
+                    .listarTrackingSolicitud(
+
+                            idSolicitud,
+
+                            proveedor.getIdProveedor()
+
+                    )
+
+    );
+
+}
+
+
+
+
+@GetMapping("/proveedor/entregas/detalles")
+public ResponseEntity<
+        List<SolicitudDetalleEntregaResponse>
+> listarDetallesEntregaProveedor(
+
+        Principal principal
+
+) {
+
+    // =========================
+    // PROVEEDOR AUTENTICADO
+    // =========================
+
+    Proveedor proveedor =
+
+            proveedorRepo
+                    .findByUsuario_Correo(
+                            principal.getName()
+                    )
+
+                    .orElseThrow(() ->
+
+                            new ResponseStatusException(
+
+                                    HttpStatus.FORBIDDEN,
+
+                                    "Proveedor no encontrado"
+
+                            )
+
+                    );
+
+    // =========================
+    // LISTAR DETALLES
+    // =========================
+
+    return ResponseEntity.ok(
+
+            solicitudService
+                    .listarDetallesEntregaProveedor(
+
+                            proveedor.getIdProveedor()
+
+                    )
+
+    );
+
+}
+
+
+
+
+
+
+
 //@GetMapping("/proveedor/{idProveedor}")
 //public ResponseEntity<List<SolicitudResponse>>
 //listarSolicitudesProveedor(
@@ -199,7 +365,12 @@ public ResponseEntity<List<SolicitudResponse>> listarMisSolicitudesProveedor(
 
 
 
+@GetMapping("/test-auth")
+public Object testAuth(Authentication auth) {
 
+    return auth.getAuthorities();
+
+}
 
 
 
