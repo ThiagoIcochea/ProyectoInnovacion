@@ -73,7 +73,7 @@ export class RequestsComponent implements OnInit {
             year: 'numeric'
           }),
 
-          status: s.estado,
+          status: s.estado=== 'Pago pendiente'? 'Pedido en revisión': s.estado,
           statusClass: this.mapStatusClass(s.estado),
           rawStatus: s.estado
         }));
