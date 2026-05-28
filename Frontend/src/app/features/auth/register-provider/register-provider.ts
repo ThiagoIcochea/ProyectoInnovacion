@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
+import { APP_API_BASE_URL, APP_STORAGE_KEYS , APP_ROUTE_PATHS} from '../../../core/constants/app.constants';
+import { Router, RouterLink } from '@angular/router';
+
 
 @Component({
   selector: 'app-register-provider',
@@ -187,7 +189,8 @@ export class RegisterProviderComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   openLegalModal(type: 'terms' | 'privacy'): void {
@@ -502,7 +505,9 @@ export class RegisterProviderComponent implements OnInit {
       payload,
       { headers: this.headers() }
     ).subscribe({
-      next: () => alert('Proveedor registrado correctamente'),
+      next: () => {alert('Proveedor registrado correctamente')
+         this.router.navigate([APP_ROUTE_PATHS.login]);
+      },
       error: err => {
         console.error(err);
         this.formError = err?.error?.message || 'No se pudo registrar el proveedor.';
