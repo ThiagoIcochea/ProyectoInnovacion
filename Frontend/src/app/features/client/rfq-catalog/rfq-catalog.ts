@@ -616,7 +616,7 @@ export class RfqCatalogComponent implements OnInit {
               ?? item.description
               ?? '',
 
-            scoreGeneral: Math.round( item.scoreGeneral*100)
+            
           };
         });
 

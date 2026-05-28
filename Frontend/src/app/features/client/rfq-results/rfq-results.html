@@ -25,7 +25,7 @@
           
           <div class="provider-info">
             <h2>{{ provider.nombreProveedor }}</h2>
-            <p>Puntaje de Coincidencia: <strong>{{ provider.scoreFinal | number:'1.1-2' }} / 5.0</strong></p>
+            <p>Puntaje de Coincidencia: <strong>{{ provider.scoreFinal*100 | number:'1.1-2' }} / 100</strong></p>
           </div>
 
           <div class="provider-badges">

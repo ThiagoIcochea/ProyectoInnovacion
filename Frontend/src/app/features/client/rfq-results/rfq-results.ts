@@ -13,6 +13,7 @@ import { APP_STORAGE_KEYS, APP_ROUTE_PATHS } from '../../../core/constants/app.c
 })
 export class RfqResultsComponent implements OnInit {
   providers: any[] = [];
+
   summaryItems: any[] = [];
 
   constructor(private router: Router) {
