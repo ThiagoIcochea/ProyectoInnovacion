@@ -2,7 +2,6 @@ package com.nethink.b2b.service;
 
 import com.nethink.b2b.dto.response.RFQProveedorResponse;
 import com.nethink.b2b.entity.Solicitud.EstadoSolicitud;
-import com.nethink.b2b.entity.enums.EstadoSolicitud;
 import com.nethink.b2b.entity.enums.PrioridadRFQ;
 import com.nethink.b2b.repository.ComentarioRepository;
 import com.nethink.b2b.repository.EvaluacionRepository;
