@@ -1,13 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpHeaders
+} from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-provider-reviews',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [
+    CommonModule,
+    RouterLink,
+    FormsModule
+  ],
   templateUrl: './provider-reviews.html',
   styleUrl: './provider-reviews.scss'
 })
@@ -16,11 +23,16 @@ export class ProviderReviewsComponent implements OnInit {
   product: any = null;
   selectedProvider: any = null;
   origin: string | null = null;
+
   requestItems: any[] = [];
   providers: any[] = [];
+
   qty: number = 1;
+
   loadingProviders: boolean = true;
+
   expandedProviderKey: string | null = null;
+
   productImageFailed = false;
 
   reviewDrafts: {
@@ -31,7 +43,8 @@ export class ProviderReviewsComponent implements OnInit {
     }
   } = {};
 
-  private readonly API_BASE = 'https://proyectoinnovacion.onrender.com/api';
+  private readonly API_BASE =
+    'https://proyectoinnovacion.onrender.com/api';
 
   constructor(
     private router: Router,
@@ -40,10 +53,18 @@ export class ProviderReviewsComponent implements OnInit {
   ) {
 
     const nav = this.router.getCurrentNavigation();
-    const state = nav?.extras?.state ?? history.state;
 
-    this.product = state?.['product'] ?? null;
-    this.origin = state?.['origen'] ?? null;
+    const state =
+      nav?.extras?.state
+      ?? history.state;
+
+    this.product =
+      state?.['product']
+      ?? null;
+
+    this.origin =
+      state?.['origen']
+      ?? null;
 
     const stateProvider =
       state?.['proveedor']
@@ -53,12 +74,19 @@ export class ProviderReviewsComponent implements OnInit {
     if (stateProvider) {
 
       this.selectedProvider =
-        this.normalizarProveedor(stateProvider);
+        this.normalizarProveedor(
+          stateProvider
+        );
 
-      this.providers = [this.selectedProvider];
+      this.providers = [
+        this.selectedProvider
+      ];
 
       this.expandedProviderKey =
-        this.getProviderKey(this.selectedProvider, 0);
+        this.getProviderKey(
+          this.selectedProvider,
+          0
+        );
 
       this.loadingProviders = false;
 
@@ -72,7 +100,9 @@ export class ProviderReviewsComponent implements OnInit {
     if (Array.isArray(stateProviders)) {
 
       this.setProviderList(
-        this.filterProvidersForProduct(stateProviders)
+        this.filterProvidersForProduct(
+          stateProviders
+        )
       );
 
       this.loadingProviders = false;
@@ -83,18 +113,30 @@ export class ProviderReviewsComponent implements OnInit {
 
     this.cargarCarritoLocal();
 
-    if (!this.product && !this.selectedProvider) {
+    if (
+      !this.product
+      && !this.selectedProvider
+    ) {
 
-      this.router.navigate(['/app/rfq/catalog']);
+      this.router.navigate([
+        '/app/rfq/catalog'
+      ]);
+
       return;
     }
 
     if (this.selectedProvider) {
 
-      this.cargarIndicadoresProveedor(this.selectedProvider);
-      this.cargarComentariosProveedor(this.selectedProvider);
+      this.cargarIndicadoresProveedor(
+        this.selectedProvider
+      );
+
+      this.cargarComentariosProveedor(
+        this.selectedProvider
+      );
 
       this.loadingProviders = false;
+
       return;
     }
 
@@ -105,20 +147,24 @@ export class ProviderReviewsComponent implements OnInit {
 
   private getHeaders(): HttpHeaders {
 
-    const token = localStorage.getItem('token');
+    const token =
+      localStorage.getItem('token');
 
     return new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
     });
   }
 
   cargarCarritoLocal(): void {
 
-    const saved = localStorage.getItem('rfq_cart');
+    const saved =
+      localStorage.getItem('rfq_cart');
 
     if (saved) {
-      this.requestItems = JSON.parse(saved);
+
+      this.requestItems =
+        JSON.parse(saved);
     }
   }
 
@@ -132,22 +178,34 @@ export class ProviderReviewsComponent implements OnInit {
 
   cargarProveedoresDelProducto(): void {
 
-    if (!this.product) return;
+    if (!this.product) {
+      return;
+    }
 
     this.loadingProviders = true;
 
-    const providersFromProduct = this.getProvidersFromProduct();
+    const providersFromProduct =
+      this.getProvidersFromProduct();
 
     if (providersFromProduct.length > 0) {
 
-      this.setProviderList(providersFromProduct);
+      this.setProviderList(
+        providersFromProduct
+      );
 
       this.providers.forEach(provider => {
-        this.cargarIndicadoresProveedor(provider);
-        this.cargarComentariosProveedor(provider);
+
+        this.cargarIndicadoresProveedor(
+          provider
+        );
+
+        this.cargarComentariosProveedor(
+          provider
+        );
       });
 
       this.loadingProviders = false;
+
       this.cdr.detectChanges();
 
       return;
@@ -156,7 +214,8 @@ export class ProviderReviewsComponent implements OnInit {
     const request = {
       items: [
         {
-          idProducto: this.product.idProducto,
+          idProducto:
+            this.product.idProducto,
           cantidad: 1
         }
       ],
@@ -180,15 +239,24 @@ export class ProviderReviewsComponent implements OnInit {
       next: (res) => {
 
         this.setProviderList(
-          Array.isArray(res) ? res : []
+          Array.isArray(res)
+            ? res
+            : []
         );
 
         this.providers.forEach(provider => {
-          this.cargarIndicadoresProveedor(provider);
-          this.cargarComentariosProveedor(provider);
+
+          this.cargarIndicadoresProveedor(
+            provider
+          );
+
+          this.cargarComentariosProveedor(
+            provider
+          );
         });
 
         this.loadingProviders = false;
+
         this.cdr.detectChanges();
       },
 
@@ -200,6 +268,7 @@ export class ProviderReviewsComponent implements OnInit {
         );
 
         this.providers = [];
+
         this.loadingProviders = false;
 
         this.cdr.detectChanges();
@@ -207,7 +276,9 @@ export class ProviderReviewsComponent implements OnInit {
     });
   }
 
-  cargarComentariosProveedor(provider: any): void {
+  cargarComentariosProveedor(
+    provider: any
+  ): void {
 
     const idProvProd =
       provider?.idProvProd
@@ -216,7 +287,9 @@ export class ProviderReviewsComponent implements OnInit {
       ?? provider?.idProveedor;
 
     if (!idProvProd) {
+
       provider.comentarios = [];
+
       return;
     }
 
@@ -232,14 +305,27 @@ export class ProviderReviewsComponent implements OnInit {
         provider.comentarios =
           Array.isArray(res)
             ? res.map(c => ({
+
                 ...c,
-                likes: c.likes ?? 0,
-                dislikes: c.dislikes ?? 0,
+
+                likes:
+                  Number(c.likes ?? 0),
+
+                dislikes:
+                  Number(c.dislikes ?? 0),
+
+                tipo:
+                  c.tipo === 'NEGATIVO'
+                    ? 'DISLIKE'
+                    : 'LIKE',
+
                 userReaction: null
               }))
             : [];
 
-        this.recalculateProviderReviewMetrics(provider);
+        this.recalculateProviderReviewMetrics(
+          provider
+        );
 
         this.cdr.detectChanges();
       },
@@ -258,7 +344,9 @@ export class ProviderReviewsComponent implements OnInit {
     });
   }
 
-  cargarIndicadoresProveedor(provider: any): void {
+  cargarIndicadoresProveedor(
+    provider: any
+  ): void {
 
     const idProveedor =
       provider?.idProveedor
@@ -266,7 +354,9 @@ export class ProviderReviewsComponent implements OnInit {
       ?? provider?.idProvider
       ?? provider?.id;
 
-    if (!idProveedor) return;
+    if (!idProveedor) {
+      return;
+    }
 
     this.http.get<any>(
       `${this.API_BASE}/provider/${idProveedor}/indicadores`,
@@ -290,7 +380,10 @@ export class ProviderReviewsComponent implements OnInit {
           res?.scoreGeneral ?? 0;
 
         provider.scoringGeneral =
-          Math.round((provider.scoreGeneral || 0) * 100);
+          Math.round(
+            (provider.scoreGeneral || 0)
+            * 100
+          );
 
         this.cdr.detectChanges();
       },
@@ -305,16 +398,24 @@ export class ProviderReviewsComponent implements OnInit {
     });
   }
 
-  private setProviderList(providers: any[]): void {
+  private setProviderList(
+    providers: any[]
+  ): void {
 
     this.providers =
-      (providers || []).map(provider =>
-        this.normalizarProveedor(provider)
+      (providers || []).map(
+        provider =>
+          this.normalizarProveedor(
+            provider
+          )
       );
 
     this.expandedProviderKey =
       this.providers.length
-        ? this.getProviderKey(this.providers[0], 0)
+        ? this.getProviderKey(
+            this.providers[0],
+            0
+          )
         : null;
   }
 
@@ -330,7 +431,9 @@ export class ProviderReviewsComponent implements OnInit {
     const firstList =
       possibleLists.find(Array.isArray);
 
-    return firstList ? [...firstList] : [];
+    return firstList
+      ? [...firstList]
+      : [];
   }
 
   private filterProvidersForProduct(
@@ -341,22 +444,31 @@ export class ProviderReviewsComponent implements OnInit {
       return providers;
     }
 
-    return providers.filter(provider => {
+    return providers.filter(
+      provider => {
 
-      const items = provider?.items;
+        const items =
+          provider?.items;
 
-      if (!Array.isArray(items)
-        || items.length === 0) {
-        return true;
+        if (
+          !Array.isArray(items)
+          || items.length === 0
+        ) {
+          return true;
+        }
+
+        return items.some(
+          (item: any) =>
+            item?.idProducto ===
+            this.product.idProducto
+        );
       }
-
-      return items.some((item: any) =>
-        item?.idProducto === this.product.idProducto
-      );
-    });
+    );
   }
 
-  normalizarProveedor(item: any): any {
+  normalizarProveedor(
+    item: any
+  ): any {
 
     return {
 
@@ -402,25 +514,30 @@ export class ProviderReviewsComponent implements OnInit {
         || 'ACTIVO',
 
       pedidosCompletados:
-        item?.pedidosCompletados ?? 0,
+        item?.pedidosCompletados
+        ?? 0,
 
       pedidosTotal:
-        item?.pedidosTotal ?? 0,
+        item?.pedidosTotal
+        ?? 0,
 
       cumplimiento:
-        item?.cumplimiento ?? 0,
+        item?.cumplimiento
+        ?? 0,
 
       scoringGeneral:
-        item?.scoringGeneral ?? 0,
+        item?.scoringGeneral
+        ?? 0,
 
       likes:
-        item?.likes ?? 0,
+        Number(item?.likes ?? 0),
 
       dislikes:
-        item?.dislikes ?? 0,
+        Number(item?.dislikes ?? 0),
 
       satisfaccion:
-        item?.satisfaccion ?? 0
+        item?.satisfaccion
+        ?? 0
     };
   }
 
@@ -430,7 +547,8 @@ export class ProviderReviewsComponent implements OnInit {
       return null;
     }
 
-    const image = this.product?.imagenes?.[0];
+    const image =
+      this.product?.imagenes?.[0];
 
     return image?.URL
       || image?.url
@@ -441,7 +559,10 @@ export class ProviderReviewsComponent implements OnInit {
     this.productImageFailed = true;
   }
 
-  getProviderKey(provider: any, index: number): string {
+  getProviderKey(
+    provider: any,
+    index: number
+  ): string {
 
     return String(
       provider?.idProveedor
@@ -451,10 +572,16 @@ export class ProviderReviewsComponent implements OnInit {
     );
   }
 
-  toggleProvider(provider: any, index: number): void {
+  toggleProvider(
+    provider: any,
+    index: number
+  ): void {
 
     const key =
-      this.getProviderKey(provider, index);
+      this.getProviderKey(
+        provider,
+        index
+      );
 
     this.expandedProviderKey =
       this.expandedProviderKey === key
@@ -462,17 +589,28 @@ export class ProviderReviewsComponent implements OnInit {
         : key;
 
     if (this.expandedProviderKey) {
-      this.cargarComentariosProveedor(provider);
+
+      this.cargarComentariosProveedor(
+        provider
+      );
     }
   }
 
-  isProviderExpanded(provider: any, index: number): boolean {
+  isProviderExpanded(
+    provider: any,
+    index: number
+  ): boolean {
 
     return this.expandedProviderKey ===
-      this.getProviderKey(provider, index);
+      this.getProviderKey(
+        provider,
+        index
+      );
   }
 
-  getProviderName(provider: any): string {
+  getProviderName(
+    provider: any
+  ): string {
 
     return provider?.razonSocial
       || provider?.nombreProveedor
@@ -480,7 +618,9 @@ export class ProviderReviewsComponent implements OnInit {
       || 'Proveedor';
   }
 
-  getProviderCategory(provider: any): string | null {
+  getProviderCategory(
+    provider: any
+  ): string | null {
 
     return provider?.categoriaPrincipal
       || provider?.categoria
@@ -488,12 +628,17 @@ export class ProviderReviewsComponent implements OnInit {
       || null;
   }
 
-  getProviderStatus(provider: any): string | null {
+  getProviderStatus(
+    provider: any
+  ): string | null {
 
-    return provider?.estado || null;
+    return provider?.estado
+      || null;
   }
 
-  getProviderLocation(provider: any): string | null {
+  getProviderLocation(
+    provider: any
+  ): string | null {
 
     return provider?.ubicacion
       || provider?.direccion
@@ -501,32 +646,49 @@ export class ProviderReviewsComponent implements OnInit {
       || null;
   }
 
-  getProviderDescription(provider: any): string | null {
+  getProviderDescription(
+    provider: any
+  ): string | null {
 
-    return provider?.descripcion || null;
+    return provider?.descripcion
+      || null;
   }
 
-  getProviderSince(provider: any): string {
+  getProviderSince(
+    provider: any
+  ): string {
 
     return provider?.fechaRegistro
-      ? this.formatFecha(provider.fechaRegistro)
+      ? this.formatFecha(
+          provider.fechaRegistro
+        )
       : 'No disponible';
   }
 
-  getProviderDelivery(provider: any): number | null {
+  getProviderDelivery(
+    provider: any
+  ): number | null {
 
-    return provider?.tiempoEntregaPromedio ?? null;
+    return provider?.tiempoEntregaPromedio
+      ?? null;
   }
 
-  getProviderResponse(provider: any): number | null {
+  getProviderResponse(
+    provider: any
+  ): number | null {
 
-    return provider?.tiempoRespuestaPromedio ?? null;
+    return provider?.tiempoRespuestaPromedio
+      ?? null;
   }
 
-  getProviderResponseLabel(provider: any): string {
+  getProviderResponseLabel(
+    provider: any
+  ): string {
 
     const value =
-      this.getProviderResponse(provider);
+      this.getProviderResponse(
+        provider
+      );
 
     if (value === null) {
       return 'No disponible';
@@ -535,28 +697,42 @@ export class ProviderReviewsComponent implements OnInit {
     return `${value} dias`;
   }
 
-  getProviderCompliance(provider: any): number | null {
+  getProviderCompliance(
+    provider: any
+  ): number | null {
 
-    return provider?.cumplimiento ?? 0;
+    return provider?.cumplimiento
+      ?? 0;
   }
 
-  getProviderOnTime(provider: any): number | null {
+  getProviderOnTime(
+    provider: any
+  ): number | null {
 
-    return provider?.cumplimiento ?? 0;
+    return provider?.cumplimiento
+      ?? 0;
   }
 
-  getCompletedOrders(provider: any): number | null {
+  getCompletedOrders(
+    provider: any
+  ): number | null {
 
-    return provider?.pedidosCompletados ?? 0;
+    return provider?.pedidosCompletados
+      ?? 0;
   }
 
-  getProviderScore100(provider: any): number | null {
+  getProviderScore100(
+    provider: any
+  ): number | null {
 
     const score =
       provider?.scoringGeneral
       ?? provider?.scoreGeneral;
 
-    if (score === null || score === undefined) {
+    if (
+      score === null
+      || score === undefined
+    ) {
       return 0;
     }
 
@@ -567,12 +743,18 @@ export class ProviderReviewsComponent implements OnInit {
     return Math.round(score);
   }
 
-  getProviderReputation(provider: any): number | null {
+  getProviderReputation(
+    provider: any
+  ): number | null {
 
-    return this.getProviderScore100(provider);
+    return this.getProviderScore100(
+      provider
+    );
   }
 
-  getReviews(provider: any): any[] {
+  getReviews(
+    provider: any
+  ): any[] {
 
     const reviews =
       provider?.comentarios
@@ -584,7 +766,10 @@ export class ProviderReviewsComponent implements OnInit {
       : [];
   }
 
-  getReviewCommentDraft(provider: any, index: number): string {
+  getReviewCommentDraft(
+    provider: any,
+    index: number
+  ): string {
 
     return this.ensureReviewDraft(
       provider,
@@ -599,9 +784,13 @@ export class ProviderReviewsComponent implements OnInit {
   ): void {
 
     const draft =
-      this.ensureReviewDraft(provider, index);
+      this.ensureReviewDraft(
+        provider,
+        index
+      );
 
     draft.comentario = value;
+
     draft.error = '';
   }
 
@@ -647,7 +836,9 @@ export class ProviderReviewsComponent implements OnInit {
     return this.ensureReviewDraft(
       provider,
       index
-    ).comentario.trim().length > 0;
+    ).comentario
+      .trim()
+      .length > 0;
   }
 
   agregarComentarioProveedor(
@@ -656,7 +847,10 @@ export class ProviderReviewsComponent implements OnInit {
   ): void {
 
     const draft =
-      this.ensureReviewDraft(provider, index);
+      this.ensureReviewDraft(
+        provider,
+        index
+      );
 
     const comentario =
       draft.comentario.trim();
@@ -670,6 +864,7 @@ export class ProviderReviewsComponent implements OnInit {
     }
 
     const request = {
+
       idProvProd:
         provider?.idProvProd
         ?? provider?.id_prov_prod
@@ -677,11 +872,13 @@ export class ProviderReviewsComponent implements OnInit {
         ?? provider?.idProveedor,
 
       idUsuario:
-        Number(localStorage.getItem('idUsuario')) || 1,
+        Number(
+          localStorage.getItem(
+            'idUsuario'
+          )
+        ) || 1,
 
-      comentario: comentario,
-
-      tipo: draft.tipo
+      comentario: comentario
     };
 
     this.http.post<any>(
@@ -695,22 +892,37 @@ export class ProviderReviewsComponent implements OnInit {
       next: (res) => {
 
         const nuevoComentario = {
+
           ...res,
+
           usuario: 'Tu comentario',
+
           comentario: comentario,
+
           tipo: draft.tipo,
-          fecha: new Date().toISOString(),
+
+          fecha:
+            new Date().toISOString(),
+
           likes: 0,
+
           dislikes: 0,
+
           userReaction: null
         };
 
-        this.getWritableReviews(provider)
-          .unshift(nuevoComentario);
+        this.getWritableReviews(
+          provider
+        ).unshift(
+          nuevoComentario
+        );
 
-        this.recalculateProviderReviewMetrics(provider);
+        this.recalculateProviderReviewMetrics(
+          provider
+        );
 
         draft.comentario = '';
+
         draft.error = '';
 
         this.cdr.detectChanges();
@@ -729,36 +941,76 @@ export class ProviderReviewsComponent implements OnInit {
     });
   }
 
-  getReviewCount(provider: any): number {
-    return this.getReviews(provider).length;
+  getReviewCount(
+    provider: any
+  ): number {
+
+    return this.getReviews(
+      provider
+    ).length;
   }
 
-  getProviderTotalComments(provider: any): number {
-    return this.getReviewCount(provider);
+  getProviderTotalComments(
+    provider: any
+  ): number {
+
+    return this.getReviewCount(
+      provider
+    );
   }
 
-  getProviderLikes(provider: any): number {
-    return provider?.likes ?? 0;
+  getProviderLikes(
+    provider: any
+  ): number {
+
+    return Number(
+      provider?.likes ?? 0
+    );
   }
 
-  getProviderDislikes(provider: any): number {
-    return provider?.dislikes ?? 0;
+  getProviderDislikes(
+    provider: any
+  ): number {
+
+    return Number(
+      provider?.dislikes ?? 0
+    );
   }
 
-  getReviewLikes(review: any): number {
-    return review?.likes ?? 0;
+  getReviewLikes(
+    review: any
+  ): number {
+
+    return Number(
+      review?.likes ?? 0
+    );
   }
 
-  getReviewDislikes(review: any): number {
-    return review?.dislikes ?? 0;
+  getReviewDislikes(
+    review: any
+  ): number {
+
+    return Number(
+      review?.dislikes ?? 0
+    );
   }
 
-  getCommentLikes(comentario: any): number {
-    return this.getReviewLikes(comentario);
+  getCommentLikes(
+    comentario: any
+  ): number {
+
+    return this.getReviewLikes(
+      comentario
+    );
   }
 
-  getCommentDislikes(comentario: any): number {
-    return this.getReviewDislikes(comentario);
+  getCommentDislikes(
+    comentario: any
+  ): number {
+
+    return this.getReviewDislikes(
+      comentario
+    );
   }
 
   hasUserReaction(
@@ -766,7 +1018,8 @@ export class ProviderReviewsComponent implements OnInit {
     tipo: 'LIKE' | 'DISLIKE'
   ): boolean {
 
-    return comentario?.userReaction === tipo;
+    return comentario?.userReaction
+      === tipo;
   }
 
   reactToComment(
@@ -779,10 +1032,21 @@ export class ProviderReviewsComponent implements OnInit {
       return;
     }
 
+    const previousReaction =
+      comentario.userReaction;
+
     const request = {
-      idComentario: comentario.idComentario,
+
+      idComentario:
+        comentario.idComentario,
+
       idUsuario:
-        Number(localStorage.getItem('idUsuario')) || 1,
+        Number(
+          localStorage.getItem(
+            'idUsuario'
+          )
+        ) || 1,
+
       tipo: tipo
     };
 
@@ -796,36 +1060,64 @@ export class ProviderReviewsComponent implements OnInit {
 
       next: () => {
 
-        if (comentario.userReaction === tipo) {
+        if (
+          previousReaction === tipo
+        ) {
           return;
         }
 
         if (tipo === 'LIKE') {
 
           comentario.likes =
-            (comentario.likes || 0) + 1;
+            Number(
+              comentario.likes || 0
+            ) + 1;
 
-          if (comentario.userReaction === 'DISLIKE') {
+          if (
+            previousReaction
+            === 'DISLIKE'
+          ) {
+
             comentario.dislikes =
-              Math.max(0, (comentario.dislikes || 0) - 1);
+              Math.max(
+                0,
+                Number(
+                  comentario.dislikes || 0
+                ) - 1
+              );
           }
         }
 
         if (tipo === 'DISLIKE') {
 
           comentario.dislikes =
-            (comentario.dislikes || 0) + 1;
+            Number(
+              comentario.dislikes || 0
+            ) + 1;
 
-          if (comentario.userReaction === 'LIKE') {
+          if (
+            previousReaction
+            === 'LIKE'
+          ) {
+
             comentario.likes =
-              Math.max(0, (comentario.likes || 0) - 1);
+              Math.max(
+                0,
+                Number(
+                  comentario.likes || 0
+                ) - 1
+              );
           }
         }
 
-        comentario.userReaction = tipo;
+        comentario.userReaction =
+          tipo;
 
         if (provider) {
-          this.recalculateProviderReviewMetrics(provider);
+
+          this.recalculateProviderReviewMetrics(
+            provider
+          );
         }
 
         this.cdr.detectChanges();
@@ -841,32 +1133,49 @@ export class ProviderReviewsComponent implements OnInit {
     });
   }
 
-  getTotalReactions(provider: any): number {
+  getTotalReactions(
+    provider: any
+  ): number {
 
-    return this.getProviderLikes(provider)
-      + this.getProviderDislikes(provider);
+    return this.getProviderLikes(
+      provider
+    )
+    + this.getProviderDislikes(
+      provider
+    );
   }
 
-  getProviderSatisfaction(provider: any): number {
+  getProviderSatisfaction(
+    provider: any
+  ): number {
 
-    return provider?.satisfaccion ?? 0;
+    return provider?.satisfaccion
+      ?? 0;
   }
 
-  getReviewAuthor(review: any): string {
+  getReviewAuthor(
+    review: any
+  ): string {
 
     return review?.usuario
       || review?.autor
       || 'Cliente';
   }
 
-  getReviewComment(review: any): string {
+  getReviewComment(
+    review: any
+  ): string {
 
-    return review?.comentario || '';
+    return review?.comentario
+      || '';
   }
 
-  getReviewDate(review: any): string {
+  getReviewDate(
+    review: any
+  ): string {
 
-    return review?.fecha || '';
+    return review?.fecha
+      || '';
   }
 
   getReviewReactionType(
@@ -876,28 +1185,46 @@ export class ProviderReviewsComponent implements OnInit {
     return review?.tipo || '';
   }
 
-  formatFecha(value: string): string {
+  formatFecha(
+    value: string
+  ): string {
 
-    if (!value) return '';
+    if (!value) {
+      return '';
+    }
 
-    const date = new Date(value);
+    const date =
+      new Date(value);
 
-    if (Number.isNaN(date.getTime())) {
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
       return value;
     }
 
-    return date.toLocaleDateString('es-PE', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    return date.toLocaleDateString(
+      'es-PE',
+      {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      }
+    );
   }
 
   formatPercent(
-    value: number | null | undefined
+    value:
+      number
+      | null
+      | undefined
   ): string {
 
-    if (value === null || value === undefined) {
+    if (
+      value === null
+      || value === undefined
+    ) {
       return '0%';
     }
 
@@ -905,10 +1232,16 @@ export class ProviderReviewsComponent implements OnInit {
   }
 
   formatDays(
-    value: number | null | undefined
+    value:
+      number
+      | null
+      | undefined
   ): string {
 
-    if (value === null || value === undefined) {
+    if (
+      value === null
+      || value === undefined
+    ) {
       return 'No disponible';
     }
 
@@ -916,16 +1249,27 @@ export class ProviderReviewsComponent implements OnInit {
   }
 
   progressValue(
-    value: number | null | undefined
+    value:
+      number
+      | null
+      | undefined
   ): number {
 
-    if (value === null || value === undefined) {
+    if (
+      value === null
+      || value === undefined
+    ) {
       return 0;
     }
 
     return Math.max(
       0,
-      Math.min(100, Math.round(Number(value)))
+      Math.min(
+        100,
+        Math.round(
+          Number(value)
+        )
+      )
     );
   }
 
@@ -939,13 +1283,19 @@ export class ProviderReviewsComponent implements OnInit {
   } {
 
     const key =
-      this.getReviewDraftKey(provider, index);
+      this.getReviewDraftKey(
+        provider,
+        index
+      );
 
     if (!this.reviewDrafts[key]) {
 
       this.reviewDrafts[key] = {
+
         comentario: '',
+
         tipo: 'LIKE',
+
         error: ''
       };
     }
@@ -964,58 +1314,83 @@ export class ProviderReviewsComponent implements OnInit {
     );
   }
 
-  private getWritableReviews(provider: any): any[] {
+  private getWritableReviews(
+    provider: any
+  ): any[] {
 
-    if (!Array.isArray(provider.comentarios)) {
+    if (
+      !Array.isArray(
+        provider.comentarios
+      )
+    ) {
+
       provider.comentarios = [];
     }
 
     return provider.comentarios;
   }
 
-  private recalculateProviderReviewMetrics(provider: any): void {
+  private recalculateProviderReviewMetrics(
+    provider: any
+  ): void {
 
     const comentarios =
       this.getReviews(provider);
 
     let likes = 0;
+
     let dislikes = 0;
 
     comentarios.forEach(review => {
 
-      likes += Number(review?.likes || 0);
-      dislikes += Number(review?.dislikes || 0);
+      likes += Number(
+        review?.likes || 0
+      );
+
+      dislikes += Number(
+        review?.dislikes || 0
+      );
 
       if (
-        review?.likes === 0 &&
-        review?.dislikes === 0
+        Number(review?.likes || 0) === 0
+        && Number(review?.dislikes || 0) === 0
       ) {
 
-        if (review?.tipo === 'LIKE') {
+        if (
+          review?.tipo === 'LIKE'
+        ) {
           likes++;
         }
 
-        if (review?.tipo === 'DISLIKE') {
+        if (
+          review?.tipo === 'DISLIKE'
+        ) {
           dislikes++;
         }
       }
     });
 
     provider.likes = likes;
+
     provider.dislikes = dislikes;
 
-    const total = likes + dislikes;
+    const total =
+      likes + dislikes;
 
     provider.satisfaccion =
       total > 0
-        ? Math.round((likes / total) * 100)
+        ? Math.round(
+            (likes / total) * 100
+          )
         : 0;
   }
 
   get yaEnCarrito(): boolean {
 
     return this.requestItems.some(
-      x => x.idProducto === this.product?.idProducto
+      x =>
+        x.idProducto ===
+        this.product?.idProducto
     );
   }
 
@@ -1032,24 +1407,41 @@ export class ProviderReviewsComponent implements OnInit {
 
   agregarAlCarrito(): void {
 
-    if (!this.product) return;
+    if (!this.product) {
+      return;
+    }
 
     const existe =
       this.requestItems.find(
-        x => x.idProducto === this.product.idProducto
+        x =>
+          x.idProducto ===
+          this.product.idProducto
       );
 
     if (!existe) {
 
       this.requestItems.push({
-        idProducto: this.product.idProducto,
-        name: this.product.producto,
-        detail: `${this.product.marca}`,
+
+        idProducto:
+          this.product.idProducto,
+
+        name:
+          this.product.producto,
+
+        detail:
+          `${this.product.marca}`,
+
         qty: this.qty,
+
         precioReferencia:
-          this.product.precioUnitario ?? null,
-        categoria: this.product.categoria,
-        marca: this.product.marca
+          this.product.precioUnitario
+          ?? null,
+
+        categoria:
+          this.product.categoria,
+
+        marca:
+          this.product.marca
       });
 
     } else {
@@ -1081,7 +1473,10 @@ export class ProviderReviewsComponent implements OnInit {
     }
 
     this.router.navigate(
-      ['/app/rfq/product', this.product?.idProducto],
+      [
+        '/app/rfq/product',
+        this.product?.idProducto
+      ],
       {
         state: {
           product: this.product

@@ -47,7 +47,8 @@ public class ComentarioService {
             );
         }
 
-        Comentario comentario = new Comentario();
+        Comentario comentario =
+                new Comentario();
 
         comentario.setIdProvProd(
                 request.getIdProvProd()
@@ -65,9 +66,21 @@ public class ComentarioService {
                 LocalDateTime.now()
         );
 
+        /*
+          SENTIMIENTO:
+          POSITIVO
+          NEGATIVO
+          NEUTRO
+        */
         comentario.setTipo(
                 ia.getSentimiento()
         );
+
+        /*
+          CACHE INICIAL
+        */
+        comentario.setLikes(0);
+        comentario.setDislikes(0);
 
         return comentarioRepository.save(
                 comentario
@@ -93,7 +106,30 @@ public class ComentarioService {
                         .findById(
                                 request.getIdComentario()
                         )
-                        .orElseThrow();
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Comentario no encontrado"
+                                )
+                        );
+
+        /*
+          VALIDAR SOLO:
+          LIKE / DISLIKE
+        */
+        if (
+                !"LIKE".equalsIgnoreCase(
+                        request.getTipo()
+                )
+                &&
+                !"DISLIKE".equalsIgnoreCase(
+                        request.getTipo()
+                )
+        ) {
+
+            throw new RuntimeException(
+                    "Tipo de reaccion invalido"
+            );
+        }
 
         ComentarioLike reaccionExistente =
                 likeRepository
@@ -104,13 +140,13 @@ public class ComentarioService {
                         .orElse(null);
 
         /*
-          SI YA EXISTE:
           UPDATE
         */
         if (reaccionExistente != null) {
 
             reaccionExistente.setTipo(
                     request.getTipo()
+                            .toUpperCase()
             );
 
             likeRepository.save(
@@ -120,7 +156,6 @@ public class ComentarioService {
         } else {
 
             /*
-              SI NO EXISTE:
               INSERT
             */
             ComentarioLike like =
@@ -136,13 +171,16 @@ public class ComentarioService {
 
             like.setTipo(
                     request.getTipo()
+                            .toUpperCase()
             );
 
-            likeRepository.save(like);
+            likeRepository.save(
+                    like
+            );
         }
 
         /*
-          RECALCULAR CONTADORES
+          RECALCULAR CACHE
         */
         int likes =
                 likeRepository
@@ -158,11 +196,13 @@ public class ComentarioService {
                                 "DISLIKE"
                         );
 
-        /*
-          GUARDAR EN COMENTARIO
-        */
-        comentario.setLikes(likes);
-        comentario.setDislikes(dislikes);
+        comentario.setLikes(
+                likes
+        );
+
+        comentario.setDislikes(
+                dislikes
+        );
 
         comentarioRepository.save(
                 comentario
