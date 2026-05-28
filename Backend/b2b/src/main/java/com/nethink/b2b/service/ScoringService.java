@@ -1,11 +1,14 @@
 package com.nethink.b2b.service;
 
 import com.nethink.b2b.dto.response.RFQProveedorResponse;
+import com.nethink.b2b.entity.Solicitud.EstadoSolicitud;
+import com.nethink.b2b.entity.enums.EstadoSolicitud;
 import com.nethink.b2b.entity.enums.PrioridadRFQ;
 import com.nethink.b2b.repository.ComentarioRepository;
 import com.nethink.b2b.repository.EvaluacionRepository;
 import com.nethink.b2b.repository.ProveedorProductoRepository;
 import com.nethink.b2b.repository.ReclamoRepository;
+import com.nethink.b2b.repository.SolicitudRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,24 +20,27 @@ public class ScoringService {
     private final ReclamoRepository reclamoRepo;
     private final ComentarioRepository comentarioRepo;
     private final ProveedorProductoRepository proveedorProductoRepo;
+    private final SolicitudRepository solicitudRepo;
 
     public ScoringService(
             EvaluacionRepository evaluacionRepo,
             ReclamoRepository reclamoRepo,
             ComentarioRepository comentarioRepo,
-            ProveedorProductoRepository proveedorProductoRepo
+            ProveedorProductoRepository proveedorProductoRepo,
+            SolicitudRepository solicitudRepo
     ) {
 
         this.evaluacionRepo = evaluacionRepo;
         this.reclamoRepo = reclamoRepo;
         this.comentarioRepo = comentarioRepo;
         this.proveedorProductoRepo = proveedorProductoRepo;
+        this.solicitudRepo = solicitudRepo;
     }
 
     /*
-        ==========================================
-        RFQ SCORING DINAMICO
-        ==========================================
+        ===================================================
+        SCORE PARA RFQ DINAMICO
+        ===================================================
     */
 
     public void calcularScore(
@@ -46,217 +52,104 @@ public class ScoringService {
             return;
         }
 
+        double wPrecio = 0.4;
+        double wTiempo = 0.3;
+        double wCalidad = 0.3;
+
         if (prioridad == null) {
             prioridad = PrioridadRFQ.BALANCEADO;
         }
 
-        double wPrecio = 0.40;
-        double wTiempo = 0.30;
-        double wCalidad = 0.30;
+        if (prioridad == PrioridadRFQ.PRECIO) {
 
-        switch (prioridad) {
+            wPrecio = 0.6;
+            wTiempo = 0.2;
+            wCalidad = 0.2;
+        }
 
-            case PRECIO:
+        if (prioridad == PrioridadRFQ.TIEMPO) {
 
-                wPrecio = 0.60;
-                wTiempo = 0.20;
-                wCalidad = 0.20;
+            wPrecio = 0.2;
+            wTiempo = 0.6;
+            wCalidad = 0.2;
+        }
 
-                break;
+        if (prioridad == PrioridadRFQ.CALIDAD) {
 
-            case TIEMPO:
-
-                wPrecio = 0.20;
-                wTiempo = 0.60;
-                wCalidad = 0.20;
-
-                break;
-
-            case CALIDAD:
-
-                wPrecio = 0.20;
-                wTiempo = 0.20;
-                wCalidad = 0.60;
-
-                break;
-
-            case BALANCEADO:
-            default:
-                break;
+            wPrecio = 0.2;
+            wTiempo = 0.2;
+            wCalidad = 0.6;
         }
 
         double mejorPrecio = proveedores.stream()
-                .mapToDouble(p ->
-                        p.getTotalCotizacion() != null
+                .mapToDouble(
+                        p -> p.getTotalCotizacion() != null
                                 ? p.getTotalCotizacion()
                                 : Double.MAX_VALUE
                 )
                 .min()
                 .orElse(1);
 
-        int mejorTiempo = proveedores.stream()
-                .mapToInt(p ->
-                        p.getTiempoEntregaPromedio() != null
+        double mejorTiempo = proveedores.stream()
+                .mapToInt(
+                        p -> p.getTiempoEntregaPromedio() != null
                                 ? p.getTiempoEntregaPromedio()
                                 : Integer.MAX_VALUE
                 )
                 .min()
                 .orElse(1);
 
-        for (RFQProveedorResponse proveedor : proveedores) {
+        for (RFQProveedorResponse p : proveedores) {
 
-            double precio = proveedor.getTotalCotizacion() != null
-                    ? proveedor.getTotalCotizacion()
-                    : Double.MAX_VALUE;
+            double precio =
+                    p.getTotalCotizacion() != null
+                            ? p.getTotalCotizacion()
+                            : Double.MAX_VALUE;
 
-            int tiempo = proveedor.getTiempoEntregaPromedio() != null
-                    ? proveedor.getTiempoEntregaPromedio()
-                    : Integer.MAX_VALUE;
+            double tiempo =
+                    p.getTiempoEntregaPromedio() != null
+                            ? p.getTiempoEntregaPromedio()
+                            : Integer.MAX_VALUE;
 
-            /*
-                SCORE PRECIO
-                Menor precio = mejor score
-            */
+            double scorePrecio = mejorPrecio / precio;
+            double scoreTiempo = mejorTiempo / tiempo;
 
-            double scorePrecio;
-
-            if (precio <= 0 || precio == Double.MAX_VALUE) {
-
-                scorePrecio = 0;
-
-            } else {
-
-                scorePrecio =
-                        mejorPrecio / precio;
-
-                scorePrecio =
-                        limitar(scorePrecio, 0, 1);
-            }
-
-            /*
-                SCORE TIEMPO
-                Menor tiempo = mejor score
-            */
-
-            double scoreTiempo;
-
-            if (tiempo <= 0 || tiempo == Integer.MAX_VALUE) {
-
-                scoreTiempo = 0;
-
-            } else {
-
-                scoreTiempo =
-                        (double) mejorTiempo / tiempo;
-
-                scoreTiempo =
-                        limitar(scoreTiempo, 0, 1);
-            }
-
-            /*
-                SCORE CALIDAD
-                NORMALIZADO 0 - 1
-            */
-
-            double scoreCalidad =
-                    calcularCalidad(proveedor.getIdProveedor()) / 5.0;
-
-            /*
-                SCORE FINAL
-            */
+            double calidad =
+                    calcularScoreProveedorCompleto(
+                            p.getIdProveedor()
+                    );
 
             double scoreFinal =
-                    (scorePrecio * wPrecio) +
-                    (scoreTiempo * wTiempo) +
-                    (scoreCalidad * wCalidad);
+                    (wPrecio * scorePrecio) +
+                    (wTiempo * scoreTiempo) +
+                    (wCalidad * calidad);
 
-            /*
-                AJUSTE POR RECLAMOS
-            */
-
-            Integer reclamos =
-                    reclamoRepo.contarReclamos(
-                            proveedor.getIdProveedor()
-                    );
-
-            int totalReclamos =
-                    reclamos != null ? reclamos : 0;
-
-            if (totalReclamos >= 10) {
-
-                scoreFinal -= 0.25;
-
-            } else if (totalReclamos >= 5) {
-
-                scoreFinal -= 0.15;
-
-            } else if (totalReclamos >= 3) {
-
-                scoreFinal -= 0.10;
+            if (scoreFinal < 0) {
+                scoreFinal = 0;
             }
 
-            /*
-                AJUSTE POR POCA DATA
-            */
-
-            Integer positivos =
-                    comentarioRepo.contarComentariosPositivos(
-                            proveedor.getIdProveedor()
-                    );
-
-            Integer negativos =
-                    comentarioRepo.contarComentariosNegativos(
-                            proveedor.getIdProveedor()
-                    );
-
-            int totalComentarios =
-                    (positivos != null ? positivos : 0) +
-                    (negativos != null ? negativos : 0);
-
-            if (totalComentarios == 0) {
-
-                scoreFinal *= 0.90;
+            if (scoreFinal > 1) {
+                scoreFinal = 1;
             }
 
-            /*
-                LIMITES
-            */
-
-            scoreFinal =
-                    limitar(scoreFinal, 0, 1);
-
-            proveedor.setScoreFinal(scoreFinal);
+            p.setScoreFinal(scoreFinal);
         }
     }
 
     /*
-        ==========================================
-        CALIDAD GLOBAL
-        ==========================================
+        ===================================================
+        CALIDAD BASE
+        ===================================================
     */
 
     private double calcularCalidad(Integer idProveedor) {
 
         if (idProveedor == null) {
-            return 3.0;
+            return 3.5;
         }
-
-        /*
-            EVALUACION PROMEDIO
-            ESCALA 1 - 5
-        */
 
         Double evaluacion =
                 evaluacionRepo.promedioCalidad(idProveedor);
-
-        double base =
-                evaluacion != null
-                        ? evaluacion
-                        : 3.5;
-
-        /*
-            COMENTARIOS
-        */
 
         Integer positivos =
                 comentarioRepo.contarComentariosPositivos(idProveedor);
@@ -264,77 +157,48 @@ public class ScoringService {
         Integer negativos =
                 comentarioRepo.contarComentariosNegativos(idProveedor);
 
-        int pos = positivos != null ? positivos : 0;
-        int neg = negativos != null ? negativos : 0;
-
-        int totalComentarios = pos + neg;
-
-        /*
-            REPUTACION
-            0 -> 1
-        */
-
-        double reputacion;
-
-        if (totalComentarios == 0) {
-
-            reputacion = 0.5;
-
-        } else {
-
-            reputacion =
-                    (double) pos / totalComentarios;
-        }
-
-        /*
-            IMPACTO COMENTARIOS
-            ENTRE -1 Y +1
-        */
-
-        double impactoComentarios =
-                (reputacion - 0.5) * 2;
-
-        /*
-            RECLAMOS
-        */
-
         Integer reclamos =
                 reclamoRepo.contarReclamos(idProveedor);
 
-        int totalReclamos =
-                reclamos != null ? reclamos : 0;
+        int pos = positivos != null ? positivos : 0;
+        int neg = negativos != null ? negativos : 0;
+        int rec = reclamos != null ? reclamos : 0;
 
-        double penalizacionReclamos =
-                totalReclamos * 0.15;
+        double base =
+                evaluacion != null
+                        ? evaluacion
+                        : 3.5;
 
-        /*
-            CALIDAD FINAL
-        */
+        double impactoComentarios =
+                (pos * 0.08) -
+                (neg * 0.12);
+
+        double impactoReclamos =
+                rec * 0.15;
 
         double calidadFinal =
                 base +
                 impactoComentarios -
-                penalizacionReclamos;
+                impactoReclamos;
 
-        /*
-            LIMITES
-        */
+        if (calidadFinal < 1) {
+            calidadFinal = 1;
+        }
 
-        calidadFinal =
-                limitar(calidadFinal, 1, 5);
+        if (calidadFinal > 5) {
+            calidadFinal = 5;
+        }
 
         return calidadFinal;
     }
 
     /*
-        ==========================================
-        SCORE BASICO GLOBAL
-        ==========================================
+        ===================================================
+        SCORE COMPLETO DEL PROVEEDOR
+        ===================================================
     */
 
-    public double calcularScoreProveedorBasico(
-            Integer idProveedor
-    ) {
+    public double calcularScoreProveedorCompleto(Integer idProveedor) {
 
         if (idProveedor == null) {
             return 0;
@@ -351,27 +215,49 @@ public class ScoringService {
         double calidad =
                 calcularCalidad(idProveedor);
 
+        Integer positivos =
+                comentarioRepo
+                        .contarComentariosPositivos(idProveedor);
+
+        Integer negativos =
+                comentarioRepo
+                        .contarComentariosNegativos(idProveedor);
+
+        Integer reclamos =
+                reclamoRepo
+                        .contarReclamos(idProveedor);
+
+        int pos = positivos != null ? positivos : 0;
+        int neg = negativos != null ? negativos : 0;
+        int rec = reclamos != null ? reclamos : 0;
+
         /*
+            ==========================================
             SCORE PRECIO
+            ==========================================
         */
 
         double scorePrecio;
 
         if (promedioPrecio == null || promedioPrecio <= 0) {
 
-            scorePrecio = 0.2;
+            scorePrecio = 0.30;
 
         } else if (promedioPrecio <= 100) {
 
             scorePrecio = 1.0;
 
-        } else if (promedioPrecio <= 500) {
+        } else if (promedioPrecio <= 300) {
 
             scorePrecio = 0.9;
 
-        } else if (promedioPrecio <= 1000) {
+        } else if (promedioPrecio <= 700) {
 
             scorePrecio = 0.8;
+
+        } else if (promedioPrecio <= 1500) {
+
+            scorePrecio = 0.7;
 
         } else if (promedioPrecio <= 3000) {
 
@@ -383,14 +269,16 @@ public class ScoringService {
         }
 
         /*
+            ==========================================
             SCORE TIEMPO
+            ==========================================
         */
 
         double scoreTiempo;
 
         if (promedioTiempo == null || promedioTiempo <= 0) {
 
-            scoreTiempo = 0.2;
+            scoreTiempo = 0.30;
 
         } else if (promedioTiempo <= 1) {
 
@@ -404,111 +292,183 @@ public class ScoringService {
 
             scoreTiempo = 0.8;
 
-        } else if (promedioTiempo <= 10) {
+        } else if (promedioTiempo <= 7) {
 
-            scoreTiempo = 0.6;
+            scoreTiempo = 0.7;
+
+        } else if (promedioTiempo <= 15) {
+
+            scoreTiempo = 0.5;
 
         } else {
 
-            scoreTiempo = 0.4;
+            scoreTiempo = 0.3;
         }
 
         /*
+            ==========================================
             SCORE CALIDAD
+            ==========================================
         */
 
-        double scoreCalidad =
-                calidad / 5.0;
+        double scoreCalidad = calidad / 5.0;
 
         /*
-            PESOS
+            ==========================================
+            CUMPLIMIENTO
+            ==========================================
         */
 
-        double wPrecio = 0.35;
-        double wTiempo = 0.25;
-        double wCalidad = 0.40;
+        Integer completadas =
+                solicitudRepo
+                        .countByProveedor_IdProveedorAndEstado(
+                                idProveedor,
+                                EstadoSolicitud.COMPLETADA
+                        );
+
+        Integer totalSolicitudes =
+                solicitudRepo
+                        .countByProveedor_IdProveedor(
+                                idProveedor
+                        );
+
+        int total =
+                totalSolicitudes != null
+                        ? totalSolicitudes
+                        : 0;
+
+        int totalCompletadas =
+                completadas != null
+                        ? completadas
+                        : 0;
+
+        double cumplimiento;
+
+        if (total == 0) {
+
+            cumplimiento = 0.40;
+
+        } else {
+
+            cumplimiento =
+                    (double) totalCompletadas / total;
+        }
+
+        /*
+            ==========================================
+            EXPERIENCIA
+            ==========================================
+        */
+
+        double scoreExperiencia;
+
+        if (total >= 100) {
+
+            scoreExperiencia = 1.0;
+
+        } else if (total >= 50) {
+
+            scoreExperiencia = 0.9;
+
+        } else if (total >= 20) {
+
+            scoreExperiencia = 0.7;
+
+        } else if (total >= 5) {
+
+            scoreExperiencia = 0.5;
+
+        } else {
+
+            scoreExperiencia = 0.3;
+        }
+
+        /*
+            ==========================================
+            PESOS
+            ==========================================
+        */
+
+        double wCalidad = 0.35;
+        double wPrecio = 0.20;
+        double wTiempo = 0.15;
+        double wCumplimiento = 0.20;
+        double wExperiencia = 0.10;
 
         double scoreFinal =
+                (scoreCalidad * wCalidad) +
                 (scorePrecio * wPrecio) +
                 (scoreTiempo * wTiempo) +
-                (scoreCalidad * wCalidad);
+                (cumplimiento * wCumplimiento) +
+                (scoreExperiencia * wExperiencia);
 
         /*
-            RECLAMOS
+            ==========================================
+            PENALIZACIONES
+            ==========================================
         */
 
-        Integer reclamos =
-                reclamoRepo.contarReclamos(idProveedor);
+        if (rec >= 3) {
+            scoreFinal -= 0.05;
+        }
 
-        int totalReclamos =
-                reclamos != null ? reclamos : 0;
+        if (rec >= 5) {
+            scoreFinal -= 0.10;
+        }
 
-        if (totalReclamos >= 10) {
+        if (rec >= 10) {
+            scoreFinal -= 0.20;
+        }
 
-            scoreFinal -= 0.25;
-
-        } else if (totalReclamos >= 5) {
-
-            scoreFinal -= 0.15;
-
-        } else if (totalReclamos >= 3) {
-
+        if (neg > pos && neg >= 5) {
             scoreFinal -= 0.10;
         }
 
         /*
-            SIN DATA
+            ==========================================
+            SIN ACTIVIDAD
+            ==========================================
         */
 
         boolean sinProductos =
                 promedioPrecio == null &&
                 promedioTiempo == null;
 
-        Integer positivos =
-                comentarioRepo.contarComentariosPositivos(idProveedor);
+        boolean sinHistorial =
+                total == 0 &&
+                pos == 0 &&
+                neg == 0;
 
-        Integer negativos =
-                comentarioRepo.contarComentariosNegativos(idProveedor);
-
-        int totalComentarios =
-                (positivos != null ? positivos : 0) +
-                (negativos != null ? negativos : 0);
-
-        if (sinProductos && totalComentarios == 0) {
+        if (sinProductos && sinHistorial) {
 
             scoreFinal *= 0.5;
         }
 
         /*
+            ==========================================
             LIMITES
+            ==========================================
         */
 
-        scoreFinal =
-                limitar(scoreFinal, 0, 1);
+        if (scoreFinal < 0) {
+            scoreFinal = 0;
+        }
+
+        if (scoreFinal > 1) {
+            scoreFinal = 1;
+        }
 
         return scoreFinal;
     }
 
     /*
-        ==========================================
-        UTIL
-        ==========================================
+        ===================================================
+        COMPATIBILIDAD CON CLASES ANTIGUAS
+        ===================================================
     */
 
-    private double limitar(
-            double valor,
-            double min,
-            double max
-    ) {
+    public double calcularScoreProveedorBasico(Integer idProveedor) {
 
-        if (valor < min) {
-            return min;
-        }
-
-        if (valor > max) {
-            return max;
-        }
-
-        return valor;
+        return calcularScoreProveedorCompleto(idProveedor);
     }
 }

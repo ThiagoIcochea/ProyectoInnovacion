@@ -21,6 +21,7 @@ import com.nethink.b2b.dto.response.AdminProviderResponse;
 import com.nethink.b2b.dto.response.IndicadorProveedorResponse;
 import com.nethink.b2b.entity.Solicitud.EstadoSolicitud;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Comparator;
 import java.util.Optional;
 
 @Service
@@ -306,7 +307,7 @@ private LogsApiRepository logsApiRepository;
     return dto;
 }
    
-   public List<IndicadorProveedorResponse> top10Proveedores() {
+ public List<IndicadorProveedorResponse> top10Proveedores() {
 
     List<Proveedor> proveedores = proveedorRepository.findAll();
 
@@ -315,33 +316,61 @@ private LogsApiRepository logsApiRepository;
     for (Proveedor p : proveedores) {
 
         int completadas = solicitudRepo
-                .countByProveedor_IdProveedorAndEstado(p.getIdProveedor(), EstadoSolicitud.COMPLETADA);
+                .countByProveedor_IdProveedorAndEstado(
+                        p.getIdProveedor(),
+                        EstadoSolicitud.COMPLETADA
+                );
 
         int total = solicitudRepo
-                .countByProveedor_IdProveedor(p.getIdProveedor());
+                .countByProveedor_IdProveedor(
+                        p.getIdProveedor()
+                );
 
         double cumplimiento = total == 0
                 ? 0
-                : ((double) completadas / total) * 100;
+                : ((double) completadas / total) * 100.0;
 
-        double score = scoringService.calcularScoreProveedorBasico(p.getIdProveedor());
+        double score = scoringService
+                .calcularScoreProveedorCompleto(
+                        p.getIdProveedor()
+                );
 
-        IndicadorProveedorResponse dto = new IndicadorProveedorResponse();
+        IndicadorProveedorResponse dto =
+                new IndicadorProveedorResponse();
 
-        dto.setIdProveedor(p.getIdProveedor());
-        dto.setRazonSocial(p.getRazonSocial());
+        dto.setIdProveedor(
+                p.getIdProveedor()
+        );
 
-        dto.setPedidosCompletados(completadas);
-        dto.setPedidosTotal(total);
+        dto.setRazonSocial(
+                p.getRazonSocial()
+        );
 
-        dto.setCumplimiento(cumplimiento);
-        dto.setScoreGeneral(score);
+        dto.setPedidosCompletados(
+                completadas
+        );
+
+        dto.setPedidosTotal(
+                total
+        );
+
+        dto.setCumplimiento(
+                Math.round(cumplimiento * 100.0) / 100.0
+        );
+
+        dto.setScoreGeneral(
+                Math.round(score * 1000.0) / 1000.0
+        );
 
         lista.add(dto);
     }
 
     return lista.stream()
-            .sorted((a, b) -> Double.compare(b.getScoreGeneral(), a.getScoreGeneral()))
+            .sorted(
+                    Comparator.comparingDouble(
+                            IndicadorProveedorResponse::getScoreGeneral
+                    ).reversed()
+            )
             .limit(10)
             .toList();
 }

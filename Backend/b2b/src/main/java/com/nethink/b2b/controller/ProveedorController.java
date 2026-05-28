@@ -52,7 +52,7 @@ public IndicadorProveedorResponse indicadoresProveedor(
     return proveedorService.obtenerIndicadoresPorProveedor(idProveedor);
 }
 
-@GetMapping("/admin/top10")
+@GetMapping("/proveedores/top")
 public List<IndicadorProveedorResponse> top10(
         Principal principal,
         HttpServletRequest request
