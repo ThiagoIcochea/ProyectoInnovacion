@@ -5,12 +5,15 @@ import com.nethink.b2b.dto.request.ReaccionComentarioRequest;
 import com.nethink.b2b.dto.response.IAComentarioResponse;
 import com.nethink.b2b.entity.Comentario;
 import com.nethink.b2b.entity.ComentarioLike;
+import com.nethink.b2b.entity.ProveedorProducto;
 import com.nethink.b2b.repository.ComentarioLikeRepository;
 import com.nethink.b2b.repository.ComentarioRepository;
+import com.nethink.b2b.repository.ProveedorProductoRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class ComentarioService {
@@ -18,6 +21,10 @@ public class ComentarioService {
     private final ComentarioRepository comentarioRepository;
     private final ComentarioLikeRepository likeRepository;
     private final ModeracionService moderacionService;
+    
+         @Autowired
+     
+     private ProveedorProductoRepository proveedorProductoRepo;
 
     public ComentarioService(
             ComentarioRepository comentarioRepository,
@@ -34,6 +41,7 @@ public class ComentarioService {
             Integer idUsuario
     ) {
 
+         ProveedorProducto provProd = proveedorProductoRepo.findByProveedor_IdProveedorAndProducto_IdProducto(request.getIdProv(), request.getIdProd()).orElseThrow();
         IAComentarioResponse ia =
                 moderacionService.moderar(
                         request.getComentario()
@@ -52,7 +60,7 @@ public class ComentarioService {
                 new Comentario();
 
         comentario.setIdProvProd(
-                request.getIdProvProd()
+              provProd.getIdProvProd()
         );
 
         comentario.setIdUsuario(idUsuario

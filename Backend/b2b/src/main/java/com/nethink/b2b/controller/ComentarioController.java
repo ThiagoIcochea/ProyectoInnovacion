@@ -3,7 +3,9 @@ package com.nethink.b2b.controller;
 import com.nethink.b2b.dto.request.CrearComentarioRequest;
 import com.nethink.b2b.dto.request.ReaccionComentarioRequest;
 import com.nethink.b2b.entity.Comentario;
+import com.nethink.b2b.entity.ProveedorProducto;
 import com.nethink.b2b.entity.Usuario;
+import com.nethink.b2b.repository.ProveedorProductoRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
 import com.nethink.b2b.service.ComentarioService;
 import java.security.Principal;
@@ -19,6 +21,10 @@ public class ComentarioController {
     private final ComentarioService comentarioService;
      @Autowired
     private  UsuarioRepository usuarioRepo;
+     
+     @Autowired
+     
+     private ProveedorProductoRepository proveedorProductoRepo;
 
     public ComentarioController(
             ComentarioService comentarioService
@@ -42,14 +48,20 @@ public class ComentarioController {
         );
     }
 
-    @GetMapping("/{idProvProd}")
+    @GetMapping("/{idProv}/{idProd}")
     public ResponseEntity<List<Comentario>> listar(
-            @PathVariable Integer idProvProd
+            @PathVariable Integer idProv,
+            @PathVariable Integer idProd
+            
     ) {
+        
+       ProveedorProducto provProd = proveedorProductoRepo.findByProveedor_IdProveedorAndProducto_IdProducto(idProv, idProd).orElseThrow();
 
+        
+        
         return ResponseEntity.ok(
                 comentarioService.listar(
-                        idProvProd
+                        provProd.getIdProvProd()
                 )
         );
     }

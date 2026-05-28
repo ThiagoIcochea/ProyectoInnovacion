@@ -897,7 +897,7 @@ export class ProviderReviewsComponent implements OnInit {
 
       return;
     }
-
+    console.log(provider);
     const request = {
 
       idProvProd:
