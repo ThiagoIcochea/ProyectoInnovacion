@@ -30,7 +30,8 @@ public class ComentarioService {
     }
 
     public Comentario crearComentario(
-            CrearComentarioRequest request
+            CrearComentarioRequest request,
+            Integer idUsuario
     ) {
 
         IAComentarioResponse ia =
@@ -54,8 +55,8 @@ public class ComentarioService {
                 request.getIdProvProd()
         );
 
-        comentario.setIdUsuario(
-                request.getIdUsuario()
+        comentario.setIdUsuario(idUsuario
+               
         );
 
         comentario.setComentario(
@@ -98,7 +99,8 @@ public class ComentarioService {
     }
 
     public void reaccionar(
-            ReaccionComentarioRequest request
+            ReaccionComentarioRequest request,
+            Integer idUsuario
     ) {
 
         Comentario comentario =
@@ -135,7 +137,7 @@ public class ComentarioService {
                 likeRepository
                         .findByIdComentarioAndIdUsuario(
                                 request.getIdComentario(),
-                                request.getIdUsuario()
+                                idUsuario
                         )
                         .orElse(null);
 
@@ -165,8 +167,8 @@ public class ComentarioService {
                     request.getIdComentario()
             );
 
-            like.setIdUsuario(
-                    request.getIdUsuario()
+            like.setIdUsuario(idUsuario
+                    
             );
 
             like.setTipo(

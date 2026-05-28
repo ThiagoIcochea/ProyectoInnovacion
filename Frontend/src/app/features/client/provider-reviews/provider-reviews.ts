@@ -1023,115 +1023,57 @@ export class ProviderReviewsComponent implements OnInit {
   }
 
   reactToComment(
-    comentario: any,
-    tipo: 'LIKE' | 'DISLIKE',
-    provider?: any
-  ): void {
+  comentario: any,
+  tipo: 'LIKE' | 'DISLIKE',
+  provider?: any
+): void {
 
-    if (!comentario?.idComentario) {
-      return;
+  if (!comentario?.idComentario) {
+    return;
+  }
+
+  const request = {
+
+    idComentario:
+      comentario.idComentario,
+
+  
+
+    tipo: tipo
+  };
+
+  this.http.post(
+    `${this.API_BASE}/comentarios/reaccion`,
+    request,
+    {
+      headers: this.getHeaders()
     }
+  ).subscribe({
 
-    const previousReaction =
-      comentario.userReaction;
+    next: () => {
 
-    const request = {
+      comentario.userReaction =
+        tipo;
 
-      idComentario:
-        comentario.idComentario,
+      if (provider) {
 
-      idUsuario:
-        Number(
-          localStorage.getItem(
-            'idUsuario'
-          )
-        ) || 1,
-
-      tipo: tipo
-    };
-
-    this.http.post(
-      `${this.API_BASE}/comentarios/reaccion`,
-      request,
-      {
-        headers: this.getHeaders()
-      }
-    ).subscribe({
-
-      next: () => {
-
-        if (
-          previousReaction === tipo
-        ) {
-          return;
-        }
-
-        if (tipo === 'LIKE') {
-
-          comentario.likes =
-            Number(
-              comentario.likes || 0
-            ) + 1;
-
-          if (
-            previousReaction
-            === 'DISLIKE'
-          ) {
-
-            comentario.dislikes =
-              Math.max(
-                0,
-                Number(
-                  comentario.dislikes || 0
-                ) - 1
-              );
-          }
-        }
-
-        if (tipo === 'DISLIKE') {
-
-          comentario.dislikes =
-            Number(
-              comentario.dislikes || 0
-            ) + 1;
-
-          if (
-            previousReaction
-            === 'LIKE'
-          ) {
-
-            comentario.likes =
-              Math.max(
-                0,
-                Number(
-                  comentario.likes || 0
-                ) - 1
-              );
-          }
-        }
-
-        comentario.userReaction =
-          tipo;
-
-        if (provider) {
-
-          this.recalculateProviderReviewMetrics(
-            provider
-          );
-        }
-
-        this.cdr.detectChanges();
-      },
-
-      error: (err) => {
-
-        console.error(
-          'Error reaccionando comentario',
-          err
+        this.cargarComentariosProveedor(
+          provider
         );
       }
-    });
-  }
+
+      this.cdr.detectChanges();
+    },
+
+    error: (err) => {
+
+      console.error(
+        'Error reaccionando comentario',
+        err
+      );
+    }
+  });
+}
 
   getTotalReactions(
     provider: any
