@@ -108,7 +108,25 @@ public ResponseEntity<?> aprobarPago(
     );
 }   
     
+
+@PutMapping("/{idPago}/rechazar")
+public ResponseEntity<?> rechazarPago(
+        @PathVariable Integer idPago, Principal principal
+) {
+
     
+    Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
+            .orElseThrow(() ->
+                    new RuntimeException("Usuario no encontrado"));
+
+    pagoService.rechazarPago(idPago, usuario.getIdUsuario());
+    
+    
+
+    return ResponseEntity.ok(
+          Map.of("mensaje","Pago rechazado" )
+    );
+}
     
     
     

@@ -23,7 +23,7 @@ import { catchError, shareReplay, tap } from 'rxjs/operators';
 export class ProviderPaymentsComponent  implements OnInit    {
 
  
-  payments$!: Observable<Payment[]>;
+  payments$: Observable<Payment[]> = of([]);
   loading = true;
   errorMessage = '';
   voucherZoom = 1;
@@ -40,15 +40,13 @@ export class ProviderPaymentsComponent  implements OnInit    {
 
 ngOnInit(): void {
 
-  
-
   const token = localStorage.getItem('token');
 
   console.log("TOKEN JWT:", token);
 
-    this.payments$ = this.pagoService.listarMisPagos();
+  this.cargarPagos();
 
-  }
+}
 
 
 private cargarPagos(): void {
