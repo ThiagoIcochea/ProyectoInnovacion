@@ -263,6 +263,7 @@ export class ProviderReviewsComponent implements OnInit {
       { headers: this.getHeaders() }
     ).subscribe({
       next: (res) => {
+          console.log("RESPUESTA COMENTARIOS", res);
         provider.comentarios = Array.isArray(res)
           ? res.map((comentario) => this.normalizarComentario(comentario))
           : [];
@@ -283,49 +284,56 @@ export class ProviderReviewsComponent implements OnInit {
     });
   }
 
-  normalizarComentario(comentario: any): any {
-    const tipoNormalizado =
-      comentario?.tipo === 'DISLIKE' ||
-      comentario?.tipo === 'NEGATIVO'
-        ? 'DISLIKE'
-        : 'LIKE';
+ normalizarComentario(comentario: any): any {
 
-    const reacciones =
-      Array.isArray(comentario?.likes)
-        ? comentario.likes
-        : Array.isArray(comentario?.reacciones)
-          ? comentario.reacciones
-          : [];
+  const tipoNormalizado =
+    comentario?.tipo === 'DISLIKE' ||
+    comentario?.tipo === 'NEGATIVO'
+      ? 'DISLIKE'
+      : 'LIKE';
 
-    return {
-      ...comentario,
-      idComentario:
-        comentario?.idComentario ||
-        comentario?.id_comentario ||
-        comentario?.id,
-      idProvProd:
-        comentario?.idProvProd ||
-        comentario?.id_prov_prod ||
-        null,
-      idUsuario:
-        comentario?.idUsuario ||
-        comentario?.id_usuario ||
-        null,
-      comentario: comentario?.comentario || '',
-      tipo: tipoNormalizado,
-      fecha: comentario?.fecha || null,
-      likes: reacciones,
-      likesCount:
-        comentario?.likesCount ??
-        comentario?.likes_count ??
-        this.contarReacciones(reacciones, 'LIKE'),
-      dislikesCount:
-        comentario?.dislikesCount ??
-        comentario?.dislikes_count ??
-        this.contarReacciones(reacciones, 'DISLIKE'),
-      userReaction: comentario?.userReaction || null
-    };
-  }
+  return {
+    ...comentario,
+
+    idComentario:
+      comentario?.idComentario ||
+      comentario?.id_comentario ||
+      comentario?.id,
+
+    idProvProd:
+      comentario?.idProvProd ||
+      comentario?.id_prov_prod ||
+      null,
+
+    idUsuario:
+      comentario?.idUsuario ||
+      comentario?.id_usuario ||
+      null,
+
+    comentario:
+      comentario?.comentario || '',
+
+    tipo: tipoNormalizado,
+
+    fecha:
+      comentario?.fecha || null,
+
+    likes:
+      Number(comentario?.likes ?? 0),
+
+    dislikes:
+      Number(comentario?.dislikes ?? 0),
+
+    likesCount:
+      Number(comentario?.likes ?? 0),
+
+    dislikesCount:
+      Number(comentario?.dislikes ?? 0),
+
+    userReaction:
+      comentario?.userReaction || null
+  };
+}
 
   contarReacciones(reacciones: any[], tipo: 'LIKE' | 'DISLIKE'): number {
     if (!Array.isArray(reacciones)) {
@@ -847,38 +855,13 @@ export class ProviderReviewsComponent implements OnInit {
     return Number(provider?.dislikes ?? 0);
   }
 
-  getReviewLikes(review: any): number {
-    if (typeof review?.likes === 'number') {
-      return Number(review.likes);
-    }
-
-    if (Array.isArray(review?.likes)) {
-      return this.contarReacciones(review.likes, 'LIKE');
-    }
-
-    return Number(
-      review?.likesCount ??
-      review?.likes_count ??
-      0
-    );
-  }
+getReviewLikes(review: any): number {
+  return Number(review?.likes ?? review?.likesCount ?? 0);
+}
 
   getReviewDislikes(review: any): number {
-    if (typeof review?.dislikes === 'number') {
-      return Number(review.dislikes);
-    }
-
-    if (Array.isArray(review?.likes)) {
-      return this.contarReacciones(review.likes, 'DISLIKE');
-    }
-
-    return Number(
-      review?.dislikesCount ??
-      review?.dislikes_count ??
-      0
-    );
-  }
-
+  return Number(review?.dislikes ?? review?.dislikesCount ?? 0);
+}
   getCommentLikes(comentario: any): number {
     return this.getReviewLikes(comentario);
   }
@@ -939,7 +922,7 @@ export class ProviderReviewsComponent implements OnInit {
   getReviewAuthor(review: any): string {
     return review?.usuario ||
       review?.autor ||
-      `Usuario ${review?.idUsuario || ''}`.trim() ||
+      `${review?.nombreUsuario || ''}`.trim() ||
       'Cliente';
   }
 
