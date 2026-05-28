@@ -141,7 +141,7 @@ public class Solicitud {
     }
 
     public String getDireccionEnvio() {
-        return direccionEnvio;
+        return direccionEnvio  ;
     }
 
     public void setDireccionEnvio(String direccionEnvio) {

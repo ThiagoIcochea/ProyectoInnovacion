@@ -80,9 +80,24 @@
     <section class="payment-detail-card" *ngIf="!loading">
       <div class="detail-header">
         <div>
-          <span class="status-pill">{{ selectedPayment?.estado || 'Sin pago seleccionado' }}</span>
-          <h2>Pago {{ getPagoCode(selectedPayment) }}</h2>
-          <p>Asociado a Cotizacion: {{ getCotCode(selectedPayment) }}</p>
+          <span class="status-pill">  {{ selectedPayment?.estado}}        </span>
+          <h2>Pago {{ getPagoCode(selectedPayment) }}   </h2>
+          <p>Asociado a Cotización: {{ getCotCode(selectedPayment)  }}     </p>
+
+<p
+    *ngIf="
+      selectedPayment?.estado === 'APROBADO'
+      && selectedPayment?.fechaValidacion
+    "
+  >
+    Fecha validación:
+    {{
+      getFechaCompleta(
+        selectedPayment?.fechaValidacion
+      )
+    }}
+  </p>
+
         </div>
       </div>
 
@@ -141,10 +156,8 @@
             <p>Confirma si el monto y codigo de operacion coinciden con tu cuenta bancaria.</p>
 
             <div class="validation-actions">
-              <button class="btn-danger">Rechazar pago</button>
-              <button class="btn-primary" (click)="aprobarPago()" [disabled]="!selectedPayment">
-                Aprobar pago
-              </button>
+              <button class="btn-danger"  (click)="abrirModal('RECHAZAR')"     >Rechazar pago</button>
+              <button class="btn-primary" (click)="abrirModal('APROBAR')"    >Aprobar pago</button>
             </div>
           </div>
         </div>
@@ -196,3 +209,58 @@
     </section>
   </div>
 </div>
+
+
+
+
+<div class="modal" *ngIf="mostrarModal">
+
+  <div class="modal-content">
+
+    <h3>
+      {{ accionModal === 'APROBAR'
+          ? 'Confirmar aprobación'
+          : 'Confirmar rechazo' }}
+    </h3>
+
+    <p>
+      ¿Estás seguro de que deseas
+      {{ accionModal === 'APROBAR'
+          ? 'aprobar'
+          : 'rechazar' }}
+      este pago?
+    </p>
+
+    <div class="modal-actions">
+
+      <button class="btn-primary"
+              (click)="confirmarAccion()">
+        Sí, confirmar
+      </button>
+
+      <button class="btn-secondary"
+              (click)="cerrarModal()">
+        Cancelar
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

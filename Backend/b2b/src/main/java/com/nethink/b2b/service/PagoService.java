@@ -195,6 +195,8 @@ public class PagoService {
 
             dto.setFechaPago(
                     p.getFechaPago());
+            
+            dto.setFechaValidacion(p.getFechaValidacion()); 
 
             dto.setComprobanteUrl(
                     p.getComprobanteUrl());
@@ -287,8 +289,16 @@ public void aprobarPago(Integer idPago, String correoUsuario,HttpServletRequest 
     // =========================
 
     pago.setEstado(
-            Pago.EstadoPago.VALIDANDO
+            Pago.EstadoPago.APROBADO
     );
+    
+    
+    pago.setValidado(true); 
+    
+    pago.setFechaValidacion( LocalDateTime.now());
+    
+    pago.setValidadoPor(idUsuario); 
+    
 
     // =========================
     // ACTUALIZAR SOLICITUD
@@ -299,7 +309,31 @@ public void aprobarPago(Integer idPago, String correoUsuario,HttpServletRequest 
     solicitud.setEstado(
             Solicitud.EstadoSolicitud.PAGADA
     );
+    
+    
+    
+    SolicitudHistorial historial =
+            new SolicitudHistorial();
 
+    historial.setSolicitud(solicitud);
+
+    historial.setIdUsuario(idUsuario);
+
+    historial.setEstado(
+            Solicitud.EstadoSolicitud.PAGADA.name()
+    );
+
+    historial.setDescripcion(
+            "Pago aprobado por proveedor"
+    );
+
+    historial.setFecha(
+            LocalDateTime.now()
+    ); 
+    
+    
+    historialRepo.save(historial); 
+    
     pagoRepo.save(pago);
     
     logsSistemaService.registrarLog(
@@ -326,7 +360,77 @@ public void aprobarPago(Integer idPago, String correoUsuario,HttpServletRequest 
     
     
     
+@Transactional
+public void rechazarPago(Integer idPago, Integer idUsuario) {
+
+    Pago pago = pagoRepo.findById(idPago)
+            .orElseThrow(() ->
+                    new RuntimeException("Pago no encontrado"));
+
+    // =========================
+    // ACTUALIZAR PAGO
+    // =========================
+
+    pago.setEstado(
+            Pago.EstadoPago.RECHAZADO
+    );
     
+    
+    pago.setValidado(true); 
+    
+    pago.setFechaValidacion( LocalDateTime.now());
+    
+    pago.setValidadoPor(idUsuario); 
+    
+
+    // =========================
+    // ACTUALIZAR SOLICITUD
+    // =========================
+
+    Solicitud solicitud = pago.getSolicitud();
+
+    solicitud.setEstado(
+            Solicitud.EstadoSolicitud.RECHAZADA
+    );
+    
+    
+    
+    
+   SolicitudHistorial historial =
+            new SolicitudHistorial();
+
+    historial.setSolicitud(solicitud);
+
+    historial.setIdUsuario(idUsuario);
+
+    historial.setEstado(
+            Solicitud.EstadoSolicitud.RECHAZADA.name()
+    );
+
+    historial.setDescripcion(
+            "Pago rechazado por proveedor"
+    );
+
+    historial.setFecha(
+            LocalDateTime.now()
+    ); 
+    
+    
+    historialRepo.save(historial);  
+    
+    pagoRepo.save(pago);
+
+} 
+
+
+
+
+
+
+
+
+
+
     
     
 }

@@ -4,6 +4,7 @@ import com.nethink.b2b.dto.request.SolicitudCrearRequest;
 import com.nethink.b2b.dto.response.SolicitudHistorialResponse;
 import com.nethink.b2b.dto.response.SolicitudResponse;
 import com.nethink.b2b.dto.response.TrackingResponse;
+import com.nethink.b2b.dto.response.TrackingStepEntregaResponse; 
 import com.nethink.b2b.dto.response.TrackingStepResponse;
 import com.nethink.b2b.entity.DescuentoVolumen;
 import com.nethink.b2b.entity.DetalleSolicitud;
@@ -32,6 +33,8 @@ import com.nethink.b2b.dto.response.EspecificacionResponse;
 import com.nethink.b2b.entity.ProductoEspecificacion;
 import com.nethink.b2b.repository.ProductoEspecificacionRepository; 
 import jakarta.servlet.http.HttpServletRequest;
+import com.nethink.b2b.dto.response.SolicitudEntregaResponse; 
+import com.nethink.b2b.dto.response.SolicitudDetalleEntregaResponse; 
 
 
 import java.math.BigDecimal;
@@ -694,6 +697,7 @@ BigDecimal totalItem =
     
     
     public List<SolicitudResponse> listarSolicitudesProveedor(
+<<<<<<< HEAD
         Integer idProveedor,Integer idUsuario, HttpServletRequest request) {
         
         logsSistemaService.registrarLog(
@@ -705,6 +709,10 @@ BigDecimal totalItem =
    request
 );
 
+=======
+        Integer idProveedor) {
+System.err.println("ID PROVEEDOR = " + idProveedor);
+>>>>>>> origin/feature/pestaña-pagos-validacion
     List<Solicitud> solicitudes =
             solicitudRepo.listarSolicitudes(idProveedor);
 
@@ -851,8 +859,20 @@ BigDecimal totalItem =
     
     
     
+// listar solicitudes pagadas, en preparacion, en camino y entregadas
     
     
+    public List<SolicitudEntregaResponse>
+listarSolicitudesEntregaProveedor(
+        Integer idProveedor
+) {
+
+    return solicitudRepo
+            .listarSolicitudesEntrega(
+                    idProveedor
+            );
+
+}
     
     public List<SolicitudResponse> listarTodasSolicitudes(Integer idUsuario,HttpServletRequest request) {
 logsSistemaService.registrarLog(
@@ -942,6 +962,27 @@ logsSistemaService.registrarLog(
     return response;
 }
     
+  // listar el tracking para proveedor
+
+public List<TrackingStepEntregaResponse>
+listarTrackingSolicitud(
+
+        Integer idSolicitud,
+
+        Integer idProveedor
+
+) {
+
+    return historialRepo
+            .listarTrackingSolicitud(
+
+                    idSolicitud,
+
+                    idProveedor
+
+            );
+
+}
     
         @Transactional
 public void aprobarPedido(Integer idSolicitud, String correoUsuario,HttpServletRequest req) {
@@ -961,6 +1002,7 @@ public void aprobarPedido(Integer idSolicitud, String correoUsuario,HttpServletR
 
   
     
+<<<<<<< HEAD
     logsSistemaService.registrarLog(
     usuario.getIdUsuario(),
     "APROBAR PEDIDOS",
@@ -982,6 +1024,29 @@ public void aprobarPedido(Integer idSolicitud, String correoUsuario,HttpServletR
 
 }
   
+=======
+  // listar los detalles de las solicitudes que estan en fase de entregas
+
+
+public List<SolicitudDetalleEntregaResponse>
+listarDetallesEntregaProveedor(
+
+        Integer idProveedor
+
+) {
+
+    return detalleRepo
+            .listarDetallesEntregaProveedor(
+                    idProveedor
+            );
+
+}
+
+
+
+
+
+>>>>>>> origin/feature/pestaña-pagos-validacion
     
             @Transactional
 public void rechazarPedido(Integer idSolicitud,String prompt, String correoUsuario,HttpServletRequest req) {

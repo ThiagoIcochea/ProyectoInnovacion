@@ -9,6 +9,8 @@ import { catchError, shareReplay, tap } from 'rxjs/operators';
 
 
 
+
+
 @Component({
   selector: 'app-provider-payments',
   standalone: true,
@@ -31,11 +33,20 @@ export class ProviderPaymentsComponent  implements OnInit    {
 
   selectedPayment: Payment | null = null;
 
+  accionModal: 'APROBAR' | 'RECHAZAR' | null = null;
+  mostrarModal = false;
+
   constructor(private pagoService: PagoService) {}
 
 ngOnInit(): void {
 
-    this.cargarPagos();
+  
+
+  const token = localStorage.getItem('token');
+
+  console.log("TOKEN JWT:", token);
+
+    this.payments$ = this.pagoService.listarMisPagos();
 
   }
 
@@ -74,33 +85,159 @@ private cargarPagos(): void {
 seleccionarPago(pago: Payment): void {
     this.selectedPayment = pago;
     this.voucherZoom = 1;
+
+     console.log("seleccionpago", this.selectedPayment); 
+
+    
   }
 
 
 
+abrirModal(accion: 'APROBAR' | 'RECHAZAR'): void {
+  if (!this.selectedPayment) return;
 
-aprobarPago(): void {
+  this.accionModal = accion;
+  this.mostrarModal = true;
+}
 
-    if (!this.selectedPayment) return;
+
+
+
+cerrarModal(): void {
+
+  this.mostrarModal = false;
+  this.accionModal=null; 
+
+
+}
+
+
+
+
+confirmarAccion(): void {
+  if (!this.selectedPayment) return;
+
+  const idPago = this.selectedPayment.idPago;
+
+  if (this.accionModal === 'APROBAR') {
+    this.aprobarPago(idPago);
+  }
+
+  if (this.accionModal === 'RECHAZAR') {
+    this.rechazarPago(idPago);
+  }
+}
+
+
+
+
+aprobarPago(idPago:number): void {
+
+    //if (!this.selectedPayment) return;
+
+    //const idPago = this.selectedPayment?.idPago;
+
+  //if (!idPago) {
+   // console.error("idPago no válido");
+   //return;
+  //}
 
     this.pagoService
-      .aprobarPago(this.selectedPayment.idPago)
+      .aprobarPago(idPago)
       .subscribe({
 
-        next: () => {
+        next: (resp) => {
+           console.log(resp.mensaje); 
+          //alert('Pago aprobado correctamente');
 
-          alert('Pago aprobado correctamente');
 
+
+            this.cerrarModal(); 
           // recargar lista
-          this.cargarPagos();
+          //this.payments$ =
+          //  this.pagoService.listarMisPagos()
+
+           // .pipe(
+
+            //  tap((pagos) => {
+
+            //    this.selectedPayment =
+             //     pagos.length > 0
+             //       ? pagos[0]
+             //       : null;
+
+             // })
+
+            //);  
+
 
         },
 
         error: (err) => {
 
           console.error(err);
+          console.log("error al aprobar"); 
 
-          alert('Error al aprobar pago');
+          //this.mostrarModal=false; 
+
+          //alert('Error al aprobar pago');
+
+        }
+
+      });
+
+  }
+
+
+rechazarPago(idPago:number): void {
+
+    //if (!this.selectedPayment) return;
+
+   // const idPago = this.selectedPayment?.idPago;
+
+  //if (!idPago) {
+  //  console.error("idPago no válido");
+  //  return;
+  //}
+
+    this.pagoService
+      .rechazarPago(idPago)
+      .subscribe({
+
+        next: (resp) => {
+           console.log(resp.mensaje); 
+          //alert('Pago no aprobado');
+
+            this.recargarPagos(); 
+            this.cerrarModal(); 
+          // recargar lista
+          //this.payments$ =
+          //  this.pagoService.listarMisPagos()
+
+           // .pipe(
+
+            //  tap((pagos) => {
+
+            //    this.selectedPayment =
+            //      pagos.length > 0
+            //        ? pagos[0]
+            //        : null;
+
+            //  })
+
+           // );  
+
+
+        },
+
+        error: (err) => {
+
+          console.error(err);
+          console.log("error al rechazar"); 
+
+          //this.mostrarModal=false; 
+
+          //alert('Error al rechazar pago');
 
         }
 
@@ -110,10 +247,13 @@ aprobarPago(): void {
 
 
 
-
-
-
-
+private recargarPagos(): void {
+  this.payments$ = this.pagoService.listarMisPagos().pipe(
+    tap((pagos) => {
+      this.selectedPayment = pagos.length > 0 ? pagos[0] : null;
+    })
+  );
+}
 
 
 

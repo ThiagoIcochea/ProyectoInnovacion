@@ -12,7 +12,7 @@
     <aside class="orders-card">
       <div class="list-header">
         <h2>Órdenes activas</h2>
-        <span>2 en progreso</span>
+        <span>  {{(deliveries$ | async )?.length || 0}}  órdenes</span>
       </div>
 
       <div class="search-box">Buscar por ID de orden o cliente...</div>
@@ -20,22 +20,24 @@
       <div class="order-list">
         <button
           class="order-item"
-          *ngFor="let order of orders"
-          [class.active]="order.active"
+          
+          *ngFor="let order  of (deliveries$ | async)   "
+          [class.active]="selectedRequest?.idSolicitud === order.idSolicitud "
+          (click)="seleccionarSolicitud(order)"
         >
           <div>
-            <strong>{{ order.id }}</strong>
-            <p>{{ order.client }}</p>
-            <small>{{ order.items }}</small>
+            <strong>{{ order.idSolicitud }}</strong>
+            <p>{{ order.nombreEmpresa  }}</p>
+            <small>{{ order.cantidadProductos }}</small>
           </div>
 
           <div class="order-meta">
-            <span>{{ order.time }}</span>
+            <span>{{ order.fechaCreacion  }}</span>
             <em
-              [class.shipping]="order.status === 'En camino'"
-              [class.delivered]="order.status === 'Entregado'"
+              [class.shipping]="order.estado === 'En camino'"
+              [class.delivered]="order.estado === 'Entregado'"
             >
-              {{ order.status }}
+              {{ order.estado }}
             </em>
           </div>
         </button>
@@ -88,10 +90,10 @@
               <div>Cant.</div>
             </div>
 
-            <div class="shipment-table__row" *ngFor="let item of shipmentProducts">
-              <div>{{ item.product }}</div>
-              <div>{{ item.sku }}</div>
-              <div>{{ item.qty }}</div>
+            <div class="shipment-table__row" *ngFor="let item of (details$ | async)    ">
+              <div>{{ item.nombreProducto }}</div>
+              <div></div>
+              <div>{{ item.cantidad }}</div>
             </div>
           </div>
         </div>
@@ -102,17 +104,17 @@
           <div class="timeline">
             <div
               class="timeline-item"
-              *ngFor="let step of steps"
-              [ngClass]="step.status"
+              *ngFor="let step of (tracking$ | async)    "
+              [ngClass]="step.estado"
             >
               <div class="marker">
-                <span *ngIf="step.status === 'done'">✓</span>
-                <span *ngIf="step.status === 'active'">•</span>
+                <span *ngIf="step.estado === 'done'">✓</span>
+                <span *ngIf="step.estado === 'active'">•</span>
               </div>
 
               <div>
-                <strong>{{ step.title }}</strong>
-                <p>{{ step.description }}</p>
+                <strong>{{ step.descripcion }}</strong>
+                <p>{{ step.fecha | date:'short'    }}</p>
               </div>
             </div>
           </div>

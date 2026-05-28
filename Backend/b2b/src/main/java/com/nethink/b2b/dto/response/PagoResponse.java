@@ -46,6 +46,8 @@ public class PagoResponse {
     private String estado;
 
     private LocalDateTime fechaPago;
+    
+    private LocalDateTime fechaValidacion; 
 
     private String comprobanteUrl;
 
@@ -120,18 +122,18 @@ public  LocalDateTime getFechaSolicitud(){
 
 public void  setFechaSolicitud(LocalDateTime fechaSolicitud   ){
     
-    this.fechaSolicitud=fechaSolicitud  ; 
+    this.fechaSolicitud=fechaSolicitud    ; 
 } 
 
 
 
 
 public BigDecimal getTotalSolicitud() {
-    return totalSolicitud;
+    return totalSolicitud     ;
 }
 
 public void setTotalSolicitud(BigDecimal totalSolicitud) {
-    this.totalSolicitud = totalSolicitud;
+      this.totalSolicitud = totalSolicitud    ;
 }
 
 
@@ -146,15 +148,15 @@ public void setTotalSolicitud(BigDecimal totalSolicitud) {
 //}
 
 public String getMetodo() {
-    return metodo;
+    return metodo   ;
 }
 
 public void setMetodo(String metodo) {
-    this.metodo = metodo;
+    this.metodo = metodo  ;
 }
 
 public String getEntidad() {
-    return entidad;
+    return entidad   ;
 }
 
 public void setEntidad(String entidad) {
@@ -184,6 +186,19 @@ public LocalDateTime getFechaPago() {
 public void setFechaPago(LocalDateTime fechaPago) {
     this.fechaPago = fechaPago;
 }
+
+
+public LocalDateTime getFechaValidacion(){
+    return fechaValidacion; 
+}
+
+
+public void setFechaValidacion(LocalDateTime fechaValidacion){
+    this.fechaValidacion=fechaValidacion; 
+}    
+
+
+
 
 public String getComprobanteUrl() {
     return comprobanteUrl;

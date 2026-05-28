@@ -44,9 +44,11 @@ ngOnInit(): void {
 
   // ✔ SOLO datos aquí (sin tap, sin lógica UI)
     this.requests$ = this.requestService.listarSolicitudes();
+    
 
     // ✔ selección inicial (una sola vez)
     this.requests$.subscribe(data => {
+      console.log(data);
       if (data?.length > 0) {
         this.selectRequest(data[0]);
       }

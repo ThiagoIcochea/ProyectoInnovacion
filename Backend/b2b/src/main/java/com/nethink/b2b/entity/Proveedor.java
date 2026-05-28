@@ -40,7 +40,7 @@ private String estadoApi;
     private LocalDateTime fechaRegistro;
 
 
-@ManyToOne(fetch = FetchType.EAGER)
+@OneToOne(fetch = FetchType.EAGER)
 @JoinColumn(name = "id_usuario")
 private Usuario usuario;
 

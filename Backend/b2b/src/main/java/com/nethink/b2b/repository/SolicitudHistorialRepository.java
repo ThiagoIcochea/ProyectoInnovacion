@@ -4,6 +4,9 @@ import com.nethink.b2b.entity.SolicitudHistorial;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import com.nethink.b2b.dto.response.TrackingStepEntregaResponse;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
 
 public interface SolicitudHistorialRepository
         extends JpaRepository<SolicitudHistorial, Integer> {
@@ -22,4 +25,45 @@ public interface SolicitudHistorialRepository
             Integer idSolicitud,
             String estado
     );
+    
+    
+   @Query("""
+SELECT new com.nethink.b2b.dto.response.TrackingStepEntregaResponse(
+
+    sh.solicitud.idSolicitud,
+
+    sh.estado,
+
+    sh.descripcion,
+          
+    sh.fecha      
+
+)
+
+FROM SolicitudHistorial sh
+
+WHERE sh.solicitud.idSolicitud = :idSolicitud
+          AND sh.solicitud.proveedor.idProveedor = :idProveedor
+
+ORDER BY sh.fecha ASC
+""")
+List<TrackingStepEntregaResponse>
+listarTrackingSolicitud(
+        @Param("idSolicitud")
+        Integer idSolicitud,
+        
+        @Param("idProveedor")
+        Integer idProveedor
+        
+        
+        
+        
+); 
+    
+    
+    
+    
+    
+    
+    
 }

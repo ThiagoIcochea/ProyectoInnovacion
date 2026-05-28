@@ -52,7 +52,7 @@ protected void doFilterInternal(HttpServletRequest request,
     if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
         String token = authHeader.substring(7);
-//System.out.println("🔥 REQUEST EN FILTER");
+
         try {
             if (!jwtUtil.isTokenValid(token)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
