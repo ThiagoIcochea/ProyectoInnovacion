@@ -326,20 +326,17 @@ public List<IndicadorProveedorResponse> top10Proveedores() {
                         p.getIdProveedor()
                 );
 
-        if (total <= 0) {
+        if (total == 0) {
             continue;
         }
 
-        double cumplimiento = ((double) completadas / total) * 100.0;
+        double cumplimiento =
+                ((double) completadas / total) * 100.0;
 
         double score = scoringService
                 .calcularScoreProveedorCompleto(
                         p.getIdProveedor()
                 );
-
-        if (score <= 0) {
-            continue;
-        }
 
         IndicadorProveedorResponse dto =
                 new IndicadorProveedorResponse();

@@ -331,7 +331,7 @@
               </div>
 
               <div class="top-provider-badges">
-                <span class="provider-status provider-score-pill">{{ proveedor.scoringGeneral || 0 }}/100</span>
+                <span class="provider-status provider-score-pill">{{ proveedor.scoreGeneral || 0 }}/100</span>
 
                 <span class="provider-status" *ngIf="proveedor.estado; else verifiedStatus">
                   {{ proveedor.estado }}
