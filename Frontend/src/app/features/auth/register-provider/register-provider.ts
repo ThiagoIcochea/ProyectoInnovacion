@@ -37,9 +37,11 @@ export class RegisterProviderComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   headers() {
-    return new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token)}`
-    });
+    const token = localStorage.getItem(APP_STORAGE_KEYS.token);
+
+    return token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : new HttpHeaders();
   }
 
   /* ================= METODOS DE PAGO ================= */
@@ -111,13 +113,40 @@ export class RegisterProviderComponent implements OnInit {
 
   certificaciones: any[] = [];
   selectedCerts: any = {};
+  certificacionesLoading = false;
+  certificacionesError = '';
 
   fechaObtencionMap: any = {};
   fechaExpiracionMap: any = {};
 
   ngOnInit(): void {
+    this.cargarCertificaciones();
+  }
+
+  cargarCertificaciones(): void {
+    this.certificacionesLoading = true;
+    this.certificacionesError = '';
+
     this.http.get<any>(`${APP_API_BASE_URL}/certificaciones`)
-      .subscribe(res => this.certificaciones = res);
+      .subscribe({
+        next: res => {
+          this.certificaciones = Array.isArray(res)
+            ? res
+            : Array.isArray(res?.data)
+              ? res.data
+              : [];
+
+          this.certificacionesLoading = false;
+        },
+        error: err => {
+          console.error(err);
+          this.certificaciones = [];
+          this.certificacionesLoading = false;
+          this.certificacionesError = err?.status === 403
+            ? 'El backend no esta permitiendo cargar certificaciones en el registro publico.'
+            : 'No se pudieron cargar las certificaciones desde el backend.';
+        }
+      });
   }
 
   toggleCertificacion(event: any, id: number) {
@@ -185,6 +214,21 @@ export class RegisterProviderComponent implements OnInit {
       return;
     }
 
+    if (this.certificacionesLoading) {
+      this.formError = 'Espera a que terminen de cargar las certificaciones.';
+      return;
+    }
+
+    if (this.certificacionesError) {
+      this.formError = this.certificacionesError;
+      return;
+    }
+
+    if (this.certificaciones.length < 1) {
+      this.formError = 'No hay certificaciones disponibles desde el backend.';
+      return;
+    }
+
     if (!this.hasSelectedCertification()) {
       this.formError = 'Debes seleccionar al menos 1 certificacion.';
       return;
@@ -228,7 +272,10 @@ export class RegisterProviderComponent implements OnInit {
       { headers: this.headers() }
     ).subscribe({
       next: () => alert('Proveedor registrado correctamente'),
-      error: err => console.error(err)
+      error: err => {
+        console.error(err);
+        this.formError = err?.error?.message || 'No se pudo registrar el proveedor.';
+      }
     });
   }
 }

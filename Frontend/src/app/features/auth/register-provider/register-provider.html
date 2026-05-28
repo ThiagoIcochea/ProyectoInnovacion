@@ -232,15 +232,26 @@
             </div>
           </div>
 
-          <div *ngIf="certificaciones.length === 0" class="empty-state">
+          <div *ngIf="certificacionesLoading" class="empty-state empty-state--loading">
+            Cargando certificaciones desde el backend...
+          </div>
+
+          <div *ngIf="!certificacionesLoading && certificacionesError" class="form-error cert-load-error">
+            <span>{{ certificacionesError }}</span>
+            <button type="button" class="btn btn-outline" (click)="cargarCertificaciones()">
+              Reintentar
+            </button>
+          </div>
+
+          <div *ngIf="!certificacionesLoading && !certificacionesError && certificaciones.length === 0" class="empty-state">
             No hay certificaciones disponibles por ahora.
           </div>
 
-          <div *ngIf="submitted && certificaciones.length > 0 && !hasSelectedCertification()" class="form-error">
+          <div *ngIf="submitted && !certificacionesLoading && !certificacionesError && certificaciones.length > 0 && !hasSelectedCertification()" class="form-error">
             Debes seleccionar al menos 1 certificacion.
           </div>
 
-          <div class="cert-grid" *ngIf="certificaciones.length > 0">
+          <div class="cert-grid" *ngIf="!certificacionesLoading && !certificacionesError && certificaciones.length > 0">
             <div class="cert-card" *ngFor="let c of certificaciones" [class.is-selected]="selectedCerts[c.idCertificacion]">
               <label class="cert-card__label" [attr.for]="'cert-' + c.idCertificacion">
                 <input

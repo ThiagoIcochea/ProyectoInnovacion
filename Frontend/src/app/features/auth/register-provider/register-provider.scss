@@ -397,6 +397,21 @@
   color: #94a3b8;
 }
 
+.empty-state--loading {
+  position: relative;
+  overflow: hidden;
+  color: #bfdbfe;
+}
+
+.empty-state--loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.12), transparent);
+  animation: cert-loading 1.4s ease-in-out infinite;
+}
+
 .form-error {
   margin-top: 0.75rem;
   border: 1px solid rgba(248, 113, 113, 0.22);
@@ -404,6 +419,20 @@
   color: #fca5a5;
   font-size: 0.9rem;
   font-weight: 800;
+}
+
+.cert-load-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cert-load-error .btn {
+  flex: 0 0 auto;
+  min-height: 38px;
+  color: #fecaca;
+  border-color: rgba(248, 113, 113, 0.3);
 }
 
 .payment-grid {
@@ -622,5 +651,16 @@
 
   .payment-modal__actions {
     flex-direction: column-reverse;
+  }
+
+  .cert-load-error {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+@keyframes cert-loading {
+  to {
+    transform: translateX(100%);
   }
 }

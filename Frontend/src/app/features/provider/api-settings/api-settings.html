@@ -2,23 +2,19 @@
 
   <div class="page-header">
     <div>
-      <span>Integración</span>
-      <h1>Configuración API</h1>
+      <span>Integracion</span>
+      <h1>Configuracion API</h1>
       <p>
-        Conecta tu inventario para sincronizar catálogo,
+        Conecta tu inventario para sincronizar catalogo,
         stock y precios en tiempo real.
       </p>
     </div>
 
     <div
       class="status-pill"
-      [class.text-warning]="config.estadoConexion === 'ERROR'"
+      [ngClass]="'status-pill--' + connectionState"
     >
-      {{
-        config.estadoConexion === 'OK'
-          ? 'API conectada'
-          : 'API con errores'
-      }}
+      {{ connectionLabel }}
     </div>
   </div>
 
@@ -40,42 +36,39 @@
 
     <section class="api-card">
 
-      <h2>Credenciales de conexión</h2>
+      <h2>Credenciales de conexion</h2>
 
       <div class="form-grid">
 
         <div class="form-group">
-          <label>Endpoint URL</label>
+          <label for="apiUrl">Endpoint URL</label>
 
           <input
+            id="apiUrl"
             type="text"
             [(ngModel)]="config.apiUrl"
+            placeholder="https://api.tuempresa.com/catalogo"
           />
         </div>
 
         <div class="form-group">
-          <label>Tipo de conexión</label>
+          <label for="apiTipo">Tipo de conexion</label>
 
-          <select [(ngModel)]="config.apiTipo">
-
-            <option value="REST">
-              REST
-            </option>
-
-            <option value="GRAPHQL">
-              GRAPHQL
-            </option>
-
+          <select id="apiTipo" [(ngModel)]="config.apiTipo">
+            <option value="REST">REST</option>
+            <option value="GRAPHQL">GRAPHQL</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label>API Key / Token</label>
+          <label for="apiToken">API Key / Token</label>
 
           <div class="secret-input">
             <input
+              id="apiToken"
               [type]="showApiKey ? 'text' : 'password'"
               [(ngModel)]="config.apiToken"
+              placeholder="Token de autenticacion"
             />
 
             <button
@@ -94,31 +87,39 @@
         </div>
 
         <div class="form-group">
-          <label>Estado proveedor</label>
+          <label for="estadoProveedor">Estado proveedor</label>
 
           <input
+            id="estadoProveedor"
             type="text"
-            [value]="config.estadoProveedor"
+            [value]="config.estadoProveedor || '-'"
             disabled
           />
         </div>
 
       </div>
 
+      <div class="form-message form-message--warning" *ngIf="connectionMessage && connectionState !== 'error'">
+        {{ connectionMessage }}
+      </div>
+
       <div class="actions">
 
         <button
+          type="button"
           class="btn-secondary"
           (click)="probarConexion()"
+          [disabled]="testingConnection || !config.apiUrl?.trim()"
         >
-          Probar conexión
+          {{ testingConnection ? 'Probando...' : 'Probar conexion' }}
         </button>
 
         <button
+          type="button"
           class="btn-primary"
           (click)="guardarConfiguracion()"
         >
-          Guardar configuración
+          Guardar configuracion
         </button>
 
       </div>
@@ -127,33 +128,24 @@
 
     <aside class="sync-card">
 
-      <h2>Estado de sincronización</h2>
+      <h2>Estado de sincronizacion</h2>
 
-      <div class="sync-status">
+      <div
+        class="sync-status"
+        [ngClass]="'sync-status--' + connectionState"
+      >
 
         <div class="sync-icon">
-          {{
-            config.estadoConexion === 'OK'
-              ? '✓'
-              : '!'
-          }}
+          {{ syncIcon }}
         </div>
 
         <div>
-
-          <strong>
-            {{
-              config.estadoConexion === 'OK'
-                ? 'Sincronización activa'
-                : 'Sincronización con errores'
-            }}
-          </strong>
+          <strong>{{ syncTitle }}</strong>
 
           <span>
-            Última actualización:
+            Ultima actualizacion:
             {{ config.fechaUltimaConexion || '-' }}
           </span>
-
         </div>
       </div>
 
@@ -163,15 +155,17 @@
           <span>Endpoint</span>
           <div class="secret-value-row">
             <strong
-              class="secret-value"
-              [class.secret-value--expanded]="showEndpoint">
-              {{ config.endpoint || '-' }}
+              class="secret-value endpoint-value"
+              [class.secret-value--masked]="!showEndpoint && syncEndpoint"
+              [class.secret-value--expanded]="showEndpoint"
+              [title]="showEndpoint ? endpointLabel : ''">
+              {{ endpointDisplayLabel }}
             </strong>
 
             <button
               type="button"
               class="secret-toggle"
-              (click)="toggleSecret('endpoint')"
+              (click)="toggleEndpointVisibility()"
               [attr.aria-label]="showEndpoint ? 'Ocultar endpoint' : 'Mostrar endpoint'">
               <svg *ngIf="!showEndpoint" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path d="M12 5c5 0 8.5 4.5 9.5 7-1 2.5-4.5 7-9.5 7s-8.5-4.5-9.5-7C3.5 9.5 7 5 12 5Zm0 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0-2a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" fill="currentColor"></path>
@@ -184,17 +178,18 @@
         </div>
 
         <div>
-          <span>Método HTTP</span>
-          <strong>
+          <span>Metodo HTTP</span>
+          <strong class="safe-value">
             {{ config.metodoHttp || '-' }}
           </strong>
         </div>
 
         <div>
-          <span>Código respuesta</span>
+          <span>Codigo respuesta</span>
 
           <strong
-            [class.text-warning]="config.estadoConexion === 'ERROR'"
+            class="safe-value"
+            [class.text-warning]="connectionState === 'error'"
           >
             {{ config.codigoRespuesta || '-' }}
           </strong>
@@ -202,17 +197,18 @@
 
         <div>
           <span>Tiempo respuesta</span>
-          <strong>
-            {{ config.tiempoRespuestaMs || 0 }} ms
+          <strong class="safe-value">
+            {{ responseTimeLabel }}
           </strong>
         </div>
 
       </div>
 
-      <div class="info-box">
-
-        {{ config.descripcion || 'Sin información reciente.' }}
-
+      <div
+        class="info-box"
+        [ngClass]="'info-box--' + connectionState"
+      >
+        {{ connectionDescription }}
       </div>
 
     </aside>

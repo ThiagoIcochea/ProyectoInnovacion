@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import {
   HttpClient,
   HttpHeaders
 } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+
+type ConnectionState = 'idle' | 'testing' | 'success' | 'error';
 
 @Component({
   selector: 'app-provider-api-settings',
@@ -16,14 +18,12 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './api-settings.html',
   styleUrl: './api-settings.scss'
 })
-export class ProviderApiSettingsComponent
-implements OnInit {
+export class ProviderApiSettingsComponent implements OnInit {
 
   private API_URL =
     'https://proyectoinnovacion.onrender.com/api/proveedor-api';
 
   config: any = {
-
     apiUrl: '',
     apiTipo: 'REST',
     apiToken: '',
@@ -39,6 +39,8 @@ implements OnInit {
   };
 
   loading = true;
+  testingConnection = false;
+  connectionMessage = '';
   showEndpoint = false;
   showApiKey = false;
 
@@ -52,7 +54,6 @@ implements OnInit {
   }
 
   private headers(): HttpHeaders {
-
     return new HttpHeaders({
       Authorization:
         `Bearer ${localStorage.getItem('token')}`
@@ -60,7 +61,6 @@ implements OnInit {
   }
 
   cargarConfiguracion(): void {
-
     this.loading = true;
 
     this.http.get<any>(
@@ -72,8 +72,10 @@ implements OnInit {
     .subscribe({
 
       next: (res) => {
-
-        this.config = res;
+        this.config = {
+          ...this.config,
+          ...res
+        };
         this.loading = false;
 
         this.cdr.detectChanges();
@@ -81,7 +83,7 @@ implements OnInit {
 
       error: (err) => {
         console.error(
-          'Error cargando configuración API',
+          'Error cargando configuracion API',
           err
         );
         this.loading = false;
@@ -91,11 +93,7 @@ implements OnInit {
   }
 
   guardarConfiguracion(): void {
-
-   
-
     const body = {
-
       apiUrl: this.config.apiUrl,
       apiTipo: this.config.apiTipo,
       apiToken: this.config.apiToken
@@ -111,16 +109,14 @@ implements OnInit {
     .subscribe({
 
       next: () => {
-
-        alert('Configuración guardada');
+        alert('Configuracion guardada');
 
         this.cargarConfiguracion();
       },
 
       error: (err) => {
-
         console.error(
-          'Error guardando configuración',
+          'Error guardando configuracion',
           err
         );
 
@@ -130,8 +126,13 @@ implements OnInit {
   }
 
   probarConexion(): void {
+    if (!this.config.apiUrl?.trim()) {
+      this.connectionMessage = 'Configura un endpoint antes de probar la conexion.';
+      return;
+    }
 
-   
+    this.testingConnection = true;
+    this.connectionMessage = '';
 
     this.http.post<any>(
       `${this.API_URL}/probar`,
@@ -143,29 +144,146 @@ implements OnInit {
     .subscribe({
 
       next: (res) => {
+        this.config = {
+          ...this.config,
+          ...res
+        };
+        this.testingConnection = false;
 
-        this.config = res;
-
-        alert('Conexión realizada');
+        alert('Conexion realizada');
 
         this.cdr.detectChanges();
       },
 
       error: (err) => {
-
         console.error(
-          'Error probando conexión',
+          'Error probando conexion',
           err
         );
 
-        alert('Error de conexión');
+        this.config = {
+          ...this.config,
+          estadoConexion: 'ERROR',
+          codigoRespuesta: err?.status || '',
+          descripcion: err?.message || 'Error de conexion'
+        };
+        this.testingConnection = false;
+        this.connectionMessage = 'No se pudo conectar con el endpoint configurado.';
+
+        alert('Error de conexion');
+        this.cdr.detectChanges();
       }
     });
   }
 
+  get connectionState(): ConnectionState {
+    if (this.testingConnection) {
+      return 'testing';
+    }
+
+    const status = String(this.config.estadoConexion || '').toUpperCase();
+
+    if (status === 'OK' || status === 'CONECTADO' || status === 'SUCCESS') {
+      return 'success';
+    }
+
+    if (status === 'ERROR') {
+      return 'error';
+    }
+
+    return 'idle';
+  }
+
+  get connectionLabel(): string {
+    const labels: Record<ConnectionState, string> = {
+      idle: 'Conexion sin probar',
+      testing: 'Probando conexion...',
+      success: 'API conectada',
+      error: 'API con errores'
+    };
+
+    return labels[this.connectionState];
+  }
+
+  get syncTitle(): string {
+    const labels: Record<ConnectionState, string> = {
+      idle: 'Conexion sin probar',
+      testing: 'Probando conexion',
+      success: 'Sincronizacion activa',
+      error: 'Sincronizacion con errores'
+    };
+
+    return labels[this.connectionState];
+  }
+
+  get syncIcon(): string {
+    const icons: Record<ConnectionState, string> = {
+      idle: '-',
+      testing: '...',
+      success: 'OK',
+      error: '!'
+    };
+
+    return icons[this.connectionState];
+  }
+
+  get syncEndpoint(): string {
+    return this.config.endpoint || this.config.apiUrl || '';
+  }
+
+  get endpointLabel(): string {
+    return this.syncEndpoint || 'Endpoint no configurado';
+  }
+
+  get endpointDisplayLabel(): string {
+    if (!this.syncEndpoint) {
+      return 'Endpoint no configurado';
+    }
+
+    return this.showEndpoint
+      ? this.endpointLabel
+      : 'Endpoint oculto';
+  }
+
+  get responseTimeLabel(): string {
+    if (
+      this.config.tiempoRespuestaMs === null ||
+      this.config.tiempoRespuestaMs === undefined ||
+      this.config.tiempoRespuestaMs === ''
+    ) {
+      return '-';
+    }
+
+    return `${this.config.tiempoRespuestaMs} ms`;
+  }
+
+  get connectionDescription(): string {
+    if (this.connectionMessage) {
+      return this.connectionMessage;
+    }
+
+    if (this.config.descripcion) {
+      return this.config.descripcion;
+    }
+
+    if (!this.syncEndpoint) {
+      return 'Endpoint no configurado.';
+    }
+
+    if (this.connectionState === 'idle') {
+      return 'La conexion aun no fue probada.';
+    }
+
+    return 'Sin informacion reciente.';
+  }
+
+  toggleEndpointVisibility(): void {
+    this.showEndpoint = !this.showEndpoint;
+  }
+
   toggleSecret(field: string): void {
     if (field === 'endpoint') {
-      this.showEndpoint = !this.showEndpoint;
+      this.toggleEndpointVisibility();
       return;
     }
 
