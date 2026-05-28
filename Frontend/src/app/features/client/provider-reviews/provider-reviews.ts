@@ -250,6 +250,7 @@ export class ProviderReviewsComponent implements OnInit {
             provider
           );
 
+          
           this.cargarComentariosProveedor(
             provider
           );
