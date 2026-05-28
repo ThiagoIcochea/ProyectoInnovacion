@@ -1,23 +1,34 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.nethink.b2b.dto.response;
 
-/**
- *
- * @author thico
- */
 public class IndicadorProveedorResponse {
 
     private Integer idProveedor;
+
     private String razonSocial;
 
     private int pedidosCompletados;
+
     private int pedidosTotal;
 
     private double cumplimiento;
+
     private double scoreGeneral;
+
+    private String categoriaPrincipal;
+
+    private int totalResenas;
+
+    private int likes;
+
+    private int dislikes;
+
+    private int satisfaccion;
+
+    private double tiempoEntregaPromedio;
+
+    private boolean verificado;
+
+    private String estado;
 
     public Integer getIdProveedor() {
         return idProveedor;
@@ -67,5 +78,67 @@ public class IndicadorProveedorResponse {
         this.scoreGeneral = scoreGeneral;
     }
 
-   
+    public String getCategoriaPrincipal() {
+        return categoriaPrincipal;
+    }
+
+    public void setCategoriaPrincipal(String categoriaPrincipal) {
+        this.categoriaPrincipal = categoriaPrincipal;
+    }
+
+    public int getTotalResenas() {
+        return totalResenas;
+    }
+
+    public void setTotalResenas(int totalResenas) {
+        this.totalResenas = totalResenas;
+    }
+
+    public int getLikes() {
+        return likes;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
+    public int getDislikes() {
+        return dislikes;
+    }
+
+    public void setDislikes(int dislikes) {
+        this.dislikes = dislikes;
+    }
+
+    public int getSatisfaccion() {
+        return satisfaccion;
+    }
+
+    public void setSatisfaccion(int satisfaccion) {
+        this.satisfaccion = satisfaccion;
+    }
+
+    public double getTiempoEntregaPromedio() {
+        return tiempoEntregaPromedio;
+    }
+
+    public void setTiempoEntregaPromedio(double tiempoEntregaPromedio) {
+        this.tiempoEntregaPromedio = tiempoEntregaPromedio;
+    }
+
+    public boolean isVerificado() {
+        return verificado;
+    }
+
+    public void setVerificado(boolean verificado) {
+        this.verificado = verificado;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
 }

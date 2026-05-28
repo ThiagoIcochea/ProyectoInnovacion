@@ -39,4 +39,16 @@ public interface ComentarioRepository extends JpaRepository<Comentario, Integer>
     List<Comentario> findByIdProvProdOrderByFechaDesc(
             Integer idProvProd
     );
+    
+    @Query("""
+    SELECT c
+    FROM Comentario c
+    JOIN ProveedorProducto pp
+        ON pp.idProvProd = c.idProvProd
+    WHERE pp.proveedor.idProveedor = :idProveedor
+    ORDER BY c.fecha DESC
+""")
+List<Comentario> findByProveedor_IdProveedor(
+        @Param("idProveedor") Integer idProveedor
+);
 }

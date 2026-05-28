@@ -46,6 +46,9 @@ public class ProveedorService {
 
     @Autowired
     private MetodoPagoRepository metodoPagoRepository;
+    
+    @Autowired
+    private ComentarioRepository comentarioRepository;
 
     @Autowired
     private CertificacionRepository certificacionRepository;
@@ -338,6 +341,51 @@ public List<IndicadorProveedorResponse> top10Proveedores() {
                         p.getIdProveedor()
                 );
 
+        int likes = 0;
+        int dislikes = 0;
+        int totalResenas = 0;
+
+        double tiempoEntregaPromedio = 0;
+
+        try {
+
+            List<Comentario> comentarios =
+                    comentarioRepository
+                            .findByProveedor_IdProveedor(
+                                    p.getIdProveedor()
+                            );
+
+            totalResenas = comentarios.size();
+
+            likes = comentarios.stream()
+                    .mapToInt(c ->
+                            c.getLikes() != null
+                                    ? c.getLikes()
+                                    : 0
+                    )
+                    .sum();
+
+            dislikes = comentarios.stream()
+                    .mapToInt(c ->
+                            c.getDislikes() != null
+                                    ? c.getDislikes()
+                                    : 0
+                    )
+                    .sum();
+
+        } catch (Exception e) {
+
+            likes = 0;
+            dislikes = 0;
+            totalResenas = 0;
+        }
+
+        int totalFeedback = likes + dislikes;
+
+        int satisfaccion = totalFeedback == 0
+                ? 0
+                : (likes * 100) / totalFeedback;
+
         IndicadorProveedorResponse dto =
                 new IndicadorProveedorResponse();
 
@@ -363,6 +411,40 @@ public List<IndicadorProveedorResponse> top10Proveedores() {
 
         dto.setScoreGeneral(
                 Math.round(score * 1000.0) / 1000.0
+        );
+
+        dto.setLikes(
+                likes
+        );
+
+        dto.setDislikes(
+                dislikes
+        );
+
+        dto.setTotalResenas(
+                totalResenas
+        );
+
+        dto.setSatisfaccion(
+                satisfaccion
+        );
+
+        dto.setTiempoEntregaPromedio(
+                tiempoEntregaPromedio
+        );
+
+        dto.setEstado(
+                p.getEstado()
+        );
+
+        dto.setVerificado(
+                "ACTIVO".equalsIgnoreCase(
+                        p.getEstado()
+                )
+        );
+
+        dto.setCategoriaPrincipal(
+                "Proveedor B2B"
         );
 
         lista.add(dto);

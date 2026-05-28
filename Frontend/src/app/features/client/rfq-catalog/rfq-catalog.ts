@@ -515,6 +515,8 @@ export class RfqCatalogComponent implements OnInit {
 
         const data = Array.isArray(res) ? res : [];
 
+        console.log(res);
+
         this.topProviders = data.map((item: any, index: number) => {
 
           const likes = Number(
@@ -612,7 +614,9 @@ export class RfqCatalogComponent implements OnInit {
             descripcion:
               item.descripcion
               ?? item.description
-              ?? ''
+              ?? '',
+
+            scoreGeneral: Math.round( item.scoreGeneral*100)
           };
         });
 
