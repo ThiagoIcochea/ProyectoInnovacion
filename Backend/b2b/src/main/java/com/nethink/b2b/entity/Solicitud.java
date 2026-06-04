@@ -99,7 +99,8 @@ public class Solicitud {
         CANCELADA,
         NO_ENTREGADA,
         EN_RECLAMO,
-        VENCIDA
+        VENCIDA,
+        EN_PREPARACION
     }
 
     public enum CanceladoPor {

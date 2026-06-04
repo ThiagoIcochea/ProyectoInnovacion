@@ -12,6 +12,8 @@ export interface DeliveryDetail {
 
   fechaCreacion: string;
 
+   
+
 }
 
 

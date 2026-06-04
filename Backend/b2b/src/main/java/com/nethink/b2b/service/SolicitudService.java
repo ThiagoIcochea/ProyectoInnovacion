@@ -1087,5 +1087,96 @@ public void rechazarPedido(Integer idSolicitud,String prompt, String correoUsuar
 
 }
     
+  
+
+
+
+@Transactional
+public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, String codigoIngresado,
+        String correoUsuario     ) {
+
     
+    
+    
+    // =========================
+        // 1. BUSCAR SOLICITUD
+        // =========================
+        Solicitud solicitud = solicitudRepo.findById(idSolicitud)
+                .orElseThrow(() ->
+                        new RuntimeException("Solicitud no encontrada")
+                );
+
+        // =========================
+        // 2. BUSCAR USUARIO AUTENTICADO
+        // =========================
+        //Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
+        //        .orElseThrow(() ->
+        //                new RuntimeException("Usuario no encontrado")
+        //        );
+    
+    
+    // =========================
+    // 3. VALIDACIÓN DE CÓDIGO SOLO SI ES ENTREGADA
+    // =========================
+    if (nuevoEstado == EstadoSolicitud.ENTREGADA) {
+
+        if (codigoIngresado == null || codigoIngresado.isEmpty()) {
+            throw new RuntimeException("Código requerido para marcar como ENTREGADA");
+        }
+
+        if (!codigoIngresado.equals(solicitud.getCodigoRecepcion())) {
+            throw new RuntimeException("Código incorrecto");
+        }
+    }
+    
+
+    // 1. actualizar estado
+    solicitud.setEstado(nuevoEstado);
+
+    solicitudRepo.save(solicitud);
+    
+    String descripcion = generarDescripcion(nuevoEstado);
+
+    // 2. guardar historial
+    SolicitudHistorial hist = new SolicitudHistorial();
+    hist.setSolicitud(solicitud);
+    hist.setEstado(nuevoEstado.name());
+    hist.setDescripcion(descripcion); 
+    hist.setFecha(LocalDateTime.now());
+
+    historialRepo.save(hist);
+}
+
+
+
+private String generarDescripcion(EstadoSolicitud estado) {
+
+    switch (estado) {
+
+        case EN_PREPARACION:
+            return "La solicitud está siendo preparada para despacho";
+
+        case EN_CAMINO:
+            return "La solicitud ha sido enviada y está en camino";
+
+        case ENTREGADA:
+            return "La solicitud fue entregada al cliente";
+
+        
+
+        default:
+            return "Estado actualizado";
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 }

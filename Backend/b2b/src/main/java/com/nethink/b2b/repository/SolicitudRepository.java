@@ -75,10 +75,15 @@ List<Solicitud> listarSolicitudes(@Param("idProveedor") Integer idProveedor);
         s.estado,
         s.total,
         s.fechaCreacion,
+          
         emp.razonSocial,
         u.nombres,
         u.apellidos,
-        SUM(d.cantidad)
+        u.telefono,
+        u.whatsapp,   
+        SUM(d.cantidad),
+        s.direccionEnvio   
+        
     )
     FROM Solicitud s
     JOIN s.usuario u
@@ -105,9 +110,13 @@ List<Solicitud> listarSolicitudes(@Param("idProveedor") Integer idProveedor);
         s.estado,
         s.total,
         s.fechaCreacion,
+          
         emp.razonSocial,
         u.nombres,
-        u.apellidos
+        u.apellidos, 
+        u.telefono, 
+        u.whatsapp,
+        s.direccionEnvio
            
      ORDER BY s.fechaCreacion DESC      
            

@@ -4,7 +4,7 @@
 
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 
@@ -69,6 +69,25 @@ listarDetallesEntrega(idSolicitud:number):
 
 
 
+  actualizarEstado(
+    id: number,
+    estado: string,
+    codigo?: string
+  ): Observable<void> {
+
+    let params = new HttpParams()
+      .set('estado', estado);
+
+    if (codigo) {
+      params = params.set('codigo', codigo);
+    }
+
+    return this.http.put<void>(
+      `${this.apiUrl}/api/solicitudes/${id}/estado`,
+      {},
+      { params }
+    );
+  }
 
 
 
