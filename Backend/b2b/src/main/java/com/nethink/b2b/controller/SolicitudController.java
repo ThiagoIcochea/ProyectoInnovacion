@@ -459,7 +459,7 @@ public ResponseEntity<Void> actualizarEstadoTracking(
             idSolicitud,
             estado,
             codigo,
-            proveedor.getIdProveedor()
+            proveedor.getIdProveedor().toString()
     );
 
     return ResponseEntity.ok().build();
