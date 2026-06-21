@@ -31,6 +31,8 @@ public class SolicitudDetalleEntregaResponse {
     private String nombreProducto;
 
     private Integer cantidad;
+    
+    private String skuGlobal;
 
     // =========================
     // CONSTRUCTOR
@@ -43,6 +45,8 @@ public class SolicitudDetalleEntregaResponse {
             String nombreProducto,
 
             Integer cantidad,
+            
+            String skuGlobal,
 
             String estado,
 
@@ -55,6 +59,7 @@ public class SolicitudDetalleEntregaResponse {
         this.nombreProducto = nombreProducto;
 
         this.cantidad = cantidad;
+        this.skuGlobal=skuGlobal;
 
         this.estado = estado;
 
@@ -114,6 +119,16 @@ public class SolicitudDetalleEntregaResponse {
     ) {
         this.fechaCreacion = fechaCreacion;
     }
+
+    public String getSkuGlobal() {
+        return skuGlobal;
+    }
+
+    public void setSkuGlobal(String skuGlobal) {
+        this.skuGlobal = skuGlobal;
+    }
+    
+    
 
 }
 

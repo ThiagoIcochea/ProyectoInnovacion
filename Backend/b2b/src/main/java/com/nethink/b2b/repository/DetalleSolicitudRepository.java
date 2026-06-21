@@ -52,6 +52,8 @@ SELECT new com.nethink.b2b.dto.response.SolicitudDetalleEntregaResponse(
     p.nombre,
 
     ds.cantidad,
+       
+    p.sku_global,
 
     CAST(s.estado AS string),
 

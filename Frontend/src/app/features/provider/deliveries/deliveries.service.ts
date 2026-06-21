@@ -25,9 +25,7 @@ export class DeliveriesService {
     private http: HttpClient
   ) {}
 
-  // =====================================
-  // LISTAR PAGOS DEL PROVEEDOR
-  // =====================================
+ 
 
   listarSolicitudesEntrega(): Observable<DeliveryRequest[]> {
 

@@ -41,11 +41,13 @@ public class SecurityConfig {
                                 "/api/usuarios/register",
                                 "/api/provider/register"
                                 
+                                
                         ).permitAll()
 
                         .requestMatchers("/api/config/**")
                         .hasRole(AppConstants.ROLE_ADMIN)
-                        
+                        .requestMatchers("/api/solicitudes/*/estado")
+                        .hasRole(AppConstants.ROLE_PROVEEDOR)
                        
 
                         .anyRequest().authenticated()
