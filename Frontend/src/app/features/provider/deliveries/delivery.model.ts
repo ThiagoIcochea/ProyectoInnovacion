@@ -17,6 +17,12 @@ export interface DeliveryRequest {
 
   cantidadProductos: number;
 
+  telefono:string; 
+
+  whatsapp:string; 
+
+  direccionEnvio:string; 
+
 }
 
 
