@@ -92,7 +92,7 @@
 
             <div class="shipment-table__row" *ngFor="let item of (details$ | async)    ">
               <div>{{ item.nombreProducto }}</div>
-              <div>{{item.sku}}</div>
+              <div>{{item.skuGlobal}}</div>
               <div>{{ item.cantidad }}</div>
             </div>
           </div>
