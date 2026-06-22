@@ -262,25 +262,105 @@ export class ProviderReviewsComponent implements OnInit {
       `${this.API_BASE}/comentarios/${idProveedor}/${idProducto}`,
       { headers: this.getHeaders() }
     ).subscribe({
-      next: (res) => {
-          console.log("RESPUESTA COMENTARIOS", res);
-        provider.comentarios = Array.isArray(res)
-          ? res.map((comentario) => this.normalizarComentario(comentario))
-          : [];
+     next: (res) => {
 
-        this.recalcularMetricasProveedor(provider);
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error(
-          'Error cargando comentarios del proveedor para este producto',
-          err
-        );
+  const comentarios = Array.isArray(res)
+    ? res.map((comentario) =>
+        this.normalizarComentario(comentario)
+      )
+    : [];
 
-        provider.comentarios = [];
-        this.recalcularMetricasProveedor(provider);
-        this.cdr.detectChanges();
-      }
+  const providerActualizado = {
+    ...provider,
+    comentarios
+  };
+
+  this.recalcularMetricasProveedor(providerActualizado);
+
+  const index = this.providers.findIndex(
+    p =>
+      (p.idProveedor || p.id_proveedor) ===
+      (provider.idProveedor || provider.id_proveedor)
+  );
+
+  if (index !== -1) {
+
+    this.providers = [
+      ...this.providers.slice(0, index),
+      providerActualizado,
+      ...this.providers.slice(index + 1)
+    ];
+
+  }
+
+  if (
+    this.selectedProvider &&
+    (
+      this.selectedProvider.idProveedor ||
+      this.selectedProvider.id_proveedor
+    ) === (
+      provider.idProveedor ||
+      provider.id_proveedor
+    )
+  ) {
+
+    this.selectedProvider = {
+      ...providerActualizado
+    };
+
+  }
+
+  this.cdr.detectChanges();
+},
+     error: (err) => {
+
+  console.error(
+    'Error cargando comentarios del proveedor para este producto',
+    err
+  );
+
+  const providerActualizado = {
+    ...provider,
+    comentarios: []
+  };
+
+  this.recalcularMetricasProveedor(providerActualizado);
+
+  const index = this.providers.findIndex(
+    p =>
+      (p.idProveedor || p.id_proveedor) ===
+      (provider.idProveedor || provider.id_proveedor)
+  );
+
+  if (index !== -1) {
+
+    this.providers = [
+      ...this.providers.slice(0, index),
+      providerActualizado,
+      ...this.providers.slice(index + 1)
+    ];
+
+  }
+
+  if (
+    this.selectedProvider &&
+    (
+      this.selectedProvider.idProveedor ||
+      this.selectedProvider.id_proveedor
+    ) === (
+      provider.idProveedor ||
+      provider.id_proveedor
+    )
+  ) {
+
+    this.selectedProvider = {
+      ...providerActualizado
+    };
+
+  }
+
+  this.cdr.detectChanges();
+}
     });
   }
 
