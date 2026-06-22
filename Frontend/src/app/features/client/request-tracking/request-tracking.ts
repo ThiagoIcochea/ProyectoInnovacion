@@ -181,7 +181,7 @@ export class RequestTrackingComponent implements OnInit {
     return this.normalizarEstado(this.tracking?.estado) === 'PAGO_PENDIENTE';
   }
    esEnCamino(): boolean {
-    
+    console.log("ESTADO ACTUAL:", this.tracking?.estado);
     return  this.tracking?.estado === 'EN_CAMINO';
   }
 }
