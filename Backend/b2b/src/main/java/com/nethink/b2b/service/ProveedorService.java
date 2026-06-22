@@ -298,7 +298,7 @@ private LogsApiRepository logsApiRepository;
     
     double satisfaccion  = solicitudRepo.calcularSatisfaccionProveedor(idProveedor);
     
-   
+    double tiempoEntregaPromedio = solicitudRepo.calcularTiempoEntregaPromedio(idProveedor);
 
     IndicadorProveedorResponse dto = new IndicadorProveedorResponse();
 
@@ -314,6 +314,11 @@ private LogsApiRepository logsApiRepository;
     dto.setScoreGeneral(scoreCalidad);
     
     dto.setSatisfaccion(satisfaccion);
+    
+   
+    dto.setTiempoEntregaPromedio(tiempoEntregaPromedio);
+    
+    dto.setFechaRegistro(proveedor.getFechaRegistro());
 
     return dto;
 }

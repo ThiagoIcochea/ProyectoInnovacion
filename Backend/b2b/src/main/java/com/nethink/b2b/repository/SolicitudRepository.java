@@ -198,4 +198,14 @@ WHERE c.idProvProd IN (
 """)
 Double calcularSatisfaccionProveedor(@Param("idProveedor") Integer idProveedor);
 
+
+@Query("""
+SELECT AVG(
+    DATEDIFF(s.fechaEntrega, s.fechaCreacion)
+)
+FROM Solicitud s
+WHERE s.proveedor.idProveedor = :idProveedor
+AND s.fechaEntrega IS NOT NULL
+""")
+Double calcularTiempoEntregaPromedio(@Param("idProveedor") Integer idProveedor);
 }
