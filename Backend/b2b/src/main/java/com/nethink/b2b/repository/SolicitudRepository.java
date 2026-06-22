@@ -193,7 +193,7 @@ SELECT
                     WHEN c.tipo = 'POSITIVO' AND r.tipo = 'LIKE' 
                     THEN 1 ELSE 0 
                 END) * 100.0
-            / COUNT(r)
+           ) / COUNT(r)
         )
     END
 FROM ComentarioLike r
