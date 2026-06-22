@@ -283,6 +283,7 @@ private LogsApiRepository logsApiRepository;
             .orElseThrow(() -> new RuntimeException("Proveedor no existe"));
 
     int completadas = solicitudRepo
+            .countByProveedor_IdProveedorAndEstado(idProveedor, EstadoSolicitud.ENTREGADA)+ solicitudRepo
             .countByProveedor_IdProveedorAndEstado(idProveedor, EstadoSolicitud.COMPLETADA);
 
     int total = solicitudRepo
