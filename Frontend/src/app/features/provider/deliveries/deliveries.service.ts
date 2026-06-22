@@ -43,7 +43,7 @@ listarTrackingSolicitud(
       TrackingStep[]
     >(
 
-      `${this.apiUrl}/api/solicitudes/proveedor/solicitudes/${idSolicitud}/tracking`
+      `${this.apiUrl}/api/solicitudes/proveedor/${idSolicitud}/tracking`
 
     );
 
@@ -81,7 +81,7 @@ listarDetallesEntrega(idSolicitud:number):
   }
 
   return this.http.put<void>(
-    `${this.apiUrl}/api/solicitudes/proveedor/solicitudes/${id}/estado`,
+    `${this.apiUrl}/api/solicitudes/proveedor/${id}/estado`,
     {},
     { params }
   );
