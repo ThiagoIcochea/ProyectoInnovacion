@@ -201,6 +201,7 @@ export class ProviderReviewsComponent implements OnInit {
       { headers: this.getHeaders() }
     ).subscribe({
       next: (res) => {
+        console.log(res);
         const proveedoresRaw =
           Array.isArray(res)
             ? res
@@ -468,10 +469,7 @@ export class ProviderReviewsComponent implements OnInit {
 
  cargarIndicadoresProveedor(provider: any): void {
   const idProveedor =
-    provider?.idProveedor ??
-    provider?.id_proveedor ??
-    provider?.idProvider ??
-    provider?.id;
+    provider?.idProveedor ?? provider?.id_proveedor ?? provider?.idProvider ?? provider?.id;
 
   if (!idProveedor) return;
 
@@ -481,25 +479,56 @@ export class ProviderReviewsComponent implements OnInit {
   ).subscribe({
     next: (res) => {
 
-      provider.pedidosCompletados = res?.pedidosCompletados ?? 0;
-      provider.pedidosTotal = res?.pedidosTotal ?? 0;
-      provider.cumplimiento = res?.cumplimiento ?? 0;
-      provider.scoreGeneral = res?.scoreGeneral ?? 0;
-
-      // ✅ SIN TRANSFORMACIONES ERRÓNEAS
-      provider.satisfaccion = res?.satisfaccion ?? 0;
-      provider.tiempoEntregaPromedio = res?.tiempoEntregaPromedio ?? 0;
-      provider.fechaRegistro = res?.fechaRegistro ?? null;
-
-      provider.scoringGeneral = Math.round(
-        (provider.scoreGeneral || 0) * 100
+      const index = this.providers.findIndex(
+        p => (p.idProveedor || p.id) === idProveedor
       );
 
+      if (index === -1) return;
+
+      const current = this.providers[index];
+
+      
+
+      this.providers[index] = {
+        ...current,
+        pedidosCompletados: res?.pedidosCompletados ?? 0,
+        pedidosTotal: res?.pedidosTotal ?? 0,
+        cumplimiento: res?.cumplimiento ?? 0,
+        scoreGeneral: res?.scoreGeneral ?? 0,
+        satisfaccion: res?.satisfaccion ?? 0,
+        tiempoEntregaPromedio: res?.tiempoEntregaPromedio ?? 0,
+        fechaRegistro: res?.fechaRegistro ?? null,
+      };
+
+
+      if (
+  this.selectedProvider &&
+  (
+    this.selectedProvider.idProveedor ||
+    this.selectedProvider.id
+  ) === idProveedor
+) {
+  this.selectedProvider = {
+    ...this.selectedProvider,
+
+    pedidosCompletados: res?.pedidosCompletados ?? 0,
+    pedidosTotal: res?.pedidosTotal ?? 0,
+    cumplimiento: res?.cumplimiento ?? 0,
+    scoreGeneral: res?.scoreGeneral ?? 0,
+    satisfaccion: res?.satisfaccion ?? 0,
+    tiempoEntregaPromedio: res?.tiempoEntregaPromedio ?? 0,
+    fechaRegistro: res?.fechaRegistro ?? null,
+
+    likes: res?.likes ?? this.selectedProvider.likes ?? 0,
+    dislikes: res?.dislikes ?? this.selectedProvider.dislikes ?? 0,
+    totalResenas: res?.totalResenas ?? 0
+  };
+}
+
+      this.providers = [...this.providers]; // 🔥 fuerza render
       this.cdr.detectChanges();
     },
-    error: (err) => {
-      console.error('Error cargando indicadores', err);
-    }
+    error: (err) => console.error(err)
   });
 }
   private setProviderList(providers: any[]): void {
@@ -651,8 +680,15 @@ export class ProviderReviewsComponent implements OnInit {
       cumplimiento:
         item?.cumplimiento ?? 0,
 
-      scoringGeneral:
-        item?.scoringGeneral ?? 0,
+     scoringGeneral:
+  item?.scoringGeneral ??
+  item?.scoreGeneral ??
+  0,
+
+  scoreGeneral:
+  item?.scoreGeneral ??
+  item?.scoringGeneral ??
+  0,
 
       comentarios:
         Array.isArray(item?.comentarios)
