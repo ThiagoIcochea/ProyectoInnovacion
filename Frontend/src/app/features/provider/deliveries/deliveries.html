@@ -47,7 +47,7 @@
     <section class="delivery-detail-card"     >
       <div class="detail-header">
         <div>
-          <span class="status-pill">En preparación</span>
+          <span class="status-pill"> {{selectedRequest?.estado}} </span>
           <h2>Orden {{getOrCode(selectedRequest)}}    </h2>
           <p>Destino: Sede principal, Lima</p>
         </div>
@@ -71,8 +71,12 @@
 
             <div class="full">
               <span>Dirección de entrega</span>
-              <strong>   {{ selectedRequest | json }}            </strong>
-              <small>San Isidro, Lima, Perú</small>
+              <strong>   {{ selectedRequest?.direccionEnvio | json }}            </strong>
+            </div>
+             <div class="full">
+              <span>Información de contacto</span>
+              <strong> Número de Contacto:  {{ selectedRequest?.telefono | json }}            </strong>
+               <strong> Número de Whatsapp:  {{ selectedRequest?.whatsapp | json }}            </strong>
             </div>
           </div>
 
