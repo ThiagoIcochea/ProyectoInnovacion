@@ -127,11 +127,22 @@
             <h3>Actualizar estado</h3>
 
             <label for="nuevoEstado">Nuevo estado</label>
-            <select id="nuevoEstado" [(ngModel)]="estadoSeleccionado"    aria-label="Nuevo estado">
-              <option value="EN_PREPARACION">En preparación</option>
-  <option value="EN_CAMINO">En camino</option>
-  <option value="ENTREGADA">Entregado</option>
-            </select>
+          <select
+  id="nuevoEstado"
+  [(ngModel)]="estadoSeleccionado"
+  *ngIf="getEstadosDisponibles().length > 0">
+
+  <option value="">Seleccione...</option>
+
+  <option
+    *ngFor="let estado of getEstadosDisponibles()"
+    [value]="estado.value">
+
+    {{ estado.label }}
+
+  </option>
+
+</select>
             
             <div *ngIf="estadoSeleccionado === 'ENTREGADA'">
             <label for="codigoEntrega">Código de entrega</label>

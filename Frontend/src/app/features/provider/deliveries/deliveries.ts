@@ -220,7 +220,33 @@ actualizarTracking(): void {
 }
 
 
+getEstadosDisponibles(): { value: string; label: string }[] {
 
+  if (!this.selectedRequest) {
+    return [];
+  }
+
+  switch (this.selectedRequest.estado) {
+
+    case 'PAGADA':
+      return [
+        { value: 'EN_PREPARACION', label: 'En preparación' }
+      ];
+
+    case 'EN_PREPARACION':
+      return [
+        { value: 'EN_CAMINO', label: 'En camino' }
+      ];
+
+    case 'EN_CAMINO':
+      return [
+        { value: 'ENTREGADA', label: 'Entregado' }
+      ];
+
+    default:
+      return [];
+  }
+}
 
 
 
