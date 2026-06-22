@@ -291,7 +291,7 @@ private LogsApiRepository logsApiRepository;
 
     double cumplimiento = total == 0
             ? 0
-            : ((double) completadas / total) * 100;
+            : ((double) solicitudRepo.contarEntregasATiempo(idProveedor)/ total) * 100;
 
     double scoreCalidad = scoringService.calcularScoreProveedorBasico(idProveedor);
 

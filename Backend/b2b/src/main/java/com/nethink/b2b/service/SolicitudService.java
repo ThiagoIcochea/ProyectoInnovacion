@@ -1131,6 +1131,8 @@ public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, S
         if (!codigoIngresado.equals(solicitud.getCodigoRecepcion())) {
             throw new RuntimeException("Código incorrecto");
         }
+        
+        solicitud.setFechaEntrega(LocalDateTime.now());
     }
     
 

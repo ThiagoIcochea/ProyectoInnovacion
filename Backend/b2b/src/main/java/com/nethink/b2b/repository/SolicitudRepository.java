@@ -163,10 +163,26 @@ List<Solicitud> listarSolicitudes(@Param("idProveedor") Integer idProveedor);
 //    WHERE d.solicitud.idSolicitud = :idSolicitud
 //""")
 //List<DetalleSolicitud> listarDetalles(@Param("idSolicitud") Integer idSolicitud);
+    
+    
+ @Query("""
+SELECT COUNT(s)
+FROM Solicitud s
+WHERE s.proveedor.idProveedor = :idProveedor
+AND s.estado IN ('ENTREGADA', 'COMPLETADA')
+AND s.fechaEntrega IS NOT NULL
+AND s.fechaLimiteEntrega IS NOT NULL
+AND s.fechaEntrega <= s.fechaLimiteEntrega
+""")
+long contarEntregasATiempo(
+        @Param("idProveedor") Integer idProveedor
+);
 
 
 int countByProveedor_IdProveedorAndEstado(Integer idProveedor, EstadoSolicitud estado);
 
 int countByProveedor_IdProveedor(Integer idProveedor);
+
+
 
 }
