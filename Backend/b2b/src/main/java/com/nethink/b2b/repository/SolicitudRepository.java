@@ -194,7 +194,7 @@ SELECT
                     THEN 1 ELSE 0 
                 END) * 100.0
            ) / COUNT(r)
-        )
+        
     END
 FROM ComentarioLike r
 JOIN r.comentario c
