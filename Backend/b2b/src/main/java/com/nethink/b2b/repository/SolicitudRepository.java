@@ -183,22 +183,18 @@ int countByProveedor_IdProveedorAndEstado(Integer idProveedor, EstadoSolicitud e
 
 int countByProveedor_IdProveedor(Integer idProveedor);
 
-
 @Query("""
 SELECT 
 CASE 
-    WHEN COUNT(l) = 0 THEN 0
-    ELSE (
-        SUM(CASE 
-                WHEN c.tipo = 'POSITIVO' AND l.tipo = 'LIKE' 
-                THEN 1 ELSE 0 
-            END) * 100.0
-    ) / COUNT(l)
+    WHEN COUNT(c) = 0 THEN 0
+    ELSE (SUM(CASE WHEN c.tipo = 'POSITIVO' THEN 1 ELSE 0 END) * 100.0) / COUNT(c)
 END
-FROM ComentarioLike l, Comentario c, ProveedorProducto pp
-WHERE l.idComentario = c.idComentario
-AND c.idProvProd = pp.idProvProd
-AND pp.proveedor.idProveedor = :idProveedor
+FROM Comentario c
+WHERE c.idProvProd IN (
+    SELECT pp.idProvProd
+    FROM ProveedorProducto pp
+    WHERE pp.proveedor.idProveedor = :idProveedor
+)
 """)
 Double calcularSatisfaccionProveedor(@Param("idProveedor") Integer idProveedor);
 
