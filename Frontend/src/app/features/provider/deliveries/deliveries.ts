@@ -27,6 +27,8 @@ details$: Observable<DeliveryDetail[]> = of([]);
 estadoSeleccionado: string = '';
 codigoEntrega: string = '';
 
+guardando: boolean = false;
+
   selectedRequest:
       DeliveryRequest | null = null;
 
@@ -162,7 +164,15 @@ cargarDetalles(
 
 actualizarTracking(): void {
 
-  if (!this.selectedRequest) return;
+   if (this.guardando) {
+    return;
+  }
+
+  if (!this.selectedRequest) {
+    return;
+  }
+
+  this.guardando = true;
 
   // ✔ validar estado
     if (!this.estadoSeleccionado) {
