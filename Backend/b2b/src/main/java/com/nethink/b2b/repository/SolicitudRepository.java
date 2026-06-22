@@ -195,7 +195,7 @@ CASE
             END) * 100.0
     ) / COUNT(l)
 END
-FROM ComentarioLike l, Comentario c, ProvProd pp
+FROM ComentarioLike l, Comentario c, ProveedorProducto pp
 WHERE l.idComentario = c.idComentario
 AND c.idProvProd = pp.idProvProd
 AND pp.proveedor.idProveedor = :idProveedor
