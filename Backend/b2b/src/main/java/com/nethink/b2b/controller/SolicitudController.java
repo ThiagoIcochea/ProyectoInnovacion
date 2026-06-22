@@ -302,56 +302,31 @@ listarTrackingSolicitud(
 
 
 
+@GetMapping("/proveedor/entregas/detalles/{idSolicitud}")
+public ResponseEntity<List<SolicitudDetalleEntregaResponse>>
+listarDetallesEntregaProveedor(
 
-@GetMapping("/proveedor/entregas/detalles")
-public ResponseEntity<
-        List<SolicitudDetalleEntregaResponse>
-> listarDetallesEntregaProveedor(
-
+        @PathVariable Integer idSolicitud,
         Principal principal
 
 ) {
 
-    // =========================
-    // PROVEEDOR AUTENTICADO
-    // =========================
-
-    Proveedor proveedor =
-
-            proveedorRepo
-                    .findByUsuario_Correo(
-                            principal.getName()
+    Proveedor proveedor = proveedorRepo
+            .findByUsuario_Correo(principal.getName())
+            .orElseThrow(() ->
+                    new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "Proveedor no encontrado"
                     )
-
-                    .orElseThrow(() ->
-
-                            new ResponseStatusException(
-
-                                    HttpStatus.FORBIDDEN,
-
-                                    "Proveedor no encontrado"
-
-                            )
-
-                    );
-
-    // =========================
-    // LISTAR DETALLES
-    // =========================
+            );
 
     return ResponseEntity.ok(
-
-            solicitudService
-                    .listarDetallesEntregaProveedor(
-
-                            proveedor.getIdProveedor()
-
-                    )
-
+            solicitudService.listarDetallesEntregaProveedor(
+                    proveedor.getIdProveedor(),
+                    idSolicitud
+            )
     );
-
 }
-
 
 
 

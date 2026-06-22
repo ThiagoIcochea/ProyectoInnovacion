@@ -1030,13 +1030,15 @@ public void aprobarPedido(Integer idSolicitud, String correoUsuario,HttpServletR
 public List<SolicitudDetalleEntregaResponse>
 listarDetallesEntregaProveedor(
 
-        Integer idProveedor
+        Integer idProveedor,
+        Integer idSolicitud
 
 ) {
 
     return detalleRepo
             .listarDetallesEntregaProveedor(
-                    idProveedor
+                    idProveedor,
+                    idSolicitud
             );
 
 }

@@ -58,7 +58,7 @@ listarDetallesEntrega(idSolicitud:number):
       DeliveryDetail[]
     >(
 
-      `${this.apiUrl}/api/solicitudes/proveedor/entregas/detalles`
+      `${this.apiUrl}/api/solicitudes/proveedor/entregas/detalles/${idSolicitud}`
 
     );
 

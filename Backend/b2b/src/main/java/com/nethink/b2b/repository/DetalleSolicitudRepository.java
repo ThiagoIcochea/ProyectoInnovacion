@@ -77,12 +77,15 @@ AND s.estado IN (
     'EN_CAMINO',
     'ENTREGADA'
 )
+       
+AND  s.idSolicitud = :idSolicitud
 
 ORDER BY s.fechaCreacion DESC
 """)
 List<SolicitudDetalleEntregaResponse>
 listarDetallesEntregaProveedor(
-    @Param("idProveedor") Integer idProveedor
+    @Param("idProveedor") Integer idProveedor,
+    @Param("idSolicitud") Integer idSolicitud
 );
 
 
