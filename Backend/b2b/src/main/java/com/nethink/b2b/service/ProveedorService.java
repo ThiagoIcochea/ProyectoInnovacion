@@ -291,9 +291,14 @@ private LogsApiRepository logsApiRepository;
 
     double cumplimiento = total == 0
             ? 0
-            : ((double) solicitudRepo.contarEntregasATiempo(idProveedor)/ total) * 100;
+            : ((double) solicitudRepo.contarEntregasATiempo(idProveedor)/ completadas) * 100;
 
     double scoreCalidad = scoringService.calcularScoreProveedorBasico(idProveedor);
+    
+    
+    double satisfaccion  = solicitudRepo.calcularSatisfaccionProveedor(idProveedor);
+    
+   
 
     IndicadorProveedorResponse dto = new IndicadorProveedorResponse();
 
@@ -307,6 +312,8 @@ private LogsApiRepository logsApiRepository;
 
    
     dto.setScoreGeneral(scoreCalidad);
+    
+    dto.setSatisfaccion(satisfaccion);
 
     return dto;
 }

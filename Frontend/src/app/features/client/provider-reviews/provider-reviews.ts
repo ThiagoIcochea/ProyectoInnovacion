@@ -423,6 +423,8 @@ export class ProviderReviewsComponent implements OnInit {
     return reacciones.filter(reaccion => reaccion?.tipo === tipo).length;
   }
 
+  
+
   recalcularMetricasProveedor(provider: any): void {
     const comentarios = Array.isArray(provider?.comentarios)
       ? provider.comentarios
@@ -430,6 +432,8 @@ export class ProviderReviewsComponent implements OnInit {
 
     let likes = 0;
     let dislikes = 0;
+
+   
 
     comentarios.forEach((comentario: any) => {
       likes += this.getReviewLikes(comentario);
@@ -452,9 +456,7 @@ export class ProviderReviewsComponent implements OnInit {
     provider.totalComentarios = comentarios.length;
     provider.likes = likes;
     provider.dislikes = dislikes;
-    provider.satisfaccion = total > 0
-      ? Math.round((likes / total) * 100)
-      : 0;
+   
   }
 
   private recalculateProviderReviewMetrics(provider: any): void {

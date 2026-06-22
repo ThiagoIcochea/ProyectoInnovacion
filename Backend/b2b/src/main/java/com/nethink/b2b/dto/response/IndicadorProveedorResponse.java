@@ -17,12 +17,13 @@ public class IndicadorProveedorResponse {
     private String categoriaPrincipal;
 
     private int totalResenas;
+   
 
     private int likes;
 
     private int dislikes;
 
-    private int satisfaccion;
+    private double satisfaccion;
 
     private double tiempoEntregaPromedio;
 
@@ -110,11 +111,11 @@ public class IndicadorProveedorResponse {
         this.dislikes = dislikes;
     }
 
-    public int getSatisfaccion() {
+    public double getSatisfaccion() {
         return satisfaccion;
     }
 
-    public void setSatisfaccion(int satisfaccion) {
+    public void setSatisfaccion(double satisfaccion) {
         this.satisfaccion = satisfaccion;
     }
 
