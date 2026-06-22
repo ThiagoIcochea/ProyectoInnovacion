@@ -484,8 +484,10 @@ export class ProviderReviewsComponent implements OnInit {
         provider.cumplimiento = res?.cumplimiento ?? 0;
         provider.scoreGeneral = res?.scoreGeneral ?? 0;
 
-          provider.tiempoEntregaPromedio = res?.tiempoEntregaPromedio ?? null;
-  provider.satisfaccion = res?.satisfaccion ?? 0;
+          provider.tiempoEntregaPromedio = res?.tiempoEntregaPromedio ?? Math.round(
+        (res.tiempoEntregaPromedio|| 0) * 100);
+  provider.satisfaccion = res?.satisfaccion ?? Math.round(
+          (res.satisfaccion|| 0) * 100);
   provider.fechaRegistro = res?.fechaRegistro ?? provider.fechaRegistro;
 
         provider.scoringGeneral = Math.round(
