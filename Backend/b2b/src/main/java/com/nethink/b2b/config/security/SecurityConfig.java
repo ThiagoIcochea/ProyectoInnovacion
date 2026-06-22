@@ -46,6 +46,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/config/**")
                         .hasRole(AppConstants.ROLE_ADMIN)
+                        .requestMatchers("/api/logs/admin")
+                        .hasRole(AppConstants.ROLE_ADMIN)
                         .requestMatchers("/api/solicitudes/proveedor/**")
                         .hasRole(AppConstants.ROLE_PROVEEDOR)
                         
