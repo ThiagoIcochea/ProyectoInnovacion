@@ -413,9 +413,8 @@ public ResponseEntity<Void> actualizarEstadoTracking(
 
 ) {
 
-    // =========================
-    // PROVEEDOR AUTENTICADO
-    // =========================
+   System.out.println("USER: " + principal.getName());
+   
     Proveedor proveedor =
             proveedorRepo.findByUsuario_Correo(
                     principal.getName()

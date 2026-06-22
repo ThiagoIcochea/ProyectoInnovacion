@@ -67,26 +67,25 @@ listarDetallesEntrega(idSolicitud:number):
 
 
 
-  actualizarEstado(
-    id: number,
-    estado: string,
-    codigo?: string
-  ): Observable<void> {
+ actualizarEstado(
+  id: number,
+  estado: string,
+  codigo?: string
+): Observable<void> {
 
-    let params = new HttpParams()
-      .set('estado', estado);
+  let params = new HttpParams()
+    .set('estado', estado);
 
-    if (codigo) {
-      params = params.set('codigo', codigo);
-    }
-
-    return this.http.put<void>(
-      `${this.apiUrl}/api/solicitudes/${id}/estado`,
-      {},
-      { params }
-    );
+  if (codigo) {
+    params = params.set('codigo', codigo);
   }
 
+  return this.http.put<void>(
+    `${this.apiUrl}/api/solicitudes/proveedor/solicitudes/${id}/estado`,
+    {},
+    { params }
+  );
+}
 
 
 
