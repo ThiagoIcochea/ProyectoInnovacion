@@ -182,6 +182,6 @@ export class RequestTrackingComponent implements OnInit {
   }
    esEnCamino(): boolean {
     
-    return  this.tracking?.estado === 'En camino';
+    return  this.tracking?.estado === 'EN_CAMINO';
   }
 }
