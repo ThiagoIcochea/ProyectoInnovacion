@@ -270,10 +270,13 @@ export class ProviderReviewsComponent implements OnInit {
       )
     : [];
 
-  const providerActualizado = {
-    ...provider,
-    comentarios
-  };
+ const providerActualizado = {
+  ...provider,
+  comentarios,
+  satisfaccion: provider.satisfaccion,
+  tiempoEntregaPromedio: provider.tiempoEntregaPromedio,
+  fechaRegistro: provider.fechaRegistro
+};
 
   this.recalcularMetricasProveedor(providerActualizado);
 
@@ -463,45 +466,42 @@ export class ProviderReviewsComponent implements OnInit {
     this.recalcularMetricasProveedor(provider);
   }
 
-  cargarIndicadoresProveedor(provider: any): void {
-    const idProveedor =
-      provider?.idProveedor ??
-      provider?.id_proveedor ??
-      provider?.idProvider ??
-      provider?.id;
+ cargarIndicadoresProveedor(provider: any): void {
+  const idProveedor =
+    provider?.idProveedor ??
+    provider?.id_proveedor ??
+    provider?.idProvider ??
+    provider?.id;
 
-    if (!idProveedor) {
-      return;
+  if (!idProveedor) return;
+
+  this.http.get<any>(
+    `${this.API_BASE}/provider/${idProveedor}/indicadores`,
+    { headers: this.getHeaders() }
+  ).subscribe({
+    next: (res) => {
+
+      provider.pedidosCompletados = res?.pedidosCompletados ?? 0;
+      provider.pedidosTotal = res?.pedidosTotal ?? 0;
+      provider.cumplimiento = res?.cumplimiento ?? 0;
+      provider.scoreGeneral = res?.scoreGeneral ?? 0;
+
+      // ✅ SIN TRANSFORMACIONES ERRÓNEAS
+      provider.satisfaccion = res?.satisfaccion ?? 0;
+      provider.tiempoEntregaPromedio = res?.tiempoEntregaPromedio ?? 0;
+      provider.fechaRegistro = res?.fechaRegistro ?? null;
+
+      provider.scoringGeneral = Math.round(
+        (provider.scoreGeneral || 0) * 100
+      );
+
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Error cargando indicadores', err);
     }
-
-    this.http.get<any>(
-      `${this.API_BASE}/provider/${idProveedor}/indicadores`,
-      { headers: this.getHeaders() }
-    ).subscribe({
-      next: (res) => {
-        provider.pedidosCompletados = res?.pedidosCompletados ?? 0;
-        provider.pedidosTotal = res?.pedidosTotal ?? 0;
-        provider.cumplimiento = res?.cumplimiento ?? 0;
-        provider.scoreGeneral = res?.scoreGeneral ?? 0;
-
-          provider.tiempoEntregaPromedio = res?.tiempoEntregaPromedio ?? Math.round(
-        (res.tiempoEntregaPromedio|| 0) * 100);
-  provider.satisfaccion = res?.satisfaccion ?? Math.round(
-          (res.satisfaccion|| 0) * 100);
-  provider.fechaRegistro = res?.fechaRegistro ?? res.fechaRegistro;
-
-        provider.scoringGeneral = Math.round(
-          (provider.scoreGeneral || 0) * 100
-        );
-
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error cargando indicadores', err);
-      }
-    });
-  }
-
+  });
+}
   private setProviderList(providers: any[]): void {
     this.providers = (providers || []).map(provider =>
       this.normalizarProveedor(provider)
