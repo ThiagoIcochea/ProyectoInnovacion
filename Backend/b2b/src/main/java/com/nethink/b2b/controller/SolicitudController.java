@@ -256,7 +256,7 @@ listarSolicitudesEntrega(
 
 
 
-@GetMapping("/proveedor/solicitudes/{idSolicitud}/tracking")
+@GetMapping("/proveedor/{idSolicitud}/tracking")
 public ResponseEntity<List<TrackingStepEntregaResponse>>
 listarTrackingSolicitud(
 
@@ -400,7 +400,7 @@ public ResponseEntity<?> rechazarPedido(
 
 
 
-@PutMapping("/proveedor/solicitudes/{idSolicitud}/estado")
+@PutMapping("/proveedor/{idSolicitud}/estado")
 public ResponseEntity<Void> actualizarEstadoTracking(
 
         @PathVariable Integer idSolicitud,
