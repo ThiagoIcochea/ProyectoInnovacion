@@ -186,18 +186,14 @@ int countByProveedor_IdProveedor(Integer idProveedor);
 
 @Query("""
 SELECT 
-    CASE 
-        WHEN COUNT(r) = 0 THEN 0
-        ELSE (
-            SUM(CASE 
-                    WHEN c.tipo = 'POSITIVO' AND r.tipo = 'LIKE' 
-                    THEN 1 ELSE 0 
-                END) * 100.0
-           ) / COUNT(r)
-        
-    END
+CASE 
+    WHEN COUNT(r) = 0 THEN 0
+    ELSE (
+        SUM(CASE WHEN r.tipo = 'LIKE' THEN 1 ELSE 0 END) * 100.0
+    ) / COUNT(r)
+END
 FROM ComentarioLike r
-JOIN r.comentario c
+JOIN Comentario c ON c.idComentario = r.idComentario
 JOIN c.provProd pp
 JOIN pp.proveedor p
 WHERE p.idProveedor = :idProveedor
