@@ -1158,13 +1158,13 @@ private String generarDescripcion(EstadoSolicitud estado) {
     switch (estado) {
 
         case EN_PREPARACION:
-            return "La solicitud está siendo preparada para despacho";
+            return "El pedido está siendo preparado para despacho";
 
         case EN_CAMINO:
-            return "La solicitud ha sido enviada y está en camino";
+            return "El pedido está en camino";
 
         case ENTREGADA:
-            return "La solicitud fue entregada al cliente";
+            return "El pedido fue entregado al cliente";
 
         
 
