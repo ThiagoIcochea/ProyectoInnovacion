@@ -259,114 +259,87 @@ export class ProviderReviewsComponent implements OnInit {
       return;
     }
 
+    const providerId = Number(idProveedor);
+
     this.http.get<any[]>(
       `${this.API_BASE}/comentarios/${idProveedor}/${idProducto}`,
       { headers: this.getHeaders() }
     ).subscribe({
-     next: (res) => {
+      next: (res) => {
+        const comentarios = Array.isArray(res)
+          ? res.map((comentario: any) => this.normalizarComentario(comentario))
+          : [];
 
-  const comentarios = Array.isArray(res)
-    ? res.map((comentario) =>
-        this.normalizarComentario(comentario)
-      )
-    : [];
+        const index = this.providers.findIndex(
+          p => Number(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider) === providerId
+        );
 
- const providerActualizado = {
-  ...provider,
-  comentarios,
-  satisfaccion: provider.satisfaccion,
-  tiempoEntregaPromedio: provider.tiempoEntregaPromedio,
-  fechaRegistro: provider.fechaRegistro
-};
+        const current = index !== -1 ? this.providers[index] : provider;
 
-  this.recalcularMetricasProveedor(providerActualizado);
+        const providerActualizado = {
+          ...current,
+          comentarios
+        };
 
-  const index = this.providers.findIndex(
-    p =>
-      (p.idProveedor || p.id_proveedor) ===
-      (provider.idProveedor || provider.id_proveedor)
-  );
+        this.recalcularMetricasProveedor(providerActualizado);
 
-  if (index !== -1) {
+        if (index !== -1) {
+          this.providers = [
+            ...this.providers.slice(0, index),
+            providerActualizado,
+            ...this.providers.slice(index + 1)
+          ];
+        }
 
-    this.providers = [
-      ...this.providers.slice(0, index),
-      providerActualizado,
-      ...this.providers.slice(index + 1)
-    ];
+        if (
+          this.selectedProvider &&
+          Number(this.selectedProvider.idProveedor ?? this.selectedProvider.id_proveedor ?? this.selectedProvider.id ?? this.selectedProvider.idProvider) === providerId
+        ) {
+          this.selectedProvider = {
+            ...providerActualizado
+          };
+        }
 
-  }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando comentarios del proveedor para este producto', err);
 
-  if (
-    this.selectedProvider &&
-    (
-      this.selectedProvider.idProveedor ||
-      this.selectedProvider.id_proveedor
-    ) === (
-      provider.idProveedor ||
-      provider.id_proveedor
-    )
-  ) {
+        const index = this.providers.findIndex(
+          p => Number(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider) === providerId
+        );
 
-    this.selectedProvider = {
-      ...providerActualizado
-    };
+        const current = index !== -1 ? this.providers[index] : provider;
 
-  }
+        const providerActualizado = {
+          ...current,
+          comentarios: []
+        };
 
-  this.cdr.detectChanges();
-},
-     error: (err) => {
+        this.recalcularMetricasProveedor(providerActualizado);
 
-  console.error(
-    'Error cargando comentarios del proveedor para este producto',
-    err
-  );
+        if (index !== -1) {
+          this.providers = [
+            ...this.providers.slice(0, index),
+            providerActualizado,
+            ...this.providers.slice(index + 1)
+          ];
+        }
 
-  const providerActualizado = {
-    ...provider,
-    comentarios: []
-  };
+        if (
+          this.selectedProvider &&
+          Number(this.selectedProvider.idProveedor ?? this.selectedProvider.id_proveedor ?? this.selectedProvider.id ?? this.selectedProvider.idProvider) === providerId
+        ) {
+          this.selectedProvider = {
+            ...providerActualizado
+          };
+        }
 
-  this.recalcularMetricasProveedor(providerActualizado);
-
-  const index = this.providers.findIndex(
-    p =>
-      (p.idProveedor || p.id_proveedor) ===
-      (provider.idProveedor || provider.id_proveedor)
-  );
-
-  if (index !== -1) {
-
-    this.providers = [
-      ...this.providers.slice(0, index),
-      providerActualizado,
-      ...this.providers.slice(index + 1)
-    ];
-
-  }
-
-  if (
-    this.selectedProvider &&
-    (
-      this.selectedProvider.idProveedor ||
-      this.selectedProvider.id_proveedor
-    ) === (
-      provider.idProveedor ||
-      provider.id_proveedor
-    )
-  ) {
-
-    this.selectedProvider = {
-      ...providerActualizado
-    };
-
-  }
-
-  this.cdr.detectChanges();
-}
+        this.cdr.detectChanges();
+      }
     });
   }
+
 
  normalizarComentario(comentario: any): any {
 
@@ -485,7 +458,7 @@ export class ProviderReviewsComponent implements OnInit {
     next: (res) => {
 
       const index = this.providers.findIndex(
-        p => (p.idProveedor || p.id) === idProveedor
+        p => Number(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider) === Number(idProveedor)
       );
 
       if (index === -1) return;
@@ -540,10 +513,7 @@ export class ProviderReviewsComponent implements OnInit {
 
       if (
   this.selectedProvider &&
-  (
-    this.selectedProvider.idProveedor ||
-    this.selectedProvider.id
-  ) === idProveedor
+  Number(this.selectedProvider.idProveedor ?? this.selectedProvider.id_proveedor ?? this.selectedProvider.id ?? this.selectedProvider.idProvider) === Number(idProveedor)
 ) {
   this.selectedProvider = {
     ...this.selectedProvider,
