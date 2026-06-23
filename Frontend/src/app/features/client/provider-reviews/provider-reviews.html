@@ -146,21 +146,6 @@
                 <strong>Comparte tu experiencia con este producto de este proveedor</strong>
               </div>
 
-              <div class="reaction-toggle" aria-label="Tipo de rese&ntilde;a">
-                <button
-                  type="button"
-                  [class.active]="getReviewTypeDraft(provider, 0) === 'LIKE'"
-                  (click)="setReviewTypeDraft(provider, 0, 'LIKE')">
-                  &#128077; LIKE
-                </button>
-
-                <button
-                  type="button"
-                  [class.active]="getReviewTypeDraft(provider, 0) === 'DISLIKE'"
-                  (click)="setReviewTypeDraft(provider, 0, 'DISLIKE')">
-                  &#128078; DISLIKE
-                </button>
-              </div>
             </div>
 
             <textarea
@@ -195,7 +180,7 @@
                   [class.reaction-badge--dislike]="getReviewReactionType(review) === 'DISLIKE'">
                   <ng-container *ngIf="getReviewReactionType(review) === 'LIKE'">&#128077;</ng-container>
                   <ng-container *ngIf="getReviewReactionType(review) === 'DISLIKE'">&#128078;</ng-container>
-                  {{ getReviewReactionType(review) || 'No disponible' }}
+                  {{ getReviewReactionLabel(review) }}
                 </span>
               </div>
 

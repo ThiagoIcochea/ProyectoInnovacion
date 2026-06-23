@@ -36,7 +36,6 @@ export class ProviderReviewsComponent implements OnInit {
   reviewDrafts: {
     [key: string]: {
       comentario: string;
-      tipo: 'LIKE' | 'DISLIKE';
       error: string;
     }
   } = {};
@@ -64,15 +63,6 @@ export class ProviderReviewsComponent implements OnInit {
       state?.['proveedor'] ??
       state?.['provider'] ??
       null;
-
-    console.log('[PRS] ProviderReviewsComponent ctor', {
-      state,
-      product: this.product,
-      origin: this.origin,
-      idProductoActual: this.idProductoActual,
-      stateProvider,
-      stateProviders: state?.['proveedores'] ?? state?.['providers']
-    });
 
     if (stateProvider) {
       this.selectedProvider = this.normalizarProveedor(stateProvider);
@@ -218,7 +208,6 @@ export class ProviderReviewsComponent implements OnInit {
       { headers: this.getHeaders() }
     ).subscribe({
       next: (res) => {
-        console.log('[PRS] cargarProveedoresDelProducto - response', res);
         const proveedoresRaw =
           Array.isArray(res)
             ? res
@@ -359,14 +348,24 @@ export class ProviderReviewsComponent implements OnInit {
 
  normalizarComentario(comentario: any): any {
 
-  const rawTipo = comentario?.tipo ?? comentario?.type ?? comentario?.reactionType ?? comentario?.tipoReaccion;
+  const rawTipo = String(
+    comentario?.tipo ??
+    comentario?.type ??
+    comentario?.reactionType ??
+    comentario?.tipoReaccion ??
+    ''
+  ).trim().toUpperCase();
+
   const tipoNormalizado =
     rawTipo === 'DISLIKE' ||
     rawTipo === 'NEGATIVO' ||
-    rawTipo === 'DISLIKE' ||
     rawTipo === 'NEGATIVE'
       ? 'DISLIKE'
-      : 'LIKE';
+      : rawTipo === 'LIKE' ||
+        rawTipo === 'POSITIVO' ||
+        rawTipo === 'POSITIVE'
+        ? 'LIKE'
+        : 'NEUTRAL';
 
   return {
     ...comentario,
@@ -395,6 +394,7 @@ export class ProviderReviewsComponent implements OnInit {
       '',
 
     tipo: tipoNormalizado,
+    sentimiento: rawTipo || tipoNormalizado,
 
     fecha:
       comentario?.fecha ||
@@ -494,8 +494,6 @@ export class ProviderReviewsComponent implements OnInit {
           p => Number(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider) === Number(idProveedor)
         );
 
-        console.log('[PRS] cargarIndicadoresProveedor - index will be computed for', idProveedor);
-
         const payload = this.extractIndicatorPayload(res);
         const current = index !== -1
           ? this.providers[index]
@@ -509,8 +507,6 @@ export class ProviderReviewsComponent implements OnInit {
           response: res,
           payload
         };
-
-        console.log('[PRS] cargarIndicadoresProveedor - provider response', feedback);
 
         if (!payload || typeof payload !== 'object') {
           console.warn('[PRS] cargarIndicadoresProveedor - invalid payload', payload, res);
@@ -658,12 +654,6 @@ export class ProviderReviewsComponent implements OnInit {
 
         this.recalcularMetricasProveedor(update);
 
-        console.log('[PRS] cargarIndicadoresProveedor - update', {
-          idProveedor,
-          index,
-          update
-        });
-
         if (index !== -1) {
           this.providers[index] = update;
         } else {
@@ -689,7 +679,6 @@ export class ProviderReviewsComponent implements OnInit {
     });
   }
   private setProviderList(providers: any[]): void {
-    console.log('[PRS] setProviderList - incoming providers:', providers);
     this.providers = (providers || []).map(provider =>
       this.normalizarProveedor(provider)
     );
@@ -1104,6 +1093,9 @@ export class ProviderReviewsComponent implements OnInit {
     return provider?.tiempoRespuestaPromedio ??
       provider?.tiempoRespuesta ??
       provider?.tiempo_respuesta ??
+      provider?.tiempoEntregaPromedio ??
+      provider?.tiempoEntrega ??
+      provider?.tiempoEntregaDias ??
       null;
   }
 
@@ -1184,18 +1176,6 @@ export class ProviderReviewsComponent implements OnInit {
     draft.error = '';
   }
 
-  getReviewTypeDraft(provider: any, index: number): 'LIKE' | 'DISLIKE' {
-    return this.ensureReviewDraft(provider, index).tipo;
-  }
-
-  setReviewTypeDraft(
-    provider: any,
-    index: number,
-    tipo: 'LIKE' | 'DISLIKE'
-  ): void {
-    this.ensureReviewDraft(provider, index).tipo = tipo;
-  }
-
   getReviewDraftError(provider: any, index: number): string {
     return this.ensureReviewDraft(provider, index).error;
   }
@@ -1260,7 +1240,10 @@ export class ProviderReviewsComponent implements OnInit {
     },
     error: (err) => {
       console.error('Comentario rechazado', err);
-      draft.error = 'No se pudo registrar el comentario';
+      const message = String(err?.error?.message ?? err?.error ?? '').toLowerCase();
+      draft.error = message.includes('inapropiado')
+        ? 'El comentario fue rechazado por moderacion.'
+        : 'No se pudo registrar el comentario';
     }
   });
 }
@@ -1370,8 +1353,18 @@ getReviewLikes(review: any): number {
     return review?.fecha || '';
   }
 
-  getReviewReactionType(review: any): 'LIKE' | 'DISLIKE' | '' {
+  getReviewReactionType(review: any): 'LIKE' | 'DISLIKE' | 'NEUTRAL' | '' {
     return review?.tipo || review?.type || review?.reactionType || review?.tipoReaccion || '';
+  }
+
+  getReviewReactionLabel(review: any): string {
+    const tipo = this.getReviewReactionType(review);
+
+    if (tipo === 'LIKE') return 'POSITIVO';
+    if (tipo === 'DISLIKE') return 'NEGATIVO';
+    if (tipo === 'NEUTRAL') return 'NEUTRO';
+
+    return 'No disponible';
   }
 
   formatFecha(value: string): string {
@@ -1454,7 +1447,6 @@ getReviewLikes(review: any): number {
     index: number
   ): {
     comentario: string;
-    tipo: 'LIKE' | 'DISLIKE';
     error: string;
   } {
     const key = this.getReviewDraftKey(provider, index);
@@ -1462,7 +1454,6 @@ getReviewLikes(review: any): number {
     if (!this.reviewDrafts[key]) {
       this.reviewDrafts[key] = {
         comentario: '',
-        tipo: 'LIKE',
         error: ''
       };
     }

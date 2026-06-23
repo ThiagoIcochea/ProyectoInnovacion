@@ -49,7 +49,55 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   providerPaymentCount = 0;
   providerDeliveryCount = 0;
   menuMovilAbierto = false;
+  plansModalOpen = false;
+  selectedProviderPlanId = 'freemium';
+  providerPlanBillingCycle: '1' | '3' | '6' = '1';
+  providerPlanPaymentReady = false;
   globalSearchTerm = '';
+
+  providerPlans = [
+    {
+      id: 'freemium',
+      name: 'Freemium',
+      price: 0,
+      badge: '1 mes gratis',
+      description: 'Acceso base al sistema durante el primer mes.',
+      features: [
+        'Sistema operativo del proveedor',
+        'Sin anuncios para clientes',
+        'Sin reportes avanzados'
+      ]
+    },
+    {
+      id: 'standard',
+      name: 'Estándar',
+      price: 249,
+      badge: 'Gestión diaria',
+      description: 'Herramientas para administrar catálogo, stock y solicitudes.',
+      features: [
+        'Sistema de gestión de inventarios',
+        'Alertas de stock',
+        'Alertas de solicitudes'
+      ]
+    },
+    {
+      id: 'premium',
+      name: 'Premium',
+      price: 500,
+      badge: 'Mayor exposición',
+      description: 'Incluye promoción comercial y reportes para vender más.',
+      features: [
+        'Todo lo del plan Estándar',
+        'Anuncios a clientes',
+        'Reportes comerciales'
+      ]
+    }
+  ];
+
+  providerPlanPayment = {
+    payerName: '',
+    payerEmail: ''
+  };
   private fotoPerfilCacheBust = Date.now();
   private providerCountsRefreshHandler = () => {
     if (this.isProvider) {
@@ -84,11 +132,124 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     window.addEventListener('profileUpdated', this.profileUpdatedHandler);
     window.addEventListener('providerCountsRefresh', this.providerCountsRefreshHandler);
+    this.cargarPlanProveedorLocal();
     this.cargarPerfil();
     if (this.isProvider) {
       this.cargarEstadoApi();
       this.cargarIndicadoresProveedor();
     }
+  }
+
+  get currentProviderPlan(): any {
+    return this.providerPlans.find(plan => plan.id === this.selectedProviderPlanId) ||
+      this.providerPlans[0];
+  }
+
+  get selectedProviderPlan(): any {
+    return this.providerPlans.find(plan => plan.id === this.selectedProviderPlanId) ||
+      this.currentProviderPlan;
+  }
+
+  get selectedPlanTotal(): number {
+    return this.selectedProviderPlan.price * Number(this.providerPlanBillingCycle);
+  }
+
+  get selectedPlanPayload(): any {
+    return {
+      providerEmail: this.usuario?.correo || '',
+      providerName: this.nombreCompleto,
+      planId: this.selectedProviderPlan.id,
+      planName: this.selectedProviderPlan.name,
+      billingCycleMonths: Number(this.providerPlanBillingCycle),
+      amount: this.selectedPlanTotal,
+      currency: 'PEN',
+      description: `Plan ${this.selectedProviderPlan.name} por ${this.providerPlanBillingCycle} mes(es)`,
+      payer: {
+        name: this.providerPlanPayment.payerName.trim(),
+        email: this.providerPlanPayment.payerEmail.trim()
+      },
+      paypal: {
+        intent: 'CAPTURE',
+        flow: 'checkout',
+        returnUrl: `${location.origin}/app/provider/dashboard`,
+        cancelUrl: `${location.origin}/app/provider/dashboard`
+      }
+    };
+  }
+
+  get canPrepareProviderPlanPayment(): boolean {
+    if (this.selectedProviderPlan.id === 'freemium') {
+      return true;
+    }
+
+    return !!this.providerPlanPayment.payerName.trim() &&
+      !!this.providerPlanPayment.payerEmail.trim();
+  }
+
+  abrirPlanesProveedor(): void {
+    if (!this.isProvider) {
+      return;
+    }
+
+    this.plansModalOpen = true;
+    this.providerPlanPaymentReady = false;
+    this.hidratarPagoPlanProveedor();
+  }
+
+  cerrarPlanesProveedor(): void {
+    this.plansModalOpen = false;
+  }
+
+  seleccionarPlanProveedor(planId: string): void {
+    this.selectedProviderPlanId = planId;
+    this.providerPlanPaymentReady = false;
+
+    if (planId === 'freemium') {
+      this.providerPlanBillingCycle = '1';
+    }
+  }
+
+  prepararPagoPlanProveedor(): void {
+    if (!this.canPrepareProviderPlanPayment) {
+      return;
+    }
+
+    const payload = this.selectedPlanPayload;
+
+    localStorage.setItem(
+      'provider_plan_checkout_payload',
+      JSON.stringify(payload)
+    );
+
+    if (this.selectedProviderPlan.id === 'freemium') {
+      localStorage.setItem('provider_current_plan', this.selectedProviderPlan.id);
+    }
+
+    this.providerPlanPaymentReady = true;
+
+    if (this.selectedProviderPlan.id !== 'freemium') {
+      window.open('https://www.paypal.com/signin', '_blank', 'noopener,noreferrer');
+    }
+  }
+
+  private cargarPlanProveedorLocal(): void {
+    const savedPlan = localStorage.getItem('provider_current_plan');
+
+    if (savedPlan && this.providerPlans.some(plan => plan.id === savedPlan)) {
+      this.selectedProviderPlanId = savedPlan;
+    }
+  }
+
+  private hidratarPagoPlanProveedor(): void {
+    this.providerPlanPayment.payerName =
+      this.providerPlanPayment.payerName ||
+      this.nombreCompleto;
+
+    this.providerPlanPayment.payerEmail =
+      this.providerPlanPayment.payerEmail ||
+      this.usuario?.correo ||
+      '';
+
   }
 
   ngOnDestroy(): void {

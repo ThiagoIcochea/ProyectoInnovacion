@@ -303,6 +303,16 @@
 
       <div class="topbar__user">
 
+        <button
+          *ngIf="isProvider"
+          type="button"
+          class="provider-plan-trigger"
+          (click)="abrirPlanesProveedor()">
+          <span>Plan actual</span>
+          <strong>{{ currentProviderPlan.name }}</strong>
+          <small>{{ currentProviderPlan.badge }}</small>
+        </button>
+
         <div class="topbar__user-info">
           <strong>
             {{ nombreCompleto }}
@@ -344,4 +354,125 @@
       <router-outlet></router-outlet>
     </main>
   </div>
+
+  <div
+    class="provider-plan-backdrop"
+    *ngIf="plansModalOpen"
+    (click)="cerrarPlanesProveedor()">
+  </div>
+
+  <section
+    class="provider-plan-modal"
+    *ngIf="plansModalOpen"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="provider-plan-title">
+    <header class="provider-plan-modal__header">
+      <div>
+        <span>Planes para proveedores</span>
+        <h2 id="provider-plan-title">Cambiar plan</h2>
+      </div>
+
+      <button
+        type="button"
+        class="provider-plan-close"
+        (click)="cerrarPlanesProveedor()"
+        aria-label="Cerrar planes">
+        x
+      </button>
+    </header>
+
+    <div class="provider-plan-grid">
+      <article
+        class="provider-plan-card"
+        *ngFor="let plan of providerPlans"
+        [class.is-selected]="selectedProviderPlanId === plan.id"
+        (click)="seleccionarPlanProveedor(plan.id)">
+        <div class="provider-plan-card__top">
+          <div>
+            <span>{{ plan.badge }}</span>
+            <h3>{{ plan.name }}</h3>
+          </div>
+
+          <strong>
+            {{ plan.price === 0 ? 'Gratis' : ('S/ ' + plan.price) }}
+          </strong>
+        </div>
+
+        <p>{{ plan.description }}</p>
+
+        <ul>
+          <li *ngFor="let feature of plan.features">{{ feature }}</li>
+        </ul>
+      </article>
+    </div>
+
+    <form
+      class="provider-plan-payment"
+      (ngSubmit)="prepararPagoPlanProveedor()">
+      <div class="provider-plan-payment__summary">
+        <div>
+          <span>Plan seleccionado</span>
+          <strong>{{ selectedProviderPlan.name }}</strong>
+        </div>
+
+        <label>
+          Periodo
+          <select
+            name="providerPlanBillingCycle"
+            [(ngModel)]="providerPlanBillingCycle"
+            [disabled]="selectedProviderPlan.id === 'freemium'">
+            <option value="1">1 mes</option>
+            <option value="3">3 meses</option>
+            <option value="6">6 meses</option>
+          </select>
+        </label>
+
+        <div>
+          <span>Total</span>
+          <strong>{{ selectedPlanTotal === 0 ? 'S/ 0' : ('S/ ' + selectedPlanTotal) }}</strong>
+        </div>
+      </div>
+
+      <div class="provider-plan-form-grid" *ngIf="selectedProviderPlan.id !== 'freemium'">
+        <label>
+          Nombre completo
+          <input
+            type="text"
+            name="payerName"
+            [(ngModel)]="providerPlanPayment.payerName"
+            autocomplete="name"
+            required>
+        </label>
+
+        <label>
+          Correo PayPal
+          <input
+            type="email"
+            name="payerEmail"
+            [(ngModel)]="providerPlanPayment.payerEmail"
+            autocomplete="email"
+            required>
+        </label>
+      </div>
+
+      <div class="provider-plan-free" *ngIf="selectedProviderPlan.id === 'freemium'">
+        Freemium queda activo por defecto durante 1 mes. No incluye anuncios a clientes ni reportes avanzados.
+      </div>
+
+      <div class="provider-plan-actions">
+        <p *ngIf="providerPlanPaymentReady">
+          Datos listos: nombre, correo PayPal y monto. Backend creara la orden y enviara al checkout con el total fijado.
+        </p>
+
+        <button type="button" class="provider-plan-secondary" (click)="cerrarPlanesProveedor()">
+          Cancelar
+        </button>
+
+        <button type="submit" class="provider-plan-primary" [disabled]="!canPrepareProviderPlanPayment">
+          {{ selectedProviderPlan.id === 'freemium' ? 'Mantener Freemium' : 'Continuar a PayPal' }}
+        </button>
+      </div>
+    </form>
+  </section>
 </div>

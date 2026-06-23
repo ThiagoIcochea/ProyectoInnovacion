@@ -37,8 +37,6 @@ export class RfqCatalogComponent implements OnInit {
 
   topProviders: any[] = [];
 
-  usarTopProveedoresSimulado = false;
-
   readonly skeletonCards = Array.from({ length: 8 });
 
   imageLoadFailures: { [key: number]: boolean } = {};
@@ -514,8 +512,6 @@ export class RfqCatalogComponent implements OnInit {
       next: (res) => {
 
         const data = Array.isArray(res) ? res : [];
-
-        console.log(res);
 
         this.topProviders = data.map((item: any, index: number) => {
 
