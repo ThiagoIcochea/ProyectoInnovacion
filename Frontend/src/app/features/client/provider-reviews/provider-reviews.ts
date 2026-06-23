@@ -460,7 +460,12 @@ export class ProviderReviewsComponent implements OnInit {
     provider.totalComentarios = comentarios.length;
     provider.likes = likes;
     provider.dislikes = dislikes;
-   
+
+    // Si el backend no entregó satisfacción, calcularla desde likes/dislikes
+    const totalReacciones = provider.likes + provider.dislikes;
+    if ((provider.satisfaccion === null || provider.satisfaccion === undefined || provider.satisfaccion === 0) && totalReacciones > 0) {
+      provider.satisfaccion = Math.round((provider.likes / totalReacciones) * 100);
+    }
   }
 
   private recalculateProviderReviewMetrics(provider: any): void {
@@ -487,17 +492,49 @@ export class ProviderReviewsComponent implements OnInit {
 
       const current = this.providers[index];
 
-      
+      // Normalizar posibles nombres de campo que venga del backend
+      const rawSatisf =
+        res?.satisfaccion ??
+        res?.satisfaction ??
+        res?.satisfactionPercent ??
+        res?.satisfaction_percent ??
+        res?.satisfaction_percentage ??
+        res?.satisfactionScore ??
+        res?.scoreSatisfaction ??
+        null;
+
+      let satisfaccionValue: number | null = null;
+
+      if (rawSatisf !== null && rawSatisf !== undefined) {
+        const n = Number(rawSatisf);
+        if (!Number.isNaN(n)) {
+          satisfaccionValue = n <= 1 ? Math.round(n * 100) : Math.round(n);
+        }
+      }
+
+      const tiempoEntregaRaw =
+        res?.tiempoEntregaPromedio ??
+        res?.tiempo_entrega_promedio ??
+        res?.tiempoEntregaDias ??
+        res?.tiempo_entrega_dias ??
+        null;
+
+      const fechaRegistroRaw =
+        res?.fechaRegistro ??
+        res?.fecha_registro ??
+        res?.createdAt ??
+        res?.created_at ??
+        null;
 
       this.providers[index] = {
         ...current,
-        pedidosCompletados: res?.pedidosCompletados ?? 0,
-        pedidosTotal: res?.pedidosTotal ?? 0,
-        cumplimiento: res?.cumplimiento ?? 0,
-        scoreGeneral: res?.scoreGeneral ?? 0,
-        satisfaccion: res?.satisfaccion ?? 0,
-        tiempoEntregaPromedio: res?.tiempoEntregaPromedio ?? 0,
-        fechaRegistro: res?.fechaRegistro ?? null,
+        pedidosCompletados: res?.pedidosCompletados ?? res?.pedidos_completados ?? 0,
+        pedidosTotal: res?.pedidosTotal ?? res?.pedidos_total ?? 0,
+        cumplimiento: res?.cumplimiento ?? res?.cumplimientoPorcentaje ?? 0,
+        scoreGeneral: res?.scoreGeneral ?? res?.scoringGeneral ?? 0,
+        satisfaccion: satisfaccionValue ?? current?.satisfaccion ?? 0,
+        tiempoEntregaPromedio: tiempoEntregaRaw ?? current?.tiempoEntregaPromedio ?? current?.tiempoEntregaDias ?? null,
+        fechaRegistro: fechaRegistroRaw ?? current?.fechaRegistro ?? null,
       };
 
 
@@ -511,17 +548,17 @@ export class ProviderReviewsComponent implements OnInit {
   this.selectedProvider = {
     ...this.selectedProvider,
 
-    pedidosCompletados: res?.pedidosCompletados ?? 0,
-    pedidosTotal: res?.pedidosTotal ?? 0,
-    cumplimiento: res?.cumplimiento ?? 0,
-    scoreGeneral: res?.scoreGeneral ?? 0,
-    satisfaccion: res?.satisfaccion ?? 0,
-    tiempoEntregaPromedio: res?.tiempoEntregaPromedio ?? 0,
-    fechaRegistro: res?.fechaRegistro ?? null,
+    pedidosCompletados: res?.pedidosCompletados ?? res?.pedidos_completados ?? 0,
+    pedidosTotal: res?.pedidosTotal ?? res?.pedidos_total ?? 0,
+    cumplimiento: res?.cumplimiento ?? res?.cumplimientoPorcentaje ?? 0,
+    scoreGeneral: res?.scoreGeneral ?? res?.scoringGeneral ?? 0,
+    satisfaccion: satisfaccionValue ?? this.selectedProvider?.satisfaccion ?? 0,
+    tiempoEntregaPromedio: tiempoEntregaRaw ?? this.selectedProvider?.tiempoEntregaPromedio ?? this.selectedProvider?.tiempoEntregaDias ?? null,
+    fechaRegistro: fechaRegistroRaw ?? this.selectedProvider?.fechaRegistro ?? null,
 
     likes: res?.likes ?? this.selectedProvider.likes ?? 0,
     dislikes: res?.dislikes ?? this.selectedProvider.dislikes ?? 0,
-    totalResenas: res?.totalResenas ?? 0
+    totalResenas: res?.totalResenas ?? res?.total_resenas ?? 0
   };
 }
 
@@ -666,6 +703,13 @@ export class ProviderReviewsComponent implements OnInit {
         item?.tiempo_entrega_dias ||
         null,
 
+      tiempoEntregaPromedio:
+        item?.tiempoEntregaPromedio ??
+        item?.tiempo_entrega_promedio ??
+        item?.tiempoEntregaDias ??
+        item?.tiempo_entrega_dias ??
+        null,
+
       garantiaMeses:
         item?.garantiaMeses ||
         item?.garantia_meses ||
@@ -703,15 +747,31 @@ export class ProviderReviewsComponent implements OnInit {
       dislikes:
         Number(item?.dislikes ?? 0),
 
-      satisfaccion:
-        item?.satisfaccion ?? 0,
+      
 
       totalComentarios:
         item?.totalComentarios ||
         item?.total_comentarios ||
         0
+      ,
+
+      fechaRegistro:
+        item?.fechaRegistro ??
+        item?.fecha_registro ??
+        item?.createdAt ??
+        item?.created_at ??
+        null,
+
+      satisfaccion: (() => {
+        const raw = item?.satisfaccion ?? item?.satisfaction ?? item?.satisfactionPercent ?? item?.satisfaction_percent ?? null;
+        if (raw === null || raw === undefined) return item?.satisfaccion ?? 0;
+        const n = Number(raw);
+        if (Number.isNaN(n)) return item?.satisfaccion ?? 0;
+        return n <= 1 ? Math.round(n * 100) : Math.round(n);
+      })()
     };
   }
+
 
   getProductImage(): string | null {
     if (this.productImageFailed) {
@@ -1040,7 +1100,10 @@ getReviewLikes(review: any): number {
   }
 
   getProviderSatisfaction(provider: any): number {
-    return provider?.satisfaccion ?? 0;
+    const raw = provider?.satisfaccion ?? provider?.satisfaction ?? 0;
+    const n = Number(raw ?? 0);
+    if (Number.isNaN(n)) return 0;
+    return n <= 1 ? Math.round(n * 100) : Math.round(n);
   }
 
   getReviewAuthor(review: any): string {
