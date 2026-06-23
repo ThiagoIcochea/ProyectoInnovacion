@@ -10,6 +10,7 @@ import {
   Component,
   OnInit
 } from '@angular/core';
+import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-admin-integrations',
@@ -22,7 +23,7 @@ export class AdminIntegrationsComponent
 implements OnInit {
 
   private API_URL =
-    'https://proyectoinnovacion.onrender.com/api/config';
+    `${APP_API_BASE_URL}/config`;
 
   integrations: any[] = [];
   loading = true;

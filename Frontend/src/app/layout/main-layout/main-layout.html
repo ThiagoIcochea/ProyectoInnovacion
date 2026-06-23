@@ -101,7 +101,7 @@
           Solicitudes
 
           <span class="sidebar__count">
-            12
+            {{ providerRequestCount }}
           </span>
         </a>
 
@@ -114,7 +114,7 @@
           Pagos
 
           <span class="sidebar__count">
-            3
+            {{ providerPaymentCount }}
           </span>
         </a>
 
@@ -125,6 +125,10 @@
           class="sidebar__link"
           (click)="cerrarMenuMovil()">
           Entregas
+
+          <span class="sidebar__count">
+            {{ providerDeliveryCount }}
+          </span>
         </a>
 
         <a

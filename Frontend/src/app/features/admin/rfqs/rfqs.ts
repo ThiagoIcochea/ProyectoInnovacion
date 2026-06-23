@@ -13,6 +13,7 @@ import {
 } from '@angular/common/http';
 
 import { FormsModule } from '@angular/forms';
+import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-admin-rfqs',
@@ -29,7 +30,7 @@ export class AdminRfqsComponent
 implements OnInit {
 
   private API_URL =
-    'https://proyectoinnovacion.onrender.com/api/solicitudes/admin/listar';
+    `${APP_API_BASE_URL}/solicitudes/admin/listar`;
 
   rfqs: any[] = [];
 

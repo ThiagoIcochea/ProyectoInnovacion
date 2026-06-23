@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
+import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-admin-users',
@@ -28,7 +29,7 @@ export class AdminUsersComponent
 implements OnInit {
 
   private API_URL =
-    'https://proyectoinnovacion.onrender.com/api/usuarios/admin/listar';
+    `${APP_API_BASE_URL}/usuarios/admin/listar`;
 
   users: any[] = [];
 

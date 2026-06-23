@@ -36,7 +36,7 @@
         <p>Accede a tu cuenta para continuar</p>
       </div>
 
-      <form class="login-form">
+      <form class="login-form" (ngSubmit)="login()">
         <div class="form-group">
           <label for="email">Correo corporativo</label>
           <input
@@ -68,9 +68,13 @@
           <a href="#">¿Olvidaste tu contraseña?</a>
         </div>
 
-        <button type="button" class="btn-primary" (click)="login()">
-  Ingresar
-</button>
+        <p class="login-error" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </p>
+
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          {{ loading ? 'Ingresando...' : 'Ingresar' }}
+        </button>
       </form>
 
       <div class="login-card__footer">

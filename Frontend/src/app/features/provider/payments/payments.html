@@ -12,10 +12,16 @@
     <aside class="payment-list-card">
       <div class="list-header">
         <h2>Pendientes de revision</h2>
-        <span>{{ (payments$ | async)?.length || 0 }} pagos</span>
+        <span>{{ filteredPayments.length }} pagos</span>
       </div>
 
-      <div class="search-box">Buscar por ID de pago o cliente...</div>
+      <input
+        type="text"
+        class="search-box"
+        placeholder="Buscar por ID de pago, cliente o estado..."
+        [(ngModel)]="searchTerm"
+        (input)="filtrarPagos()"
+      />
 
       <div class="payment-list" *ngIf="loading">
         <div class="payment-item payment-item--skeleton" *ngFor="let item of skeletonRows">
@@ -35,7 +41,7 @@
       <div class="payment-list" *ngIf="!loading">
         <button
           class="payment-item"
-          *ngFor="let payment of (payments$ | async)"
+          *ngFor="let payment of filteredPayments"
           [class.active]="selectedPayment?.idPago === payment.idPago"
           (click)="seleccionarPago(payment)"
         >
@@ -53,8 +59,8 @@
           </div>
         </button>
 
-        <div class="empty-state" *ngIf="((payments$ | async)?.length || 0) === 0">
-          {{ errorMessage || 'No hay pagos pendientes.' }}
+        <div class="empty-state" *ngIf="filteredPayments.length === 0">
+          {{ errorMessage || 'No hay pagos que coincidan con la busqueda.' }}
         </div>
       </div>
     </aside>

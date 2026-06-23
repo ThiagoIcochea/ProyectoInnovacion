@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
+import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-admin-providers',
@@ -27,7 +28,7 @@ export class AdminProvidersComponent
 implements OnInit {
 
   private API_URL =
-    'https://proyectoinnovacion.onrender.com/api/provider/admin/listar';
+    `${APP_API_BASE_URL}/provider/admin/listar`;
 
   providers: any[] = [];
 

@@ -3,6 +3,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-provider-reviews',
@@ -39,7 +40,7 @@ export class ProviderReviewsComponent implements OnInit {
     }
   } = {};
 
-  private readonly API_BASE = 'https://proyectoinnovacion.onrender.com/api';
+  private readonly API_BASE = APP_API_BASE_URL;
 
   constructor(
     private router: Router,

@@ -11,6 +11,7 @@ import {
   Component,
   OnInit
 } from '@angular/core';
+import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 
 import { FormsModule } from '@angular/forms';
 
@@ -29,7 +30,7 @@ export class AdminLogsComponent
 implements OnInit {
 
   private API_URL =
-    'https://proyectoinnovacion.onrender.com/api/logs/admin';
+    `${APP_API_BASE_URL}/logs/admin`;
 
   logs: any[] = [];
 

@@ -19,6 +19,7 @@ import {
   RouterLinkActive,
   RouterOutlet
 } from '@angular/router';
+import { catchError, forkJoin, of } from 'rxjs';
 import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../core/constants/app.constants';
 
 @Component({
@@ -44,9 +45,17 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   };
 
   estadoApi: string = 'Desconectada';
+  providerRequestCount = 0;
+  providerPaymentCount = 0;
+  providerDeliveryCount = 0;
   menuMovilAbierto = false;
   globalSearchTerm = '';
   private fotoPerfilCacheBust = Date.now();
+  private providerCountsRefreshHandler = () => {
+    if (this.isProvider) {
+      this.cargarIndicadoresProveedor();
+    }
+  };
   private profileUpdatedHandler = (event: Event) => {
     const updatedUser = (event as CustomEvent<any>).detail;
 
@@ -64,7 +73,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   };
 
   private API_URL =
-  'https://proyectoinnovacion.onrender.com/api/proveedor-api';
+  `${APP_API_BASE_URL}/proveedor-api`;
 
   constructor(
     public router: Router,
@@ -74,14 +83,17 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     window.addEventListener('profileUpdated', this.profileUpdatedHandler);
+    window.addEventListener('providerCountsRefresh', this.providerCountsRefreshHandler);
     this.cargarPerfil();
     if (this.isProvider) {
-    this.cargarEstadoApi();
-  }
+      this.cargarEstadoApi();
+      this.cargarIndicadoresProveedor();
+    }
   }
 
   ngOnDestroy(): void {
     window.removeEventListener('profileUpdated', this.profileUpdatedHandler);
+    window.removeEventListener('providerCountsRefresh', this.providerCountsRefreshHandler);
   }
 
   toggleMenuMovil(): void {
@@ -263,4 +275,36 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     }
   });
 }
+
+  cargarIndicadoresProveedor(): void {
+    const options = {
+      headers: this.headers()
+    };
+
+    forkJoin({
+      solicitudes: this.http.get<any[]>(
+        `${APP_API_BASE_URL}/solicitudes/proveedor/mis-solicitudes`,
+        options
+      ).pipe(catchError(() => of([]))),
+      pagos: this.http.get<any[]>(
+        `${APP_API_BASE_URL}/pagos/proveedor/mis-pagos`,
+        options
+      ).pipe(catchError(() => of([]))),
+      entregas: this.http.get<any[]>(
+        `${APP_API_BASE_URL}/solicitudes/proveedor/entregas`,
+        options
+      ).pipe(catchError(() => of([])))
+    }).subscribe(({ solicitudes, pagos, entregas }) => {
+      this.providerRequestCount =
+        (solicitudes || []).length;
+
+      this.providerPaymentCount =
+        (pagos || []).length;
+
+      this.providerDeliveryCount =
+        (entregas || []).length;
+
+      this.cdr.detectChanges();
+    });
+  }
 }

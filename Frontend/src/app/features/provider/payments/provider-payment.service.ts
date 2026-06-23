@@ -11,15 +11,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { Payment } from './payments.model';
+import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class PagoService {
-
-  private apiUrl =
-    'https://proyectoinnovacion.onrender.com';
 
   constructor(
     private http: HttpClient
@@ -32,7 +30,7 @@ export class PagoService {
   listarMisPagos(): Observable<Payment[]> {
 
     return this.http.get<Payment[]>(
-      `${this.apiUrl}/api/pagos/proveedor/mis-pagos`
+      `${APP_API_BASE_URL}/pagos/proveedor/mis-pagos`
     );
   }
 
@@ -42,7 +40,7 @@ aprobarPago(idPago:number){
   
   
   return this.http.put<{ mensaje: string }>(
-    `${this.apiUrl}/api/pagos/${idPago}/aprobar`,
+    `${APP_API_BASE_URL}/pagos/${idPago}/aprobar`,
     {}
   );
 
@@ -59,7 +57,7 @@ rechazarPago(idPago:number){
   
   
   return this.http.put<{ mensaje: string }>(
-    `${this.apiUrl}/api/pagos/${idPago}/rechazar`,
+    `${APP_API_BASE_URL}/pagos/${idPago}/rechazar`,
     {}
   );
 

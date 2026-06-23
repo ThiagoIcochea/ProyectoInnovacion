@@ -3,12 +3,12 @@
   <div class="page-header">
     <div>
       <span>Resumen general</span>
-      <h1>Hola, Global Tech Solutions 👋</h1>
-      <p>Aquí tienes el resumen de tu actividad y solicitudes en la plataforma.</p>
+      <h1>Hola, {{ providerName }}</h1>
+      <p>Aqui tienes el resumen de tu actividad y solicitudes en la plataforma.</p>
     </div>
 
-    <div class="api-status">
-      API conectada
+    <div class="api-status" [class.api-status--pending]="!apiConnected">
+      {{ apiStatus }}
     </div>
   </div>
 
@@ -28,7 +28,7 @@
     <div class="requests-card__header">
       <div>
         <h2>Solicitudes recientes RFQ</h2>
-        <p>Últimas solicitudes recibidas desde clientes B2B.</p>
+        <p>Ultimas solicitudes recibidas desde clientes B2B.</p>
       </div>
 
       <a routerLink="/app/provider/requests">Ver todas</a>
@@ -39,9 +39,9 @@
         <div>ID Solicitud</div>
         <div>Cliente</div>
         <div>Cantidad</div>
-        <div>Recepción</div>
+        <div>Recepcion</div>
         <div>Estado</div>
-        <div>Acción</div>
+        <div>Accion</div>
       </div>
 
       <div class="requests-table__row" *ngFor="let request of recentRequests">
@@ -58,8 +58,7 @@
         <div>
           <span
             class="status-badge"
-            [class.warning]="request.status === 'En evaluación'"
-          >
+            [class.warning]="request.status === 'PAGO_PENDIENTE' || request.status === 'PAGO_VALIDANDO'">
             {{ request.status }}
           </span>
         </div>
@@ -69,6 +68,10 @@
             Revisar y cotizar
           </a>
         </div>
+      </div>
+
+      <div class="empty-state" *ngIf="recentRequests.length === 0">
+        No hay solicitudes recientes.
       </div>
     </div>
   </section>

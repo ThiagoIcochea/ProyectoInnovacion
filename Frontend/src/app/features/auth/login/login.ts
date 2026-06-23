@@ -18,6 +18,8 @@ export class LoginComponent implements OnInit {
   email: string = '';
   password: string = '';
   rememberEmail: boolean = false;
+  loading: boolean = false;
+  errorMessage: string = '';
 
   private readonly rememberedEmailKey = 'rememberedEmail';
 
@@ -47,30 +49,52 @@ export class LoginComponent implements OnInit {
     this.syncRememberedEmail();
   }
 
-  login() {
+  login(): void {
+    if (this.loading) {
+      return;
+    }
+
+    const correo = this.email.trim();
+    const password = this.password.trim();
+
+    if (!correo || !password) {
+      this.errorMessage = 'Ingresa tu correo y contrasena.';
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
 
     this.syncRememberedEmail();
 
     const body = {
-      correo: this.email,
-      password: this.password
+      correo,
+      password
     };
 
     this.http.post(`${APP_API_BASE_URL}/auth/login`, body)
       .subscribe({
         next: (res: any) => {
+          const normalizedRole = this.normalizeRole(res?.rol);
+
+          if (!res?.token || !normalizedRole) {
+            this.loading = false;
+            this.errorMessage = 'Respuesta de login incompleta.';
+            return;
+          }
 
           localStorage.setItem(APP_STORAGE_KEYS.token, res.token);
-          localStorage.setItem(APP_STORAGE_KEYS.role, res.rol);
-          
+          localStorage.setItem(APP_STORAGE_KEYS.role, normalizedRole);
 
-          setTimeout(() => {
-            this.redirectByRole(res.rol);
-          }, 100);
+          this.redirectByRole(normalizedRole);
         },
 
-        error: () => {
-          alert('Credenciales incorrectas');
+        error: (err) => {
+          this.loading = false;
+          this.errorMessage =
+            err?.status === 0
+              ? 'No se pudo conectar con el backend.'
+              : 'Credenciales incorrectas o usuario inactivo.';
         }
       });
   }
@@ -91,8 +115,17 @@ export class LoginComponent implements OnInit {
 
     } else {
 
+      this.loading = false;
+      this.errorMessage = `Rol no reconocido: ${rol}`;
       this.router.navigate([APP_ROUTE_PATHS.login]);
     }
+  }
+
+  private normalizeRole(rol: string | null | undefined): string {
+    return (rol || '')
+      .toUpperCase()
+      .replace(/^ROLE_/, '')
+      .trim();
   }
 
   private syncRememberedEmail(): void {

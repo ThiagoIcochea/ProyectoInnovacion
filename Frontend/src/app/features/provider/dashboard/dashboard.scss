@@ -40,6 +40,12 @@
   white-space: nowrap;
 }
 
+.api-status--pending {
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.22);
+  color: #f59e0b;
+}
+
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -195,4 +201,9 @@
   .requests-card__header {
     flex-direction: column;
   }
+}
+
+.empty-state {
+  padding: 1rem 1.5rem;
+  color: #9ca3af;
 }

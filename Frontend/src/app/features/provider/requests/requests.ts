@@ -1,302 +1,173 @@
-
-
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ProviderRequestsService } from './provider-requests.service';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-
-console.log("request ts cargado")
-
 
 @Component({
   selector: 'app-provider-requests',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './requests.html',
   styleUrls: ['./requests.scss']
 })
-export class ProviderRequestsComponent  implements OnInit {
+export class ProviderRequestsComponent implements OnInit {
+  requests: any[] = [];
+  filteredRequests: any[] = [];
+  searchTerm = '';
+  loading = true;
+  errorMessage = '';
 
+  selectedRequest: any | null = null;
+  productos: any[] = [];
 
-/*missolicitudesproveedor:any[]=[]; */
-requests$!: Observable<any[]>;
+  constructor(
+    private requestService: ProviderRequestsService
+  ) {}
 
-selectedRequest:any | null =null ; 
+  ngOnInit(): void {
+    this.loadRequests();
+  }
 
-productos:any[]=[]; 
+  loadRequests(): void {
+    this.loading = true;
+    this.errorMessage = '';
 
-
-
-constructor(
-  private requestService: ProviderRequestsService,
-   
-) {}
-
-
-
-
-
-ngOnInit(): void {
-   
-  console.log("entrando al componente"); 
-
-
-  // ✔ SOLO datos aquí (sin tap, sin lógica UI)
-    this.requests$ = this.requestService.listarSolicitudes();
-    
-
-    // ✔ selección inicial (una sola vez)
-    this.requests$.subscribe(data => {
-      console.log(data);
-      if (data?.length > 0) {
-        this.selectRequest(data[0]);
-      }
-    });
-
-
-
-
-
-
-
-
-
-
-  /* intento 2 con suscribe manual
-  this.requestService.listarSolicitudes()
+    this.requestService.listarSolicitudes()
       .subscribe({
+        next: (data) => {
+          this.requests = data || [];
+          this.filterRequests();
 
-
-
-
-        next: (data: any[]) => {
-
-          // ✔ SIEMPRE asegurar array
-          this.missolicitudesproveedor = [...data ?? [] ];
-
-          console.log("DATA:", this.missolicitudesproveedor);
-
-          // ✔ selección inicial segura
-          if (this.missolicitudesproveedor.length > 0) {
-            this.selectRequest(this.missolicitudesproveedor[0]);
+          if (this.filteredRequests.length > 0) {
+            const currentId = this.selectedRequest?.idSolicitud;
+            this.selectRequest(
+              this.filteredRequests.find(request => request.idSolicitud === currentId) ||
+              this.filteredRequests[0]
+            );
+          } else {
+            this.selectRequest(null);
           }
 
+          this.loading = false;
+          this.notifyProviderCountsRefresh();
         },
-        error: (err) => {
-          console.error("Error cargando solicitudes", err);
-          this.missolicitudesproveedor = [];
+        error: () => {
+          this.requests = [];
+          this.filteredRequests = [];
+          this.selectRequest(null);
+          this.errorMessage = 'No se pudieron cargar las solicitudes.';
+          this.loading = false;
+          this.notifyProviderCountsRefresh();
         }
       });
+  }
 
+  filterRequests(): void {
+    const text = this.searchTerm.trim().toLowerCase();
 
-
-
-*/
-
-
-
-
-
-
-
-
-  
-  /*
-  this.requests$ = this.requestService.listarSolicitudes().pipe(
-  tap(data => {
-    if (data.length > 0) {
-      this.selectedRequest = data[0];
-      this.productos = data[0].detalles ?? [];
+    if (!text) {
+      this.filteredRequests = [...this.requests];
+      return;
     }
-  })
-);
 
-*/
+    this.filteredRequests = this.requests.filter(request => [
+      this.getRfQCode(request),
+      request?.nombreEmpresa,
+      request?.nombreCliente,
+      request?.correoCliente,
+      request?.estado,
+      request?.idSolicitud?.toString()
+    ].some(value => (value || '').toLowerCase().includes(text)));
+  }
 
+  selectRequest(request: any | null): void {
+    this.selectedRequest = request;
+    this.productos = request?.detalles ?? [];
+  }
 
+  getRfQCode(request: any): string {
+    if (!request) {
+      return '';
+    }
 
+    const year = new Date(request.fechaCreacion || new Date()).getFullYear();
+    const id = String(request.idSolicitud).padStart(4, '0');
 
+    return `RFQ-${year}-${id}`;
+  }
 
+  getFecha(date: string): string {
+    if (!date) {
+      return '';
+    }
 
+    return new Date(date).toLocaleDateString('es-PE');
+  }
 
-  /*intento uno con suscribe
-  this.requestService
-    .listarSolicitudes()
-    .subscribe({
-        next:(data:any[]) =>{
+  getHora(date: string): string {
+    if (!date) {
+      return '';
+    }
 
-        console.log("IS ARRAY:", Array.isArray(data));
+    return new Date(date).toLocaleTimeString('es-PE');
+  }
 
-        this.missolicitudesproveedor = [...data];
+  getFechaCompleta(date?: string): string {
+    if (!date) {
+      return '';
+    }
 
-      /*console.log("REQUESTS:", this.missolicitudesproveedor);
+    const fecha = new Date(date);
+    const fechaTexto = fecha.toLocaleDateString('es-PE', {
+      day: 'numeric',
+      month: 'long'
+    });
+    const horaTexto = fecha.toLocaleTimeString('es-PE', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
 
-      console.log("LENGTH:", this.missolicitudesproveedor.length); */
+    return `Recibida el ${fechaTexto} a las ${horaTexto}`;
+  }
 
-      
-      
-
-  /*
-      if (this.missolicitudesproveedor.length > 0) {
-        this.selectRequest(this.missolicitudesproveedor[0]);
-        
-      }
-
-
-      console.log("solicitudes",    data); },
-
-      error: (err) => { console.error( "error cargando solicitudes", err); }
-
-    }); */
-}
-
-
-selectRequest(request: any) {
-
-  this.selectedRequest = request;
-  
-  
-
-  this.productos=request?.detalles ?? []; 
-
-  /*this.productos = request.detalles ; */
-  /*this.productos=request?.detalles  ?? []; */
-  console.log("selectedRequest", request);
-  console.log("productos", this.productos); 
-}
-
-
-
-
-getRfQCode(request: any): string {
-  if (!request) return '';
-
-  const year = new Date(request.fechaCreacion).getFullYear();
-
-  const id = String(request.idSolicitud).padStart(4, '0');
-
-  return `RFQ-${year}-${id}`;
-}
-
-
-
-
-getFecha(date: string) {
-  return new Date(date).toLocaleDateString('es-PE');
-}
-
-getHora(date: string) {
-  return new Date(date).toLocaleTimeString('es-PE');
-}
-
-
-
-
-
-
-getFechaCompleta(date?: string): string {
-
-  if (!date){
-   return ""; 
- }
-  
-  const fecha = new Date(date);
-
-  const fechaTexto = fecha.toLocaleDateString('es-PE', {
-    day: 'numeric',
-    month: 'long'
-  });
-
-  const horaTexto = fecha.toLocaleTimeString('es-PE', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  });
-
-  return `Recibida el ${fechaTexto} a las ${horaTexto}`;
-}
-
-
-
-
-aprobarPedido(): void {
-
-    if (!this.selectedRequest) return;
+  aprobarPedido(): void {
+    if (!this.selectedRequest) {
+      return;
+    }
 
     this.requestService
       .aprobarPedido(this.selectedRequest.idSolicitud)
       .subscribe({
-
-        next: () => {
-
-          alert('Pedido aprobado correctamente');
-
-          
-
-        },
-
-        error: (err) => {
-
-          console.error(err);
-
-          alert('Error al aprobar pedido');
-
+        next: () => this.loadRequests(),
+        error: () => {
+          this.errorMessage = 'Error al aprobar pedido.';
         }
-
       });
-
   }
-
 
   rechazarPedido(): void {
+    if (!this.selectedRequest) {
+      return;
+    }
 
-    if (!this.selectedRequest) return;
+    const motivo = prompt('Ingrese el motivo por el cual rechaza la orden.');
 
-    const motivo =
-    prompt('Ingrese el motivo por el cual rechaza la orden.');
-
-  if (!motivo) return;
-    
+    if (!motivo?.trim()) {
+      return;
+    }
 
     this.requestService
-      .rechazarPedido(this.selectedRequest.idSolicitud,motivo)
+      .rechazarPedido(this.selectedRequest.idSolicitud, motivo.trim())
       .subscribe({
-
-        next: () => {
-
-          alert('Pedido rechazado correctamente');
-
-          
-
-        },
-
-        error: (err) => {
-
-          console.error(err);
-
-          alert('Error al rechazar pedido');
-
+        next: () => this.loadRequests(),
+        error: () => {
+          this.errorMessage = 'Error al rechazar pedido.';
         }
-
       });
-
   }
 
-
-
-
-
-
-
-
-
+  private notifyProviderCountsRefresh(): void {
+    window.dispatchEvent(new Event('providerCountsRefresh'));
+  }
 }
-
-
-
-
-
-
-
-

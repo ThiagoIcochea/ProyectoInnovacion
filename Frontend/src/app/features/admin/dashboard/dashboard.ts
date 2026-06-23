@@ -1,25 +1,162 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { catchError, forkJoin, of } from 'rxjs';
+import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
-export class AdminDashboardComponent {
+export class AdminDashboardComponent implements OnInit {
   metrics = [
-    { title: 'Usuarios activos', value: '2,845', change: '+12.5% vs mes anterior', type: 'positive' },
-    { title: 'Proveedores verificados', value: '184', change: '+4.2% vs mes anterior', type: 'positive' },
-    { title: 'Solicitudes RFQ totales', value: '5,231', change: '+18.7% vs mes anterior', type: 'positive' },
-    { title: 'Volumen transaccional', value: '$1.2M', change: '-2.1% vs mes anterior', type: 'negative' }
+    { title: 'Usuarios activos', value: '0', change: 'Cargando datos', type: 'positive' },
+    { title: 'Proveedores registrados', value: '0', change: 'Cargando datos', type: 'positive' },
+    { title: 'Solicitudes RFQ totales', value: '0', change: 'Cargando datos', type: 'positive' },
+    { title: 'Volumen transaccional', value: 'S/ 0.00', change: 'Cargando datos', type: 'positive' }
   ];
 
-  activity = [
-    { title: 'Nuevo proveedor validado', detail: 'Global Tech Solutions', status: 'OK' },
-    { title: 'Fallo de sincronización API', detail: 'API Cisco Latam', status: 'Retry' },
-    { title: 'RFQ completado y pagado', detail: 'ORD-2026-1045', status: 'Completado' },
-    { title: 'Nuevo usuario registrado', detail: 'TechNova S.A.', status: 'Nuevo' }
+  activity: Array<{ title: string; detail: string; status: string }> = [];
+
+  chartBars = [
+    { label: 'Ene', height: 8, active: false },
+    { label: 'Feb', height: 8, active: false },
+    { label: 'Mar', height: 8, active: false },
+    { label: 'Abr', height: 8, active: false },
+    { label: 'May', height: 8, active: false },
+    { label: 'Jun', height: 8, active: false },
+    { label: 'Jul', height: 8, active: true }
   ];
+
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.cargarDashboard();
+  }
+
+  private headers(): HttpHeaders {
+    return new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token) || ''}`
+    });
+  }
+
+  private cargarDashboard(): void {
+    const options = { headers: this.headers() };
+
+    forkJoin({
+      users: this.http.get<any[]>(`${APP_API_BASE_URL}/usuarios/admin/listar`, options).pipe(catchError(() => of([]))),
+      providers: this.http.get<any[]>(`${APP_API_BASE_URL}/provider/admin/listar`, options).pipe(catchError(() => of([]))),
+      rfqs: this.http.get<any[]>(`${APP_API_BASE_URL}/solicitudes/admin/listar`, options).pipe(catchError(() => of([]))),
+      logs: this.http.get<any[]>(`${APP_API_BASE_URL}/logs/admin`, options).pipe(catchError(() => of([])))
+    }).subscribe(({ users, providers, rfqs, logs }) => {
+      const visibleUsers = users.filter(user => user?.rol !== 'ADMIN');
+      const activeUsers = visibleUsers.filter(user => (user?.estado || '').toUpperCase() === 'ACTIVO');
+      const activeProviders = providers.filter(provider => (provider?.estado || '').toUpperCase() === 'ACTIVO');
+      const totalAmount = rfqs.reduce((sum, rfq) => sum + Number(rfq?.total || 0), 0);
+
+      this.metrics = [
+        {
+          title: 'Usuarios activos',
+          value: this.formatCount(activeUsers.length || visibleUsers.length),
+          change: `${this.formatCount(visibleUsers.length)} usuarios registrados`,
+          type: 'positive'
+        },
+        {
+          title: 'Proveedores registrados',
+          value: this.formatCount(providers.length),
+          change: `${this.formatCount(activeProviders.length)} activos`,
+          type: 'positive'
+        },
+        {
+          title: 'Solicitudes RFQ totales',
+          value: this.formatCount(rfqs.length),
+          change: `${this.formatCount(this.countOpenRfqs(rfqs))} en curso`,
+          type: 'positive'
+        },
+        {
+          title: 'Volumen transaccional',
+          value: this.formatMoney(totalAmount),
+          change: 'Calculado desde RFQs registradas',
+          type: totalAmount > 0 ? 'positive' : 'negative'
+        }
+      ];
+
+      this.chartBars = this.buildChartBars(rfqs);
+      this.activity = this.buildActivity(logs);
+      this.cdr.detectChanges();
+    });
+  }
+
+  private countOpenRfqs(rfqs: any[]): number {
+    return rfqs.filter(rfq => !['CANCELADA', 'COMPLETADA', 'ENTREGADA'].includes((rfq?.estado || '').toUpperCase())).length;
+  }
+
+  private buildActivity(logs: any[]): Array<{ title: string; detail: string; status: string }> {
+    return logs.slice(0, 5).map(log => ({
+      title: log?.accion || log?.modulo || 'Actividad del sistema',
+      detail: log?.descripcion || this.formatDate(log?.fecha) || 'Registro sin descripcion',
+      status: log?.modulo || 'Log'
+    }));
+  }
+
+  private buildChartBars(rfqs: any[]): Array<{ label: string; height: number; active: boolean }> {
+    const monthFormatter = new Intl.DateTimeFormat('es-PE', { month: 'short' });
+    const months = Array.from({ length: 7 }, (_, index) => {
+      const date = new Date();
+      date.setMonth(date.getMonth() - (6 - index));
+      return {
+        date,
+        key: `${date.getFullYear()}-${date.getMonth()}`,
+        label: monthFormatter.format(date).replace('.', ''),
+        count: 0
+      };
+    });
+
+    rfqs.forEach(rfq => {
+      const date = new Date(rfq?.fechaCreacion);
+      const month = months.find(item => item.key === `${date.getFullYear()}-${date.getMonth()}`);
+
+      if (month) {
+        month.count++;
+      }
+    });
+
+    const max = Math.max(...months.map(month => month.count), 1);
+
+    return months.map((month, index) => ({
+      label: month.label,
+      height: month.count === 0 ? 8 : Math.max(18, Math.round((month.count / max) * 100)),
+      active: index === months.length - 1
+    }));
+  }
+
+  private formatCount(value: number): string {
+    return Number(value || 0).toLocaleString('es-PE');
+  }
+
+  private formatMoney(value: number): string {
+    return `S/ ${Number(value || 0).toLocaleString('es-PE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
+  }
+
+  private formatDate(date?: string): string {
+    if (!date) {
+      return '';
+    }
+
+    return new Date(date).toLocaleDateString('es-PE', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
 }

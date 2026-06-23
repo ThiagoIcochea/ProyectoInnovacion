@@ -5,6 +5,7 @@ import {
   HttpHeaders
 } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 
 type ConnectionState = 'idle' | 'testing' | 'success' | 'error';
 
@@ -21,7 +22,7 @@ type ConnectionState = 'idle' | 'testing' | 'success' | 'error';
 export class ProviderApiSettingsComponent implements OnInit {
 
   private API_URL =
-    'https://proyectoinnovacion.onrender.com/api/proveedor-api';
+    `${APP_API_BASE_URL}/proveedor-api`;
 
   config: any = {
     apiUrl: '',

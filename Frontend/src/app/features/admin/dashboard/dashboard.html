@@ -20,43 +20,16 @@
     <section class="chart-card">
       <div class="card-header">
         <h2>Solicitudes de Equipamiento de Red RFQ</h2>
-        <a>Ver reporte completo</a>
+        <a routerLink="/app/admin/rfqs">Ver reporte completo</a>
       </div>
 
       <div class="bar-chart">
-        <div class="bar-item bar-item--42">
-          <div></div>
-          <span>Ene</span>
-        </div>
-
-        <div class="bar-item bar-item--54">
-          <div></div>
-          <span>Feb</span>
-        </div>
-
-        <div class="bar-item bar-item--37">
-          <div></div>
-          <span>Mar</span>
-        </div>
-
-        <div class="bar-item bar-item--64">
-          <div></div>
-          <span>Abr</span>
-        </div>
-
-        <div class="bar-item bar-item--79">
-          <div></div>
-          <span>May</span>
-        </div>
-
-        <div class="bar-item bar-item--74">
-          <div></div>
-          <span>Jun</span>
-        </div>
-
-        <div class="bar-item active bar-item--88">
-          <div></div>
-          <span>Jul</span>
+        <div
+          class="bar-item"
+          *ngFor="let bar of chartBars"
+          [class.active]="bar.active">
+          <div [style.height.%]="bar.height"></div>
+          <span>{{ bar.label }}</span>
         </div>
       </div>
     </section>
@@ -64,7 +37,7 @@
     <aside class="activity-card">
       <div class="card-header">
         <h2>Actividad reciente</h2>
-        <a>Ver logs</a>
+        <a routerLink="/app/admin/logs">Ver logs</a>
       </div>
 
       <div class="activity-list">
@@ -77,6 +50,10 @@
           </div>
 
           <span>{{ item.status }}</span>
+        </div>
+
+        <div class="empty-state" *ngIf="activity.length === 0">
+          No hay actividad reciente disponible.
         </div>
       </div>
     </aside>

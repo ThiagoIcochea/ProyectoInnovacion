@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-provider-products',
@@ -23,7 +24,7 @@ export class ProviderProductsComponent implements OnInit {
   stockDisponibleCount = 0;
   bajoStockCount = 0;
 
-  private API_URL = 'https://proyectoinnovacion.onrender.com/api/proveedor-productos';
+  private API_URL = `${APP_API_BASE_URL}/proveedor-productos`;
 
   constructor(
     private http: HttpClient,

@@ -4,8 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { PagoService } from './provider-payment.service';
 import { Payment } from './payments.model';
-import { Observable, of } from 'rxjs';
-import { catchError, shareReplay, tap } from 'rxjs/operators';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -14,7 +13,7 @@ import { catchError, shareReplay, tap } from 'rxjs/operators';
 @Component({
   selector: 'app-provider-payments',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './payments.html',
   styleUrls: ['./payments.scss']
 })
@@ -23,7 +22,9 @@ import { catchError, shareReplay, tap } from 'rxjs/operators';
 export class ProviderPaymentsComponent  implements OnInit    {
 
  
-  payments$: Observable<Payment[]> = of([]);
+  payments: Payment[] = [];
+  filteredPayments: Payment[] = [];
+  searchTerm = '';
   loading = true;
   errorMessage = '';
   voucherZoom = 1;
@@ -39,13 +40,7 @@ export class ProviderPaymentsComponent  implements OnInit    {
   constructor(private pagoService: PagoService) {}
 
 ngOnInit(): void {
-
-  const token = localStorage.getItem('token');
-
-  console.log("TOKEN JWT:", token);
-
   this.cargarPagos();
-
 }
 
 
@@ -53,40 +48,60 @@ private cargarPagos(): void {
   this.loading = true;
   this.errorMessage = '';
 
-  this.payments$ = this.pagoService.listarMisPagos().pipe(
-    tap((payments) => {
+  this.pagoService.listarMisPagos()
+    .subscribe({
+      next: (payments) => {
       const lista = payments || [];
+      this.payments = lista;
+      this.filtrarPagos();
 
-      if (lista.length > 0) {
+      if (this.filteredPayments.length > 0) {
         const currentId = this.selectedPayment?.idPago;
         this.selectedPayment =
-          lista.find(payment => payment.idPago === currentId) ||
-          lista[0];
+          this.filteredPayments.find(payment => payment.idPago === currentId) ||
+          this.filteredPayments[0];
       } else {
         this.selectedPayment = null;
       }
 
       this.voucherZoom = 1;
       this.loading = false;
-    }),
-    catchError((err) => {
+      this.notifyProviderCountsRefresh();
+    },
+    error: (err) => {
       console.error(err);
+      this.payments = [];
+      this.filteredPayments = [];
       this.selectedPayment = null;
       this.errorMessage = 'No se pudieron cargar los pagos.';
       this.loading = false;
-      return of([]);
-    }),
-    shareReplay({ bufferSize: 1, refCount: true })
-  );
+      this.notifyProviderCountsRefresh();
+    }
+  });
+}
+
+filtrarPagos(): void {
+  const text = this.searchTerm.trim().toLowerCase();
+
+  if (!text) {
+    this.filteredPayments = [...this.payments];
+    return;
+  }
+
+  this.filteredPayments = this.payments.filter(payment => [
+    this.getPagoCode(payment),
+    this.getCotCode(payment),
+    payment.nombreEmpresa,
+    payment.rucEmpresa,
+    payment.correoCliente,
+    payment.estado,
+    payment.codigoOperacion
+  ].some(value => (value || '').toString().toLowerCase().includes(text)));
 }
 
 seleccionarPago(pago: Payment): void {
     this.selectedPayment = pago;
     this.voucherZoom = 1;
-
-     console.log("seleccionpago", this.selectedPayment); 
-
-    
   }
 
 
@@ -145,11 +160,9 @@ aprobarPago(idPago:number): void {
       .subscribe({
 
         next: (resp) => {
-           console.log(resp.mensaje); 
           //alert('Pago aprobado correctamente');
 
-
-
+            this.recargarPagos(); 
             this.cerrarModal(); 
           // recargar lista
           //this.payments$ =
@@ -174,7 +187,6 @@ aprobarPago(idPago:number): void {
         error: (err) => {
 
           console.error(err);
-          console.log("error al aprobar"); 
 
           //this.mostrarModal=false; 
 
@@ -203,7 +215,6 @@ rechazarPago(idPago:number): void {
       .subscribe({
 
         next: (resp) => {
-           console.log(resp.mensaje); 
           //alert('Pago no aprobado');
 
             this.recargarPagos(); 
@@ -231,7 +242,6 @@ rechazarPago(idPago:number): void {
         error: (err) => {
 
           console.error(err);
-          console.log("error al rechazar"); 
 
           //this.mostrarModal=false; 
 
@@ -246,11 +256,11 @@ rechazarPago(idPago:number): void {
 
 
 private recargarPagos(): void {
-  this.payments$ = this.pagoService.listarMisPagos().pipe(
-    tap((pagos) => {
-      this.selectedPayment = pagos.length > 0 ? pagos[0] : null;
-    })
-  );
+  this.cargarPagos();
+}
+
+private notifyProviderCountsRefresh(): void {
+  window.dispatchEvent(new Event('providerCountsRefresh'));
 }
 
 

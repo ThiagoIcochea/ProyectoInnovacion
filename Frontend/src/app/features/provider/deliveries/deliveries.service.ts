@@ -11,15 +11,13 @@ import { Observable } from 'rxjs';
 import { DeliveryRequest } from './delivery.model'; 
 import { TrackingStep } from './tracking-step.model';
 import { DeliveryDetail } from './delivery-detail.model';
+import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class DeliveriesService {
-
-  private apiUrl =
-    'https://proyectoinnovacion.onrender.com';
 
   constructor(
     private http: HttpClient
@@ -32,7 +30,7 @@ export class DeliveriesService {
   listarSolicitudesEntrega(): Observable<DeliveryRequest[]> {
 
     return this.http.get<DeliveryRequest[]>(
-      `${this.apiUrl}/api/solicitudes/proveedor/entregas`
+      `${APP_API_BASE_URL}/solicitudes/proveedor/entregas`
     );
   }
 
@@ -45,7 +43,7 @@ listarTrackingSolicitud(
       TrackingStep[]
     >(
 
-      `${this.apiUrl}/api/solicitudes/proveedor/solicitudes/${idSolicitud}/tracking`
+      `${APP_API_BASE_URL}/solicitudes/proveedor/${idSolicitud}/tracking`
 
     );
 
@@ -60,7 +58,7 @@ listarDetallesEntrega(idSolicitud:number):
       DeliveryDetail[]
     >(
 
-      `${this.apiUrl}/api/solicitudes/proveedor/entregas/detalles`
+      `${APP_API_BASE_URL}/solicitudes/proveedor/entregas/detalles/${idSolicitud}`
 
     );
 
@@ -70,6 +68,19 @@ listarDetallesEntrega(idSolicitud:number):
 
 
 
+  let params = new HttpParams()
+    .set('estado', estado);
+
+  if (codigo) {
+    params = params.set('codigo', codigo);
+  }
+
+  return this.http.put<void>(
+    `${APP_API_BASE_URL}/solicitudes/proveedor/${id}/estado`,
+    {},
+    { params }
+  );
+}
 
 
 
