@@ -85,6 +85,11 @@ export class ProviderReviewsComponent implements OnInit {
         this.filterProvidersForProduct(stateProviders)
       );
 
+      this.providers.forEach(provider => {
+        this.cargarIndicadoresProveedor(provider);
+        this.cargarComentariosProveedor(provider);
+      });
+
       this.loadingProviders = false;
     }
   }
@@ -407,36 +412,44 @@ export class ProviderReviewsComponent implements OnInit {
       ? provider.comentarios
       : [];
 
-    let likes = 0;
-    let dislikes = 0;
-
-   
+    let commentLikes = 0;
+    let commentDislikes = 0;
 
     comentarios.forEach((comentario: any) => {
-      likes += this.getReviewLikes(comentario);
-      dislikes += this.getReviewDislikes(comentario);
+      commentLikes += this.getReviewLikes(comentario);
+      commentDislikes += this.getReviewDislikes(comentario);
 
       if (
         this.getReviewLikes(comentario) === 0 &&
         this.getReviewDislikes(comentario) === 0
       ) {
         if (comentario?.tipo === 'DISLIKE') {
-          dislikes++;
+          commentDislikes++;
         } else {
-          likes++;
+          commentLikes++;
         }
       }
     });
 
-    const total = likes + dislikes;
+    const hasIndicatorReactionTotals =
+      Number(provider?.likes ?? 0) > 0 ||
+      Number(provider?.dislikes ?? 0) > 0;
 
     provider.totalComentarios = comentarios.length;
-    provider.likes = likes;
-    provider.dislikes = dislikes;
+    provider.likes = hasIndicatorReactionTotals
+      ? Number(provider.likes ?? 0)
+      : commentLikes;
+    provider.dislikes = hasIndicatorReactionTotals
+      ? Number(provider.dislikes ?? 0)
+      : commentDislikes;
 
-    // Si el backend no entregó satisfacción, calcularla desde likes/dislikes
     const totalReacciones = provider.likes + provider.dislikes;
-    if ((provider.satisfaccion === null || provider.satisfaccion === undefined || provider.satisfaccion === 0) && totalReacciones > 0) {
+    if (
+      (provider.satisfaccion === null ||
+        provider.satisfaccion === undefined ||
+        provider.satisfaccion === 0) &&
+      totalReacciones > 0
+    ) {
       provider.satisfaccion = Math.round((provider.likes / totalReacciones) * 100);
     }
   }
@@ -445,107 +458,150 @@ export class ProviderReviewsComponent implements OnInit {
     this.recalcularMetricasProveedor(provider);
   }
 
- cargarIndicadoresProveedor(provider: any): void {
-  const idProveedor =
-    provider?.idProveedor ?? provider?.id_proveedor ?? provider?.idProvider ?? provider?.id;
+  cargarIndicadoresProveedor(provider: any): void {
+    const idProveedor =
+      provider?.idProveedor ?? provider?.id_proveedor ?? provider?.idProvider ?? provider?.id;
 
-  if (!idProveedor) return;
+    if (!idProveedor) return;
 
-  this.http.get<any>(
-    `${this.API_BASE}/provider/${idProveedor}/indicadores`,
-    { headers: this.getHeaders() }
-  ).subscribe({
-    next: (res) => {
+    this.http.get<any>(
+      `${this.API_BASE}/provider/${idProveedor}/indicadores`,
+      { headers: this.getHeaders() }
+    ).subscribe({
+      next: (res) => {
+        const index = this.providers.findIndex(
+          p => Number(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider) === Number(idProveedor)
+        );
 
-      const index = this.providers.findIndex(
-        p => Number(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider) === Number(idProveedor)
-      );
+        const current = index !== -1
+          ? this.providers[index]
+          : provider;
 
-      if (index === -1) return;
+        const satisfaccionValue = this.parsePercentage(
+          res?.satisfaccion ??
+          res?.satisfaction ??
+          res?.satisfactionPercent ??
+          res?.satisfaction_percent ??
+          res?.satisfaction_percentage ??
+          res?.satisfactionScore ??
+          res?.scoreSatisfaction ??
+          current?.satisfaccion ??
+          current?.satisfaction ??
+          null
+        );
 
-      const current = this.providers[index];
+        const cumplimientoValue = this.parsePercentage(
+          res?.cumplimiento ??
+          res?.cumplimientoPorcentaje ??
+          res?.cumplimiento_porcentaje ??
+          current?.cumplimiento ??
+          null
+        );
 
-      // Normalizar posibles nombres de campo que venga del backend
-      const rawSatisf =
-        res?.satisfaccion ??
-        res?.satisfaction ??
-        res?.satisfactionPercent ??
-        res?.satisfaction_percent ??
-        res?.satisfaction_percentage ??
-        res?.satisfactionScore ??
-        res?.scoreSatisfaction ??
-        null;
+        const scoreGeneralValue = this.parseNumber(
+          res?.scoreGeneral ??
+          res?.scoringGeneral ??
+          res?.score_general ??
+          current?.scoreGeneral ??
+          current?.scoringGeneral ??
+          null
+        );
 
-      let satisfaccionValue: number | null = null;
+        const likesValue = Number(
+          this.parseNumber(
+            res?.likes ??
+            res?.likeCount ??
+            res?.likes_count ??
+            res?.totalLikes ??
+            current?.likes ??
+            0
+          ) ?? 0
+        );
 
-      if (rawSatisf !== null && rawSatisf !== undefined) {
-        const n = Number(rawSatisf);
-        if (!Number.isNaN(n)) {
-          satisfaccionValue = n <= 1 ? Math.round(n * 100) : Math.round(n);
+        const dislikesValue = Number(
+          this.parseNumber(
+            res?.dislikes ??
+            res?.dislikeCount ??
+            res?.dislikes_count ??
+            res?.totalDislikes ??
+            current?.dislikes ??
+            0
+          ) ?? 0
+        );
+
+        const tiempoEntregaRaw =
+          res?.tiempoEntregaPromedio ??
+          res?.tiempo_entrega_promedio ??
+          res?.tiempoEntregaDias ??
+          res?.tiempo_entrega_dias ??
+          current?.tiempoEntregaPromedio ??
+          current?.tiempoEntregaDias ??
+          null;
+
+        const fechaRegistroRaw =
+          res?.fechaRegistro ??
+          res?.fecha_registro ??
+          res?.createdAt ??
+          res?.created_at ??
+          current?.fechaRegistro ??
+          null;
+
+        const update = {
+          ...current,
+          pedidosCompletados:
+            res?.pedidosCompletados ??
+            res?.pedidos_completados ??
+            current.pedidosCompletados ??
+            0,
+          pedidosTotal:
+            res?.pedidosTotal ??
+            res?.pedidos_total ??
+            current.pedidosTotal ??
+            0,
+          cumplimiento: cumplimientoValue ?? current.cumplimiento ?? 0,
+          scoreGeneral: scoreGeneralValue ?? current.scoreGeneral ?? 0,
+          satisfaccion: satisfaccionValue ?? current?.satisfaccion ?? 0,
+          satisfaction: satisfaccionValue ?? current?.satisfaction ?? current?.satisfaccion ?? 0,
+          tiempoEntregaPromedio: tiempoEntregaRaw,
+          fechaRegistro: fechaRegistroRaw,
+          categoriaPrincipal:
+            res?.categoriaPrincipal ??
+            res?.categoria ??
+            current.categoriaPrincipal ??
+            current.categoria ??
+            null,
+          estado: res?.estado ?? current.estado ?? null,
+          verificado: res?.verificado ?? current.verificado ?? false,
+          likes: likesValue,
+          dislikes: dislikesValue,
+          totalResenas:
+            res?.totalResenas ??
+            res?.total_resenas ??
+            current.totalResenas ??
+            current.totalComentarios ??
+            0
+        };
+
+        this.recalcularMetricasProveedor(update);
+
+        this.providers[index] = update;
+
+        if (
+          this.selectedProvider &&
+          Number(this.selectedProvider.idProveedor ?? this.selectedProvider.id_proveedor ?? this.selectedProvider.id ?? this.selectedProvider.idProvider) === Number(idProveedor)
+        ) {
+          this.selectedProvider = {
+            ...this.selectedProvider,
+            ...update
+          };
         }
-      }
 
-      const tiempoEntregaRaw =
-        res?.tiempoEntregaPromedio ??
-        res?.tiempo_entrega_promedio ??
-        res?.tiempoEntregaDias ??
-        res?.tiempo_entrega_dias ??
-        null;
-
-      const fechaRegistroRaw =
-        res?.fechaRegistro ??
-        res?.fecha_registro ??
-        res?.createdAt ??
-        res?.created_at ??
-        null;
-
-      this.providers[index] = {
-        ...current,
-        pedidosCompletados: res?.pedidosCompletados ?? res?.pedidos_completados ?? current.pedidosCompletados ?? 0,
-        pedidosTotal: res?.pedidosTotal ?? res?.pedidos_total ?? current.pedidosTotal ?? 0,
-        cumplimiento: res?.cumplimiento ?? res?.cumplimientoPorcentaje ?? current.cumplimiento ?? 0,
-        scoreGeneral: res?.scoreGeneral ?? res?.scoringGeneral ?? current.scoreGeneral ?? 0,
-        satisfaccion: satisfaccionValue ?? current?.satisfaccion ?? 0,
-        tiempoEntregaPromedio: tiempoEntregaRaw ?? current?.tiempoEntregaPromedio ?? current?.tiempoEntregaDias ?? null,
-        fechaRegistro: fechaRegistroRaw ?? current?.fechaRegistro ?? null,
-        categoriaPrincipal: res?.categoriaPrincipal ?? res?.categoria ?? current.categoriaPrincipal ?? current.categoria ?? null,
-        estado: res?.estado ?? current.estado ?? null,
-        verificado: res?.verificado ?? current.verificado ?? false,
-        likes: res?.likes ?? current.likes ?? 0,
-        dislikes: res?.dislikes ?? current.dislikes ?? 0,
-        totalResenas: res?.totalResenas ?? res?.total_resenas ?? current.totalResenas ?? current.totalComentarios ?? 0
-      };
-
-
-      if (
-  this.selectedProvider &&
-  Number(this.selectedProvider.idProveedor ?? this.selectedProvider.id_proveedor ?? this.selectedProvider.id ?? this.selectedProvider.idProvider) === Number(idProveedor)
-) {
-  this.selectedProvider = {
-    ...this.selectedProvider,
-
-    pedidosCompletados: res?.pedidosCompletados ?? res?.pedidos_completados ?? this.selectedProvider.pedidosCompletados ?? 0,
-    pedidosTotal: res?.pedidosTotal ?? res?.pedidos_total ?? this.selectedProvider.pedidosTotal ?? 0,
-    cumplimiento: res?.cumplimiento ?? res?.cumplimientoPorcentaje ?? this.selectedProvider.cumplimiento ?? 0,
-    scoreGeneral: res?.scoreGeneral ?? res?.scoringGeneral ?? this.selectedProvider.scoreGeneral ?? 0,
-    satisfaccion: satisfaccionValue ?? this.selectedProvider?.satisfaccion ?? 0,
-    tiempoEntregaPromedio: tiempoEntregaRaw ?? this.selectedProvider?.tiempoEntregaPromedio ?? this.selectedProvider?.tiempoEntregaDias ?? null,
-    fechaRegistro: fechaRegistroRaw ?? this.selectedProvider?.fechaRegistro ?? null,
-    categoriaPrincipal: res?.categoriaPrincipal ?? res?.categoria ?? this.selectedProvider.categoriaPrincipal ?? this.selectedProvider.categoria ?? null,
-    estado: res?.estado ?? this.selectedProvider.estado ?? null,
-    verificado: res?.verificado ?? this.selectedProvider.verificado ?? false,
-    likes: res?.likes ?? this.selectedProvider.likes ?? 0,
-    dislikes: res?.dislikes ?? this.selectedProvider.dislikes ?? 0,
-    totalResenas: res?.totalResenas ?? res?.total_resenas ?? this.selectedProvider.totalResenas ?? this.selectedProvider.totalComentarios ?? 0
-  };
-}
-
-      this.providers = [...this.providers]; // 🔥 fuerza render
-      this.cdr.detectChanges();
-    },
-    error: (err) => console.error(err)
-  });
-}
+        this.providers = [...this.providers]; // 🔥 fuerza render
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error(err)
+    });
+  }
   private setProviderList(providers: any[]): void {
     this.providers = (providers || []).map(provider =>
       this.normalizarProveedor(provider)
@@ -664,8 +720,13 @@ export class ProviderReviewsComponent implements OnInit {
         null,
 
       estado:
-        item?.estado ||
+        item?.estado ??
+        item?.status ??
         'ACTIVO',
+
+      verificado:
+        item?.verificado ??
+        false,
 
       precioUnitario:
         item?.precioUnitario ||
@@ -874,7 +935,12 @@ export class ProviderReviewsComponent implements OnInit {
   }
 
   getProviderOnTime(provider: any): number | null {
-    return provider?.cumplimiento ?? 0;
+    const raw = provider?.cumplimiento ?? provider?.cumplimientoPorcentaje ?? provider?.cumplimiento_porcentaje ?? 0;
+    const value = this.parseNumber(raw);
+    if (value === null) {
+      return 0;
+    }
+    return value <= 1 ? Math.round(value * 100) : Math.round(value);
   }
 
   getCompletedOrders(provider: any): number | null {
@@ -1127,6 +1193,33 @@ getReviewLikes(review: any): number {
     }
 
     return `${Math.round(value)}%`;
+  }
+
+  private parseNumber(value: any): number | null {
+    if (value === null || value === undefined) {
+      return null;
+    }
+
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? value : null;
+    }
+
+    const normalized = String(value)
+      .trim()
+      .replace('%', '')
+      .replace(',', '.')
+      .replace(/\s+/g, '');
+
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  private parsePercentage(value: any): number | null {
+    const parsed = this.parseNumber(value);
+    if (parsed === null) {
+      return null;
+    }
+    return parsed <= 1 ? Math.round(parsed * 100) : Math.round(parsed);
   }
 
   formatDays(value: number | null | undefined): string {
