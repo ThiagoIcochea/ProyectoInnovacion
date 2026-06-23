@@ -206,7 +206,7 @@ export class ProviderReviewsComponent implements OnInit {
       { headers: this.getHeaders() }
     ).subscribe({
       next: (res) => {
-        console.log(res);
+        console.log('[PRS] cargarProveedoresDelProducto - response', res);
         const proveedoresRaw =
           Array.isArray(res)
             ? res
@@ -473,6 +473,8 @@ export class ProviderReviewsComponent implements OnInit {
           p => Number(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider) === Number(idProveedor)
         );
 
+        console.log('[PRS] cargarIndicadoresProveedor - index will be computed for', idProveedor);
+
         const current = index !== -1
           ? this.providers[index]
           : provider;
@@ -603,6 +605,7 @@ export class ProviderReviewsComponent implements OnInit {
     });
   }
   private setProviderList(providers: any[]): void {
+    console.log('[PRS] setProviderList - incoming providers:', providers);
     this.providers = (providers || []).map(provider =>
       this.normalizarProveedor(provider)
     );
