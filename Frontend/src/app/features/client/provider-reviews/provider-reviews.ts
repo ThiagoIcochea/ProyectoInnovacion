@@ -511,6 +511,10 @@ export class ProviderReviewsComponent implements OnInit {
 
         console.log('[PRS] cargarIndicadoresProveedor - provider response', feedback);
 
+        if (!payload || typeof payload !== 'object') {
+          console.warn('[PRS] cargarIndicadoresProveedor - invalid payload', payload, res);
+        }
+
         const satisfaccionValue = this.parsePercentage(
           payload?.satisfaccion ??
           payload?.satisfaction ??
@@ -709,7 +713,15 @@ export class ProviderReviewsComponent implements OnInit {
   }
 
   private extractIndicatorPayload(response: any): any {
-    if (!response || typeof response !== 'object') {
+    if (response === null || response === undefined) {
+      return response;
+    }
+
+    if (Array.isArray(response)) {
+      return response.length === 1 ? this.extractIndicatorPayload(response[0]) : response;
+    }
+
+    if (typeof response !== 'object') {
       return response;
     }
 
@@ -910,11 +922,22 @@ export class ProviderReviewsComponent implements OnInit {
         item?.score_final ??
         0,
 
+      scoreFinal:
+        item?.scoreFinal ??
+        item?.score_final ??
+        item?.score ??
+        item?.puntaje ??
+        item?.puntajeFinal ??
+        null,
+
       scoreGeneral:
         item?.scoreGeneral ??
         item?.scoringGeneral ??
         item?.scoreFinal ??
         item?.score_final ??
+        item?.score ??
+        item?.puntaje ??
+        item?.puntajeFinal ??
         0,
 
       comentarios:
