@@ -288,10 +288,9 @@ private LogsApiRepository logsApiRepository;
 
     int total = solicitudRepo
             .countByProveedor_IdProveedor(idProveedor);
-
-    double cumplimiento = total == 0
+    double cumplimiento = completadas == 0
             ? 0
-            : ((double) solicitudRepo.contarEntregasATiempo(idProveedor)/ completadas) * 100;
+            : ((double) solicitudRepo.contarEntregasATiempo(idProveedor) / completadas) * 100;
 
     double scoreCalidad = scoringService.calcularScoreProveedorBasico(idProveedor);
     
@@ -299,6 +298,25 @@ private LogsApiRepository logsApiRepository;
     double satisfaccion  = solicitudRepo.calcularSatisfaccionProveedor(idProveedor);
     
     double tiempoEntregaPromedio = solicitudRepo.calcularTiempoEntregaPromedio(idProveedor);
+
+        int likes = 0;
+        int dislikes = 0;
+        int totalResenas = 0;
+
+        try {
+                List<Comentario> comentarios = comentarioRepository.findByProveedor_IdProveedor(idProveedor);
+                totalResenas = comentarios.size();
+                likes = comentarios.stream()
+                                .mapToInt(c -> c.getLikes() != null ? c.getLikes() : 0)
+                                .sum();
+                dislikes = comentarios.stream()
+                                .mapToInt(c -> c.getDislikes() != null ? c.getDislikes() : 0)
+                                .sum();
+        } catch (Exception e) {
+                likes = 0;
+                dislikes = 0;
+                totalResenas = 0;
+        }
 
     IndicadorProveedorResponse dto = new IndicadorProveedorResponse();
 
@@ -317,6 +335,12 @@ private LogsApiRepository logsApiRepository;
     
    
     dto.setTiempoEntregaPromedio(tiempoEntregaPromedio);
+        dto.setLikes(likes);
+        dto.setDislikes(dislikes);
+        dto.setTotalResenas(totalResenas);
+        dto.setEstado(proveedor.getEstado());
+        dto.setVerificado("ACTIVO".equalsIgnoreCase(proveedor.getEstado()));
+        dto.setCategoriaPrincipal("Proveedor B2B");
     
     dto.setFechaRegistro(proveedor.getFechaRegistro());
 
@@ -334,6 +358,10 @@ public List<IndicadorProveedorResponse> top10Proveedores() {
         int completadas = solicitudRepo
                 .countByProveedor_IdProveedorAndEstado(
                         p.getIdProveedor(),
+                        EstadoSolicitud.ENTREGADA
+                ) + solicitudRepo
+                .countByProveedor_IdProveedorAndEstado(
+                        p.getIdProveedor(),
                         EstadoSolicitud.COMPLETADA
                 );
 
@@ -346,8 +374,9 @@ public List<IndicadorProveedorResponse> top10Proveedores() {
             continue;
         }
 
-        double cumplimiento =
-                ((double) completadas / total) * 100.0;
+        double cumplimiento = completadas == 0
+                ? 0
+                : ((double) solicitudRepo.contarEntregasATiempo(p.getIdProveedor()) / completadas) * 100.0;
 
         double score = scoringService
                 .calcularScoreProveedorCompleto(
@@ -358,7 +387,10 @@ public List<IndicadorProveedorResponse> top10Proveedores() {
         int dislikes = 0;
         int totalResenas = 0;
 
-        double tiempoEntregaPromedio = 0;
+                Double tiempoEntregaPromedio = solicitudRepo.calcularTiempoEntregaPromedio(p.getIdProveedor());
+                if (tiempoEntregaPromedio == null) {
+                        tiempoEntregaPromedio = 0.0;
+                }
 
         try {
 
@@ -418,9 +450,7 @@ public List<IndicadorProveedorResponse> top10Proveedores() {
                 total
         );
 
-        dto.setCumplimiento(
-                Math.round(cumplimiento * 100.0) / 100.0
-        );
+        dto.setCumplimiento(cumplimiento);
 
         dto.setScoreGeneral(
                 Math.round(score * 1000.0) / 1000.0
@@ -442,9 +472,7 @@ public List<IndicadorProveedorResponse> top10Proveedores() {
                 satisfaccion
         );
 
-        dto.setTiempoEntregaPromedio(
-                tiempoEntregaPromedio
-        );
+        dto.setTiempoEntregaPromedio(tiempoEntregaPromedio);
 
         dto.setEstado(
                 p.getEstado()
