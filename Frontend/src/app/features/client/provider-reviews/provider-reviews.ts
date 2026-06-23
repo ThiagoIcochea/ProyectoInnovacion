@@ -512,6 +512,8 @@ export class ProviderReviewsComponent implements OnInit {
         const scoreGeneralValue = this.parseNumber(
           res?.scoreGeneral ??
           res?.scoringGeneral ??
+          res?.scoreFinal ??
+          res?.score_final ??
           res?.score_general ??
           current?.scoreGeneral ??
           current?.scoringGeneral ??
@@ -773,17 +775,26 @@ export class ProviderReviewsComponent implements OnInit {
         item?.pedidosTotal ?? 0,
 
       cumplimiento:
-        item?.cumplimiento ?? 0,
+        item?.cumplimiento ??
+        item?.porcentajeCumplimiento ??
+        item?.cumplimiento_entrega ??
+        item?.cumplimientoPorcentaje ??
+        item?.cumplimiento_porcentaje ??
+        0,
 
-     scoringGeneral:
-  item?.scoringGeneral ??
-  item?.scoreGeneral ??
-  0,
+      scoringGeneral:
+        item?.scoringGeneral ??
+        item?.scoreGeneral ??
+        item?.scoreFinal ??
+        item?.score_final ??
+        0,
 
-  scoreGeneral:
-  item?.scoreGeneral ??
-  item?.scoringGeneral ??
-  0,
+      scoreGeneral:
+        item?.scoreGeneral ??
+        item?.scoringGeneral ??
+        item?.scoreFinal ??
+        item?.score_final ??
+        0,
 
       comentarios:
         Array.isArray(item?.comentarios)
