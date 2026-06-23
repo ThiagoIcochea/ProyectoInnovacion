@@ -25,6 +25,7 @@ export class ProviderReviewsComponent implements OnInit {
 
   requestItems: any[] = [];
   providers: any[] = [];
+  initialProvidersLoaded = false;
 
   qty: number = 1;
   loadingProviders: boolean = true;
@@ -100,6 +101,7 @@ export class ProviderReviewsComponent implements OnInit {
       });
 
       this.loadingProviders = false;
+      this.initialProvidersLoaded = true;
     }
   }
 
@@ -129,7 +131,7 @@ export class ProviderReviewsComponent implements OnInit {
       return;
     }
 
-    if (this.providers.length > 0) {
+    if (!this.initialProvidersLoaded && this.providers.length > 0) {
       this.providers.forEach(provider => {
         this.cargarIndicadoresProveedor(provider);
         this.cargarComentariosProveedor(provider);
@@ -357,9 +359,12 @@ export class ProviderReviewsComponent implements OnInit {
 
  normalizarComentario(comentario: any): any {
 
+  const rawTipo = comentario?.tipo ?? comentario?.type ?? comentario?.reactionType ?? comentario?.tipoReaccion;
   const tipoNormalizado =
-    comentario?.tipo === 'DISLIKE' ||
-    comentario?.tipo === 'NEGATIVO'
+    rawTipo === 'DISLIKE' ||
+    rawTipo === 'NEGATIVO' ||
+    rawTipo === 'DISLIKE' ||
+    rawTipo === 'NEGATIVE'
       ? 'DISLIKE'
       : 'LIKE';
 
@@ -369,7 +374,8 @@ export class ProviderReviewsComponent implements OnInit {
     idComentario:
       comentario?.idComentario ||
       comentario?.id_comentario ||
-      comentario?.id,
+      comentario?.id ||
+      null,
 
     idProvProd:
       comentario?.idProvProd ||
@@ -382,27 +388,38 @@ export class ProviderReviewsComponent implements OnInit {
       null,
 
     comentario:
-      comentario?.comentario || '',
+      comentario?.comentario ||
+      comentario?.review ||
+      comentario?.texto ||
+      comentario?.mensaje ||
+      '',
 
     tipo: tipoNormalizado,
 
     fecha:
-      comentario?.fecha || null,
+      comentario?.fecha ||
+      comentario?.date ||
+      comentario?.createdAt ||
+      comentario?.created_at ||
+      null,
 
     likes:
-      Number(comentario?.likes ?? 0),
+      Number(comentario?.likes ?? comentario?.likesCount ?? comentario?.totalLikes ?? 0),
 
     dislikes:
-      Number(comentario?.dislikes ?? 0),
+      Number(comentario?.dislikes ?? comentario?.dislikesCount ?? comentario?.totalDislikes ?? 0),
 
     likesCount:
-      Number(comentario?.likes ?? 0),
+      Number(comentario?.likes ?? comentario?.likesCount ?? comentario?.totalLikes ?? 0),
 
     dislikesCount:
-      Number(comentario?.dislikes ?? 0),
+      Number(comentario?.dislikes ?? comentario?.dislikesCount ?? comentario?.totalDislikes ?? 0),
 
     userReaction:
-      comentario?.userReaction || null
+      comentario?.userReaction ??
+      comentario?.reaccion ??
+      comentario?.reaction ??
+      null
   };
 }
 
@@ -487,6 +504,16 @@ export class ProviderReviewsComponent implements OnInit {
         const current = index !== -1
           ? this.providers[index]
           : provider;
+
+        const feedback = {
+          providerId: idProveedor,
+          index,
+          currentId: current?.idProveedor ?? current?.id_proveedor ?? current?.idProvider ?? current?.id,
+          currentName: this.getProviderName(current),
+          response: res
+        };
+
+        console.log('[PRS] cargarIndicadoresProveedor - provider response', feedback);
 
         const satisfaccionValue = this.parsePercentage(
           res?.satisfaccion ??
@@ -573,9 +600,31 @@ export class ProviderReviewsComponent implements OnInit {
             0,
           cumplimiento: cumplimientoValue ?? current.cumplimiento ?? 0,
           scoreGeneral: scoreGeneralValue ?? current.scoreGeneral ?? 0,
+          scoringGeneral: scoreGeneralValue ?? current.scoringGeneral ?? 0,
+          scoreFinal: scoreGeneralValue ?? current.scoreFinal ?? current.scoreGeneral ?? current.scoringGeneral ?? 0,
           satisfaccion: satisfaccionValue ?? current?.satisfaccion ?? 0,
           satisfaction: satisfaccionValue ?? current?.satisfaction ?? current?.satisfaccion ?? 0,
           tiempoEntregaPromedio: tiempoEntregaRaw,
+          tiempoEntregaDias:
+            res?.tiempoEntregaDias ??
+            res?.tiempo_entrega_dias ??
+            current?.tiempoEntregaDias ??
+            current?.tiempo_entrega_dias ??
+            null,
+          descripcion:
+            res?.descripcionProveedor ??
+            res?.descripcion_proveedor ??
+            res?.descripcion ??
+            res?.description ??
+            res?.detalle ??
+            res?.detalleProveedor ??
+            res?.detalle_proveedor ??
+            current?.descripcion ??
+            current?.description ??
+            current?.detalle ??
+            current?.detalleProveedor ??
+            current?.detalle_proveedor ??
+            null,
           fechaRegistro: fechaRegistroRaw,
           categoriaPrincipal:
             res?.categoriaPrincipal ??
@@ -599,6 +648,12 @@ export class ProviderReviewsComponent implements OnInit {
 
         this.providers[index] = update;
 
+        if (index !== -1) {
+          this.providers[index] = update;
+        } else {
+          console.warn('[PRS] cargarIndicadoresProveedor - provider index not found', feedback);
+        }
+
         if (
           this.selectedProvider &&
           Number(this.selectedProvider.idProveedor ?? this.selectedProvider.id_proveedor ?? this.selectedProvider.id ?? this.selectedProvider.idProvider) === Number(idProveedor)
@@ -609,7 +664,9 @@ export class ProviderReviewsComponent implements OnInit {
           };
         }
 
-        this.providers = [...this.providers]; // 🔥 fuerza render
+        if (index !== -1) {
+          this.providers = [...this.providers]; // 🔥 fuerza render
+        }
         this.cdr.detectChanges();
       },
       error: (err) => console.error(err)
@@ -924,7 +981,12 @@ export class ProviderReviewsComponent implements OnInit {
   }
 
   getProviderDescription(provider: any): string | null {
-    return provider?.descripcion || null;
+    return provider?.descripcion ||
+      provider?.description ||
+      provider?.detalle ||
+      provider?.detalleProveedor ||
+      provider?.detalle_proveedor ||
+      null;
   }
 
   getProviderSince(provider: any): string {
@@ -935,12 +997,16 @@ export class ProviderReviewsComponent implements OnInit {
 
   getProviderDelivery(provider: any): number | null {
     return provider?.tiempoEntregaPromedio ??
+      provider?.tiempoEntrega ??
       provider?.tiempoEntregaDias ??
       null;
   }
 
   getProviderResponse(provider: any): number | null {
-    return provider?.tiempoRespuestaPromedio ?? null;
+    return provider?.tiempoRespuestaPromedio ??
+      provider?.tiempoRespuesta ??
+      provider?.tiempo_respuesta ??
+      null;
   }
 
   getProviderResponseLabel(provider: any): string {
@@ -973,7 +1039,9 @@ export class ProviderReviewsComponent implements OnInit {
   getProviderScore100(provider: any): number | null {
     const score =
       provider?.scoringGeneral ??
-      provider?.scoreGeneral;
+      provider?.scoreGeneral ??
+      provider?.scoreFinal ??
+      provider?.score_final;
 
     if (score === null || score === undefined) {
       return 0;
@@ -1189,7 +1257,7 @@ getReviewLikes(review: any): number {
   }
 
   getReviewReactionType(review: any): 'LIKE' | 'DISLIKE' | '' {
-    return review?.tipo || '';
+    return review?.tipo || review?.type || review?.reactionType || review?.tipoReaccion || '';
   }
 
   formatFecha(value: string): string {
