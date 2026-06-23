@@ -282,9 +282,8 @@ export class ProviderReviewsComponent implements OnInit {
       { headers: this.getHeaders() }
     ).subscribe({
       next: (res) => {
-        const comentarios = Array.isArray(res)
-          ? res.map((comentario: any) => this.normalizarComentario(comentario))
-          : [];
+        const comentarios = this.extractCommentsPayload(res)
+          .map((comentario: any) => this.normalizarComentario(comentario));
 
         const index = this.providers.findIndex(
           p => Number(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider) === providerId
@@ -496,6 +495,7 @@ export class ProviderReviewsComponent implements OnInit {
 
         console.log('[PRS] cargarIndicadoresProveedor - index will be computed for', idProveedor);
 
+        const payload = this.extractIndicatorPayload(res);
         const current = index !== -1
           ? this.providers[index]
           : provider;
@@ -505,39 +505,43 @@ export class ProviderReviewsComponent implements OnInit {
           index,
           currentId: current?.idProveedor ?? current?.id_proveedor ?? current?.idProvider ?? current?.id,
           currentName: this.getProviderName(current),
-          response: res
+          response: res,
+          payload
         };
 
         console.log('[PRS] cargarIndicadoresProveedor - provider response', feedback);
 
         const satisfaccionValue = this.parsePercentage(
-          res?.satisfaccion ??
-          res?.satisfaction ??
-          res?.satisfactionPercent ??
-          res?.satisfaction_percent ??
-          res?.satisfaction_percentage ??
-          res?.satisfactionScore ??
-          res?.scoreSatisfaction ??
+          payload?.satisfaccion ??
+          payload?.satisfaction ??
+          payload?.satisfactionPercent ??
+          payload?.satisfaction_percent ??
+          payload?.satisfaction_percentage ??
+          payload?.satisfactionScore ??
+          payload?.scoreSatisfaction ??
           current?.satisfaccion ??
           current?.satisfaction ??
           null
         );
 
         const cumplimientoValue = this.parsePercentage(
-          res?.cumplimiento ??
-          res?.cumplimientoPorcentaje ??
-          res?.cumplimiento_porcentaje ??
+          payload?.cumplimiento ??
+          payload?.cumplimientoPorcentaje ??
+          payload?.cumplimiento_porcentaje ??
           current?.cumplimiento ??
           null
         );
 
         const scoreGeneralValue = this.parseNumber(
-          res?.scoreGeneral ??
-          res?.scoringGeneral ??
-          res?.scoreFinal ??
-          res?.score_final ??
-          res?.score ??
-          res?.score_general ??
+          payload?.scoreGeneral ??
+          payload?.scoringGeneral ??
+          payload?.scoreFinal ??
+          payload?.score_final ??
+          payload?.score ??
+          payload?.score_general ??
+          payload?.score_total ??
+          payload?.puntaje ??
+          payload?.puntajeFinal ??
           current?.scoreFinal ??
           current?.score_final ??
           current?.score ??
@@ -548,10 +552,10 @@ export class ProviderReviewsComponent implements OnInit {
 
         const likesValue = Number(
           this.parseNumber(
-            res?.likes ??
-            res?.likeCount ??
-            res?.likes_count ??
-            res?.totalLikes ??
+            payload?.likes ??
+            payload?.likeCount ??
+            payload?.likes_count ??
+            payload?.totalLikes ??
             current?.likes ??
             0
           ) ?? 0
@@ -559,10 +563,10 @@ export class ProviderReviewsComponent implements OnInit {
 
         const dislikesValue = Number(
           this.parseNumber(
-            res?.dislikes ??
-            res?.dislikeCount ??
-            res?.dislikes_count ??
-            res?.totalDislikes ??
+            payload?.dislikes ??
+            payload?.dislikeCount ??
+            payload?.dislikes_count ??
+            payload?.totalDislikes ??
             current?.dislikes ??
             0
           ) ?? 0
@@ -611,14 +615,14 @@ export class ProviderReviewsComponent implements OnInit {
             current?.tiempo_entrega_dias ??
             null,
           descripcion:
-            res?.descripcionProveedor ??
-            res?.descripcion_proveedor ??
-            res?.descripcion ??
-            res?.description ??
-            res?.detalle ??
-            res?.detalleProveedor ??
-            res?.detalle_proveedor ??
-            res?.descripcionBreve ??
+            payload?.descripcionProveedor ??
+            payload?.descripcion_proveedor ??
+            payload?.descripcion ??
+            payload?.description ??
+            payload?.detalle ??
+            payload?.detalleProveedor ??
+            payload?.detalle_proveedor ??
+            payload?.descripcionBreve ??
             current?.descripcionProveedor ??
             current?.descripcion_proveedor ??
             current?.descripcion ??
@@ -702,6 +706,59 @@ export class ProviderReviewsComponent implements OnInit {
     const firstList = possibleLists.find(Array.isArray);
 
     return firstList ? [...firstList] : [];
+  }
+
+  private extractIndicatorPayload(response: any): any {
+    if (!response || typeof response !== 'object') {
+      return response;
+    }
+
+    const payload = response.data ??
+      response.indicadores ??
+      response.indicador ??
+      response.resultado ??
+      response.provider ??
+      response.proveedor ??
+      response;
+
+    if (payload && payload !== response && typeof payload === 'object') {
+      const nested = payload.data ??
+        payload.indicadores ??
+        payload.indicador ??
+        payload.resultado ??
+        payload.provider ??
+        payload.proveedor;
+
+      if (nested && nested !== payload) {
+        return this.extractIndicatorPayload(payload);
+      }
+    }
+
+    return payload;
+  }
+
+  private extractCommentsPayload(response: any): any[] {
+    if (!response) {
+      return [];
+    }
+
+    if (Array.isArray(response)) {
+      return response;
+    }
+
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    if (Array.isArray(response.comentarios)) {
+      return response.comentarios;
+    }
+
+    if (Array.isArray(response.reviews)) {
+      return response.reviews;
+    }
+
+    return [];
   }
 
   private filterProvidersForProduct(providers: any[]): any[] {
@@ -997,6 +1054,8 @@ export class ProviderReviewsComponent implements OnInit {
 
   getProviderDescription(provider: any): string | null {
     return provider?.descripcion ||
+      provider?.descripcionProveedor ||
+      provider?.descripcion_proveedor ||
       provider?.description ||
       provider?.detalle ||
       provider?.detalleProveedor ||
@@ -1056,17 +1115,26 @@ export class ProviderReviewsComponent implements OnInit {
       provider?.scoringGeneral ??
       provider?.scoreGeneral ??
       provider?.scoreFinal ??
-      provider?.score_final;
+      provider?.score_final ??
+      provider?.score ??
+      provider?.puntaje ??
+      provider?.puntajeFinal ??
+      null;
 
-    if (score === null || score === undefined) {
-      return 0;
+    if (score === null || score === undefined || score === '') {
+      return null;
     }
 
-    if (score <= 1) {
-      return Math.round(score * 100);
+    const parsed = Number(score);
+    if (Number.isNaN(parsed)) {
+      return null;
     }
 
-    return Math.round(score);
+    if (parsed <= 1) {
+      return Math.round(parsed * 100);
+    }
+
+    return Math.round(parsed);
   }
 
   getProviderReputation(provider: any): number | null {
@@ -1250,7 +1318,14 @@ getReviewLikes(review: any): number {
   }
 
   getProviderSatisfaction(provider: any): number {
-    const raw = provider?.satisfaccion ?? provider?.satisfaction ?? 0;
+    const raw = provider?.satisfaccion ??
+      provider?.satisfaction ??
+      provider?.satisfactionPercent ??
+      provider?.satisfaction_percent ??
+      provider?.satisfaction_percentage ??
+      provider?.satisfactionScore ??
+      provider?.scoreSatisfaction ??
+      0;
     const n = Number(raw ?? 0);
     if (Number.isNaN(n)) return 0;
     return n <= 1 ? Math.round(n * 100) : Math.round(n);
