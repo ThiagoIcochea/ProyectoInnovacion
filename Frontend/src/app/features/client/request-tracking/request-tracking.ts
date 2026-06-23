@@ -180,8 +180,8 @@ export class RequestTrackingComponent implements OnInit {
    esPosibleCancelar(): boolean {
     return this.normalizarEstado(this.tracking?.estado) === 'PAGO_PENDIENTE';
   }
-   esPagado(): boolean {
-    
-    return this.tracking?.estado === 'Pagado';
+   esEnCamino(): boolean {
+    console.log('ESTADO ACTUAL:', this.tracking?.estado);
+    return  this.tracking?.estado === 'En camino';
   }
 }

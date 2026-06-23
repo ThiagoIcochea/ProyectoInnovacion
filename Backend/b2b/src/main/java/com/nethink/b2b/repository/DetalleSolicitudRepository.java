@@ -52,6 +52,8 @@ SELECT new com.nethink.b2b.dto.response.SolicitudDetalleEntregaResponse(
     p.nombre,
 
     ds.cantidad,
+       
+    p.skuGlobal,
 
     CAST(s.estado AS string),
 
@@ -75,12 +77,15 @@ AND s.estado IN (
     'EN_CAMINO',
     'ENTREGADA'
 )
+       
+AND  s.idSolicitud = :idSolicitud
 
 ORDER BY s.fechaCreacion DESC
 """)
 List<SolicitudDetalleEntregaResponse>
 listarDetallesEntregaProveedor(
-    @Param("idProveedor") Integer idProveedor
+    @Param("idProveedor") Integer idProveedor,
+    @Param("idSolicitud") Integer idSolicitud
 );
 
 

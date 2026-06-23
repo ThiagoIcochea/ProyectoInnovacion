@@ -4,7 +4,7 @@
 
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 
@@ -23,9 +23,7 @@ export class DeliveriesService {
     private http: HttpClient
   ) {}
 
-  // =====================================
-  // LISTAR PAGOS DEL PROVEEDOR
-  // =====================================
+ 
 
   listarSolicitudesEntrega(): Observable<DeliveryRequest[]> {
 
@@ -67,6 +65,11 @@ listarDetallesEntrega(idSolicitud:number):
 
 
 
+ actualizarEstado(
+  id: number,
+  estado: string,
+  codigo?: string
+): Observable<void> {
 
   let params = new HttpParams()
     .set('estado', estado);

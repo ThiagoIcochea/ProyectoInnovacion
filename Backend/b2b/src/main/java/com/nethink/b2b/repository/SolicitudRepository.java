@@ -75,10 +75,15 @@ List<Solicitud> listarSolicitudes(@Param("idProveedor") Integer idProveedor);
         s.estado,
         s.total,
         s.fechaCreacion,
+          
         emp.razonSocial,
         u.nombres,
         u.apellidos,
-        SUM(d.cantidad)
+        u.telefono,
+        u.whatsapp,   
+        SUM(d.cantidad),
+        s.direccionEnvio   
+        
     )
     FROM Solicitud s
     JOIN s.usuario u
@@ -105,9 +110,13 @@ List<Solicitud> listarSolicitudes(@Param("idProveedor") Integer idProveedor);
         s.estado,
         s.total,
         s.fechaCreacion,
+          
         emp.razonSocial,
         u.nombres,
-        u.apellidos
+        u.apellidos, 
+        u.telefono, 
+        u.whatsapp,
+        s.direccionEnvio
            
      ORDER BY s.fechaCreacion DESC      
            
@@ -154,10 +163,49 @@ List<Solicitud> listarSolicitudes(@Param("idProveedor") Integer idProveedor);
 //    WHERE d.solicitud.idSolicitud = :idSolicitud
 //""")
 //List<DetalleSolicitud> listarDetalles(@Param("idSolicitud") Integer idSolicitud);
+    
+    
+ @Query("""
+SELECT COUNT(s)
+FROM Solicitud s
+WHERE s.proveedor.idProveedor = :idProveedor
+AND s.estado IN ('ENTREGADA', 'COMPLETADA')
+AND s.fechaEntrega IS NOT NULL
+AND s.fechaLimiteEntrega IS NOT NULL
+AND s.fechaEntrega <= s.fechaLimiteEntrega
+""")
+long contarEntregasATiempo(
+        @Param("idProveedor") Integer idProveedor
+);
 
 
 int countByProveedor_IdProveedorAndEstado(Integer idProveedor, EstadoSolicitud estado);
 
 int countByProveedor_IdProveedor(Integer idProveedor);
 
+@Query("""
+SELECT 
+CASE 
+    WHEN COUNT(c) = 0 THEN 0
+    ELSE (SUM(CASE WHEN c.tipo = 'POSITIVO' THEN 1 ELSE 0 END) * 100.0) / COUNT(c)
+END
+FROM Comentario c
+WHERE c.idProvProd IN (
+    SELECT pp.idProvProd
+    FROM ProveedorProducto pp
+    WHERE pp.proveedor.idProveedor = :idProveedor
+)
+""")
+Double calcularSatisfaccionProveedor(@Param("idProveedor") Integer idProveedor);
+
+
+@Query("""
+SELECT AVG(
+    DATEDIFF(s.fechaEntrega, s.fechaCreacion)
+)
+FROM Solicitud s
+WHERE s.proveedor.idProveedor = :idProveedor
+AND s.fechaEntrega IS NOT NULL
+""")
+Double calcularTiempoEntregaPromedio(@Param("idProveedor") Integer idProveedor);
 }

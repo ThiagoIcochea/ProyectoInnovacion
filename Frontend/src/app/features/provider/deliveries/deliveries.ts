@@ -7,15 +7,11 @@ import { DeliveriesService } from './deliveries.service';
 import { DeliveryDetail } from './delivery-detail.model';
 import { DeliveryRequest } from './delivery.model';
 import { TrackingStep } from './tracking-step.model';
-<<<<<<< Updated upstream
-import { DeliveryDetail } from './delivery-detail.model';
-=======
->>>>>>> Stashed changes
 
 @Component({
   selector: 'app-provider-deliveries',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './deliveries.html',
   styleUrls: ['./deliveries.scss']
 })
@@ -28,12 +24,6 @@ export class ProviderDeliveriesComponent implements OnInit {
   filteredDeliveries: DeliveryRequest[] = [];
   selectedRequest: DeliveryRequest | null = null;
 
-tracking$: Observable<TrackingStep[]> = of([]);
-
-details$: Observable<DeliveryDetail[]> = of([]);
-
-  selectedRequest:
-      DeliveryRequest | null = null;
   searchTerm = '';
   estadoSeleccionado = '';
   codigoEntrega = '';
@@ -68,19 +58,6 @@ details$: Observable<DeliveryDetail[]> = of([]);
               this.tracking$ = of([]);
               this.details$ = of([]);
             }
-<<<<<<< Updated upstream
-
-
-            
-
-
-            //this.selectedRequest =
-            //  data.length > 0
-             //   ? data[0]
-             //   : null;
-
-=======
->>>>>>> Stashed changes
           })
         );
   }
@@ -88,92 +65,6 @@ details$: Observable<DeliveryDetail[]> = of([]);
   filtrarEntregas(): void {
     const text = this.searchTerm.trim().toLowerCase();
 
-<<<<<<< Updated upstream
-  seleccionarSolicitud(
-      solicitud: DeliveryRequest
-  ): void {
-
-    this.selectedRequest = solicitud;
-
-    this.cargarTracking(
-        solicitud.idSolicitud
-    );
-
-
-// detalles
-
-    this.cargarDetalles(
-        solicitud.idSolicitud
-    );
-
-
-
-
-
-  }
-
-
-
-cargarTracking(
-      idSolicitud: number
-  ): void {
-
-    this.tracking$ =
-
-      this.deliveriesService
-        .listarTrackingSolicitud(
-            idSolicitud
-        );
-
-  }
-
-
-
-
-cargarDetalles(
-      idSolicitud: number
-  ): void {
-
-    this.details$ =
-
-      this.deliveriesService
-        .listarDetallesEntrega(
-            idSolicitud
-        );
-
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-=======
     if (!text) {
       this.filteredDeliveries = [...this.deliveries];
       return;
@@ -302,4 +193,3 @@ cargarDetalles(
     window.dispatchEvent(new Event('providerCountsRefresh'));
   }
 }
->>>>>>> Stashed changes

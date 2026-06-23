@@ -1,5 +1,7 @@
 package com.nethink.b2b.dto.response;
 
+import java.time.LocalDateTime;
+
 public class IndicadorProveedorResponse {
 
     private Integer idProveedor;
@@ -17,16 +19,19 @@ public class IndicadorProveedorResponse {
     private String categoriaPrincipal;
 
     private int totalResenas;
+   
 
     private int likes;
 
     private int dislikes;
 
-    private int satisfaccion;
+    private double satisfaccion;
 
     private double tiempoEntregaPromedio;
 
     private boolean verificado;
+    
+    private LocalDateTime fechaRegistro;
 
     private String estado;
 
@@ -110,11 +115,11 @@ public class IndicadorProveedorResponse {
         this.dislikes = dislikes;
     }
 
-    public int getSatisfaccion() {
+    public double getSatisfaccion() {
         return satisfaccion;
     }
 
-    public void setSatisfaccion(int satisfaccion) {
+    public void setSatisfaccion(double satisfaccion) {
         this.satisfaccion = satisfaccion;
     }
 
@@ -141,4 +146,14 @@ public class IndicadorProveedorResponse {
     public void setEstado(String estado) {
         this.estado = estado;
     }
+
+    public LocalDateTime getFechaRegistro() {
+        return fechaRegistro;
+    }
+
+    public void setFechaRegistro(LocalDateTime fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
+    }
+    
+    
 }

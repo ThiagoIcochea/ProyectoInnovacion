@@ -111,7 +111,7 @@
             <strong>{{ tracking.direccion }}</strong>
           </div>
 
-          <div *ngIf="esPagado()">
+          <div *ngIf="esEnCamino()">
             <span>Código de recepción</span>
             <strong>
               {{ tracking.codigoRecepcion || 'Pendiente de generar' }}
@@ -120,7 +120,7 @@
 
         </div>
 
-        <div class="delivery-code-card" *ngIf="esPagado()">
+        <div class="delivery-code-card" *ngIf="esEnCamino()">
           <span>Código de recepción</span>
           <strong>{{ tracking.codigoRecepcion || 'Pendiente' }}</strong>
           <p>Usa este código para verificar la entrega una vez que el pedido llegue a destino.</p>

@@ -8,9 +8,13 @@ export interface DeliveryDetail {
 
   cantidad: number;
 
+  skuGlobal: string;
+
   estado: string;
 
   fechaCreacion: string;
+
+   
 
 }
 

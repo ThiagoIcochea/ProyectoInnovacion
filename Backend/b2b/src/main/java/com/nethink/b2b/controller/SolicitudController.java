@@ -16,8 +16,9 @@ import com.nethink.b2b.dto.response.SolicitudEntregaResponse;
 import com.nethink.b2b.dto.response.TrackingStepResponse; 
 import com.nethink.b2b.dto.response.SolicitudDetalleEntregaResponse; 
 //se añadio val
-import com.nethink.b2b.entity.Proveedor; 
+import com.nethink.b2b.entity.Proveedor;
 
+import com.nethink.b2b.entity.Solicitud; 
 
 import com.nethink.b2b.repository.ProveedorRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -255,7 +256,7 @@ listarSolicitudesEntrega(
 
 
 
-@GetMapping("/proveedor/solicitudes/{idSolicitud}/tracking")
+@GetMapping("/proveedor/{idSolicitud}/tracking")
 public ResponseEntity<List<TrackingStepEntregaResponse>>
 listarTrackingSolicitud(
 
@@ -301,56 +302,31 @@ listarTrackingSolicitud(
 
 
 
+@GetMapping("/proveedor/entregas/detalles/{idSolicitud}")
+public ResponseEntity<List<SolicitudDetalleEntregaResponse>>
+listarDetallesEntregaProveedor(
 
-@GetMapping("/proveedor/entregas/detalles")
-public ResponseEntity<
-        List<SolicitudDetalleEntregaResponse>
-> listarDetallesEntregaProveedor(
-
+        @PathVariable Integer idSolicitud,
         Principal principal
 
 ) {
 
-    // =========================
-    // PROVEEDOR AUTENTICADO
-    // =========================
-
-    Proveedor proveedor =
-
-            proveedorRepo
-                    .findByUsuario_Correo(
-                            principal.getName()
+    Proveedor proveedor = proveedorRepo
+            .findByUsuario_Correo(principal.getName())
+            .orElseThrow(() ->
+                    new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "Proveedor no encontrado"
                     )
-
-                    .orElseThrow(() ->
-
-                            new ResponseStatusException(
-
-                                    HttpStatus.FORBIDDEN,
-
-                                    "Proveedor no encontrado"
-
-                            )
-
-                    );
-
-    // =========================
-    // LISTAR DETALLES
-    // =========================
+            );
 
     return ResponseEntity.ok(
-
-            solicitudService
-                    .listarDetallesEntregaProveedor(
-
-                            proveedor.getIdProveedor()
-
-                    )
-
+            solicitudService.listarDetallesEntregaProveedor(
+                    proveedor.getIdProveedor(),
+                    idSolicitud
+            )
     );
-
 }
-
 
 
 
@@ -421,5 +397,74 @@ public ResponseEntity<?> rechazarPedido(
 
     return ResponseEntity.ok(response);
 } 
+
+
+
+@PutMapping("/proveedor/{idSolicitud}/estado")
+public ResponseEntity<Void> actualizarEstadoTracking(
+
+        @PathVariable Integer idSolicitud,
+
+        @RequestParam Solicitud.EstadoSolicitud estado,
+
+        @RequestParam(required = false) String codigo,
+
+        Principal principal
+
+) {
+
+   System.out.println("USER: " + principal.getName());
+   
+    Proveedor proveedor =
+            proveedorRepo.findByUsuario_Correo(
+                    principal.getName()
+            ).orElseThrow(() ->
+
+                    new ResponseStatusException(
+                            HttpStatus.FORBIDDEN,
+                            "Proveedor no encontrado"
+                    )
+            );
+
+    // =========================
+    // ACTUALIZAR TRACKING
+    // =========================
+    solicitudService.actualizarEstado(
+            idSolicitud,
+            estado,
+            codigo,
+            proveedor.getIdProveedor().toString()
+    );
+
+    return ResponseEntity.ok().build();
+}
+
+
+
+
+
+//@PutMapping("/{id}/estado")
+//public ResponseEntity<Void> actualizarEstado(
+//        @PathVariable Integer id,
+//        @RequestParam Solicitud.EstadoSolicitud estado,
+//        @RequestParam(required = false) String codigo,
+//        Principal principal
+//) {
+
+//    solicitudService.actualizarEstado(
+ //           id,
+//           estado,
+ //           codigo,
+ //           principal.getName()
+//    );
+
+ //   return ResponseEntity.ok().build();
+//}
+
+
+
+
+
+
 
 }

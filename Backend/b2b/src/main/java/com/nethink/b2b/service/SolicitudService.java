@@ -608,6 +608,8 @@ BigDecimal totalItem =
             case PAGO_VALIDANDO -> "Validando pago";
                 
             case PAGADA -> "Pagado" ;
+            
+            case EN_PREPARACION -> "En preparación";
 
             case EN_CAMINO -> "En camino";
 
@@ -1030,13 +1032,15 @@ public void aprobarPedido(Integer idSolicitud, String correoUsuario,HttpServletR
 public List<SolicitudDetalleEntregaResponse>
 listarDetallesEntregaProveedor(
 
-        Integer idProveedor
+        Integer idProveedor,
+        Integer idSolicitud
 
 ) {
 
     return detalleRepo
             .listarDetallesEntregaProveedor(
-                    idProveedor
+                    idProveedor,
+                    idSolicitud
             );
 
 }
@@ -1087,5 +1091,98 @@ public void rechazarPedido(Integer idSolicitud,String prompt, String correoUsuar
 
 }
     
+  
+
+
+
+@Transactional
+public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, String codigoIngresado,
+        String correoUsuario     ) {
+
     
+    
+    
+    // =========================
+        // 1. BUSCAR SOLICITUD
+        // =========================
+        Solicitud solicitud = solicitudRepo.findById(idSolicitud)
+                .orElseThrow(() ->
+                        new RuntimeException("Solicitud no encontrada")
+                );
+
+        // =========================
+        // 2. BUSCAR USUARIO AUTENTICADO
+        // =========================
+        //Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
+        //        .orElseThrow(() ->
+        //                new RuntimeException("Usuario no encontrado")
+        //        );
+    
+    
+    // =========================
+    // 3. VALIDACIÓN DE CÓDIGO SOLO SI ES ENTREGADA
+    // =========================
+    if (nuevoEstado == EstadoSolicitud.ENTREGADA) {
+
+        if (codigoIngresado == null || codigoIngresado.isEmpty()) {
+            throw new RuntimeException("Código requerido para marcar como ENTREGADA");
+        }
+
+        if (!codigoIngresado.equals(solicitud.getCodigoRecepcion())) {
+            throw new RuntimeException("Código incorrecto");
+        }
+        
+        solicitud.setFechaEntrega(LocalDateTime.now());
+    }
+    
+
+    // 1. actualizar estado
+    solicitud.setEstado(nuevoEstado);
+
+    solicitudRepo.save(solicitud);
+    
+    String descripcion = generarDescripcion(nuevoEstado);
+
+    // 2. guardar historial
+    SolicitudHistorial hist = new SolicitudHistorial();
+    hist.setSolicitud(solicitud);
+    hist.setEstado(nuevoEstado.name());
+    hist.setDescripcion(descripcion); 
+    hist.setFecha(LocalDateTime.now());
+
+    historialRepo.save(hist);
+}
+
+
+
+private String generarDescripcion(EstadoSolicitud estado) {
+
+    switch (estado) {
+
+        case EN_PREPARACION:
+            return "El pedido está siendo preparado para despacho";
+
+        case EN_CAMINO:
+            return "El pedido está en camino";
+
+        case ENTREGADA:
+            return "El pedido fue entregado al cliente";
+
+        
+
+        default:
+            return "Estado actualizado";
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 }

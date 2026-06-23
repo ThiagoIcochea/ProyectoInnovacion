@@ -22,6 +22,8 @@ public class SolicitudEntregaResponse {
     private BigDecimal total;
 
     private LocalDateTime fechaCreacion;
+    
+    
 
     // =========================
     // EMPRESA
@@ -40,6 +42,12 @@ public class SolicitudEntregaResponse {
     // =========================
 
     private Integer cantidadProductos;
+    
+    private String telefono;
+    
+    private String whatsapp; 
+    
+    private String direccionEnvio;  
 
     // =========================
     // CONSTRUCTOR QUERY JPQL
@@ -50,10 +58,15 @@ public class SolicitudEntregaResponse {
             Enum estado,
             BigDecimal total,
             LocalDateTime fechaCreacion,
+            
             String nombreEmpresa,
             String nombres,
             String apellidos,
-            Long cantidadProductos
+            String telefono,
+            String whatsapp,
+            
+            Long cantidadProductos,
+            String direccionEnvio
     ) {
 
         this.idSolicitud = idSolicitud;
@@ -63,14 +76,24 @@ public class SolicitudEntregaResponse {
         this.total = total;
 
         this.fechaCreacion = fechaCreacion;
+        
 
         this.nombreEmpresa = nombreEmpresa;
 
         this.nombreCliente =
                 nombres + " " + apellidos;
+        
+        this.telefono= telefono;
+        
+        this.whatsapp= whatsapp;
+        
 
         this.cantidadProductos =
                 cantidadProductos.intValue();
+        
+         
+        this.direccionEnvio = direccionEnvio;
+        
     }
 
     // =========================
@@ -131,6 +154,28 @@ public class SolicitudEntregaResponse {
         this.nombreCliente = nombreCliente;
     }
 
+    
+    public String getTelefono(){
+        return telefono; 
+    }
+    
+    
+   public void setTelefono(String telefono){
+       this.telefono=telefono; 
+   } 
+    
+    
+   public String getWhatsapp(){
+       return whatsapp; 
+   } 
+    
+    
+   public void setWhatsapp(String whatsapp){
+       this.whatsapp=whatsapp; 
+   }
+   
+   
+    
     public Integer getCantidadProductos() {
         return cantidadProductos;
     }
@@ -140,6 +185,18 @@ public class SolicitudEntregaResponse {
     ) {
         this.cantidadProductos = cantidadProductos;
     }
+    
+    public String getDireccionEnvio(){
+        return direccionEnvio; 
+    }
+    
+    public void setDireccionEnvio(String direccionEnvio){
+        this.direccionEnvio=direccionEnvio; 
+    }
+    
+    
+    
+    
 }
     
     

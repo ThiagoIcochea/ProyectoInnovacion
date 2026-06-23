@@ -26,6 +26,7 @@ export class ProviderReviewsComponent implements OnInit {
 
   requestItems: any[] = [];
   providers: any[] = [];
+  initialProvidersLoaded = false;
 
   qty: number = 1;
   loadingProviders: boolean = true;
@@ -64,6 +65,15 @@ export class ProviderReviewsComponent implements OnInit {
       state?.['provider'] ??
       null;
 
+    console.log('[PRS] ProviderReviewsComponent ctor', {
+      state,
+      product: this.product,
+      origin: this.origin,
+      idProductoActual: this.idProductoActual,
+      stateProvider,
+      stateProviders: state?.['proveedores'] ?? state?.['providers']
+    });
+
     if (stateProvider) {
       this.selectedProvider = this.normalizarProveedor(stateProvider);
       this.providers = [this.selectedProvider];
@@ -86,7 +96,13 @@ export class ProviderReviewsComponent implements OnInit {
         this.filterProvidersForProduct(stateProviders)
       );
 
+      this.providers.forEach(provider => {
+        this.cargarIndicadoresProveedor(provider);
+        this.cargarComentariosProveedor(provider);
+      });
+
       this.loadingProviders = false;
+      this.initialProvidersLoaded = true;
     }
   }
 
@@ -116,7 +132,7 @@ export class ProviderReviewsComponent implements OnInit {
       return;
     }
 
-    if (this.providers.length > 0) {
+    if (!this.initialProvidersLoaded && this.providers.length > 0) {
       this.providers.forEach(provider => {
         this.cargarIndicadoresProveedor(provider);
         this.cargarComentariosProveedor(provider);
@@ -202,6 +218,7 @@ export class ProviderReviewsComponent implements OnInit {
       { headers: this.getHeaders() }
     ).subscribe({
       next: (res) => {
+        console.log('[PRS] cargarProveedoresDelProducto - response', res);
         const proveedoresRaw =
           Array.isArray(res)
             ? res
@@ -259,37 +276,95 @@ export class ProviderReviewsComponent implements OnInit {
       return;
     }
 
+    const providerId = Number(idProveedor);
+
     this.http.get<any[]>(
       `${this.API_BASE}/comentarios/${idProveedor}/${idProducto}`,
       { headers: this.getHeaders() }
     ).subscribe({
       next: (res) => {
-          console.log("RESPUESTA COMENTARIOS", res);
-        provider.comentarios = Array.isArray(res)
-          ? res.map((comentario) => this.normalizarComentario(comentario))
-          : [];
+        const comentarios = this.extractCommentsPayload(res)
+          .map((comentario: any) => this.normalizarComentario(comentario));
 
-        this.recalcularMetricasProveedor(provider);
+        const index = this.providers.findIndex(
+          p => Number(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider) === providerId
+        );
+
+        const current = index !== -1 ? this.providers[index] : provider;
+
+        const providerActualizado = {
+          ...current,
+          comentarios
+        };
+
+        this.recalcularMetricasProveedor(providerActualizado);
+
+        if (index !== -1) {
+          this.providers = [
+            ...this.providers.slice(0, index),
+            providerActualizado,
+            ...this.providers.slice(index + 1)
+          ];
+        }
+
+        if (
+          this.selectedProvider &&
+          Number(this.selectedProvider.idProveedor ?? this.selectedProvider.id_proveedor ?? this.selectedProvider.id ?? this.selectedProvider.idProvider) === providerId
+        ) {
+          this.selectedProvider = {
+            ...providerActualizado
+          };
+        }
+
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error(
-          'Error cargando comentarios del proveedor para este producto',
-          err
+        console.error('Error cargando comentarios del proveedor para este producto', err);
+
+        const index = this.providers.findIndex(
+          p => Number(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider) === providerId
         );
 
-        provider.comentarios = [];
-        this.recalcularMetricasProveedor(provider);
+        const current = index !== -1 ? this.providers[index] : provider;
+
+        const providerActualizado = {
+          ...current,
+          comentarios: []
+        };
+
+        this.recalcularMetricasProveedor(providerActualizado);
+
+        if (index !== -1) {
+          this.providers = [
+            ...this.providers.slice(0, index),
+            providerActualizado,
+            ...this.providers.slice(index + 1)
+          ];
+        }
+
+        if (
+          this.selectedProvider &&
+          Number(this.selectedProvider.idProveedor ?? this.selectedProvider.id_proveedor ?? this.selectedProvider.id ?? this.selectedProvider.idProvider) === providerId
+        ) {
+          this.selectedProvider = {
+            ...providerActualizado
+          };
+        }
+
         this.cdr.detectChanges();
       }
     });
   }
 
+
  normalizarComentario(comentario: any): any {
 
+  const rawTipo = comentario?.tipo ?? comentario?.type ?? comentario?.reactionType ?? comentario?.tipoReaccion;
   const tipoNormalizado =
-    comentario?.tipo === 'DISLIKE' ||
-    comentario?.tipo === 'NEGATIVO'
+    rawTipo === 'DISLIKE' ||
+    rawTipo === 'NEGATIVO' ||
+    rawTipo === 'DISLIKE' ||
+    rawTipo === 'NEGATIVE'
       ? 'DISLIKE'
       : 'LIKE';
 
@@ -299,7 +374,8 @@ export class ProviderReviewsComponent implements OnInit {
     idComentario:
       comentario?.idComentario ||
       comentario?.id_comentario ||
-      comentario?.id,
+      comentario?.id ||
+      null,
 
     idProvProd:
       comentario?.idProvProd ||
@@ -312,27 +388,38 @@ export class ProviderReviewsComponent implements OnInit {
       null,
 
     comentario:
-      comentario?.comentario || '',
+      comentario?.comentario ||
+      comentario?.review ||
+      comentario?.texto ||
+      comentario?.mensaje ||
+      '',
 
     tipo: tipoNormalizado,
 
     fecha:
-      comentario?.fecha || null,
+      comentario?.fecha ||
+      comentario?.date ||
+      comentario?.createdAt ||
+      comentario?.created_at ||
+      null,
 
     likes:
-      Number(comentario?.likes ?? 0),
+      Number(comentario?.likes ?? comentario?.likesCount ?? comentario?.totalLikes ?? 0),
 
     dislikes:
-      Number(comentario?.dislikes ?? 0),
+      Number(comentario?.dislikes ?? comentario?.dislikesCount ?? comentario?.totalDislikes ?? 0),
 
     likesCount:
-      Number(comentario?.likes ?? 0),
+      Number(comentario?.likes ?? comentario?.likesCount ?? comentario?.totalLikes ?? 0),
 
     dislikesCount:
-      Number(comentario?.dislikes ?? 0),
+      Number(comentario?.dislikes ?? comentario?.dislikesCount ?? comentario?.totalDislikes ?? 0),
 
     userReaction:
-      comentario?.userReaction || null
+      comentario?.userReaction ??
+      comentario?.reaccion ??
+      comentario?.reaction ??
+      null
   };
 }
 
@@ -344,38 +431,48 @@ export class ProviderReviewsComponent implements OnInit {
     return reacciones.filter(reaccion => reaccion?.tipo === tipo).length;
   }
 
+  
+
   recalcularMetricasProveedor(provider: any): void {
     const comentarios = Array.isArray(provider?.comentarios)
       ? provider.comentarios
       : [];
 
-    let likes = 0;
-    let dislikes = 0;
+    let commentLikes = 0;
+    let commentDislikes = 0;
 
     comentarios.forEach((comentario: any) => {
-      likes += this.getReviewLikes(comentario);
-      dislikes += this.getReviewDislikes(comentario);
+      commentLikes += this.getReviewLikes(comentario);
+      commentDislikes += this.getReviewDislikes(comentario);
 
       if (
         this.getReviewLikes(comentario) === 0 &&
         this.getReviewDislikes(comentario) === 0
       ) {
         if (comentario?.tipo === 'DISLIKE') {
-          dislikes++;
+          commentDislikes++;
         } else {
-          likes++;
+          commentLikes++;
         }
       }
     });
 
-    const total = likes + dislikes;
+    const hasIndicatorReactionTotals =
+      Number(provider?.likes ?? 0) > 0 ||
+      Number(provider?.dislikes ?? 0) > 0;
 
     provider.totalComentarios = comentarios.length;
-    provider.likes = likes;
-    provider.dislikes = dislikes;
-    provider.satisfaccion = total > 0
-      ? Math.round((likes / total) * 100)
-      : 0;
+    provider.likes = hasIndicatorReactionTotals
+      ? Number(provider.likes ?? 0)
+      : commentLikes;
+    provider.dislikes = hasIndicatorReactionTotals
+      ? Number(provider.dislikes ?? 0)
+      : commentDislikes;
+
+    const totalReacciones = provider.likes + provider.dislikes;
+    if (totalReacciones > 0) {
+      provider.satisfaccion = Math.round((provider.likes / totalReacciones) * 100);
+    }
   }
 
   private recalculateProviderReviewMetrics(provider: any): void {
@@ -384,38 +481,215 @@ export class ProviderReviewsComponent implements OnInit {
 
   cargarIndicadoresProveedor(provider: any): void {
     const idProveedor =
-      provider?.idProveedor ??
-      provider?.id_proveedor ??
-      provider?.idProvider ??
-      provider?.id;
+      provider?.idProveedor ?? provider?.id_proveedor ?? provider?.idProvider ?? provider?.id;
 
-    if (!idProveedor) {
-      return;
-    }
+    if (!idProveedor) return;
 
     this.http.get<any>(
       `${this.API_BASE}/provider/${idProveedor}/indicadores`,
       { headers: this.getHeaders() }
     ).subscribe({
       next: (res) => {
-        provider.pedidosCompletados = res?.pedidosCompletados ?? 0;
-        provider.pedidosTotal = res?.pedidosTotal ?? 0;
-        provider.cumplimiento = res?.cumplimiento ?? 0;
-        provider.scoreGeneral = res?.scoreGeneral ?? 0;
-
-        provider.scoringGeneral = Math.round(
-          (provider.scoreGeneral || 0) * 100
+        const index = this.providers.findIndex(
+          p => Number(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider) === Number(idProveedor)
         );
 
+        console.log('[PRS] cargarIndicadoresProveedor - index will be computed for', idProveedor);
+
+        const payload = this.extractIndicatorPayload(res);
+        const current = index !== -1
+          ? this.providers[index]
+          : provider;
+
+        const feedback = {
+          providerId: idProveedor,
+          index,
+          currentId: current?.idProveedor ?? current?.id_proveedor ?? current?.idProvider ?? current?.id,
+          currentName: this.getProviderName(current),
+          response: res,
+          payload
+        };
+
+        console.log('[PRS] cargarIndicadoresProveedor - provider response', feedback);
+
+        if (!payload || typeof payload !== 'object') {
+          console.warn('[PRS] cargarIndicadoresProveedor - invalid payload', payload, res);
+        }
+
+        const satisfaccionValue = this.parsePercentage(
+          payload?.satisfaccion ??
+          payload?.satisfaction ??
+          payload?.satisfactionPercent ??
+          payload?.satisfaction_percent ??
+          payload?.satisfaction_percentage ??
+          payload?.satisfactionScore ??
+          payload?.scoreSatisfaction ??
+          current?.satisfaccion ??
+          current?.satisfaction ??
+          null
+        );
+
+        const cumplimientoValue = this.parsePercentage(
+          payload?.cumplimiento ??
+          payload?.cumplimientoPorcentaje ??
+          payload?.cumplimiento_porcentaje ??
+          current?.cumplimiento ??
+          null
+        );
+
+        const scoreGeneralValue = this.parseNumber(
+          payload?.scoreGeneral ??
+          payload?.scoringGeneral ??
+          payload?.scoreFinal ??
+          payload?.score_final ??
+          payload?.score ??
+          payload?.score_general ??
+          payload?.score_total ??
+          payload?.puntaje ??
+          payload?.puntajeFinal ??
+          current?.scoreFinal ??
+          current?.score_final ??
+          current?.score ??
+          current?.scoreGeneral ??
+          current?.scoringGeneral ??
+          null
+        );
+
+        const likesValue = Number(
+          this.parseNumber(
+            payload?.likes ??
+            payload?.likeCount ??
+            payload?.likes_count ??
+            payload?.totalLikes ??
+            current?.likes ??
+            0
+          ) ?? 0
+        );
+
+        const dislikesValue = Number(
+          this.parseNumber(
+            payload?.dislikes ??
+            payload?.dislikeCount ??
+            payload?.dislikes_count ??
+            payload?.totalDislikes ??
+            current?.dislikes ??
+            0
+          ) ?? 0
+        );
+
+        const tiempoEntregaRaw =
+          res?.tiempoEntregaPromedio ??
+          res?.tiempo_entrega_promedio ??
+          res?.tiempoEntregaDias ??
+          res?.tiempo_entrega_dias ??
+          current?.tiempoEntregaPromedio ??
+          current?.tiempoEntregaDias ??
+          null;
+
+        const fechaRegistroRaw =
+          res?.fechaRegistro ??
+          res?.fecha_registro ??
+          res?.createdAt ??
+          res?.created_at ??
+          current?.fechaRegistro ??
+          null;
+
+        const update = {
+          ...current,
+          pedidosCompletados:
+            res?.pedidosCompletados ??
+            res?.pedidos_completados ??
+            current.pedidosCompletados ??
+            0,
+          pedidosTotal:
+            res?.pedidosTotal ??
+            res?.pedidos_total ??
+            current.pedidosTotal ??
+            0,
+          cumplimiento: cumplimientoValue ?? current.cumplimiento ?? 0,
+          scoreGeneral: scoreGeneralValue ?? current.scoreGeneral ?? 0,
+          scoringGeneral: scoreGeneralValue ?? current.scoringGeneral ?? 0,
+          scoreFinal: scoreGeneralValue ?? current.scoreFinal ?? current.scoreGeneral ?? current.scoringGeneral ?? 0,
+          satisfaccion: satisfaccionValue ?? current?.satisfaccion ?? 0,
+          satisfaction: satisfaccionValue ?? current?.satisfaction ?? current?.satisfaccion ?? 0,
+          tiempoEntregaPromedio: tiempoEntregaRaw,
+          tiempoEntregaDias:
+            res?.tiempoEntregaDias ??
+            res?.tiempo_entrega_dias ??
+            current?.tiempoEntregaDias ??
+            current?.tiempo_entrega_dias ??
+            null,
+          descripcion:
+            payload?.descripcionProveedor ??
+            payload?.descripcion_proveedor ??
+            payload?.descripcion ??
+            payload?.description ??
+            payload?.detalle ??
+            payload?.detalleProveedor ??
+            payload?.detalle_proveedor ??
+            payload?.descripcionBreve ??
+            current?.descripcionProveedor ??
+            current?.descripcion_proveedor ??
+            current?.descripcion ??
+            current?.description ??
+            current?.detalle ??
+            current?.detalleProveedor ??
+            current?.detalle_proveedor ??
+            current?.descripcionBreve ??
+            null,
+          fechaRegistro: fechaRegistroRaw,
+          categoriaPrincipal:
+            res?.categoriaPrincipal ??
+            res?.categoria ??
+            current.categoriaPrincipal ??
+            current.categoria ??
+            null,
+          estado: res?.estado ?? current.estado ?? null,
+          verificado: res?.verificado ?? current.verificado ?? false,
+          likes: likesValue,
+          dislikes: dislikesValue,
+          totalResenas:
+            res?.totalResenas ??
+            res?.total_resenas ??
+            current.totalResenas ??
+            current.totalComentarios ??
+            0
+        };
+
+        this.recalcularMetricasProveedor(update);
+
+        console.log('[PRS] cargarIndicadoresProveedor - update', {
+          idProveedor,
+          index,
+          update
+        });
+
+        if (index !== -1) {
+          this.providers[index] = update;
+        } else {
+          console.warn('[PRS] cargarIndicadoresProveedor - provider index not found', feedback);
+        }
+
+        if (
+          this.selectedProvider &&
+          Number(this.selectedProvider.idProveedor ?? this.selectedProvider.id_proveedor ?? this.selectedProvider.id ?? this.selectedProvider.idProvider) === Number(idProveedor)
+        ) {
+          this.selectedProvider = {
+            ...this.selectedProvider,
+            ...update
+          };
+        }
+
+        if (index !== -1) {
+          this.providers = [...this.providers]; // 🔥 fuerza render
+        }
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error cargando indicadores', err);
-      }
+      error: (err) => console.error(err)
     });
   }
-
   private setProviderList(providers: any[]): void {
+    console.log('[PRS] setProviderList - incoming providers:', providers);
     this.providers = (providers || []).map(provider =>
       this.normalizarProveedor(provider)
     );
@@ -437,6 +711,67 @@ export class ProviderReviewsComponent implements OnInit {
     const firstList = possibleLists.find(Array.isArray);
 
     return firstList ? [...firstList] : [];
+  }
+
+  private extractIndicatorPayload(response: any): any {
+    if (response === null || response === undefined) {
+      return response;
+    }
+
+    if (Array.isArray(response)) {
+      return response.length === 1 ? this.extractIndicatorPayload(response[0]) : response;
+    }
+
+    if (typeof response !== 'object') {
+      return response;
+    }
+
+    const payload = response.data ??
+      response.indicadores ??
+      response.indicador ??
+      response.resultado ??
+      response.provider ??
+      response.proveedor ??
+      response;
+
+    if (payload && payload !== response && typeof payload === 'object') {
+      const nested = payload.data ??
+        payload.indicadores ??
+        payload.indicador ??
+        payload.resultado ??
+        payload.provider ??
+        payload.proveedor;
+
+      if (nested && nested !== payload) {
+        return this.extractIndicatorPayload(payload);
+      }
+    }
+
+    return payload;
+  }
+
+  private extractCommentsPayload(response: any): any[] {
+    if (!response) {
+      return [];
+    }
+
+    if (Array.isArray(response)) {
+      return response;
+    }
+
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    if (Array.isArray(response.comentarios)) {
+      return response.comentarios;
+    }
+
+    if (Array.isArray(response.reviews)) {
+      return response.reviews;
+    }
+
+    return [];
   }
 
   private filterProvidersForProduct(providers: any[]): any[] {
@@ -533,8 +868,13 @@ export class ProviderReviewsComponent implements OnInit {
         null,
 
       estado:
-        item?.estado ||
+        item?.estado ??
+        item?.status ??
         'ACTIVO',
+
+      verificado:
+        item?.verificado ??
+        false,
 
       precioUnitario:
         item?.precioUnitario ||
@@ -550,6 +890,13 @@ export class ProviderReviewsComponent implements OnInit {
         item?.tiempo_entrega_dias ||
         null,
 
+      tiempoEntregaPromedio:
+        item?.tiempoEntregaPromedio ??
+        item?.tiempo_entrega_promedio ??
+        item?.tiempoEntregaDias ??
+        item?.tiempo_entrega_dias ??
+        null,
+
       garantiaMeses:
         item?.garantiaMeses ||
         item?.garantia_meses ||
@@ -562,10 +909,37 @@ export class ProviderReviewsComponent implements OnInit {
         item?.pedidosTotal ?? 0,
 
       cumplimiento:
-        item?.cumplimiento ?? 0,
+        item?.cumplimiento ??
+        item?.porcentajeCumplimiento ??
+        item?.cumplimiento_entrega ??
+        item?.cumplimientoPorcentaje ??
+        item?.cumplimiento_porcentaje ??
+        0,
 
       scoringGeneral:
-        item?.scoringGeneral ?? 0,
+        item?.scoringGeneral ??
+        item?.scoreGeneral ??
+        item?.scoreFinal ??
+        item?.score_final ??
+        0,
+
+      scoreFinal:
+        item?.scoreFinal ??
+        item?.score_final ??
+        item?.score ??
+        item?.puntaje ??
+        item?.puntajeFinal ??
+        null,
+
+      scoreGeneral:
+        item?.scoreGeneral ??
+        item?.scoringGeneral ??
+        item?.scoreFinal ??
+        item?.score_final ??
+        item?.score ??
+        item?.puntaje ??
+        item?.puntajeFinal ??
+        0,
 
       comentarios:
         Array.isArray(item?.comentarios)
@@ -580,15 +954,39 @@ export class ProviderReviewsComponent implements OnInit {
       dislikes:
         Number(item?.dislikes ?? 0),
 
-      satisfaccion:
-        item?.satisfaccion ?? 0,
+      
 
       totalComentarios:
         item?.totalComentarios ||
         item?.total_comentarios ||
         0
+      ,
+
+      fechaRegistro:
+        item?.fechaRegistro ??
+        item?.fecha_registro ??
+        item?.createdAt ??
+        item?.created_at ??
+        null,
+
+      satisfaccion: (() => {
+        const raw = item?.satisfaccion ??
+          item?.satisfaction ??
+          item?.satisfactionPercent ??
+          item?.satisfaction_percent ??
+          item?.satisfaction_percentage ??
+          item?.satisfactionScore ??
+          item?.scoreSatisfaction ??
+          null;
+
+        if (raw === null || raw === undefined) return item?.satisfaccion ?? 0;
+        const n = Number(raw);
+        if (Number.isNaN(n)) return item?.satisfaccion ?? 0;
+        return n <= 1 ? Math.round(n * 100) : Math.round(n);
+      })()
     };
   }
+
 
   getProductImage(): string | null {
     if (this.productImageFailed) {
@@ -679,7 +1077,14 @@ export class ProviderReviewsComponent implements OnInit {
   }
 
   getProviderDescription(provider: any): string | null {
-    return provider?.descripcion || null;
+    return provider?.descripcion ||
+      provider?.descripcionProveedor ||
+      provider?.descripcion_proveedor ||
+      provider?.description ||
+      provider?.detalle ||
+      provider?.detalleProveedor ||
+      provider?.detalle_proveedor ||
+      null;
   }
 
   getProviderSince(provider: any): string {
@@ -690,12 +1095,16 @@ export class ProviderReviewsComponent implements OnInit {
 
   getProviderDelivery(provider: any): number | null {
     return provider?.tiempoEntregaPromedio ??
+      provider?.tiempoEntrega ??
       provider?.tiempoEntregaDias ??
       null;
   }
 
   getProviderResponse(provider: any): number | null {
-    return provider?.tiempoRespuestaPromedio ?? null;
+    return provider?.tiempoRespuestaPromedio ??
+      provider?.tiempoRespuesta ??
+      provider?.tiempo_respuesta ??
+      null;
   }
 
   getProviderResponseLabel(provider: any): string {
@@ -713,7 +1122,12 @@ export class ProviderReviewsComponent implements OnInit {
   }
 
   getProviderOnTime(provider: any): number | null {
-    return provider?.cumplimiento ?? 0;
+    const raw = provider?.cumplimiento ?? provider?.cumplimientoPorcentaje ?? provider?.cumplimiento_porcentaje ?? 0;
+    const value = this.parseNumber(raw);
+    if (value === null) {
+      return 0;
+    }
+    return value <= 1 ? Math.round(value * 100) : Math.round(value);
   }
 
   getCompletedOrders(provider: any): number | null {
@@ -723,17 +1137,28 @@ export class ProviderReviewsComponent implements OnInit {
   getProviderScore100(provider: any): number | null {
     const score =
       provider?.scoringGeneral ??
-      provider?.scoreGeneral;
+      provider?.scoreGeneral ??
+      provider?.scoreFinal ??
+      provider?.score_final ??
+      provider?.score ??
+      provider?.puntaje ??
+      provider?.puntajeFinal ??
+      null;
 
-    if (score === null || score === undefined) {
-      return 0;
+    if (score === null || score === undefined || score === '') {
+      return null;
     }
 
-    if (score <= 1) {
-      return Math.round(score * 100);
+    const parsed = Number(score);
+    if (Number.isNaN(parsed)) {
+      return null;
     }
 
-    return Math.round(score);
+    if (parsed <= 1) {
+      return Math.round(parsed * 100);
+    }
+
+    return Math.round(parsed);
   }
 
   getProviderReputation(provider: any): number | null {
@@ -917,7 +1342,17 @@ getReviewLikes(review: any): number {
   }
 
   getProviderSatisfaction(provider: any): number {
-    return provider?.satisfaccion ?? 0;
+    const raw = provider?.satisfaccion ??
+      provider?.satisfaction ??
+      provider?.satisfactionPercent ??
+      provider?.satisfaction_percent ??
+      provider?.satisfaction_percentage ??
+      provider?.satisfactionScore ??
+      provider?.scoreSatisfaction ??
+      0;
+    const n = Number(raw ?? 0);
+    if (Number.isNaN(n)) return 0;
+    return n <= 1 ? Math.round(n * 100) : Math.round(n);
   }
 
   getReviewAuthor(review: any): string {
@@ -936,7 +1371,7 @@ getReviewLikes(review: any): number {
   }
 
   getReviewReactionType(review: any): 'LIKE' | 'DISLIKE' | '' {
-    return review?.tipo || '';
+    return review?.tipo || review?.type || review?.reactionType || review?.tipoReaccion || '';
   }
 
   formatFecha(value: string): string {
@@ -963,6 +1398,33 @@ getReviewLikes(review: any): number {
     }
 
     return `${Math.round(value)}%`;
+  }
+
+  private parseNumber(value: any): number | null {
+    if (value === null || value === undefined) {
+      return null;
+    }
+
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? value : null;
+    }
+
+    const normalized = String(value)
+      .trim()
+      .replace('%', '')
+      .replace(',', '.')
+      .replace(/\s+/g, '');
+
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  private parsePercentage(value: any): number | null {
+    const parsed = this.parseNumber(value);
+    if (parsed === null) {
+      return null;
+    }
+    return parsed <= 1 ? Math.round(parsed * 100) : Math.round(parsed);
   }
 
   formatDays(value: number | null | undefined): string {
