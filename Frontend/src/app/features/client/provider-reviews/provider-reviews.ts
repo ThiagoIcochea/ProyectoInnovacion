@@ -501,13 +501,19 @@ export class ProviderReviewsComponent implements OnInit {
 
       this.providers[index] = {
         ...current,
-        pedidosCompletados: res?.pedidosCompletados ?? res?.pedidos_completados ?? 0,
-        pedidosTotal: res?.pedidosTotal ?? res?.pedidos_total ?? 0,
-        cumplimiento: res?.cumplimiento ?? res?.cumplimientoPorcentaje ?? 0,
-        scoreGeneral: res?.scoreGeneral ?? res?.scoringGeneral ?? 0,
+        pedidosCompletados: res?.pedidosCompletados ?? res?.pedidos_completados ?? current.pedidosCompletados ?? 0,
+        pedidosTotal: res?.pedidosTotal ?? res?.pedidos_total ?? current.pedidosTotal ?? 0,
+        cumplimiento: res?.cumplimiento ?? res?.cumplimientoPorcentaje ?? current.cumplimiento ?? 0,
+        scoreGeneral: res?.scoreGeneral ?? res?.scoringGeneral ?? current.scoreGeneral ?? 0,
         satisfaccion: satisfaccionValue ?? current?.satisfaccion ?? 0,
         tiempoEntregaPromedio: tiempoEntregaRaw ?? current?.tiempoEntregaPromedio ?? current?.tiempoEntregaDias ?? null,
         fechaRegistro: fechaRegistroRaw ?? current?.fechaRegistro ?? null,
+        categoriaPrincipal: res?.categoriaPrincipal ?? res?.categoria ?? current.categoriaPrincipal ?? current.categoria ?? null,
+        estado: res?.estado ?? current.estado ?? null,
+        verificado: res?.verificado ?? current.verificado ?? false,
+        likes: res?.likes ?? current.likes ?? 0,
+        dislikes: res?.dislikes ?? current.dislikes ?? 0,
+        totalResenas: res?.totalResenas ?? res?.total_resenas ?? current.totalResenas ?? current.totalComentarios ?? 0
       };
 
 
@@ -518,17 +524,19 @@ export class ProviderReviewsComponent implements OnInit {
   this.selectedProvider = {
     ...this.selectedProvider,
 
-    pedidosCompletados: res?.pedidosCompletados ?? res?.pedidos_completados ?? 0,
-    pedidosTotal: res?.pedidosTotal ?? res?.pedidos_total ?? 0,
-    cumplimiento: res?.cumplimiento ?? res?.cumplimientoPorcentaje ?? 0,
-    scoreGeneral: res?.scoreGeneral ?? res?.scoringGeneral ?? 0,
+    pedidosCompletados: res?.pedidosCompletados ?? res?.pedidos_completados ?? this.selectedProvider.pedidosCompletados ?? 0,
+    pedidosTotal: res?.pedidosTotal ?? res?.pedidos_total ?? this.selectedProvider.pedidosTotal ?? 0,
+    cumplimiento: res?.cumplimiento ?? res?.cumplimientoPorcentaje ?? this.selectedProvider.cumplimiento ?? 0,
+    scoreGeneral: res?.scoreGeneral ?? res?.scoringGeneral ?? this.selectedProvider.scoreGeneral ?? 0,
     satisfaccion: satisfaccionValue ?? this.selectedProvider?.satisfaccion ?? 0,
     tiempoEntregaPromedio: tiempoEntregaRaw ?? this.selectedProvider?.tiempoEntregaPromedio ?? this.selectedProvider?.tiempoEntregaDias ?? null,
     fechaRegistro: fechaRegistroRaw ?? this.selectedProvider?.fechaRegistro ?? null,
-
+    categoriaPrincipal: res?.categoriaPrincipal ?? res?.categoria ?? this.selectedProvider.categoriaPrincipal ?? this.selectedProvider.categoria ?? null,
+    estado: res?.estado ?? this.selectedProvider.estado ?? null,
+    verificado: res?.verificado ?? this.selectedProvider.verificado ?? false,
     likes: res?.likes ?? this.selectedProvider.likes ?? 0,
     dislikes: res?.dislikes ?? this.selectedProvider.dislikes ?? 0,
-    totalResenas: res?.totalResenas ?? res?.total_resenas ?? 0
+    totalResenas: res?.totalResenas ?? res?.total_resenas ?? this.selectedProvider.totalResenas ?? this.selectedProvider.totalComentarios ?? 0
   };
 }
 
