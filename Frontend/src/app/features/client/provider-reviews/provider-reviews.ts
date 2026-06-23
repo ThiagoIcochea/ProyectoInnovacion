@@ -470,12 +470,7 @@ export class ProviderReviewsComponent implements OnInit {
       : commentDislikes;
 
     const totalReacciones = provider.likes + provider.dislikes;
-    if (
-      (provider.satisfaccion === null ||
-        provider.satisfaccion === undefined ||
-        provider.satisfaccion === 0) &&
-      totalReacciones > 0
-    ) {
+    if (totalReacciones > 0) {
       provider.satisfaccion = Math.round((provider.likes / totalReacciones) * 100);
     }
   }
@@ -541,7 +536,11 @@ export class ProviderReviewsComponent implements OnInit {
           res?.scoringGeneral ??
           res?.scoreFinal ??
           res?.score_final ??
+          res?.score ??
           res?.score_general ??
+          current?.scoreFinal ??
+          current?.score_final ??
+          current?.score ??
           current?.scoreGeneral ??
           current?.scoringGeneral ??
           null
@@ -619,11 +618,15 @@ export class ProviderReviewsComponent implements OnInit {
             res?.detalle ??
             res?.detalleProveedor ??
             res?.detalle_proveedor ??
+            res?.descripcionBreve ??
+            current?.descripcionProveedor ??
+            current?.descripcion_proveedor ??
             current?.descripcion ??
             current?.description ??
             current?.detalle ??
             current?.detalleProveedor ??
             current?.detalle_proveedor ??
+            current?.descripcionBreve ??
             null,
           fechaRegistro: fechaRegistroRaw,
           categoriaPrincipal:
@@ -646,7 +649,11 @@ export class ProviderReviewsComponent implements OnInit {
 
         this.recalcularMetricasProveedor(update);
 
-        this.providers[index] = update;
+        console.log('[PRS] cargarIndicadoresProveedor - update', {
+          idProveedor,
+          index,
+          update
+        });
 
         if (index !== -1) {
           this.providers[index] = update;
@@ -882,7 +889,15 @@ export class ProviderReviewsComponent implements OnInit {
         null,
 
       satisfaccion: (() => {
-        const raw = item?.satisfaccion ?? item?.satisfaction ?? item?.satisfactionPercent ?? item?.satisfaction_percent ?? null;
+        const raw = item?.satisfaccion ??
+          item?.satisfaction ??
+          item?.satisfactionPercent ??
+          item?.satisfaction_percent ??
+          item?.satisfaction_percentage ??
+          item?.satisfactionScore ??
+          item?.scoreSatisfaction ??
+          null;
+
         if (raw === null || raw === undefined) return item?.satisfaccion ?? 0;
         const n = Number(raw);
         if (Number.isNaN(n)) return item?.satisfaccion ?? 0;
