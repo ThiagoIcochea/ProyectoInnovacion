@@ -63,6 +63,15 @@ export class ProviderReviewsComponent implements OnInit {
       state?.['provider'] ??
       null;
 
+    console.log('[PRS] ProviderReviewsComponent ctor', {
+      state,
+      product: this.product,
+      origin: this.origin,
+      idProductoActual: this.idProductoActual,
+      stateProvider,
+      stateProviders: state?.['proveedores'] ?? state?.['providers']
+    });
+
     if (stateProvider) {
       this.selectedProvider = this.normalizarProveedor(stateProvider);
       this.providers = [this.selectedProvider];
