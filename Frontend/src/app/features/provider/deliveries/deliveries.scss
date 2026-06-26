@@ -154,6 +154,19 @@
   }
 }
 
+.claim-mini-badge {
+  display: inline-flex !important;
+  margin-top: 0.5rem;
+  color: #fde68a !important;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.26);
+  border-radius: 999px;
+  padding: 0.28rem 0.5rem;
+  font-size: 0.7rem !important;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
 .delivery-detail-card {
   overflow: hidden;
 }
@@ -171,6 +184,55 @@
   p {
     color: #9ca3af;
     margin: 0;
+  }
+}
+
+.provider-claim-alert {
+  margin: 1.25rem 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: 14px;
+  background: rgba(245, 158, 11, 0.1);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+
+  span {
+    color: #fcd34d;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    color: #f8fafc;
+    margin: 0.3rem 0 0.4rem;
+  }
+
+  p {
+    color: #d1d5db;
+    margin: 0;
+    line-height: 1.45;
+  }
+}
+
+.provider-claim-alert__meta {
+  min-width: 170px;
+  display: grid;
+  gap: 0.35rem;
+  justify-items: end;
+  color: #fcd34d;
+
+  strong {
+    color: #fde68a;
+    font-size: 1.25rem;
+  }
+
+  small {
+    color: #fef3c7;
+    text-align: right;
   }
 }
 
@@ -404,5 +466,17 @@
 
   .delivery-progress-card {
     margin-top: 0;
+  }
+
+  .provider-claim-alert {
+    grid-template-columns: 1fr;
+  }
+
+  .provider-claim-alert__meta {
+    justify-items: start;
+
+    small {
+      text-align: left;
+    }
   }
 }

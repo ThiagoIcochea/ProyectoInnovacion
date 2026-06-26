@@ -401,9 +401,204 @@
   }
 }
 
+.delay-claim-card {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(96, 165, 250, 0.24);
+  background: rgba(59, 130, 246, 0.1);
+  color: #bfdbfe;
+
+  span {
+    display: inline-flex;
+    margin-bottom: 0.35rem;
+    color: #93c5fd;
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  strong {
+    display: block;
+    color: #f8fafc;
+    margin-bottom: 0.35rem;
+  }
+
+  p {
+    margin: 0 0 0.55rem;
+    color: #cbd5e1;
+    line-height: 1.45;
+  }
+
+  small {
+    color: #93c5fd;
+    line-height: 1.4;
+  }
+}
+
+.delay-claim-card--warning {
+  border-color: rgba(245, 158, 11, 0.28);
+  background: rgba(245, 158, 11, 0.1);
+
+  span,
+  small {
+    color: #fcd34d;
+  }
+}
+
+.btn-delay-claim {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.18);
+  color: #fde68a;
+  font-weight: 900;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(245, 158, 11, 0.26);
+  }
+}
+
+.claim-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.claim-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 1510;
+  width: min(680px, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 16px;
+  background: #0f172a;
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.45);
+  padding: 1.1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.claim-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+
+  span {
+    color: #93c5fd;
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    margin: 0.2rem 0 0;
+    color: #f8fafc;
+    font-size: 1.35rem;
+  }
+
+  button {
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #cbd5e1;
+    cursor: pointer;
+    font-weight: 900;
+  }
+}
+
+.claim-modal__summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+
+  div {
+    padding: 0.85rem;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.82);
+  }
+
+  span {
+    display: block;
+    color: #94a3b8;
+    font-size: 0.78rem;
+    margin-bottom: 0.35rem;
+  }
+
+  strong {
+    color: #f8fafc;
+    overflow-wrap: anywhere;
+  }
+}
+
+.claim-form {
+  display: grid;
+  gap: 0.9rem;
+
+  label {
+    display: grid;
+    gap: 0.4rem;
+    color: #bfdbfe;
+    font-weight: 800;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    background: #020617;
+    color: #f8fafc;
+    padding: 0.8rem;
+    outline: none;
+
+    &:focus {
+      border-color: rgba(96, 165, 250, 0.7);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+}
+
+.claim-error {
+  margin: 0;
+  color: #fecaca;
+  font-weight: 800;
+}
+
+.claim-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 720px) {
   .tracking-error {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .claim-modal__summary {
+    grid-template-columns: 1fr;
   }
 }

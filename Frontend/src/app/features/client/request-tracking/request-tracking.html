@@ -107,6 +107,13 @@
           </div>
 
           <div>
+            <span>Fecha prometida</span>
+            <strong>
+              {{ getPromisedDate() ? (getPromisedDate() | date:'dd/MM/yyyy') : 'No registrada' }}
+            </strong>
+          </div>
+
+          <div>
             <span>Dirección</span>
             <strong>{{ tracking.direccion }}</strong>
           </div>
@@ -125,6 +132,27 @@
           <strong>{{ tracking.codigoRecepcion || 'Pendiente' }}</strong>
           <p>Usa este código para verificar la entrega una vez que el pedido llegue a destino.</p>
         </div>
+
+        <div class="delay-claim-card" *ngIf="currentClaim; else delayClaimAction">
+          <span>Reclamo enviado al proveedor</span>
+          <strong>{{ currentClaim.estado }}</strong>
+          <p>{{ currentClaim.descripcion }}</p>
+          <small>
+            Fecha prometida: {{ formatClaimDate(currentClaim.fechaPrometida) }}
+            - Demora: {{ currentClaim.diasDemora }} dia{{ currentClaim.diasDemora === 1 ? '' : 's' }}
+          </small>
+        </div>
+
+        <ng-template #delayClaimAction>
+          <div class="delay-claim-card delay-claim-card--warning" *ngIf="canCreateDelayClaim()">
+            <span>Posible demora</span>
+            <strong>Solicitud de reclamo</strong>
+            <p>{{ getDelayClaimHint() }}</p>
+            <button type="button" class="btn-delay-claim" (click)="abrirReclamoDemora()">
+              Generar reclamo por demora
+            </button>
+          </div>
+        </ng-template>
 
         <div class="actions-box" >
 
@@ -148,3 +176,58 @@
   </div>
 
 </div>
+
+<div class="claim-modal-backdrop" *ngIf="claimModalOpen" (click)="cerrarReclamoDemora()"></div>
+
+<section class="claim-modal" *ngIf="claimModalOpen" role="dialog" aria-modal="true" aria-labelledby="claim-modal-title">
+  <header class="claim-modal__header">
+    <div>
+      <span>Solicitud al proveedor</span>
+      <h2 id="claim-modal-title">Reclamo por demora</h2>
+    </div>
+
+    <button type="button" (click)="cerrarReclamoDemora()" aria-label="Cerrar reclamo">x</button>
+  </header>
+
+  <div class="claim-modal__summary">
+    <div>
+      <span>Solicitud</span>
+      <strong>{{ getRequestCode() }}</strong>
+    </div>
+
+    <div>
+      <span>Proveedor</span>
+      <strong>{{ tracking?.proveedor || 'Proveedor' }}</strong>
+    </div>
+
+    <div>
+      <span>Demora calculada</span>
+      <strong>{{ getDelayDays(getClaimPromisedDate()) }} dia{{ getDelayDays(getClaimPromisedDate()) === 1 ? '' : 's' }}</strong>
+    </div>
+  </div>
+
+  <form class="claim-form" (ngSubmit)="guardarReclamoDemora()">
+    <label>
+      Fecha prometida por el proveedor
+      <input type="date" name="claimPromisedDate" [(ngModel)]="claimPromisedDate" required>
+    </label>
+
+    <label>
+      Detalle del reclamo
+      <textarea
+        name="claimDescription"
+        [(ngModel)]="claimDescription"
+        rows="5"
+        maxlength="600"
+        required>
+      </textarea>
+    </label>
+
+    <p class="claim-error" *ngIf="claimError">{{ claimError }}</p>
+
+    <div class="claim-actions">
+      <button type="button" class="btn-secondary" (click)="cerrarReclamoDemora()">Cancelar</button>
+      <button type="submit" class="btn-primary">Enviar solicitud de reclamo</button>
+    </div>
+  </form>
+</section>

@@ -43,6 +43,7 @@
               [class.delivered]="order.estado === 'ENTREGADA' || order.estado === 'Entregado'">
               {{ order.estado }}
             </em>
+            <small class="claim-mini-badge" *ngIf="hasDelayClaim(order)">Reclamo por demora</small>
           </div>
         </button>
 
@@ -58,6 +59,20 @@
           <span class="status-pill"> {{selectedRequest?.estado}} </span>
           <h2>Orden {{getOrCode(selectedRequest)}}    </h2>
           <p>Destino: Sede principal, Lima</p>
+        </div>
+      </div>
+
+      <div class="provider-claim-alert" *ngIf="selectedDelayClaim as claim">
+        <div>
+          <span>Reclamo pendiente del cliente</span>
+          <h3>Demora en entrega</h3>
+          <p>{{ claim.descripcion }}</p>
+        </div>
+
+        <div class="provider-claim-alert__meta">
+          <strong>{{ claim.diasDemora }} dia{{ claim.diasDemora === 1 ? '' : 's' }}</strong>
+          <small>Fecha prometida: {{ formatClaimDate(claim.fechaPrometida) }}</small>
+          <small>Estado: {{ claim.estado }}</small>
         </div>
       </div>
 

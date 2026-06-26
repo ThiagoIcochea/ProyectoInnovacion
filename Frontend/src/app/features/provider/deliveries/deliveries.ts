@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -7,6 +7,7 @@ import { DeliveriesService } from './deliveries.service';
 import { DeliveryDetail } from './delivery-detail.model';
 import { DeliveryRequest } from './delivery.model';
 import { TrackingStep } from './tracking-step.model';
+import { DelayClaim, DelayClaimsService } from '../../../core/services/delay-claims.service';
 
 @Component({
   selector: 'app-provider-deliveries',
@@ -15,7 +16,7 @@ import { TrackingStep } from './tracking-step.model';
   templateUrl: './deliveries.html',
   styleUrls: ['./deliveries.scss']
 })
-export class ProviderDeliveriesComponent implements OnInit {
+export class ProviderDeliveriesComponent implements OnInit, OnDestroy {
   deliveries$: Observable<DeliveryRequest[]> = of([]);
   tracking$: Observable<TrackingStep[]> = of([]);
   details$: Observable<DeliveryDetail[]> = of([]);
@@ -29,13 +30,26 @@ export class ProviderDeliveriesComponent implements OnInit {
   codigoEntrega = '';
   guardando = false;
   errorMessage = '';
+  delayClaims: DelayClaim[] = [];
+  private delayClaimsUpdatedHandler = () => {
+    this.cargarReclamosLocales();
+  };
 
   constructor(
-    private deliveriesService: DeliveriesService
+    private deliveriesService: DeliveriesService,
+    private delayClaimsService: DelayClaimsService
   ) {}
 
   ngOnInit(): void {
+    window.addEventListener('deliveryDelayClaimsUpdated', this.delayClaimsUpdatedHandler);
+    window.addEventListener('storage', this.delayClaimsUpdatedHandler);
+    this.cargarReclamosLocales();
     this.recargarSolicitudes();
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('deliveryDelayClaimsUpdated', this.delayClaimsUpdatedHandler);
+    window.removeEventListener('storage', this.delayClaimsUpdatedHandler);
   }
 
   recargarSolicitudes(): void {
@@ -81,6 +95,7 @@ export class ProviderDeliveriesComponent implements OnInit {
   }
 
   seleccionarSolicitud(solicitud: DeliveryRequest): void {
+    this.cargarReclamosLocales();
     this.selectedRequest = solicitud;
     this.estadoSeleccionado = '';
     this.codigoEntrega = '';
@@ -187,6 +202,34 @@ export class ProviderDeliveriesComponent implements OnInit {
     const id = String(deliverie.idSolicitud).padStart(4, '0');
 
     return `OR-${year}-${id}`;
+  }
+
+  getClaimForOrder(order: DeliveryRequest | null | undefined): DelayClaim | null {
+    if (!order?.idSolicitud) {
+      return null;
+    }
+
+    return this.delayClaims.find(claim => Number(claim.idSolicitud) === Number(order.idSolicitud)) || null;
+  }
+
+  hasDelayClaim(order: DeliveryRequest | null | undefined): boolean {
+    return !!this.getClaimForOrder(order);
+  }
+
+  get selectedDelayClaim(): DelayClaim | null {
+    return this.getClaimForOrder(this.selectedRequest);
+  }
+
+  formatClaimDate(value?: string): string {
+    if (!value) {
+      return '';
+    }
+
+    return new Date(value).toLocaleDateString('es-PE');
+  }
+
+  private cargarReclamosLocales(): void {
+    this.delayClaims = this.delayClaimsService.getAll();
   }
 
   private notifyProviderCountsRefresh(): void {
