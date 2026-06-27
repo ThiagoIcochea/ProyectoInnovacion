@@ -6,6 +6,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 import { DelayClaim, DelayClaimsService } from '../../../core/services/delay-claims.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-request-tracking',
@@ -31,7 +32,8 @@ export class RequestTrackingComponent implements OnInit {
     private http: HttpClient,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private delayClaimsService: DelayClaimsService
+    private delayClaimsService: DelayClaimsService,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -200,6 +202,22 @@ export class RequestTrackingComponent implements OnInit {
     this.claimModalOpen = false;
     this.claimError = '';
     this.cdr.detectChanges();
+
+    // Attempt to send the claim via backend/email with current evidence
+    const emailPayload = {
+      idSolicitud: Number(this.tracking.idSolicitud),
+      proveedor: this.tracking?.proveedor || 'Proveedor',
+      empresaCliente: this.tracking?.empresaCompradora?.razonSocial || 'Cliente',
+      motivo: 'DEMORA_ENTREGA',
+      descripcion: description,
+      fechaPrometida: promisedDate.toISOString(),
+      evidencia: [] // frontend: attach evidence files if available (not implemented)
+    };
+
+    this.notification.sendDelayClaimEmail(emailPayload).subscribe({
+      next: () => console.log('Reclamo enviado por correo (backend).'),
+      error: (err) => console.warn('Error enviando reclamo por correo', err)
+    });
   }
 
   getRequestCode(): string {

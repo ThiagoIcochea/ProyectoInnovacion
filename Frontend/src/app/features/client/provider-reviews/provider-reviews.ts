@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
+import { WebsocketService } from '../../../core/services/websocket.service';
 
 @Component({
   selector: 'app-provider-reviews',
@@ -45,7 +46,8 @@ export class ProviderReviewsComponent implements OnInit {
   constructor(
     private router: Router,
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private websocket: WebsocketService
   ) {
     const nav = this.router.getCurrentNavigation();
     const state = nav?.extras?.state ?? history.state;
@@ -93,6 +95,34 @@ export class ProviderReviewsComponent implements OnInit {
 
       this.loadingProviders = false;
       this.initialProvidersLoaded = true;
+    }
+
+    // Connect to websocket (optional) to receive live reviews
+    try {
+      this.websocket.connect();
+      this.websocket.onMessage().subscribe((msg: any) => {
+        if (!msg) return;
+
+        // expected shape: { type: 'review.created', providerId, productId, review }
+        if (msg.type === 'review.created') {
+          const pid = String(msg.providerId || msg.provider || msg.idProveedor || msg.id_proveedor || msg.providerIdLocal || '');
+          const prod = String(msg.productId || msg.product || msg.idProducto || msg.id_producto || '');
+
+          this.providers = this.providers.map(p => {
+            const pId = String(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider ?? '');
+            if (pId === pid) {
+              const comentario = this.normalizarComentario(msg.review || msg.payload || msg);
+              p.comentarios = [comentario, ...(p.comentarios || [])];
+              this.recalcularMetricasProveedor(p);
+            }
+            return p;
+          });
+
+          this.cdr.detectChanges();
+        }
+      });
+    } catch (e) {
+      console.warn('Websocket unavailable, falling back to HTTP polling', e);
     }
   }
 
@@ -420,6 +450,15 @@ export class ProviderReviewsComponent implements OnInit {
       comentario?.reaccion ??
       comentario?.reaction ??
       null
+    ,
+
+    usuarioNombre:
+      comentario?.usuarioNombre ?? comentario?.usuario?.nombre ?? comentario?.user?.name ?? comentario?.author ?? 'Usuario',
+
+    puntuacion:
+      Number(comentario?.puntuacion ?? comentario?.puntaje ?? comentario?.rating ?? comentario?.score ?? 0),
+
+    fechaFormateada: comentario?.fecha ? new Date(comentario.fecha).toLocaleString('es-PE') : 'No disponible'
   };
 }
 

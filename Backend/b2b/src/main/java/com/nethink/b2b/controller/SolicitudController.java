@@ -68,6 +68,24 @@ public class SolicitudController {
         
     }
 
+        @PostMapping("/{idSolicitud}/notify-evaluation")
+        public ResponseEntity<?> notifyEvaluation(@PathVariable Integer idSolicitud) {
+                solicitudService.notifyEvaluation(idSolicitud);
+                return ResponseEntity.ok(Map.of("message", "Notificación de evaluación solicitada"));
+        }
+
+        @PostMapping("/{idSolicitud}/auto-complete")
+        public ResponseEntity<?> autoComplete(@PathVariable Integer idSolicitud) {
+                solicitudService.autoCompleteIfUnresolved(idSolicitud);
+                return ResponseEntity.ok(Map.of("message", "Auto-complete ejecutado"));
+        }
+
+        @PostMapping("/{idSolicitud}/evaluation")
+        public ResponseEntity<?> resolveEvaluation(@PathVariable Integer idSolicitud) {
+                solicitudService.resolveEvaluation(idSolicitud);
+                return ResponseEntity.ok(Map.of("message", "Evaluación registrada"));
+        }
+
     
     @GetMapping("/mis-solicitudes")
     public ResponseEntity<List<SolicitudResponse>> listarMisSolicitudes(Principal principal) {

@@ -593,6 +593,77 @@ BigDecimal totalItem =
         return codigo;
     }
 
+        // Enviar correo solicitando evaluación al cliente
+        public void notifyEvaluation(Integer idSolicitud) {
+                Solicitud s = solicitudRepo.findById(idSolicitud)
+                                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+
+                try {
+                        emailService.enviarCorreoEvaluacionCliente(s);
+                } catch (Exception e) {
+                        System.out.println("notifyEvaluation error: " + e.getMessage());
+                }
+        }
+
+        // Marcar como completada si no hubo respuesta
+        public void autoCompleteIfUnresolved(Integer idSolicitud) {
+                Solicitud s = solicitudRepo.findById(idSolicitud)
+                                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+
+                if (s.getEstado() == EstadoSolicitud.ENTREGADA) {
+                        s.setEstado(EstadoSolicitud.COMPLETADA);
+                        solicitudRepo.save(s);
+
+                        SolicitudHistorial historial = new SolicitudHistorial();
+                        historial.setSolicitud(s);
+                        historial.setIdUsuario(s.getUsuario() != null ? s.getUsuario().getIdUsuario() : null);
+                        historial.setEstado(EstadoSolicitud.COMPLETADA.name());
+                        historial.setDescripcion("Solicitud marcada como completada automáticamente por falta de evaluación");
+                        historial.setFecha(LocalDateTime.now());
+                        historialRepo.save(historial);
+                }
+        }
+
+        // Resolver evaluación enviada por cliente (marca completada)
+        public void resolveEvaluation(Integer idSolicitud) {
+                Solicitud s = solicitudRepo.findById(idSolicitud)
+                                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+
+                s.setEstado(EstadoSolicitud.COMPLETADA);
+                solicitudRepo.save(s);
+
+                SolicitudHistorial historial = new SolicitudHistorial();
+                historial.setSolicitud(s);
+                historial.setIdUsuario(s.getUsuario() != null ? s.getUsuario().getIdUsuario() : null);
+                historial.setEstado(EstadoSolicitud.COMPLETADA.name());
+                historial.setDescripcion("Evaluación recibida y solicitud marcada como completada");
+                historial.setFecha(LocalDateTime.now());
+                historialRepo.save(historial);
+        }
+
+        // Registrar reclamo por demora y notificar al proveedor
+        public void enviarReclamoDemora(Integer idSolicitud, String descripcion, String evidenciaJson) {
+                Solicitud s = solicitudRepo.findById(idSolicitud)
+                                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+
+                SolicitudHistorial historial = new SolicitudHistorial();
+                historial.setSolicitud(s);
+                historial.setIdUsuario(s.getUsuario() != null ? s.getUsuario().getIdUsuario() : null);
+                historial.setEstado(EstadoSolicitud.EN_RECLAMO.name());
+                historial.setDescripcion("Reclamo por demora: " + (descripcion != null ? descripcion : ""));
+                historial.setFecha(LocalDateTime.now());
+                historialRepo.save(historial);
+
+                s.setEstado(EstadoSolicitud.EN_RECLAMO);
+                solicitudRepo.save(s);
+
+                try {
+                        emailService.enviarCorreoReclamoDemora(s, descripcion, evidenciaJson);
+                } catch (Exception e) {
+                        System.out.println("enviarReclamoDemora email error: " + e.getMessage());
+                }
+        }
+
     private String formatearEstado(
             EstadoSolicitud estado
     ) {

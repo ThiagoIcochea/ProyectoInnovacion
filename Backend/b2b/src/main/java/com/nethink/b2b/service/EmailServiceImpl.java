@@ -156,6 +156,122 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Async
+    @Override
+    public void enviarCorreoEvaluacionCliente(Solicitud solicitud) {
+        try {
+            if (solicitud == null || solicitud.getUsuario() == null) return;
+
+            Resend resend = getResendClient();
+
+            String html = """
+                    <div style='font-family:Arial,sans-serif;background:#f4f6f9;padding:40px'>
+                        <div style='max-width:700px;margin:auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.1)'>
+
+                            <div style='background:#10b981;padding:25px;text-align:center;color:white'>
+                                <h1 style='margin:0'>Tu entrega fue registrada</h1>
+                            </div>
+
+                            <div style='padding:40px'>
+                                <h2 style='color:#0f172a'>¿Cómo fue la experiencia con el proveedor?</h2>
+
+                                <p style='font-size:16px;color:#334155'>
+                                    Hola <b>%s</b>,
+                                </p>
+
+                                <p style='font-size:15px;color:#475569'>
+                                    Tu pedido ha sido marcado como entregado. Por favor, califica al proveedor haciendo clic en el siguiente enlace.
+                                </p>
+
+                                <div style='background:#eff6ff;padding:20px;border-radius:10px;margin-top:20px'>
+                                    <p><b>Código de recepción:</b> %s</p>
+                                    <p><b>Total:</b> %s</p>
+                                </div>
+
+                                <p style='margin-top:30px;color:#64748b'>
+                                    <a href='%s/app/requests/evaluation'>Calificar ahora</a>
+                                </p>
+                            </div>
+
+                            <div style='background:#f8fafc;padding:20px;text-align:center;color:#94a3b8;font-size:13px'>
+                                © 2026 NETHINK B2B
+                            </div>
+
+                        </div>
+                    </div>
+                    """.formatted(
+                    solicitud.getUsuario().getNombres(),
+                    solicitud.getCodigoRecepcion(),
+                    solicitud.getTotal(),
+                    configService.getValor("APP_FRONTEND_ORIGIN") != null
+                            ? configService.getValor("APP_FRONTEND_ORIGIN")
+                            : "https://proyectoinnovacion.onrender.com"
+            );
+
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                    .to(solicitud.getUsuario().getCorreo())
+                    .subject("Califica tu entrega - NETHINK B2B")
+                    .html(html)
+                    .build();
+
+            resend.emails().send(params);
+
+        } catch (Exception e) {
+            System.out.println("Error enviando correo evaluacion: " + e.getMessage());
+        }
+    }
+
+    @Async
+    @Override
+    public void enviarCorreoReclamoDemora(Solicitud solicitud, String descripcion, String evidenciaJson) {
+        try {
+            if (solicitud == null || solicitud.getProveedor() == null) return;
+
+            Resend resend = getResendClient();
+
+            String html = """
+                    <div style='font-family:Arial,sans-serif;background:#fff7ed;padding:40px'>
+                        <div style='max-width:700px;margin:auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.06)'>
+                            <div style='background:#f97316;padding:20px;text-align:center;color:white'>
+                                <h1 style='margin:0'>Reclamo por demora</h1>
+                            </div>
+                            <div style='padding:30px'>
+                                <p>Se ha registrado un reclamo por demora para la solicitud <b>%s</b>.</p>
+                                <p><b>Cliente:</b> %s</p>
+                                <p><b>Descripción:</b><br/>%s</p>
+                                <p><b>Evidencia (JSON):</b><br/>%s</p>
+                            </div>
+                            <div style='background:#f8fafc;padding:20px;text-align:center;color:#94a3b8;font-size:13px'>
+                                © 2026 NETHINK B2B
+                            </div>
+                        </div>
+                    </div>
+                    """.formatted(
+                    solicitud.getCodigoRecepcion(),
+                    solicitud.getUsuario() != null ? solicitud.getUsuario().getCorreo() : "Cliente",
+                    descripcion,
+                    evidenciaJson == null ? "Sin evidencia" : evidenciaJson
+            );
+
+            String correoProveedor = solicitud.getProveedor().getUsuario().getCorreo();
+
+            if (correoProveedor == null || correoProveedor.isBlank()) return;
+
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                    .to(correoProveedor)
+                    .subject("Reclamo por demora - " + solicitud.getCodigoRecepcion())
+                    .html(html)
+                    .build();
+
+            resend.emails().send(params);
+
+        } catch (Exception e) {
+            System.out.println("Error enviando correo reclamo: " + e.getMessage());
+        }
+    }
+
+    @Async
     public void enviarCorreoRegistroCliente(Usuario usuario) {
 
         try {
