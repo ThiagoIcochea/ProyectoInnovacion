@@ -189,7 +189,7 @@ public class EmailServiceImpl implements EmailService {
                                 </div>
 
                                 <p style='margin-top:30px;color:#64748b'>
-                                    <a href='%s/app/requests/evaluation'>Calificar ahora</a>
+                                    <a href="%s/app/requests/evaluation/%d">Calificar ahora</a>
                                 </p>
                             </div>
 
@@ -199,14 +199,14 @@ public class EmailServiceImpl implements EmailService {
 
                         </div>
                     </div>
-                    """.formatted(
-                    solicitud.getUsuario().getNombres(),
-                    solicitud.getCodigoRecepcion(),
-                    solicitud.getTotal(),
-                    configService.getValor("APP_FRONTEND_ORIGIN") != null
+                 """.formatted(
+                        solicitud.getUsuario().getNombres(),
+                        solicitud.getCodigoRecepcion(),
+                        solicitud.getTotal(),
+                        configService.getValor("APP_FRONTEND_ORIGIN") != null
                             ? configService.getValor("APP_FRONTEND_ORIGIN")
-                            : "https://proyectoinnovacion.onrender.com"
-            );
+                            : "https://proyectoinnovacion.onrender.com",
+                        solicitud.getIdSolicitud());
 
             CreateEmailOptions params = CreateEmailOptions.builder()
                     .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")

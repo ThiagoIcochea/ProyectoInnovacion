@@ -1204,6 +1204,7 @@ public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, S
         }
         
         solicitud.setFechaEntrega(LocalDateTime.now());
+        emailService.enviarCorreoEvaluacionCliente(solicitud);
     }
     
 
