@@ -40,6 +40,13 @@ implements OnInit {
 
   searchText: string = '';
 
+  showManageModal = false;
+
+productImages: any[] = [];
+
+selectedImage = '';
+
+
   constructor(
     private http: HttpClient,
     private cdr: ChangeDetectorRef
@@ -59,6 +66,42 @@ implements OnInit {
 
     });
   }
+
+
+  openManageModal(): void {
+
+    this.showManageModal = true;
+
+    /*
+        Aquí luego llamarás
+
+        GET /productos/{id}/imagenes
+    */
+
+    this.productImages = [
+
+        {
+            url: 'https://tse4.mm.bing.net/th?q=Cisco+Catalyst+9200L+Stack+Module&w=400&h=400',
+            principal: true
+        },
+
+        {
+            url: 'https://tse2.mm.bing.net/th?q=Router+Cisco+ISR+4331&w=400&h=400',
+            principal: false
+        }
+
+    ];
+
+    this.selectedImage =
+        this.productImages[0].url;
+
+}
+
+closeManageModal(): void {
+
+    this.showManageModal = false;
+
+}
 
   obtenerProductos(): void {
 

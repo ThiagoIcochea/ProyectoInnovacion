@@ -163,6 +163,18 @@
 
       </div>
 
+      <div class="detail-actions">
+
+  <button
+    class="manage-btn"
+    (click)="openManageModal()">
+
+    Gestionar producto
+
+  </button>
+
+</div>
+
       <div class="info-box">
         El stock mostrado proviene de la sincronización API de cada proveedor.
         El administrador solo supervisa y notifica incidencias.
@@ -172,4 +184,140 @@
 
   </div>
 
+
+  <div
+    class="modal-overlay"
+    *ngIf="showManageModal">
+
+    <div class="product-modal">
+
+        <div class="modal-header">
+
+            <div>
+
+                <span>Configuración</span>
+
+                <h2>
+                    {{ selectedProduct?.name }}
+                </h2>
+
+            </div>
+
+            <button
+                class="close-btn"
+                (click)="closeManageModal()">
+
+                ✕
+
+            </button>
+
+        </div>
+
+        <div class="modal-body">
+
+            <!-- Columna izquierda -->
+
+            <div class="gallery-section">
+
+                <div class="main-image">
+
+                    <img
+                        [src]="selectedImage"
+                        *ngIf="selectedImage">
+
+                </div>
+
+                <div class="gallery">
+
+                    <div
+                        class="gallery-item"
+                        *ngFor="let image of productImages"
+                        (click)="selectedImage=image.url">
+
+                        <img
+                            [src]="image.url">
+
+                        <span
+                            *ngIf="image.principal">
+
+                            Principal
+
+                        </span>
+
+                    </div>
+
+                    <button class="add-image">
+
+                        +
+
+                        Agregar imagen
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- Columna derecha -->
+
+            <div class="config-section">
+
+                <h3>Información general</h3>
+
+                <label>Nombre</label>
+
+                <input
+                    [(ngModel)]="selectedProduct.name">
+
+                <label>Marca</label>
+
+                <input
+                    [(ngModel)]="selectedProduct.brand">
+
+                <label>Categoría</label>
+
+                <input
+                    [(ngModel)]="selectedProduct.category">
+
+                <label>Estado</label>
+
+                <select
+                    [(ngModel)]="selectedProduct.status">
+
+                    <option>Activo</option>
+
+                    <option>Stock medio</option>
+
+                    <option>Bajo stock</option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button
+                class="cancel-btn"
+                (click)="closeManageModal()">
+
+                Cancelar
+
+            </button>
+
+            <button
+                class="save-btn">
+
+                Guardar cambios
+
+            </button>
+
+        </div>
+
+    </div>
+
 </div>
+
+</div>
+

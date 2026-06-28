@@ -1129,14 +1129,19 @@ export class ProviderReviewsComponent implements OnInit {
   }
 
   getProviderResponse(provider: any): number | null {
-    return provider?.tiempoRespuestaPromedio ??
-      provider?.tiempoRespuesta ??
-      provider?.tiempo_respuesta ??
-      provider?.tiempoEntregaPromedio ??
-      provider?.tiempoEntrega ??
-      provider?.tiempoEntregaDias ??
-      null;
-  }
+
+  const value =
+    provider?.tiempoRespuestaPromedio ??
+    provider?.tiempoRespuesta ??
+    provider?.tiempo_respuesta ??
+    provider?.tiempoEntregaPromedio ??
+    provider?.tiempoEntrega ??
+    provider?.tiempoEntregaDias;
+
+  return value != null
+    ? Math.round(value * 100) / 100
+    : null;
+}
 
   getProviderResponseLabel(provider: any): string {
     const value = this.getProviderResponse(provider);

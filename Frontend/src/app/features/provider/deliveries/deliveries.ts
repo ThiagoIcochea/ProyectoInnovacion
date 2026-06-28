@@ -52,29 +52,53 @@ export class ProviderDeliveriesComponent implements OnInit, OnDestroy {
     window.removeEventListener('storage', this.delayClaimsUpdatedHandler);
   }
 
-  recargarSolicitudes(): void {
-    this.deliveries$ =
-      this.deliveriesService
-        .listarSolicitudesEntrega()
-        .pipe(
-          tap((data) => {
-            this.deliveries = data || [];
-            this.filtrarEntregas();
+recargarSolicitudes(): void {
 
-            if (this.filteredDeliveries.length > 0) {
-              const currentId = this.selectedRequest?.idSolicitud;
-              this.seleccionarSolicitud(
-                this.filteredDeliveries.find(item => item.idSolicitud === currentId) ||
-                this.filteredDeliveries[0]
-              );
-            } else {
-              this.selectedRequest = null;
-              this.tracking$ = of([]);
-              this.details$ = of([]);
-            }
-          })
-        );
-  }
+  this.deliveriesService
+    .listarSolicitudesEntrega()
+    .subscribe({
+
+      next: (data) => {
+
+        console.log("Datos recibidos:", data);
+
+        this.deliveries = data || [];
+
+        this.filtrarEntregas();
+
+        if (this.filteredDeliveries.length > 0) {
+
+          const currentId = this.selectedRequest?.idSolicitud;
+
+          this.seleccionarSolicitud(
+
+            this.filteredDeliveries.find(
+              item => item.idSolicitud === currentId
+            ) || this.filteredDeliveries[0]
+
+          );
+
+        } else {
+
+          this.selectedRequest = null;
+
+          this.tracking$ = of([]);
+
+          this.details$ = of([]);
+
+        }
+
+      },
+
+      error: (err) => {
+
+        console.error("Error:", err);
+
+      }
+
+    });
+
+}
 
   filtrarEntregas(): void {
     const text = this.searchTerm.trim().toLowerCase();
