@@ -89,11 +89,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/client/request-tracking/request-tracking').then(m => m.RequestTrackingComponent)
       },
-      {
-        path: 'requests/evaluation',
-        loadComponent: () =>
-          import('./features/client/request-evaluation/request-evaluation').then(m => m.RequestEvaluationComponent)
-      },
+     {
+  path: 'requests/evaluation/:id',
+  loadComponent: () =>
+    import('./features/client/request-evaluation/request-evaluation')
+      .then(m => m.RequestEvaluationComponent)
+},
       {
         path: 'history',
         loadComponent: () =>
