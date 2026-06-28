@@ -33,6 +33,11 @@
 }
 
 .products-card,
+.detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
 .detail-card {
   background: #1e293b;
   border: 1px solid #374151;
