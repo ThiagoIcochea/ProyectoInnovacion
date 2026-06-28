@@ -1,5 +1,6 @@
 package com.nethink.b2b.service;
 
+import com.nethink.b2b.entity.ProveedorProducto;
 import com.nethink.b2b.entity.Solicitud;
 import com.nethink.b2b.entity.Usuario;
 
@@ -11,6 +12,11 @@ public interface EmailService {
     void enviarCorreoEvaluacionCliente(Solicitud solicitud);
     void enviarCorreoReclamoDemora(Solicitud solicitud, String descripcion, String evidenciaJson);
     void enviarCorreoRegistroCliente(Usuario usuario);
+    void enviarAlertaStockBajo(ProveedorProducto proveedorProducto);
+
+void enviarAlertaSinStock(ProveedorProducto proveedorProducto);
+
+void enviarAlertaReposicionStock(ProveedorProducto proveedorProducto, Integer stockAnterior);
     void enviarCorreoRegistroProveedor(
             Usuario usuario,
             String razonSocial,

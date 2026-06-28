@@ -1,5 +1,6 @@
 package com.nethink.b2b.service;
 
+import com.nethink.b2b.entity.ProveedorProducto;
 import com.nethink.b2b.entity.Solicitud;
 import com.nethink.b2b.entity.Usuario;
 import com.resend.Resend;
@@ -405,4 +406,232 @@ public class EmailServiceImpl implements EmailService {
             System.out.println("Error correo registro proveedor: " + e.getMessage());
         }
     }
+    
+    @Async
+@Override
+public void enviarAlertaStockBajo(ProveedorProducto proveedorProducto) {
+
+    try {
+
+        if (proveedorProducto == null
+                || proveedorProducto.getProveedor() == null
+                || proveedorProducto.getProveedor().getUsuario() == null) {
+            return;
+        }
+
+        Resend resend = getResendClient();
+
+        String html = """
+                <div style='font-family:Arial,sans-serif;background:#f4f6f9;padding:40px'>
+                    <div style='max-width:700px;margin:auto;background:white;border-radius:12px;overflow:hidden'>
+
+                        <div style='background:#f59e0b;padding:25px;text-align:center;color:white'>
+                            <h1 style='margin:0'>Alerta de Stock Bajo</h1>
+                        </div>
+
+                        <div style='padding:35px'>
+
+                            <p>Hola <b>%s</b>,</p>
+
+                            <p>
+                                Tu producto ha alcanzado un nivel bajo de inventario.
+                            </p>
+
+                            <div style='background:#fef3c7;padding:20px;border-radius:10px'>
+
+                                <p><b>Producto:</b> %s</p>
+
+                                <p><b>SKU:</b> %s</p>
+
+                                <p><b>Stock actual:</b> %d unidades</p>
+
+                                <p><b>Última actualización:</b> %s</p>
+
+                            </div>
+
+                            <p style='margin-top:25px'>
+                                Te recomendamos actualizar el inventario para evitar quedarte sin stock.
+                            </p>
+
+                        </div>
+
+                        <div style='background:#f8fafc;padding:20px;text-align:center;color:#94a3b8'>
+                            © 2026 NETHINK B2B
+                        </div>
+
+                    </div>
+                </div>
+                """.formatted(
+                proveedorProducto.getProveedor().getUsuario().getNombres(),
+                proveedorProducto.getProducto().getNombre(),
+                proveedorProducto.getProducto().getSkuGlobal(),
+                proveedorProducto.getStock(),
+                proveedorProducto.getUltimaActualizacionStock()
+        );
+
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                .to(proveedorProducto.getProveedor().getUsuario().getCorreo())
+                .subject("⚠ Stock Bajo - " + proveedorProducto.getProducto().getNombre())
+                .html(html)
+                .build();
+
+        resend.emails().send(params);
+
+    } catch (Exception e) {
+        System.out.println("Error correo stock bajo: " + e.getMessage());
+    }
+}
+
+@Async
+@Override
+public void enviarAlertaSinStock(ProveedorProducto proveedorProducto) {
+
+    try {
+
+        if (proveedorProducto == null
+                || proveedorProducto.getProveedor() == null
+                || proveedorProducto.getProveedor().getUsuario() == null) {
+            return;
+        }
+
+        Resend resend = getResendClient();
+
+        String html = """
+                <div style='font-family:Arial;background:#fff7ed;padding:40px'>
+
+                    <div style='max-width:700px;margin:auto;background:white;border-radius:12px;overflow:hidden'>
+
+                        <div style='background:#dc2626;padding:25px;text-align:center;color:white'>
+                            <h1>Producto sin Stock</h1>
+                        </div>
+
+                        <div style='padding:35px'>
+
+                            <p>Hola <b>%s</b>,</p>
+
+                            <p>
+                                Uno de tus productos ya no tiene existencias disponibles.
+                            </p>
+
+                            <div style='background:#fee2e2;padding:20px;border-radius:10px'>
+
+                                <p><b>Producto:</b> %s</p>
+
+                                <p><b>SKU:</b> %s</p>
+
+                                <p><b>Stock actual:</b> 0 unidades</p>
+
+                            </div>
+
+                            <p style='margin-top:20px'>
+                                Actualiza el inventario lo antes posible para seguir recibiendo solicitudes.
+                            </p>
+
+                        </div>
+
+                        <div style='background:#f8fafc;padding:20px;text-align:center;color:#94a3b8'>
+                            © 2026 NETHINK B2B
+                        </div>
+
+                    </div>
+
+                </div>
+                """.formatted(
+                proveedorProducto.getProveedor().getUsuario().getNombres(),
+                proveedorProducto.getProducto().getNombre(),
+                proveedorProducto.getProducto().getSkuGlobal()
+        );
+
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                .to(proveedorProducto.getProveedor().getUsuario().getCorreo())
+                .subject("🚨 Producto sin Stock")
+                .html(html)
+                .build();
+
+        resend.emails().send(params);
+
+    } catch (Exception e) {
+        System.out.println("Error correo sin stock: " + e.getMessage());
+    }
+}
+
+
+@Async
+@Override
+public void enviarAlertaReposicionStock(
+        ProveedorProducto proveedorProducto,
+        Integer stockAnterior
+) {
+
+    try {
+
+        if (proveedorProducto == null
+                || proveedorProducto.getProveedor() == null
+                || proveedorProducto.getProveedor().getUsuario() == null) {
+            return;
+        }
+
+        Resend resend = getResendClient();
+
+        String html = """
+                <div style='font-family:Arial;background:#f0fdf4;padding:40px'>
+
+                    <div style='max-width:700px;margin:auto;background:white;border-radius:12px;overflow:hidden'>
+
+                        <div style='background:#16a34a;padding:25px;text-align:center;color:white'>
+                            <h1>Stock Actualizado</h1>
+                        </div>
+
+                        <div style='padding:35px'>
+
+                            <p>Hola <b>%s</b>,</p>
+
+                            <p>
+                                Se registró correctamente una actualización del inventario.
+                            </p>
+
+                            <div style='background:#dcfce7;padding:20px;border-radius:10px'>
+
+                                <p><b>Producto:</b> %s</p>
+
+                                <p><b>SKU:</b> %s</p>
+
+                                <p><b>Stock anterior:</b> %d</p>
+
+                                <p><b>Stock actual:</b> %d</p>
+
+                            </div>
+
+                        </div>
+
+                        <div style='background:#f8fafc;padding:20px;text-align:center;color:#94a3b8'>
+                            © 2026 NETHINK B2B
+                        </div>
+
+                    </div>
+
+                </div>
+                """.formatted(
+                proveedorProducto.getProveedor().getUsuario().getNombres(),
+                proveedorProducto.getProducto().getNombre(),
+                proveedorProducto.getProducto().getSkuGlobal(),
+                stockAnterior,
+                proveedorProducto.getStock()
+        );
+
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                .to(proveedorProducto.getProveedor().getUsuario().getCorreo())
+                .subject("✅ Inventario actualizado")
+                .html(html)
+                .build();
+
+        resend.emails().send(params);
+
+    } catch (Exception e) {
+        System.out.println("Error correo reposición stock: " + e.getMessage());
+    }
+}
 }

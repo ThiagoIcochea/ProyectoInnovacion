@@ -146,7 +146,7 @@ public class ProductoService {
 
         dto.setTotalStock(stock);
 
-        if (stock <= 5) {
+        if (stock <= 10) {
             dto.setStatus("Bajo stock");
         }
 
