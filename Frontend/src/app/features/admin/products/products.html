@@ -180,19 +180,21 @@
 
                
 
-                <button
-                    *ngIf="i<productImages.length-1"
-                    (click)="moveRight(i); $event.stopPropagation()">
-
-                    ▶
-
-                </button>
+              
 
                  <button
                     *ngIf="i>0"
                     (click)="moveLeft(i); $event.stopPropagation()">
 
                     ◀
+
+                </button>
+
+                  <button
+                    *ngIf="i<productImages.length-1"
+                    (click)="moveRight(i); $event.stopPropagation()">
+
+                    ▶
 
                 </button>
 

@@ -205,7 +205,7 @@ public class EmailServiceImpl implements EmailService {
                         solicitud.getTotal(),
                         configService.getValor("APP_FRONTEND_ORIGIN") != null
                             ? configService.getValor("APP_FRONTEND_ORIGIN")
-                            : "https://proyectoinnovacion.onrender.com",
+                            : "https://proyectoinnovacion-1.onrender.com",
                         solicitud.getIdSolicitud());
 
             CreateEmailOptions params = CreateEmailOptions.builder()
