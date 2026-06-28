@@ -111,26 +111,53 @@ export class AdminProductsComponent implements OnInit {
     this.syncPrincipal();
   }
 
-  moveUp(i: number): void {
-    if (i === 0) return;
-    [this.productImages[i - 1], this.productImages[i]] =
-      [this.productImages[i], this.productImages[i - 1]];
-    this.syncPrincipal();
+ moveLeft(index: number): void {
+
+  if (index === 0) return;
+
+  [
+    this.productImages[index],
+    this.productImages[index - 1]
+  ] = [
+    this.productImages[index - 1],
+    this.productImages[index]
+  ];
+
+  this.syncPrincipal();
+
+}
+
+moveRight(index: number): void {
+
+  if (index === this.productImages.length - 1) return;
+
+  [
+    this.productImages[index],
+    this.productImages[index + 1]
+  ] = [
+    this.productImages[index + 1],
+    this.productImages[index]
+  ];
+
+  this.syncPrincipal();
+
+}
+
+ syncPrincipal(): void {
+
+  this.productImages.forEach((img, index) => {
+
+    img.principal = index === 0;
+
+  });
+
+  if (this.productImages.length > 0) {
+
+    this.selectedImage = this.productImages[0].url;
+
   }
 
-  moveDown(i: number): void {
-    if (i === this.productImages.length - 1) return;
-    [this.productImages[i + 1], this.productImages[i]] =
-      [this.productImages[i], this.productImages[i + 1]];
-    this.syncPrincipal();
-  }
-
-  syncPrincipal(): void {
-    if (this.productImages.length > 0) {
-      this.productImages.forEach((img, i) => img.principal = i === 0);
-      this.selectedImage = this.productImages[0].url;
-    }
-  }
+}
 
   // 📌 UPLOAD DESDE PC
   onFileSelected(event: any): void {

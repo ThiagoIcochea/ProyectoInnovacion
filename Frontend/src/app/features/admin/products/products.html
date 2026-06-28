@@ -154,44 +154,67 @@
         <!-- IZQUIERDA -->
         <div class="gallery-section">
 
-          <div class="main-image">
-            <img [src]="selectedImage" *ngIf="selectedImage">
-          </div>
+    <div class="main-image">
+        <img [src]="selectedImage" *ngIf="selectedImage">
+    </div>
 
-          <!-- UPLOAD -->
-          <input type="file" accept="image/*" (change)="onFileSelected($event)">
+    <div class="gallery">
 
-          <div class="gallery">
+        <div
+            class="gallery-item"
+            *ngFor="let image of productImages; let i = index"
+            (click)="selectImage(image.url)"
+        >
 
-            <div
-              class="gallery-item"
-              *ngFor="let image of productImages; let i = index"
-            >
+            <img [src]="image.url">
 
-              <img [src]="image.url">
+            <span
+                class="principal-badge"
+                *ngIf="i==0">
 
-              <span *ngIf="image.principal">
                 Principal
-              </span>
 
-              <div class="actions">
+            </span>
 
-                <button (click)="selectImage(image.url)">Ver</button>
+            <div class="gallery-actions">
 
-                <button (click)="setPrincipal(i)">⭐</button>
+                <button
+                    *ngIf="i>0"
+                    (click)="moveLeft(i); $event.stopPropagation()">
 
-                <button (click)="moveUp(i)">⬆</button>
+                    ◀
 
-                <button (click)="moveDown(i)">⬇</button>
+                </button>
 
-              </div>
+                <button
+                    *ngIf="i<productImages.length-1"
+                    (click)="moveRight(i); $event.stopPropagation()">
+
+                    ▶
+
+                </button>
 
             </div>
 
-          </div>
-
         </div>
 
+        <!-- BOTON AGREGAR -->
+
+        <label class="gallery-upload">
+
+            <span>+</span>
+
+            <input
+                type="file"
+                accept="image/*"
+                hidden
+                (change)="onFileSelected($event)">
+
+        </label>
+
+    </div>
+
+</div>
         <!-- DERECHA -->
         <div class="config-section">
 
