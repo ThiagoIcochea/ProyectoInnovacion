@@ -128,7 +128,9 @@ public interface ProductoRepository
 
         COUNT(DISTINCT pp.id_proveedor) AS providersCount,
 
-        COALESCE(SUM(pp.stock),0) AS totalStock
+        COALESCE(SUM(pp.stock),0) AS totalStock,
+                   
+        p.estado
 
     FROM productos p
 

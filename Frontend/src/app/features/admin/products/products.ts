@@ -1,43 +1,33 @@
 import { CommonModule } from '@angular/common';
-
 import {
   HttpClient,
   HttpClientModule,
   HttpHeaders
 } from '@angular/common/http';
-
 import {
   ChangeDetectorRef,
   Component,
   OnInit
 } from '@angular/core';
-
 import { FormsModule } from '@angular/forms';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
-  imports: [
-    CommonModule,
-    HttpClientModule,
-    FormsModule
-  ],
+  imports: [CommonModule, HttpClientModule, FormsModule],
   templateUrl: './products.html',
   styleUrl: './products.scss'
 })
 export class AdminProductsComponent implements OnInit {
 
-  private API_URL =
-    `${APP_API_BASE_URL}/productos/admin`;
+  private API_URL = `${APP_API_BASE_URL}/productos/admin`;
 
   products: any[] = [];
   filteredProducts: any[] = [];
-
   selectedProduct: any = null;
 
   searchText: string = '';
-
   showManageModal = false;
 
   productImages: any[] = [];
@@ -52,104 +42,117 @@ export class AdminProductsComponent implements OnInit {
     this.obtenerProductos();
   }
 
-  // 🔐 headers auth
   private headers(): HttpHeaders {
     return new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`
     });
   }
 
-  // 📦 CARGA PRODUCTOS (YA INCLUYE IMÁGENES DESDE BACKEND)
   obtenerProductos(): void {
+    this.http.get<any[]>(this.API_URL, { headers: this.headers() })
+      .subscribe({
+        next: (res) => {
+          this.products = res;
+          this.filteredProducts = [...res];
 
-    this.http.get<any[]>(
-      this.API_URL,
-      { headers: this.headers() }
-    ).subscribe({
+          if (this.filteredProducts.length > 0) {
+            this.selectedProduct = this.filteredProducts[0];
+            this.cargarImagenes();
+          }
 
-      next: (res) => {
-
-        this.products = res;
-        this.filteredProducts = [...res];
-
-        if (this.filteredProducts.length > 0) {
-          this.selectedProduct = this.filteredProducts[0];
-
-          // opcional: inicializar imágenes del primer producto
-          this.cargarImagenesSeleccionado();
+          this.cdr.detectChanges();
         }
-
-        this.cdr.detectChanges();
-      },
-
-      error: (err) => {
-        console.error('Error obteniendo productos', err);
-      }
-    });
+      });
   }
 
-  // 📌 seleccionar producto
   seleccionarProducto(product: any): void {
-
     this.selectedProduct = product;
-
-    this.cargarImagenesSeleccionado();
-
+    this.cargarImagenes();
     this.cdr.detectChanges();
   }
 
-  // 🔥 centraliza carga de imágenes desde backend ya embebido
-  private cargarImagenesSeleccionado(): void {
-
-    this.productImages =
-      this.selectedProduct?.images || [];
-
-    if (this.productImages.length > 0) {
-
-      const principal =
-        this.productImages.find((img: any) => img.principal);
-
-      this.selectedImage =
-        principal?.url || this.productImages[0].url;
-
-    } else {
-      this.selectedImage = '';
-    }
-  }
-
-  // 🔍 filtro
   filtrarProductos(): void {
-
     const text = this.searchText.toLowerCase();
 
-    this.filteredProducts = this.products.filter(product =>
-      product?.name?.toLowerCase().includes(text) ||
-      product?.brand?.toLowerCase().includes(text) ||
-      product?.category?.toLowerCase().includes(text)
+    this.filteredProducts = this.products.filter(p =>
+      p?.name?.toLowerCase().includes(text) ||
+      p?.brand?.toLowerCase().includes(text) ||
+      p?.category?.toLowerCase().includes(text)
     );
-
-    if (this.filteredProducts.length > 0) {
-      this.selectedProduct = this.filteredProducts[0];
-      this.cargarImagenesSeleccionado();
-    }
-
-    this.cdr.detectChanges();
   }
 
-  // 🧩 modal
   openManageModal(): void {
-
     this.showManageModal = true;
-
-    this.cargarImagenesSeleccionado();
+    this.cargarImagenes();
   }
 
   closeManageModal(): void {
     this.showManageModal = false;
   }
 
-  // 🖼️ cambiar imagen en galería
+  cargarImagenes(): void {
+    this.productImages = this.selectedProduct?.images || [];
+
+    if (this.productImages.length > 0) {
+      const principal = this.productImages.find((i: any) => i.principal);
+      this.selectedImage = principal?.url || this.productImages[0].url;
+    } else {
+      this.selectedImage = '';
+    }
+  }
+
   selectImage(url: string): void {
     this.selectedImage = url;
+  }
+
+  setPrincipal(index: number): void {
+    this.productImages.forEach(i => i.principal = false);
+    this.productImages[index].principal = true;
+    this.syncPrincipal();
+  }
+
+  moveUp(i: number): void {
+    if (i === 0) return;
+    [this.productImages[i - 1], this.productImages[i]] =
+      [this.productImages[i], this.productImages[i - 1]];
+    this.syncPrincipal();
+  }
+
+  moveDown(i: number): void {
+    if (i === this.productImages.length - 1) return;
+    [this.productImages[i + 1], this.productImages[i]] =
+      [this.productImages[i], this.productImages[i + 1]];
+    this.syncPrincipal();
+  }
+
+  syncPrincipal(): void {
+    if (this.productImages.length > 0) {
+      this.productImages.forEach((img, i) => img.principal = i === 0);
+      this.selectedImage = this.productImages[0].url;
+    }
+  }
+
+  // 📌 UPLOAD DESDE PC
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const newImage = {
+        url: reader.result as string,
+        principal: this.productImages.length === 0
+      };
+
+      this.productImages.push(newImage);
+
+      if (newImage.principal) {
+        this.selectedImage = newImage.url;
+      }
+    };
+
+    reader.readAsDataURL(file);
   }
 }

@@ -130,7 +130,13 @@ public class ProductoService {
                 new ProductoAdminResponse();
 
         Integer stock =
-                ((Number) row[5]).intValue();
+               ((Number) row[5]).intValue();
+        String status = ((String)row[6]);
+        
+        status = status.substring(0, 1).toUpperCase()
+        + status.substring(1).toLowerCase();
+        
+        dto.setStatus(status);
 
         dto.setIdProducto(
                 ((Number) row[0]).intValue()

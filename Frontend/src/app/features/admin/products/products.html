@@ -53,24 +53,12 @@
             {{ product.name }}
           </div>
 
-          <div>
-            {{ product.brand }}
-          </div>
+          <div>{{ product.brand }}</div>
+          <div>{{ product.category }}</div>
+          <div>{{ product.providersCount }}</div>
+          <div>{{ product.totalStock }} und.</div>
 
           <div>
-            {{ product.category }}
-          </div>
-
-          <div>
-            {{ product.providersCount }}
-          </div>
-
-          <div>
-            {{ product.totalStock }} und.
-          </div>
-
-          <div>
-
             <span
               class="status"
               [class.warning]="product.status === 'Stock medio'"
@@ -78,7 +66,6 @@
             >
               {{ product.status }}
             </span>
-
           </div>
 
         </div>
@@ -93,14 +80,10 @@
 
         <span>Producto seleccionado</span>
 
-        <h2>
-          {{ selectedProduct?.name }}
-        </h2>
+        <h2>{{ selectedProduct?.name }}</h2>
 
         <p>
-          {{ selectedProduct?.brand }}
-          ·
-          {{ selectedProduct?.category }}
+          {{ selectedProduct?.brand }} · {{ selectedProduct?.category }}
         </p>
 
       </div>
@@ -108,23 +91,13 @@
       <div class="detail-summary">
 
         <div>
-
           <span>Proveedores</span>
-
-          <strong>
-            {{ selectedProduct?.providersCount }}
-          </strong>
-
+          <strong>{{ selectedProduct?.providersCount }}</strong>
         </div>
 
         <div>
-
           <span>Stock total</span>
-
-          <strong>
-            {{ selectedProduct?.totalStock }}
-          </strong>
-
+          <strong>{{ selectedProduct?.totalStock }}</strong>
         </div>
 
       </div>
@@ -136,27 +109,8 @@
         <div class="provider-item">
 
           <div>
-
-            <strong>
-              Estado del producto
-            </strong>
-
-            <span>
-              {{ selectedProduct?.status }}
-            </span>
-
-          </div>
-
-          <div class="provider-stock">
-
-            <strong>
-              {{ selectedProduct?.totalStock }} und.
-            </strong>
-
-            <span>
-              {{ selectedProduct?.brand }}
-            </span>
-
+            <strong>Estado del producto</strong>
+            <span>{{ selectedProduct?.status }}</span>
           </div>
 
         </div>
@@ -165,139 +119,117 @@
 
       <div class="detail-actions">
 
- <button class="btn-secondary" (click)="openManageModal()">
-  Gestionar producto
-</button>
+        <button class="btn-secondary" (click)="openManageModal()">
+          Gestionar producto
+        </button>
 
-</div>
+      </div>
 
       <div class="info-box">
-        El stock mostrado proviene de la sincronización API de cada proveedor.
-        El administrador solo supervisa y notifica incidencias.
+        El stock mostrado proviene de la sincronización API.
       </div>
 
     </aside>
 
   </div>
 
-
-  <div
-    class="modal-overlay"
-    *ngIf="showManageModal">
+  <!-- MODAL -->
+  <div class="modal-overlay" *ngIf="showManageModal">
 
     <div class="product-modal">
 
-        <div class="modal-header">
+      <div class="modal-header">
 
-            <div>
+        <div>
+          <span>Configuración</span>
+          <h2>{{ selectedProduct?.name }}</h2>
+        </div>
 
-                <span>Configuración</span>
+        <button class="close-btn" (click)="closeManageModal()">✕</button>
 
-                <h2>
-                    {{ selectedProduct?.name }}
-                </h2>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- IZQUIERDA -->
+        <div class="gallery-section">
+
+          <div class="main-image">
+            <img [src]="selectedImage" *ngIf="selectedImage">
+          </div>
+
+          <!-- UPLOAD -->
+          <input type="file" accept="image/*" (change)="onFileSelected($event)">
+
+          <div class="gallery">
+
+            <div
+              class="gallery-item"
+              *ngFor="let image of productImages; let i = index"
+            >
+
+              <img [src]="image.url">
+
+              <span *ngIf="image.principal">
+                Principal
+              </span>
+
+              <div class="actions">
+
+                <button (click)="selectImage(image.url)">Ver</button>
+
+                <button (click)="setPrincipal(i)">⭐</button>
+
+                <button (click)="moveUp(i)">⬆</button>
+
+                <button (click)="moveDown(i)">⬇</button>
+
+              </div>
 
             </div>
 
-            <button
-                class="close-btn"
-                (click)="closeManageModal()">
-
-                ✕
-
-            </button>
+          </div>
 
         </div>
 
-        <div class="modal-body">
+        <!-- DERECHA -->
+        <div class="config-section">
 
-            <!-- Columna izquierda -->
+          <h3>Información general</h3>
 
-            <div class="gallery-section">
+          <label>Nombre</label>
+          <input [(ngModel)]="selectedProduct.name">
 
-              <div class="main-image">
-  <img [src]="selectedImage" *ngIf="selectedImage">
-</div>
+          <label>Marca</label>
+          <input [(ngModel)]="selectedProduct.brand">
 
-<div class="gallery">
+          <label>Categoría</label>
+          <input [(ngModel)]="selectedProduct.category">
 
-  <div
-    class="gallery-item"
-    *ngFor="let image of productImages"
-    (click)="selectImage(image.url)">
+          <label>Estado</label>
+          <select [(ngModel)]="selectedProduct.status">
+            <option>Activo</option>
+            <option>Inactivo</option>
+          </select>
 
-    <img [src]="image.url">
+        </div>
 
-    <span *ngIf="image.principal">
-      Principal
-    </span>
+      </div>
+
+      <div class="modal-footer">
+
+        <button class="cancel-btn" (click)="closeManageModal()">
+          Cancelar
+        </button>
+
+        <button class="save-btn">
+          Guardar cambios
+        </button>
+
+      </div>
+
+    </div>
 
   </div>
 
 </div>
-
-            </div>
-
-            <!-- Columna derecha -->
-
-            <div class="config-section">
-
-                <h3>Información general</h3>
-
-                <label>Nombre</label>
-
-                <input
-                    [(ngModel)]="selectedProduct.name">
-
-                <label>Marca</label>
-
-                <input
-                    [(ngModel)]="selectedProduct.brand">
-
-                <label>Categoría</label>
-
-                <input
-                    [(ngModel)]="selectedProduct.category">
-
-                <label>Estado</label>
-
-                <select
-                    [(ngModel)]="selectedProduct.status">
-
-                    <option>Activo</option>
-
-                    <option>Stock medio</option>
-
-                    <option>Bajo stock</option>
-
-                </select>
-
-            </div>
-
-        </div>
-
-        <div class="modal-footer">
-
-            <button
-                class="cancel-btn"
-                (click)="closeManageModal()">
-
-                Cancelar
-
-            </button>
-
-            <button
-                class="save-btn">
-
-                Guardar cambios
-
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-</div>
-
