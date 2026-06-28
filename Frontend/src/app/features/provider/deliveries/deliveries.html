@@ -141,13 +141,14 @@
               </div>
             </div>
 
-          <div class="update-box" [(ngModel)]="estadoSeleccionado"
+          <div class="update-box" 
   *ngIf="getEstadosDisponibles().length > 0">
             <h3>Actualizar estado</h3>
 
             <label for="nuevoEstado">Nuevo estado</label>
           <select
-  id="nuevoEstado"
+   id="nuevoEstado"
+    [(ngModel)]="estadoSeleccionado"
   >
 
   <option value="">Seleccione...</option>
