@@ -362,6 +362,46 @@
 
 }
 
+.gallery-actions{
+
+    position:absolute;
+
+    inset:0;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:6px;
+
+    pointer-events:none;
+
+}
+
+.gallery-actions button{
+
+    width:28px;
+
+    height:28px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:rgba(0,0,0,.75);
+
+    color:#fff;
+
+    cursor:pointer;
+
+    font-size:14px;
+
+    pointer-events:auto;
+
+}
+
 .gallery-item img{
 
     width:100%;

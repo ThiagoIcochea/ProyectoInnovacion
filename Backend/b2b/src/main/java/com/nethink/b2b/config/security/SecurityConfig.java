@@ -40,7 +40,7 @@ public class SecurityConfig {
                                 "/api/certificaciones",
                                 "/api/usuarios/register",
                                 "/api/provider/register",
-                                "/api/proveedor/{idProveedor}/metodos-pago"
+                                "/api/proveedor/*/metodos-pago"
                                 
                                 
                         ).permitAll()
