@@ -279,7 +279,7 @@ export class RequestTrackingComponent implements OnInit {
   }
 
   canCreateDelayClaim(): boolean {
-    if (!this.tracking || this.currentClaim || this.isFinalStatus()) {
+    if (!this.tracking || this.currentClaim || this.esEnCamino()) {
       return false;
     }
 
