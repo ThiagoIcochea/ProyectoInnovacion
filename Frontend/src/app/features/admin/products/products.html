@@ -178,19 +178,21 @@
 
             <div class="gallery-actions">
 
-                <button
-                    *ngIf="i>0"
-                    (click)="moveLeft(i); $event.stopPropagation()">
-
-                    ◀
-
-                </button>
+               
 
                 <button
                     *ngIf="i<productImages.length-1"
                     (click)="moveRight(i); $event.stopPropagation()">
 
                     ▶
+
+                </button>
+
+                 <button
+                    *ngIf="i>0"
+                    (click)="moveLeft(i); $event.stopPropagation()">
+
+                    ◀
 
                 </button>
 
@@ -232,6 +234,9 @@
           <label>Estado</label>
           <select [(ngModel)]="selectedProduct.status">
             <option>Activo</option>
+            <option>Stock alto</option>
+            <option>Stock medio</option>
+            <option>Bajo stock</option>
             <option>Inactivo</option>
           </select>
 
