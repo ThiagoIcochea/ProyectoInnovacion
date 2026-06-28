@@ -19,7 +19,13 @@ export class RequestEvaluationComponent implements OnInit {
 
   solicitudId!: number;
 
-  rating = 0;
+  servicio = 0;
+
+  calidad = 0;
+
+  tiempo = 0;
+
+  comunicacion = 0;
 
   comment = '';
 
@@ -33,7 +39,7 @@ export class RequestEvaluationComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private notification: NotificationService
-  ) {}
+  ){}
 
   ngOnInit(): void {
 
@@ -42,71 +48,99 @@ export class RequestEvaluationComponent implements OnInit {
     );
 
     /*
-      Aquí luego puedes llamar al backend
-      para obtener la información de la solicitud.
-    */
+      Aquí puedes consultar la información de la solicitud.
 
-    /*
-    this.notification
-      .obtenerSolicitudEvaluacion(this.solicitudId)
-      .subscribe(res=>{
-
-        this.providerName = res.nombreProveedor;
-        this.fechaEntrega = res.fechaEntrega;
-        this.total = res.total;
-
-      });
+      this.notification.obtenerSolicitudEvaluacion(this.solicitudId)
+      .subscribe(...)
     */
 
   }
 
-  setRating(value:number){
+  setRating(tipo:string,valor:number){
 
-    this.rating = value;
+    switch(tipo){
+
+      case 'servicio':
+        this.servicio=valor;
+        break;
+
+      case 'calidad':
+        this.calidad=valor;
+        break;
+
+      case 'tiempo':
+        this.tiempo=valor;
+        break;
+
+      case 'comunicacion':
+        this.comunicacion=valor;
+        break;
+
+    }
 
   }
 
   submitEvaluation(){
 
-    if(this.rating == 0){
+    if(
+      this.servicio==0 ||
+      this.calidad==0 ||
+      this.tiempo==0 ||
+      this.comunicacion==0
+    ){
 
-      alert("Seleccione una calificación.");
+      alert("Debe completar todas las calificaciones.");
 
       return;
 
     }
 
-    /*
-    Más adelante puedes enviar:
+    const body={
 
-    {
-      puntuacion:this.rating,
+      idSolicitud:this.solicitudId,
+
+      estrellasServicio:this.servicio,
+
+      estrellasCalidad:this.calidad,
+
+      estrellasTiempo:this.tiempo,
+
+      estrellasComunicacion:this.comunicacion,
+
       comentario:this.comment
-    }
+
+    };
+
+    console.log(body);
+
+    /*
+    Cuando tengas el endpoint:
+
+    this.notification
+        .registrarEvaluacion(body)
+        .subscribe({
+
+            next:()=>{
+
+                alert("Evaluación registrada correctamente.");
+
+                this.router.navigate(['/app/history']);
+
+            },
+
+            error:()=>{
+
+                alert("Ocurrió un error.");
+
+            }
+
+        });
 
     */
 
-    this.notification
-      .resolveEvaluation(this.solicitudId)
-      .subscribe({
+    alert("Evaluación registrada correctamente.");
 
-        next:()=>{
-
-          alert("Evaluación enviada correctamente.");
-
-          this.router.navigate(['/app/history']);
-
-        },
-
-        error:()=>{
-
-          alert("Evaluación enviada correctamente.");
-
-          this.router.navigate(['/app/history']);
-
-        }
-
-      });
+    this.router.navigate(['/app/history']);
 
   }
 

@@ -1,64 +1,143 @@
 <div class="evaluation-page">
 
   <div class="page-title">
+
     <span>Post-entrega</span>
 
-    <h1>Evaluar Proveedor</h1>
+    <h1>Evaluar proveedor</h1>
 
     <p>
-      Tu opinión ayuda a mejorar la red de proveedores B2B.
+      Tu experiencia ayudará a mejorar la calidad de nuestra red B2B.
     </p>
+
   </div>
 
   <div class="evaluation-grid">
 
     <!-- FORMULARIO -->
+
     <section class="evaluation-card">
 
-      <h2>Calificación general</h2>
+      <h2>Calificación del servicio</h2>
 
-      <div class="stars">
+      <!-- SERVICIO -->
 
-        <span
-          *ngFor="let star of [1,2,3,4,5]"
-          (click)="setRating(star)"
-          [class.active]="star <= rating">
+      <div class="rating-group">
 
-          ★
+        <label>Servicio</label>
 
-        </span>
+        <div class="stars">
+
+          <span
+            *ngFor="let star of [1,2,3,4,5]"
+            (click)="setRating('servicio',star)"
+            [class.active]="star<=servicio">
+
+            ★
+
+          </span>
+
+        </div>
 
       </div>
 
+      <!-- CALIDAD -->
+
+      <div class="rating-group">
+
+        <label>Calidad del producto</label>
+
+        <div class="stars">
+
+          <span
+            *ngFor="let star of [1,2,3,4,5]"
+            (click)="setRating('calidad',star)"
+            [class.active]="star<=calidad">
+
+            ★
+
+          </span>
+
+        </div>
+
+      </div>
+
+      <!-- TIEMPO -->
+
+      <div class="rating-group">
+
+        <label>Tiempo de entrega</label>
+
+        <div class="stars">
+
+          <span
+            *ngFor="let star of [1,2,3,4,5]"
+            (click)="setRating('tiempo',star)"
+            [class.active]="star<=tiempo">
+
+            ★
+
+          </span>
+
+        </div>
+
+      </div>
+
+      <!-- COMUNICACION -->
+
+      <div class="rating-group">
+
+        <label>Comunicación</label>
+
+        <div class="stars">
+
+          <span
+            *ngFor="let star of [1,2,3,4,5]"
+            (click)="setRating('comunicacion',star)"
+            [class.active]="star<=comunicacion">
+
+            ★
+
+          </span>
+
+        </div>
+
+      </div>
+
+      <label>Comentario</label>
+
       <textarea
         [(ngModel)]="comment"
-        placeholder="Describe tu experiencia con el proveedor...">
+        placeholder="Cuéntanos cómo fue tu experiencia...">
       </textarea>
 
       <button
         class="submit-btn"
         (click)="submitEvaluation()">
 
-        Enviar Evaluación
+        Enviar evaluación
 
       </button>
 
     </section>
 
     <!-- INFORMACIÓN -->
+
     <aside class="provider-summary">
 
       <div class="provider-header">
 
         <div class="icon">
+
           ◎
+
         </div>
 
         <div>
 
-          <h3>{{ providerName }}</h3>
+          <h3>{{providerName}}</h3>
 
-          <span>Orden completada</span>
+          <span>Orden entregada</span>
 
         </div>
 
@@ -68,25 +147,25 @@
 
         <div>
 
-          <span>Orden</span>
+          <span>Solicitud</span>
 
-          <strong>#{{ solicitudId }}</strong>
-
-        </div>
-
-        <div>
-
-          <span>Fecha entrega</span>
-
-          <strong>{{ fechaEntrega }}</strong>
+          <strong>#{{solicitudId}}</strong>
 
         </div>
 
         <div>
 
-          <span>Monto</span>
+          <span>Entrega</span>
 
-          <strong>S/ {{ total }}</strong>
+          <strong>{{fechaEntrega}}</strong>
+
+        </div>
+
+        <div>
+
+          <span>Total</span>
+
+          <strong>S/ {{total}}</strong>
 
         </div>
 
@@ -94,8 +173,7 @@
 
       <div class="info-box">
 
-        Califica al proveedor según cumplimiento,
-        tiempos de entrega y calidad del servicio.
+        Todas las calificaciones son confidenciales y ayudan a mejorar la plataforma.
 
       </div>
 
