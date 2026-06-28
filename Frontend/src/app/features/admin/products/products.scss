@@ -446,6 +446,28 @@
 
 }
 
+
+.btn-primary,
+.btn-secondary {
+  height: 42px;
+  border-radius: 11px;
+  padding: 0 1rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+  border: none;
+}
+
+.btn-secondary {
+  background: #111827;
+  color: #e5e7eb;
+  border: 1px solid #374151;
+}
+
 @media (max-width: 1200px) {
   .products-grid {
     grid-template-columns: 1fr;
@@ -472,6 +494,9 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+
 
 @media (max-width: 768px) {
   .page-header {

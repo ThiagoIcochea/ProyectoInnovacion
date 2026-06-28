@@ -5,6 +5,7 @@ import com.nethink.b2b.dto.response.CatalogoFiltrosResponse;
 import com.nethink.b2b.dto.response.CatalogoResponse;
 import com.nethink.b2b.dto.response.EspecificacionResponse;
 import com.nethink.b2b.dto.response.FiltroItemDTO;
+import com.nethink.b2b.dto.response.ImagenResponse;
 import com.nethink.b2b.entity.Producto;
 import com.nethink.b2b.entity.ProductoEspecificacion;
 import com.nethink.b2b.repository.ProductoRepository;
@@ -12,6 +13,8 @@ import com.nethink.b2b.repository.CategoriaRepository;
 import com.nethink.b2b.repository.MarcaRepository;
 import com.nethink.b2b.repository.ProductoEspecificacionRepository;
 import com.nethink.b2b.dto.response.ProductoAdminResponse;
+import com.nethink.b2b.entity.ProductoImagen;
+import com.nethink.b2b.repository.ProductoImagenRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 public class ProductoService {
 
     private final ProductoRepository productoRepository;
+    private final ProductoImagenRepository productoImagenRepository;
     private final CategoriaRepository categoriaRepository;
     private final MarcaRepository marcaRepository;
     private final ProductoEspecificacionRepository especificacionesRepository;
@@ -32,8 +36,10 @@ public class ProductoService {
                            CategoriaRepository categoriaRepository, 
                            MarcaRepository marcaRepository,
                            ProductoEspecificacionRepository especificacionesRepository,
+                           ProductoImagenRepository productoImagenRepository,
                            CatalogoService catalogoService) {
         this.productoRepository = productoRepository;
+        this.productoImagenRepository = productoImagenRepository;
         this.categoriaRepository = categoriaRepository;
         this.marcaRepository = marcaRepository;
         this.especificacionesRepository = especificacionesRepository;
@@ -117,6 +123,8 @@ public class ProductoService {
     List<Object[]> rows = productoRepository.obtenerProductosAdmin();
 
     return rows.stream().map(row -> {
+        
+        Integer idProducto = ((Number) row[0]).intValue();
 
         ProductoAdminResponse dto =
                 new ProductoAdminResponse();
@@ -157,6 +165,20 @@ public class ProductoService {
         else {
             dto.setStatus("Stock alto");
         }
+        
+        
+        List<ProductoImagen> imgs =
+        productoImagenRepository.findByProducto_IdProducto(idProducto);
+
+List<ImagenResponse> images =
+        imgs.stream()
+            .map(img -> new ImagenResponse(
+                    img.getUrl(),
+                    img.getPrincipal()
+            ))
+            .toList();
+        dto.setImages(images);
+
 
         return dto;
 

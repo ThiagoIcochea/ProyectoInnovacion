@@ -7,6 +7,11 @@ public class ImagenResponse {
     private Integer orden;
 
     public ImagenResponse() {}
+    
+     public ImagenResponse(String url, boolean principal) {
+        this.url = url;
+        this.principal = principal;
+    }
 
     public String getUrl() {
         return url;

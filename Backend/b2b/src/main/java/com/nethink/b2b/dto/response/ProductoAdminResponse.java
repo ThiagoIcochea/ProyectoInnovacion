@@ -1,5 +1,7 @@
 package com.nethink.b2b.dto.response;
 
+import java.util.List;
+
 public class ProductoAdminResponse {
 
     private Integer idProducto;
@@ -11,6 +13,8 @@ public class ProductoAdminResponse {
     private Integer totalStock;
 
     private String status;
+    
+    private List<ImagenResponse> images;
 
     public ProductoAdminResponse() {
     }
@@ -70,4 +74,13 @@ public class ProductoAdminResponse {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public List<ImagenResponse> getImages() {
+        return images;
+    }
+
+    public void setImages(List<ImagenResponse> images) {
+        this.images = images;
+    }
+    
 }

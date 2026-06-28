@@ -165,13 +165,9 @@
 
       <div class="detail-actions">
 
-  <button
-    class="manage-btn"
-    (click)="openManageModal()">
-
-    Gestionar producto
-
-  </button>
+ <button class="btn-secondary" (click)="openManageModal()">
+  Gestionar producto
+</button>
 
 </div>
 
@@ -219,42 +215,26 @@
 
             <div class="gallery-section">
 
-                <div class="main-image">
+              <div class="main-image">
+  <img [src]="selectedImage" *ngIf="selectedImage">
+</div>
 
-                    <img
-                        [src]="selectedImage"
-                        *ngIf="selectedImage">
+<div class="gallery">
 
-                </div>
+  <div
+    class="gallery-item"
+    *ngFor="let image of productImages"
+    (click)="selectImage(image.url)">
 
-                <div class="gallery">
+    <img [src]="image.url">
 
-                    <div
-                        class="gallery-item"
-                        *ngFor="let image of productImages"
-                        (click)="selectedImage=image.url">
+    <span *ngIf="image.principal">
+      Principal
+    </span>
 
-                        <img
-                            [src]="image.url">
+  </div>
 
-                        <span
-                            *ngIf="image.principal">
-
-                            Principal
-
-                        </span>
-
-                    </div>
-
-                    <button class="add-image">
-
-                        +
-
-                        Agregar imagen
-
-                    </button>
-
-                </div>
+</div>
 
             </div>
 
