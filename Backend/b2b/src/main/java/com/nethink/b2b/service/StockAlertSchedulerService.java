@@ -21,7 +21,7 @@ public class StockAlertSchedulerService {
         this.emailService = emailService;
     }
     
-        @Scheduled(fixedRate = 60000) 
+        @Scheduled(fixedRate = 600000) 
     public void revisarStock() {
 
         System.out.println("\n=== RUTINA ALERTA STOCK INICIADA ===");
