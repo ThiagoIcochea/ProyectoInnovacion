@@ -51,8 +51,52 @@ private cargarPagos(): void {
   this.pagoService.listarMisPagos()
     .subscribe({
       next: (payments) => {
-      const lista = payments || [];
-      this.payments = lista;
+      const prioridad: Record<string, number> = {
+  VALIDANDO: 1,
+  APROBADO: 2,
+  RECHAZADO: 3
+};
+
+this.payments = (payments || [])
+  .sort((a: any, b: any) => {
+
+    const estadoA = (a.estado || '')
+      .toString()
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, '_');
+
+    const estadoB = (b.estado || '')
+      .toString()
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, '_');
+
+    const prioridadA = prioridad[estadoA] ?? 999;
+    const prioridadB = prioridad[estadoB] ?? 999;
+
+   
+    if (prioridadA !== prioridadB) {
+      return prioridadA - prioridadB;
+    }
+
+    
+    const fechaA = new Date(
+      a.fechaPago ||
+      a.fechaCreacion ||
+      a.fechaRegistro ||
+      a.fecha
+    ).getTime();
+
+    const fechaB = new Date(
+      b.fechaPago ||
+      b.fechaCreacion ||
+      b.fechaRegistro ||
+      b.fecha
+    ).getTime();
+
+    return fechaA -  fechaB ;
+  });
       this.filtrarPagos();
 
       if (this.filteredPayments.length > 0) {

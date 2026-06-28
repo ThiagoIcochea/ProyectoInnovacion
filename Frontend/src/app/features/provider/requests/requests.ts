@@ -76,8 +76,8 @@ export class ProviderRequestsComponent implements OnInit {
                 return prioridad[estadoA] - prioridad[estadoB];
               }
 
-              return new Date(b.fechaCreacion).getTime()
-                - new Date(a.fechaCreacion).getTime();
+              return new Date(a.fechaCreacion).getTime()   -  new Date(b.fechaCreacion).getTime()
+                ;
             });
 
           this.filterRequests();

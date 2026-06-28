@@ -40,7 +40,16 @@ export class ProviderDeliveriesComponent implements OnInit, OnDestroy {
     private delayClaimsService: DelayClaimsService
   ) {}
 
+  private providerRefreshHandler = () => {
+  this.recargarSolicitudes();
+};
+
+
   ngOnInit(): void {
+      window.addEventListener(
+    'providerCountsRefresh',
+    this.providerRefreshHandler
+  );
     window.addEventListener('deliveryDelayClaimsUpdated', this.delayClaimsUpdatedHandler);
     window.addEventListener('storage', this.delayClaimsUpdatedHandler);
     this.cargarReclamosLocales();
@@ -48,6 +57,10 @@ export class ProviderDeliveriesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+      window.removeEventListener(
+    'providerCountsRefresh',
+    this.providerRefreshHandler
+  );
     window.removeEventListener('deliveryDelayClaimsUpdated', this.delayClaimsUpdatedHandler);
     window.removeEventListener('storage', this.delayClaimsUpdatedHandler);
   }
@@ -62,7 +75,64 @@ recargarSolicitudes(): void {
 
         console.log("Datos recibidos:", data);
 
-        this.deliveries = data || [];
+        const prioridad: Record<string, number> = {
+  PAGADA: 1,
+  EN_PREPARACION: 2,
+  EN_CAMINO: 3,
+  ENTREGADA: 4
+};
+
+this.deliveries = (data || [])
+  .filter((item: any) =>
+    [
+      'PAGADA',
+      'EN_PREPARACION',
+      'EN_CAMINO',
+      'ENTREGADA'
+    ].includes(
+      (item.estado || '')
+        .toString()
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, '_')
+    )
+  )
+  .sort((a: any, b: any) => {
+
+    const estadoA = (a.estado || '')
+      .toString()
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, '_');
+
+    const estadoB = (b.estado || '')
+      .toString()
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, '_');
+
+  
+    if (prioridad[estadoA] !== prioridad[estadoB]) {
+      return prioridad[estadoA] - prioridad[estadoB];
+    }
+
+    
+    const fechaA = new Date(
+      a.fechaCreacion ||
+      a.fechaPago ||
+      a.fechaRegistro ||
+      a.fecha
+    ).getTime();
+
+    const fechaB = new Date(
+      b.fechaCreacion ||
+      b.fechaPago ||
+      b.fechaRegistro ||
+      b.fecha
+    ).getTime();
+
+    return fechaA - fechaB;
+  });
 
         this.filtrarEntregas();
 
