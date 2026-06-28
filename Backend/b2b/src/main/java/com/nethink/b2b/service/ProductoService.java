@@ -1,5 +1,6 @@
 package com.nethink.b2b.service;
 
+import com.nethink.b2b.dto.request.ActualizarProductoRequest;
 import com.nethink.b2b.dto.request.FiltroRFQRequest;
 import com.nethink.b2b.dto.response.CatalogoFiltrosResponse;
 import com.nethink.b2b.dto.response.CatalogoResponse;
@@ -13,6 +14,8 @@ import com.nethink.b2b.repository.CategoriaRepository;
 import com.nethink.b2b.repository.MarcaRepository;
 import com.nethink.b2b.repository.ProductoEspecificacionRepository;
 import com.nethink.b2b.dto.response.ProductoAdminResponse;
+import com.nethink.b2b.entity.Categoria;
+import com.nethink.b2b.entity.Marca;
 import com.nethink.b2b.entity.ProductoImagen;
 import com.nethink.b2b.repository.ProductoImagenRepository;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProductoService {
@@ -189,5 +193,45 @@ List<ImagenResponse> images =
         return dto;
 
     }).toList();
+}
+    
+@Transactional
+public void actualizarProducto(ActualizarProductoRequest request) {
+
+    Producto producto = productoRepository
+            .findById(request.getIdProducto())
+            .orElseThrow();
+
+    producto.setNombre(request.getNombre());
+
+    Marca marca = marcaRepository.findByNombre(request.getMarca()).orElseThrow();
+    Categoria categoria = categoriaRepository.findByNombre(request.getCategoria()).orElseThrow();
+
+    producto.setMarca(marca);
+    producto.setCategoria(categoria);
+    producto.setEstado(request.getEstado());
+
+    productoRepository.save(producto);
+
+   
+    if (request.getImagenes() != null) {
+
+       
+        List<ProductoImagen> actuales =
+                productoImagenRepository.findByProducto_IdProducto(producto.getIdProducto());
+
+        productoImagenRepository.deleteAll(actuales);
+
+        
+        List<ProductoImagen> nuevas = request.getImagenes().stream().map(imgReq -> {
+            ProductoImagen img = new ProductoImagen();
+            img.setProducto(producto);
+            img.setUrl(imgReq.getUrl());
+            img.setPrincipal(Boolean.TRUE.equals(imgReq.getPrincipal()));
+            return img;
+        }).toList();
+
+        productoImagenRepository.saveAll(nuevas);
+    }
 }
 }

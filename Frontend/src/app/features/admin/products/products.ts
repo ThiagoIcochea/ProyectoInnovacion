@@ -27,6 +27,8 @@ export class AdminProductsComponent implements OnInit {
 
   private API_URL = `${APP_API_BASE_URL}/productos/admin`;
 
+  private UPDATE_URL = `${APP_API_BASE_URL}/productos/admin/actualizar`;
+
   products: any[] = [];
   filteredProducts: any[] = [];
 
@@ -56,6 +58,40 @@ export class AdminProductsComponent implements OnInit {
       Authorization: `Bearer ${localStorage.getItem('token')}`
     });
   }
+
+  guardarCambios(): void {
+
+  if (!this.selectedProduct) return;
+
+  const body = {
+    idProducto: this.selectedProduct.idProducto,
+    nombre: this.selectedProduct.name,
+    marca: this.selectedProduct.brand,
+    categoria: this.selectedProduct.category,
+    estado: this.estadoSeleccionado,
+    imagenes: this.productImages.map(img => ({
+      url: img.url,
+      principal: img.principal
+    }))
+  };
+
+  this.http.post(this.UPDATE_URL, body, {
+    headers: this.headers()
+  }).subscribe({
+
+    next: () => {
+      alert('Producto actualizado correctamente');
+      this.showManageModal = false;
+      this.obtenerProductos(); // recarga tabla
+    },
+
+    error: (err) => {
+      console.error(err);
+      alert('Error al actualizar producto');
+    }
+
+  });
+}
 
   obtenerProductos(): void {
 

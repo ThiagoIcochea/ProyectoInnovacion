@@ -1,5 +1,6 @@
 package com.nethink.b2b.controller;
 
+import com.nethink.b2b.dto.request.ActualizarProductoRequest;
 import com.nethink.b2b.dto.request.FiltroRFQRequest; 
 import com.nethink.b2b.dto.response.CatalogoFiltrosResponse;
 import com.nethink.b2b.entity.Producto;
@@ -47,5 +48,15 @@ obtenerProductosAdmin() {
     return ResponseEntity.ok(
             productoService.obtenerProductosAdmin()
     );
+}
+
+
+@PostMapping("/admin/actualizar")
+public ResponseEntity<Void> actualizarProducto(
+        @RequestBody ActualizarProductoRequest request) {
+
+    productoService.actualizarProducto(request);
+
+    return ResponseEntity.ok().build();
 }
 }
