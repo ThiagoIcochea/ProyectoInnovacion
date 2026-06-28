@@ -3,6 +3,8 @@ package com.nethink.b2b.dto.response;
 import java.time.LocalDateTime;
 
 public class IndicadorProveedorResponse {
+    
+    private String descripcion;
 
     private Integer idProveedor;
 
@@ -153,6 +155,14 @@ public class IndicadorProveedorResponse {
 
     public void setFechaRegistro(LocalDateTime fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
     
     

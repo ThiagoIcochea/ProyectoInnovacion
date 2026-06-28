@@ -333,6 +333,8 @@ private LogsApiRepository logsApiRepository;
     
     dto.setSatisfaccion(satisfaccion);
     
+    dto.setDescripcion(proveedor.getDescripcion());
+    
    
     dto.setTiempoEntregaPromedio(tiempoEntregaPromedio);
         dto.setLikes(likes);
@@ -437,7 +439,7 @@ public List<IndicadorProveedorResponse> top10Proveedores() {
         dto.setIdProveedor(
                 p.getIdProveedor()
         );
-
+        dto.setDescripcion(p.getDescripcion());
         dto.setRazonSocial(
                 p.getRazonSocial()
         );
