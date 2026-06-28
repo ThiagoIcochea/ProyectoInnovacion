@@ -30,6 +30,8 @@ export class AdminProductsComponent implements OnInit {
   products: any[] = [];
   filteredProducts: any[] = [];
 
+  estadoSeleccionado = '';
+
   selectedProduct: any = null;
 
   searchText = '';
@@ -103,6 +105,8 @@ export class AdminProductsComponent implements OnInit {
   }
 
   openManageModal(): void {
+
+     this.estadoSeleccionado = 'Activo';
 
     this.showManageModal = true;
 
