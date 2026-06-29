@@ -43,12 +43,15 @@ public class SecurityConfig {
                                 "/api/solicitudes/proveedor/*/metodos-pago"
                                 
                                 
+                                
                         ).permitAll()
                         .requestMatchers("/api/evaluaciones/")
                         .hasRole(AppConstants.ROLE_CLIENTE)
                         .requestMatchers("/api/config/**")
                         .hasRole(AppConstants.ROLE_ADMIN)
                         .requestMatchers("/api/logs/admin")
+                        .hasRole(AppConstants.ROLE_ADMIN)
+                        .requestMatchers("/api/admin/actualizar")
                         .hasRole(AppConstants.ROLE_ADMIN)
                         .requestMatchers("/api/solicitudes/proveedor/**")
                         .hasRole(AppConstants.ROLE_PROVEEDOR)
