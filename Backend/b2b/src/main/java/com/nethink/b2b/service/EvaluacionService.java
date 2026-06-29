@@ -5,7 +5,9 @@ import com.nethink.b2b.dto.response.EvaluacionResponse;
 import com.nethink.b2b.entity.Evaluacion;
 import com.nethink.b2b.repository.EvaluacionRepository;
 import java.time.LocalDateTime;
+import org.springframework.stereotype.Service;
 
+@Service
 public class EvaluacionService {
     
     private final EvaluacionRepository evaluacionRepository;
