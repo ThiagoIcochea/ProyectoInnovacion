@@ -7,6 +7,7 @@ import com.nethink.b2b.entity.Producto;
 import com.nethink.b2b.service.ProductoService;
 import com.nethink.b2b.dto.response.CatalogoResponse;
 import com.nethink.b2b.dto.response.ProductoAdminResponse;
+import java.io.IOException;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -58,7 +59,7 @@ obtenerProductosAdmin() {
 )
 public ResponseEntity<?> actualizar(
         @ModelAttribute ActualizarProductoRequest request
-) {
+) throws IOException{
 
     productoService.actualizarProducto(request);
 

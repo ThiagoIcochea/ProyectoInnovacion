@@ -246,6 +246,9 @@ public void actualizarProducto(ActualizarProductoRequest request) throws IOExcep
         List<ProductoImagen> nuevas = new ArrayList<>();
 
 for (ImagenProductoRequest imgReq : request.getImagenes()) {
+    
+    System.out.println("Archivo: " + imgReq.getArchivo());
+    System.out.println("URL: " + imgReq.getUrl());
 
     ProductoImagen img = new ProductoImagen();
     img.setProducto(producto);
