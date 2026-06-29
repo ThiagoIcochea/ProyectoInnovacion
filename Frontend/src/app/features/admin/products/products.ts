@@ -26,7 +26,6 @@ import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 export class AdminProductsComponent implements OnInit {
 
   private API_URL = `${APP_API_BASE_URL}/productos/admin`;
-
   private UPDATE_URL = `${APP_API_BASE_URL}/productos/admin/actualizar`;
 
   products: any[] = [];
@@ -61,37 +60,37 @@ export class AdminProductsComponent implements OnInit {
 
   guardarCambios(): void {
 
-  if (!this.selectedProduct) return;
+    if (!this.selectedProduct) return;
 
-  const body = {
-    idProducto: this.selectedProduct.idProducto,
-    nombre: this.selectedProduct.name,
-    marca: this.selectedProduct.brand,
-    categoria: this.selectedProduct.category,
-    estado: this.estadoSeleccionado,
-    imagenes: this.productImages.map(img => ({
-      url: img.url,
-      principal: img.principal
-    }))
-  };
+    const body = {
+      idProducto: this.selectedProduct.idProducto,
+      nombre: this.selectedProduct.name,
+      marca: this.selectedProduct.brand,
+      categoria: this.selectedProduct.category,
+      estado: this.estadoSeleccionado,
+      imagenes: this.productImages.map(img => ({
+        url: img.url,
+        principal: img.principal
+      }))
+    };
 
-  this.http.post(this.UPDATE_URL, body, {
-    headers: this.headers()
-  }).subscribe({
+    this.http.post(this.UPDATE_URL, body, {
+      headers: this.headers()
+    }).subscribe({
 
-    next: () => {
-      alert('Producto actualizado correctamente');
-      this.showManageModal = false;
-      this.obtenerProductos(); // recarga tabla
-    },
+      next: () => {
+        alert('Producto actualizado correctamente');
+        this.showManageModal = false;
+        this.obtenerProductos();
+      },
 
-    error: (err) => {
-      console.error(err);
-      alert('Error al actualizar producto');
-    }
+      error: (err) => {
+        console.error(err);
+        alert('Error al actualizar producto');
+      }
 
-  });
-}
+    });
+  }
 
   obtenerProductos(): void {
 
@@ -107,13 +106,16 @@ export class AdminProductsComponent implements OnInit {
         if (this.filteredProducts.length > 0) {
 
           this.selectedProduct = this.filteredProducts[0];
-
           this.cargarImagenes();
 
         }
 
         this.cdr.detectChanges();
 
+      },
+
+      error: (err) => {
+        console.error(err);
       }
 
     });
@@ -123,7 +125,6 @@ export class AdminProductsComponent implements OnInit {
   seleccionarProducto(product: any): void {
 
     this.selectedProduct = product;
-
     this.cargarImagenes();
 
   }
@@ -142,7 +143,10 @@ export class AdminProductsComponent implements OnInit {
 
   openManageModal(): void {
 
-     this.estadoSeleccionado = 'Activo';
+    this.estadoSeleccionado =
+      this.selectedProduct?.status ??
+      this.selectedProduct?.estado ??
+      'Activo';
 
     this.showManageModal = true;
 
@@ -233,27 +237,19 @@ export class AdminProductsComponent implements OnInit {
   private syncPrincipal(): void {
 
     this.productImages.forEach((img, i) => {
-
       img.principal = i === 0;
-
     });
 
     this.productImages = [...this.productImages];
 
     if (this.selectedProduct) {
-
       this.selectedProduct.images = [...this.productImages];
-
     }
 
     if (this.productImages.length > 0) {
-
       this.selectedImage = this.productImages[0].url;
-
     } else {
-
       this.selectedImage = '';
-
     }
 
     this.cdr.detectChanges();
@@ -271,11 +267,9 @@ export class AdminProductsComponent implements OnInit {
     reader.onload = () => {
 
       const newImage = {
-
+        file: file,
         url: reader.result as string,
-
         principal: this.productImages.length === 0
-
       };
 
       this.productImages = [
@@ -284,17 +278,13 @@ export class AdminProductsComponent implements OnInit {
       ];
 
       if (this.selectedProduct) {
-
         this.selectedProduct.images = [
           ...this.productImages
         ];
-
       }
 
       if (newImage.principal) {
-
         this.selectedImage = newImage.url;
-
       }
 
       this.cdr.detectChanges();
