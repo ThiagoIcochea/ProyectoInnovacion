@@ -86,7 +86,7 @@ export class AdminProductsComponent implements OnInit {
 
   formData.append(
     'estado',
-    this.estadoSeleccionado
+    this.estadoSeleccionado.toUpperCase()
   );
 
   this.productImages.forEach((img, index) => {
