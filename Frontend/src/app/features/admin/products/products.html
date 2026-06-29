@@ -236,8 +236,8 @@
           <label>Marca</label>
            <select [(ngModel)]="selectedProduct.brand">
             <option
-    *ngFor="let marcas of selectedProduct.marcas"
-    [value]="marcas.nombre">
+    *ngFor="let marca of selectedProduct.marcas"
+    [value]="marca.nombre">
 
     {{ marca.nombre }}
 
