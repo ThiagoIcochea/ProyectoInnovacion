@@ -216,7 +216,7 @@ List<ImagenResponse> images =
 }
     
 @Transactional
-public void actualizarProducto(ActualizarProductoRequest request) {
+public void actualizarProducto(ActualizarProductoRequest request) throws IOException {
 
     Producto producto = productoRepository
             .findById(request.getIdProducto())
@@ -248,18 +248,16 @@ public void actualizarProducto(ActualizarProductoRequest request) {
 for (ImagenProductoRequest imgReq : request.getImagenes()) {
 
     ProductoImagen img = new ProductoImagen();
-
     img.setProducto(producto);
 
-    try {
+    if (imgReq.getArchivo() != null && !imgReq.getArchivo().isEmpty()) {
 
         String url = subirACloudinary(imgReq.getArchivo());
-
         img.setUrl(url);
 
-    } catch (IOException e) {
+    } else {
 
-        throw new RuntimeException("Error al subir imagen a Cloudinary", e);
+        img.setUrl(imgReq.getUrl());
 
     }
 

@@ -91,21 +91,28 @@ export class AdminProductsComponent implements OnInit {
 
   this.productImages.forEach((img, index) => {
 
-    if (img.file) {
-
-      formData.append(
-        `imagenes[${index}].archivo`,
-        img.file
-      );
-
-    }
+  if (img.file) {
 
     formData.append(
-      `imagenes[${index}].principal`,
-      img.principal.toString()
+      `imagenes[${index}].archivo`,
+      img.file
     );
 
-  });
+  } else {
+
+    formData.append(
+      `imagenes[${index}].url`,
+      img.url
+    );
+
+  }
+
+  formData.append(
+    `imagenes[${index}].principal`,
+    img.principal.toString()
+  );
+
+});
 
   this.http.post(
     this.UPDATE_URL,

@@ -5,6 +5,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImagenProductoRequest {
 
     private MultipartFile archivo;
+    
+    private String url;
 
     private Boolean principal;
 
@@ -23,6 +25,15 @@ public class ImagenProductoRequest {
     public void setPrincipal(Boolean principal) {
         this.principal = principal;
     }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+    
     
     
 
