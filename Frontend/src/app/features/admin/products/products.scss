@@ -380,6 +380,7 @@
 
 }
 
+
 .gallery-actions button{
 
     width:28px;
@@ -511,6 +512,37 @@
   background: #111827;
   color: #e5e7eb;
   border: 1px solid #374151;
+}
+
+.delete-image{
+    position: absolute;
+    top: 6px;
+    right: 6px;
+
+    width: 22px;
+    height: 22px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: rgba(0,0,0,.65);
+    color: #fff;
+
+    font-size: 13px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: .2s;
+}
+
+.delete-image:hover{
+    transform: scale(1.1);
+    background: #d32f2f;
 }
 
 @media (max-width: 1200px) {

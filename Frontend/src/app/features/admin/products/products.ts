@@ -350,4 +350,31 @@ onFileSelected(event: any): void {
 
 }
 
+removeImage(index: number): void {
+
+  const imagenEliminada = this.productImages[index];
+
+  this.productImages.splice(index, 1);
+
+  this.productImages = [...this.productImages];
+
+  
+  this.productImages.forEach((img, i) => {
+    img.principal = i === 0;
+  });
+
+  if (this.selectedProduct) {
+    this.selectedProduct.images = [...this.productImages];
+  }
+
+  if (this.selectedImage === imagenEliminada.url) {
+    this.selectedImage =
+      this.productImages.length > 0
+        ? this.productImages[0].url
+        : '';
+  }
+
+  this.cdr.detectChanges();
+}
+
 }

@@ -112,8 +112,7 @@ export class RequestEvaluationComponent implements OnInit {
 
     console.log(body);
 
-    /*
-    Cuando tengas el endpoint:
+   
 
     this.notification
         .registrarEvaluacion(body)
@@ -135,7 +134,7 @@ export class RequestEvaluationComponent implements OnInit {
 
         });
 
-    */
+    
 
     alert("Evaluación registrada correctamente.");
 

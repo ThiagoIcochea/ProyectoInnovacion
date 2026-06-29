@@ -166,6 +166,12 @@
             (click)="selectImage(image.url)"
         >
 
+          <button
+        class="delete-image"
+        (click)="removeImage(i); $event.stopPropagation()">
+        ✕
+    </button>
+
             <img [src]="image.url">
 
             <span
