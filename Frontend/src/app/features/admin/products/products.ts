@@ -31,7 +31,7 @@ export class AdminProductsComponent implements OnInit {
   products: any[] = [];
   filteredProducts: any[] = [];
 
-  estadoSeleccionado = '';
+  estadoSeleccionado = 'Activo';
 
   selectedProduct: any = null;
 
