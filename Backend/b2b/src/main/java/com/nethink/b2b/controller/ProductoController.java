@@ -10,6 +10,7 @@ import com.nethink.b2b.dto.response.ProductoAdminResponse;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping("/api/productos")
@@ -51,12 +52,17 @@ obtenerProductosAdmin() {
 }
 
 
-@PostMapping("/admin/actualizar")
-public ResponseEntity<Void> actualizarProducto(
-        @RequestBody ActualizarProductoRequest request) {
+@PostMapping(
+    value = "/admin/actualizar",
+    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+)
+public ResponseEntity<?> actualizar(
+        @ModelAttribute ActualizarProductoRequest request
+) {
 
     productoService.actualizarProducto(request);
 
     return ResponseEntity.ok().build();
+
 }
 }

@@ -21,6 +21,7 @@ import com.nethink.b2b.repository.ProductoImagenRepository;
 import org.springframework.stereotype.Service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.nethink.b2b.dto.request.ImagenProductoRequest;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Map;
@@ -242,16 +243,32 @@ public void actualizarProducto(ActualizarProductoRequest request) {
         productoImagenRepository.deleteAll(actuales);
 
         
-        List<ProductoImagen> nuevas = request.getImagenes().stream().map(imgReq -> {
-            ProductoImagen img = new ProductoImagen();
-            img.setProducto(producto);
-            String url = subirACloudinary(imgReq.get);
-            img.setUrl(url);
-            img.setPrincipal(Boolean.TRUE.equals(imgReq.getPrincipal()));
-            return img;
-        }).toList();
+        List<ProductoImagen> nuevas = new ArrayList<>();
 
-        productoImagenRepository.saveAll(nuevas);
+for (ImagenProductoRequest imgReq : request.getImagenes()) {
+
+    ProductoImagen img = new ProductoImagen();
+
+    img.setProducto(producto);
+
+    try {
+
+        String url = subirACloudinary(imgReq.getArchivo());
+
+        img.setUrl(url);
+
+    } catch (IOException e) {
+
+        throw new RuntimeException("Error al subir imagen a Cloudinary", e);
+
+    }
+
+    img.setPrincipal(Boolean.TRUE.equals(imgReq.getPrincipal()));
+
+    nuevas.add(img);
+}
+
+productoImagenRepository.saveAll(nuevas);
     }
 }
 }

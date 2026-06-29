@@ -1,17 +1,19 @@
 package com.nethink.b2b.dto.request;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public class ImagenProductoRequest {
 
-    private String url;
+    private MultipartFile archivo;
 
     private Boolean principal;
 
-    public String getUrl() {
-        return url;
+    public MultipartFile getArchivo() {
+        return archivo;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setArchivo(MultipartFile archivo) {
+        this.archivo = archivo;
     }
 
     public Boolean getPrincipal() {
@@ -21,5 +23,7 @@ public class ImagenProductoRequest {
     public void setPrincipal(Boolean principal) {
         this.principal = principal;
     }
+    
+    
 
 }

@@ -60,37 +60,84 @@ export class AdminProductsComponent implements OnInit {
 
   guardarCambios(): void {
 
-    if (!this.selectedProduct) return;
+  if (!this.selectedProduct) return;
 
-    const body = {
-      idProducto: this.selectedProduct.idProducto,
-      nombre: this.selectedProduct.name,
-      marca: this.selectedProduct.brand,
-      categoria: this.selectedProduct.category,
-      estado: this.estadoSeleccionado,
-      imagenes: this.productImages.map(img => ({
-        url: img.url,
-        principal: img.principal
-      }))
-    };
+  const formData = new FormData();
 
-    this.http.post(this.UPDATE_URL, body, {
-      headers: this.headers()
-    }).subscribe({
+  formData.append(
+    'idProducto',
+    this.selectedProduct.idProducto.toString()
+  );
 
-      next: () => {
-        alert('Producto actualizado correctamente');
-        this.showManageModal = false;
-        this.obtenerProductos();
-      },
+  formData.append(
+    'nombre',
+    this.selectedProduct.name
+  );
 
-      error: (err) => {
-        console.error(err);
-        alert('Error al actualizar producto');
-      }
+  formData.append(
+    'marca',
+    this.selectedProduct.brand
+  );
 
-    });
-  }
+  formData.append(
+    'categoria',
+    this.selectedProduct.category
+  );
+
+  formData.append(
+    'estado',
+    this.estadoSeleccionado
+  );
+
+  this.productImages.forEach((img, index) => {
+
+    if (img.file) {
+
+      formData.append(
+        `imagenes[${index}].archivo`,
+        img.file
+      );
+
+    }
+
+    formData.append(
+      `imagenes[${index}].principal`,
+      img.principal.toString()
+    );
+
+  });
+
+  this.http.post(
+    this.UPDATE_URL,
+    formData,
+    {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      })
+    }
+  ).subscribe({
+
+    next: () => {
+
+      alert('Producto actualizado correctamente');
+
+      this.showManageModal = false;
+
+      this.obtenerProductos();
+
+    },
+
+    error: err => {
+
+      console.error(err);
+
+      alert('Error al actualizar');
+
+    }
+
+  });
+
+}
 
   obtenerProductos(): void {
 
@@ -256,43 +303,44 @@ export class AdminProductsComponent implements OnInit {
 
   }
 
-  onFileSelected(event: any): void {
+onFileSelected(event: any): void {
 
-    const file = event.target.files[0];
+  const file = event.target.files[0];
 
-    if (!file) return;
+  if (!file) return;
 
-    const reader = new FileReader();
+  const nuevaImagen = {
 
-    reader.onload = () => {
+    file: file,
 
-      const newImage = {
-        file: file,
-        url: reader.result as string,
-        principal: this.productImages.length === 0
-      };
+    url: URL.createObjectURL(file),
 
-      this.productImages = [
-        ...this.productImages,
-        newImage
-      ];
+    principal: this.productImages.length === 0
 
-      if (this.selectedProduct) {
-        this.selectedProduct.images = [
-          ...this.productImages
-        ];
-      }
+  };
 
-      if (newImage.principal) {
-        this.selectedImage = newImage.url;
-      }
+  this.productImages = [
 
-      this.cdr.detectChanges();
+    ...this.productImages,
 
-    };
+    nuevaImagen
 
-    reader.readAsDataURL(file);
+  ];
+
+  if (this.selectedProduct) {
+
+    this.selectedProduct.images = [...this.productImages];
 
   }
+
+  if (nuevaImagen.principal) {
+
+    this.selectedImage = nuevaImagen.url;
+
+  }
+
+  this.cdr.detectChanges();
+
+}
 
 }
