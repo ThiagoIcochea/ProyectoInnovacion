@@ -15,6 +15,10 @@ public class ProductoAdminResponse {
     private String status;
     
     private List<ImagenResponse> images;
+    
+    private List<CategoriaResponse> categorias;
+    
+    private List<MarcaResponse> marcas;
 
     public ProductoAdminResponse() {
     }
@@ -82,5 +86,22 @@ public class ProductoAdminResponse {
     public void setImages(List<ImagenResponse> images) {
         this.images = images;
     }
+
+    public List<CategoriaResponse> getCategorias() {
+        return categorias;
+    }
+
+    public void setCategorias(List<CategoriaResponse> categorias) {
+        this.categorias = categorias;
+    }
+
+    public List<MarcaResponse> getMarcas() {
+        return marcas;
+    }
+
+    public void setMarcas(List<MarcaResponse> marcas) {
+        this.marcas = marcas;
+    }
+    
     
 }

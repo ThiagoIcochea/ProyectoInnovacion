@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.nethink.b2b.dto.request.ImagenProductoRequest;
+import com.nethink.b2b.dto.response.CategoriaResponse;
+import com.nethink.b2b.dto.response.MarcaResponse;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Map;
@@ -197,10 +199,34 @@ List<ImagenResponse> images =
             .toList();
         dto.setImages(images);
 
-
+        List<Categoria> categorias = categoriaRepository.findAll();
+        
+        List<CategoriaResponse> categories = 
+                categorias.stream()
+                .map(categoria -> new CategoriaResponse(
+                     categoria.getIdCategoria(),
+                     categoria.getNombre()
+                )).toList();
+        
+        List<Marca> marcas = marcaRepository.findAll();
+        
+        List<MarcaResponse> marks = 
+                marcas.stream()
+                .map(marca-> new MarcaResponse(
+                     marca.getIdMarca(),
+                     marca.getNombre()
+                )).toList();
+        
+        
+        dto.setCategorias(categories);
+        dto.setMarcas(marks);
+        
         return dto;
 
     }).toList();
+    
+    
+   
 }
     
  private String subirACloudinary(MultipartFile archivo) throws IOException {

@@ -234,11 +234,28 @@
           <input [(ngModel)]="selectedProduct.name">
 
           <label>Marca</label>
-          <input [(ngModel)]="selectedProduct.brand">
+           <select [(ngModel)]="selectedProduct.brand">
+            <option
+    *ngFor="let marcas of selectedProduct.marcas"
+    [value]="marcas.nombre">
+
+    {{ categoria.nombre }}
+
+  </option>
+
+          </select>
 
           <label>Categoría</label>
-          <input [(ngModel)]="selectedProduct.category">
+          <select [(ngModel)]="selectedProduct.category">
+            <option
+    *ngFor="let categoria of selectedProduct.categorias"
+    [value]="categoria.nombre">
 
+    {{ categoria.nombre }}
+
+  </option>
+
+          </select>
           <label>Estado</label>
           <select [(ngModel)]="estadoSeleccionado">
             <option>Activo</option>
