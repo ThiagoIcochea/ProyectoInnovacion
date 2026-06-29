@@ -4,6 +4,7 @@ import com.nethink.b2b.dto.request.RegistrarEvaluacionRequest;
 import com.nethink.b2b.dto.response.EvaluacionResponse;
 import com.nethink.b2b.service.EvaluacionService;
 import jakarta.validation.Valid;
+import java.security.Principal;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,10 +26,10 @@ public class EvaluacionController {
 
             @Valid
             @RequestBody
-            RegistrarEvaluacionRequest request){
+            RegistrarEvaluacionRequest request, Principal principal){
 
         return evaluacionService
-                .registrarEvaluacion(request);
+                .registrarEvaluacion(request, principal.getName());
     }
 
 }

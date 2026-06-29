@@ -3,7 +3,11 @@ package com.nethink.b2b.service;
 import com.nethink.b2b.dto.request.RegistrarEvaluacionRequest;
 import com.nethink.b2b.dto.response.EvaluacionResponse;
 import com.nethink.b2b.entity.Evaluacion;
+import com.nethink.b2b.entity.Solicitud;
+import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.repository.EvaluacionRepository;
+import com.nethink.b2b.repository.SolicitudRepository;
+import com.nethink.b2b.repository.UsuarioRepository;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 
@@ -11,20 +15,33 @@ import org.springframework.stereotype.Service;
 public class EvaluacionService {
     
     private final EvaluacionRepository evaluacionRepository;
+    private final UsuarioRepository usuarioRepo;
+    private final SolicitudRepository solicitudRepo;
     
-    public EvaluacionService(EvaluacionRepository evaluacionRepository){
+    public EvaluacionService(EvaluacionRepository evaluacionRepository, UsuarioRepository usuarioRepo, SolicitudRepository solicitudRepo){
         this.evaluacionRepository = evaluacionRepository;
+        this.usuarioRepo = usuarioRepo;
+        this.solicitudRepo = solicitudRepo;
     }
 
     public EvaluacionResponse registrarEvaluacion(
-            RegistrarEvaluacionRequest request) {
-
-        if (evaluacionRepository.existsByIdSolicitud(
+            RegistrarEvaluacionRequest request, String  correo) {
+         Usuario usuario = usuarioRepo.findByCorreo(correo)
+                .orElseThrow();
+         Solicitud sol = solicitudRepo.findById(request.getIdSolicitud()).orElseThrow();
+         
+         if(usuario.getIdUsuario() !=  sol.getIdSolicitud()){
+              throw new RuntimeException(
+                    "Porfavor ingrese, con la cuenta correcta.");
+         }
+         
+          if (evaluacionRepository.existsByIdSolicitud(
                 request.getIdSolicitud())) {
 
             throw new RuntimeException(
                     "La solicitud ya fue evaluada.");
         }
+       
 
         Evaluacion evaluacion = new Evaluacion();
 
