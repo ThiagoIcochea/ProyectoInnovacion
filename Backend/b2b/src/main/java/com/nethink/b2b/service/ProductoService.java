@@ -213,7 +213,6 @@ List<ImagenResponse> images =
             .toList();
         dto.setImages(images);
 
-        List<Categoria> categorias = categoriaRepository.findAll();
        
         
         
