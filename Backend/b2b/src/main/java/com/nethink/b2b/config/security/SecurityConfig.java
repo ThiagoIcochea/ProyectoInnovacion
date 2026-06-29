@@ -44,7 +44,8 @@ public class SecurityConfig {
                                 
                                 
                         ).permitAll()
-
+                        .requestMatchers("/api/evaluaciones/")
+                        .hasRole(AppConstants.ROLE_CLIENTE)
                         .requestMatchers("/api/config/**")
                         .hasRole(AppConstants.ROLE_ADMIN)
                         .requestMatchers("/api/logs/admin")

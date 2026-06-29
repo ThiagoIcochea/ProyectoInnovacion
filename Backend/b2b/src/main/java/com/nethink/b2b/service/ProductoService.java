@@ -19,7 +19,11 @@ import com.nethink.b2b.entity.Marca;
 import com.nethink.b2b.entity.ProductoImagen;
 import com.nethink.b2b.repository.ProductoImagenRepository;
 import org.springframework.stereotype.Service;
-
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,19 +39,22 @@ public class ProductoService {
     private final MarcaRepository marcaRepository;
     private final ProductoEspecificacionRepository especificacionesRepository;
     private final CatalogoService catalogoService;
+    private final Cloudinary cloudinary;
 
     public ProductoService(ProductoRepository productoRepository, 
                            CategoriaRepository categoriaRepository, 
                            MarcaRepository marcaRepository,
                            ProductoEspecificacionRepository especificacionesRepository,
                            ProductoImagenRepository productoImagenRepository,
-                           CatalogoService catalogoService) {
+                           CatalogoService catalogoService,
+                           Cloudinary cloudinary) {
         this.productoRepository = productoRepository;
         this.productoImagenRepository = productoImagenRepository;
         this.categoriaRepository = categoriaRepository;
         this.marcaRepository = marcaRepository;
         this.especificacionesRepository = especificacionesRepository;
         this.catalogoService = catalogoService;
+        this.cloudinary = cloudinary;
     }
 
     public List<Producto> listarProductos(String filtro) {
@@ -195,6 +202,18 @@ List<ImagenResponse> images =
     }).toList();
 }
     
+ private String subirACloudinary(MultipartFile archivo) throws IOException {
+
+    Map uploadResult = cloudinary.uploader().upload(
+            archivo.getBytes(),
+            ObjectUtils.asMap(
+                    "folder", "b2b/productos"
+            )
+    );
+
+    return uploadResult.get("secure_url").toString();
+}
+    
 @Transactional
 public void actualizarProducto(ActualizarProductoRequest request) {
 
@@ -226,7 +245,8 @@ public void actualizarProducto(ActualizarProductoRequest request) {
         List<ProductoImagen> nuevas = request.getImagenes().stream().map(imgReq -> {
             ProductoImagen img = new ProductoImagen();
             img.setProducto(producto);
-            img.setUrl(imgReq.getUrl());
+            String url = subirACloudinary(imgReq.get);
+            img.setUrl(url);
             img.setPrincipal(Boolean.TRUE.equals(imgReq.getPrincipal()));
             return img;
         }).toList();

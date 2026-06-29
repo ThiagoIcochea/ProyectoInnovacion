@@ -2,8 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
-import { NotificationService } from '../../../core/services/notification.service';
+import { NotificationService } from './Notification.service';
 
 @Component({
   selector: 'app-request-evaluation',

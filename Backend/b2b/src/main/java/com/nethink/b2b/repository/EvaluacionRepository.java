@@ -21,4 +21,6 @@ public interface EvaluacionRepository extends JpaRepository<Evaluacion, Integer>
     )
 """)
 Double promedioCalidad(Integer idProveedor);
+
+ boolean existsByIdSolicitud(Integer idSolicitud);
 }
