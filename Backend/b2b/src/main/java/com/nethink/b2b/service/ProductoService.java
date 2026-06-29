@@ -135,6 +135,20 @@ public class ProductoService {
     public List<ProductoAdminResponse> obtenerProductosAdmin() {
 
     List<Object[]> rows = productoRepository.obtenerProductosAdmin();
+    
+    List<CategoriaResponse> categories = categoriaRepository.findAll()
+        .stream()
+        .map(c -> new CategoriaResponse(
+                c.getIdCategoria(),
+                c.getNombre()))
+        .toList();
+
+List<MarcaResponse> marks = marcaRepository.findAll()
+        .stream()
+        .map(m -> new MarcaResponse(
+                m.getIdMarca(),
+                m.getNombre()))
+        .toList();
 
     return rows.stream().map(row -> {
         
@@ -200,22 +214,7 @@ List<ImagenResponse> images =
         dto.setImages(images);
 
         List<Categoria> categorias = categoriaRepository.findAll();
-        
-        List<CategoriaResponse> categories = 
-                categorias.stream()
-                .map(categoria -> new CategoriaResponse(
-                     categoria.getIdCategoria(),
-                     categoria.getNombre()
-                )).toList();
-        
-        List<Marca> marcas = marcaRepository.findAll();
-        
-        List<MarcaResponse> marks = 
-                marcas.stream()
-                .map(marca-> new MarcaResponse(
-                     marca.getIdMarca(),
-                     marca.getNombre()
-                )).toList();
+       
         
         
         dto.setCategorias(categories);
