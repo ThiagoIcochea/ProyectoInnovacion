@@ -120,7 +120,7 @@ export class RequestEvaluationComponent implements OnInit {
 
             next:()=>{
 
-                alert("Evaluación registrada correctamente.");
+                
 
                 this.router.navigate(['/app/history']);
 

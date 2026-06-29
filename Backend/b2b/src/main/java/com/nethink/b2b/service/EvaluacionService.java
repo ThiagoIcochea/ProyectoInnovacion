@@ -30,7 +30,7 @@ public class EvaluacionService {
                 .orElseThrow();
          Solicitud sol = solicitudRepo.findById(request.getIdSolicitud()).orElseThrow();
          
-         if(usuario.getIdUsuario() !=  sol.getIdSolicitud()){
+         if(usuario.getIdUsuario() !=  sol.getUsuario().getIdUsuario()){
               throw new RuntimeException(
                     "Porfavor ingrese, con la cuenta correcta.");
          }
