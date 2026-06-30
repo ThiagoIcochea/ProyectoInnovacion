@@ -685,6 +685,8 @@ BigDecimal totalItem =
             case EN_PREPARACION -> "En preparación";
 
             case EN_CAMINO -> "En camino";
+                
+            case  EN_RECLAMO -> "En reclamo";
 
             case ENTREGADA -> "Entregado";
 
