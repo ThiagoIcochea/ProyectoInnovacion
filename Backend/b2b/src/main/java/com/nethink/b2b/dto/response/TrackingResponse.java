@@ -14,6 +14,7 @@ public class TrackingResponse {
     private String direccion;
     private String codigoRecepcion;
     private LocalDateTime fechaEntrega;
+    private LocalDateTime fechaLimiteEntrega;
 
     private List<TrackingStepResponse> timeline;
     
@@ -102,4 +103,13 @@ public void setIdProveedor(Integer idProveedor) {
     public void setTimeline(List<TrackingStepResponse> timeline) {
         this.timeline = timeline;
     }
+
+    public LocalDateTime getFechaLimiteEntrega() {
+        return fechaLimiteEntrega;
+    }
+
+    public void setFechaLimiteEntrega(LocalDateTime fechaLimiteEntrega) {
+        this.fechaLimiteEntrega = fechaLimiteEntrega;
+    }
+    
 }

@@ -444,6 +444,8 @@ BigDecimal totalItem =
         r.setFechaEntrega(
                 s.getFechaEntrega()
         );
+        
+        r.setFechaLimiteEntrega(s.getFechaLimiteEntrega());
 
         List<SolicitudHistorial> historiales =
                 historialRepo
