@@ -275,7 +275,7 @@ export class RequestTrackingComponent implements OnInit {
       return 0;
     }
 
-    return Math.max(1, Math.ceil(ms / 86400000));
+    return Math.max(1, Math.floor(ms / 86400000));
   }
 
   canCreateDelayClaim(): boolean {
