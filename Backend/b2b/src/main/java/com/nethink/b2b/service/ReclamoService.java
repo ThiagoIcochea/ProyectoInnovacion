@@ -67,6 +67,9 @@ public void registrarReclamo(
 
     reclamo.setDescripcion(
             request.getDescripcion());
+    
+    
+    reclamo.setTipo("DEMORA");
 
     reclamo.setEstado("ABIERTO");
 

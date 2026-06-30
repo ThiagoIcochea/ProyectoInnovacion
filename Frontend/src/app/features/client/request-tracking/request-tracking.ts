@@ -186,17 +186,28 @@ export class RequestTrackingComponent implements OnInit {
       return;
     }
 
-    const saved = this.delayClaimsService.save({
-      idSolicitud: Number(this.tracking.idSolicitud),
-      idProveedor: this.tracking?.idProveedor ?? null,
-      proveedor: this.tracking?.proveedor || 'Proveedor',
-      empresaCliente: this.tracking?.empresaCompradora?.razonSocial || 'Cliente',
-      orderCode: this.getRequestCode(),
-      motivo: 'DEMORA',
-      descripcion: description,
-      fechaPrometida: promisedDate.toISOString(),
-      diasDemora: this.getDelayDays(promisedDate)
-    });
+  this.delayClaimsService.save({
+  idSolicitud: Number(this.tracking.idSolicitud),
+  idProveedor: this.tracking?.idProveedor ?? null,
+  proveedor: this.tracking?.proveedor || 'Proveedor',
+  empresaCliente: this.tracking?.empresaCompradora?.razonSocial || 'Cliente',
+  orderCode: this.getRequestCode(),
+  motivo: 'DEMORA',
+  descripcion: description,
+  fechaPrometida: promisedDate.toISOString(),
+  diasDemora: this.getDelayDays(promisedDate)
+}).subscribe({
+  next: (res) => {
+    console.log('Reclamo registrado', res);
+
+    this.claimModalOpen = false;
+    this.claimError = '';
+    this.cdr.detectChanges();
+  },
+  error: (err) => {
+    console.error(err);
+  }
+});
 
     
     this.claimModalOpen = false;
@@ -211,7 +222,7 @@ export class RequestTrackingComponent implements OnInit {
       motivo: 'DEMORA_ENTREGA',
       descripcion: description,
       fechaPrometida: promisedDate.toISOString(),
-      evidencia: [] // frontend: attach evidence files if available (not implemented)
+      evidencia: [] 
     };
 
     this.notification.sendDelayClaimEmail(emailPayload).subscribe({
