@@ -13,7 +13,7 @@ export interface DelayClaim {
   proveedor: string;
   empresaCliente: string;
   orderCode: string;
-  motivo: 'DEMORA_ENTREGA';
+  motivo: 'EN_RECLAMO';
   descripcion: string;
   fechaPrometida: string;
   diasDemora: number;
