@@ -21,20 +21,7 @@ public class ReclamoController {
         this.reclamoService = reclamoService;
     }
 
-    @PostMapping("/demora")
-    public ResponseEntity<?> reclamoDemora(@RequestBody Map<String, Object> payload) {
-        Integer idSolicitud = payload.get("idSolicitud") == null ? null : Integer.valueOf(payload.get("idSolicitud").toString());
-        String descripcion = payload.getOrDefault("descripcion", "").toString();
-        String evidencia = payload.getOrDefault("evidencia", "").toString();
-
-        if (idSolicitud == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "idSolicitud requerido"));
-        }
-
-        solicitudService.enviarReclamoDemora(idSolicitud, descripcion, evidencia);
-
-        return ResponseEntity.ok(Map.of("message", "Reclamo registrado y notificado"));
-    }
+  
     
       @PostMapping("/demora")
     public ResponseEntity<?> registrar(
