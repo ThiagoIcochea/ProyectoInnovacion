@@ -192,7 +192,7 @@ export class RequestTrackingComponent implements OnInit {
       proveedor: this.tracking?.proveedor || 'Proveedor',
       empresaCliente: this.tracking?.empresaCompradora?.razonSocial || 'Cliente',
       orderCode: this.getRequestCode(),
-      motivo: 'DEMORA_ENTREGA',
+      motivo: 'EN_RECLAMO',
       descripcion: description,
       fechaPrometida: promisedDate.toISOString(),
       diasDemora: this.getDelayDays(promisedDate)
