@@ -323,7 +323,7 @@ this.deliveries = (data || [])
   }
 
   private cargarReclamosLocales(): void {
-    this.delayClaims = this.delayClaimsService.getAll();
+    this.delayClaims = /* this.delayClaimsService.getAll() */ [];
   }
 
   private notifyProviderCountsRefresh(): void {
