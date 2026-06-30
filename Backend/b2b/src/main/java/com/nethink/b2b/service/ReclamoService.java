@@ -68,7 +68,7 @@ public void registrarReclamo(
     reclamo.setDescripcion(
             request.getDescripcion());
 
-    reclamo.setEstado("PENDIENTE");
+    reclamo.setEstado("ABIERTO");
 
     reclamo.setFechaCreacion(
             LocalDateTime.now());
