@@ -184,7 +184,7 @@ public class EmailServiceImpl implements EmailService {
                                 </p>
 
                                 <div style='background:#eff6ff;padding:20px;border-radius:10px;margin-top:20px'>
-                                    <p><b>Código de recepción:</b> %s</p>
+                                    <p><b>Número de Solicitud :</b> %s</p>
                                     <p><b>Total:</b> %s</p>
                                 </div>
 
@@ -201,7 +201,7 @@ public class EmailServiceImpl implements EmailService {
                     </div>
                  """.formatted(
                         solicitud.getUsuario().getNombres(),
-                        solicitud.getCodigoRecepcion(),
+                        "RFQ-2026"+solicitud.getIdSolicitud(),
                         solicitud.getTotal(),
                         configService.getValor("APP_FRONTEND_ORIGIN") != null
                             ? configService.getValor("APP_FRONTEND_ORIGIN")
@@ -248,7 +248,7 @@ public class EmailServiceImpl implements EmailService {
                         </div>
                     </div>
                     """.formatted(
-                    solicitud.getCodigoRecepcion(),
+                    "RFQ-2026"+solicitud.getIdSolicitud(),
                     solicitud.getUsuario() != null ? solicitud.getUsuario().getCorreo() : "Cliente",
                     descripcion,
                     evidenciaJson == null ? "Sin evidencia" : evidenciaJson

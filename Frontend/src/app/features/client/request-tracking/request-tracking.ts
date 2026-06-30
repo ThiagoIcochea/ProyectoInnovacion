@@ -69,7 +69,7 @@ export class RequestTrackingComponent implements OnInit {
         console.log('TRACKING:', res);
 
         this.tracking = res;
-        this.currentClaim = this.delayClaimsService.getBySolicitud(res.idSolicitud);
+        
         this.claimPromisedDate = this.getDefaultPromisedDateInput();
 
         localStorage.setItem(
@@ -198,12 +198,12 @@ export class RequestTrackingComponent implements OnInit {
       diasDemora: this.getDelayDays(promisedDate)
     });
 
-    this.currentClaim = saved;
+    
     this.claimModalOpen = false;
     this.claimError = '';
     this.cdr.detectChanges();
 
-    // Attempt to send the claim via backend/email with current evidence
+  
     const emailPayload = {
       idSolicitud: Number(this.tracking.idSolicitud),
       proveedor: this.tracking?.proveedor || 'Proveedor',
