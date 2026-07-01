@@ -73,8 +73,8 @@ public class SuscripcionService {
         // 2. TOKEN REAL PAYPAL (sandbox)
         String token = payPalService.obtenerAccessToken();
 
-        String returnUrl = "https://proyectoinnovacion-1.onrender.com/api/suscripciones/success?subscriptionId=" + s.getIdSuscripcion();
-        String cancelUrl = "https://proyectoinnovacion-1.onrender.com/api/suscripciones/cancel?subscriptionId=" + s.getIdSuscripcion();
+        String returnUrl = "https://proyectoinnovacion.onrender.com/api/suscripciones/success?subscriptionId=" + s.getIdSuscripcion();
+        String cancelUrl = "https://proyectoinnovacion.onrender.com/api/suscripciones/cancel?subscriptionId=" + s.getIdSuscripcion();
 
         // 3. Crear orden en PayPal
         Map order = payPalService.crearOrden(

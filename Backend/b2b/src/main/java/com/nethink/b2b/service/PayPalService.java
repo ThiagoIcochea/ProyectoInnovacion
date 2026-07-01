@@ -77,10 +77,10 @@ public class PayPalService {
             Map<String, Object> experienceContext = new HashMap<>();
             experienceContext.put("return_url", returnUrl != null && !returnUrl.isBlank()
                     ? returnUrl
-                    : "https://proyectoinnovacion-1.onrender.com/api/suscripciones/success");
+                    : "https://proyectoinnovacion.onrender.com/api/suscripciones/success");
             experienceContext.put("cancel_url", cancelUrl != null && !cancelUrl.isBlank()
                     ? cancelUrl
-                    : "https://proyectoinnovacion-1.onrender.com/api/suscripciones/cancel");
+                    : "https://proyectoinnovacion.onrender.com/api/suscripciones/cancel");
 
             Map<String, Object> paymentSource = new HashMap<>();
             paymentSource.put("paypal", Map.of("experience_context", experienceContext));
