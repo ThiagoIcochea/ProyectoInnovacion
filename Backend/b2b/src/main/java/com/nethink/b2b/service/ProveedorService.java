@@ -8,6 +8,7 @@ import com.nethink.b2b.entity.*;
 import com.nethink.b2b.entity.enums.EstadoUsuario;
 import com.nethink.b2b.repository.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -65,6 +66,15 @@ private LogsSistemaService logsSistemaService;
     
     @Autowired
 private LogsApiRepository logsApiRepository;
+
+    @Autowired
+    private SuscripcionRepository suscripcionRepository;
+
+    @Autowired
+    private PlanPrecioRepository planPrecioRepository;
+
+    @Autowired
+    private PlanRepository planRepository;
 
     @Transactional
     public void registerProvider(RegisterProviderRequest req,  HttpServletRequest request) {
@@ -206,6 +216,8 @@ private LogsApiRepository logsApiRepository;
             }
         }
 
+        crearSuscripcionFreemium(user);
+
         emailService.enviarCorreoRegistroProveedor(
                 user,
                 prov.getRazonSocial(),
@@ -219,6 +231,41 @@ private LogsApiRepository logsApiRepository;
     "Correo registro proveedor enviado",
     request
 );
+    }
+
+    private void crearSuscripcionFreemium(Usuario usuario) {
+        LocalDateTime ahora = LocalDateTime.now();
+        Plan plan = planRepository.findById(1).orElseGet(() -> {
+            Plan nuevoPlan = new Plan();
+            nuevoPlan.setIdPlan(1);
+            nuevoPlan.setNombre("Freemium");
+            nuevoPlan.setDescripcion("Plan inicial gratuito para nuevos proveedores");
+            nuevoPlan.setActivo(true);
+            nuevoPlan.setFechaCreacion(ahora);
+            return planRepository.save(nuevoPlan);
+        });
+
+        PlanPrecio precio = planPrecioRepository.findById(1).orElseGet(() -> {
+            PlanPrecio nuevoPrecio = new PlanPrecio();
+            nuevoPrecio.setIdPrecio(1);
+            nuevoPrecio.setPlan(plan);
+            nuevoPrecio.setPeriodoMeses(1);
+            nuevoPrecio.setPrecio(BigDecimal.ZERO);
+            nuevoPrecio.setActivo(true);
+            nuevoPrecio.setFechaCreacion(ahora);
+            return planPrecioRepository.save(nuevoPrecio);
+        });
+
+        Suscripcion suscripcion = new Suscripcion();
+        suscripcion.setUsuario(usuario);
+        suscripcion.setPrecio(precio);
+        suscripcion.setMontoPagado(BigDecimal.ZERO);
+        suscripcion.setEstado(Suscripcion.EstadoSuscripcion.ACTIVA);
+        suscripcion.setFechaInicio(ahora);
+        suscripcion.setFechaFin(ahora.plusDays(30));
+        suscripcion.setFechaCreacion(ahora);
+        suscripcion.setFechaActualizacion(ahora);
+        suscripcionRepository.save(suscripcion);
     }
     
    public List<AdminProviderResponse> listarProviders(Integer idUsuario,  HttpServletRequest request) {

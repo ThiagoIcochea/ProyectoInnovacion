@@ -56,6 +56,8 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   providerPlanBillingCycle: '1' | '3' | '6' = '1';
   providerPlanPaymentReady = false;
   globalSearchTerm = '';
+  providerAccessBlocked = false;
+  providerAccessMessage = '';
 
   providerPlans = [
     {
@@ -180,7 +182,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   get canPrepareProviderPlanPayment(): boolean {
-    if (this.selectedProviderPlan.id === 'freemium') {
+    if (this.selectedProviderPlan.id === 1) {
       return true;
     }
 
@@ -223,22 +225,28 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       JSON.stringify(payload)
     );
 
-    if (this.selectedProviderPlan.id === 'freemium') {
-      localStorage.setItem('provider_current_plan', this.selectedProviderPlan.id);
+    if (this.selectedProviderPlan.id === 1) {
+      localStorage.setItem('provider_current_plan', String(this.selectedProviderPlan.id));
+      this.providerAccessBlocked = false;
+      this.providerAccessMessage = '';
+      this.cerrarPlanesProveedor();
+      return;
     }
 
     this.providerPlanPaymentReady = true;
 
-    if (this.selectedProviderPlan.id !== 'freemium') {
-      const request = {
-  idUsuario: this.usuario.id,
-  idPrecio: this.selectedProviderPlan.id 
-};
-     this.http.post(`${APP_API_BASE_URL}/suscripciones/crear-orden`, request)
-  .subscribe((res: any) => {
-    window.location.href = res.approvalUrl;
-  });
-    }
+    const request = {
+      idUsuario: this.usuario?.idUsuario ?? this.usuario?.id ?? Number(localStorage.getItem('auth_user_id')),
+      idPrecio: this.selectedProviderPlan.id,
+      meses: Number(this.providerPlanBillingCycle),
+      payerName: this.providerPlanPayment.payerName.trim(),
+      payerEmail: this.providerPlanPayment.payerEmail.trim()
+    };
+
+    this.http.post(`${APP_API_BASE_URL}/suscripciones/crear-orden`, request)
+      .subscribe((res: any) => {
+        window.location.href = res.approvalUrl;
+      });
   }
 
   private cargarPlanProveedorLocal(): void {
@@ -247,6 +255,35 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     if (savedPlan && this.providerPlans.some(plan => plan.id === Number(savedPlan))) {
       this.selectedProviderPlanId = Number(savedPlan);
     }
+  }
+
+  cargarEstadoSuscripcionProveedor(): void {
+    const userId = this.usuario?.idUsuario ?? this.usuario?.id ?? Number(localStorage.getItem('auth_user_id'));
+
+    if (!userId) {
+      return;
+    }
+
+    this.http.get<any>(`${APP_API_BASE_URL}/suscripciones/estado/${userId}`, {
+      headers: this.headers()
+    }).subscribe({
+      next: (res) => {
+        this.providerAccessBlocked = res?.bloqueado === true;
+        this.providerAccessMessage = res?.mensaje || 'Tu suscripción necesita actualización.';
+        this.selectedProviderPlanId = Number(res?.idPrecio || this.selectedProviderPlanId || 1);
+        localStorage.setItem('provider_current_plan', String(this.selectedProviderPlanId));
+
+        if (this.providerAccessBlocked) {
+          this.plansModalOpen = true;
+        }
+
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.providerAccessBlocked = false;
+        this.providerAccessMessage = '';
+      }
+    });
   }
 
   private hidratarPagoPlanProveedor(): void {
@@ -406,6 +443,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
         this.usuario = res;
         this.fotoPerfilCacheBust = Date.now();
+
+        if (this.isProvider) {
+          this.cargarEstadoSuscripcionProveedor();
+        }
 
         this.cdr.detectChanges();
       },

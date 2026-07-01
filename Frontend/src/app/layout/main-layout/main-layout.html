@@ -351,7 +351,19 @@
     </header>
 
     <main class="app-main">
-      <router-outlet></router-outlet>
+      <ng-container *ngIf="isProvider && providerAccessBlocked; else providerContent">
+        <section class="provider-access-block">
+          <h2>Acceso al panel proveedor bloqueado</h2>
+          <p>{{ providerAccessMessage || 'Tu plan actual ha vencido. Actualiza tu suscripción para seguir operando.' }}</p>
+          <button type="button" class="provider-plan-primary" (click)="abrirPlanesProveedor()">
+            Actualizar plan
+          </button>
+        </section>
+      </ng-container>
+
+      <ng-template #providerContent>
+        <router-outlet></router-outlet>
+      </ng-template>
     </main>
   </div>
 
@@ -421,7 +433,7 @@
           <select
             name="providerPlanBillingCycle"
             [(ngModel)]="providerPlanBillingCycle"
-            [disabled]="selectedProviderPlan.id === 'freemium'">
+            [disabled]="selectedProviderPlan.id === 1">
             <option value="1">1 mes</option>
             <option value="3">3 meses</option>
             <option value="6">6 meses</option>
@@ -434,7 +446,7 @@
         </div>
       </div>
 
-      <div class="provider-plan-form-grid" *ngIf="selectedProviderPlan.id !== 'freemium'">
+      <div class="provider-plan-form-grid" *ngIf="selectedProviderPlan.id !== 1">
         <label>
           Nombre completo
           <input
@@ -456,7 +468,7 @@
         </label>
       </div>
 
-      <div class="provider-plan-free" *ngIf="selectedProviderPlan.id === 'freemium'">
+      <div class="provider-plan-free" *ngIf="selectedProviderPlan.id === 1">
         Freemium queda activo por defecto durante 1 mes. No incluye anuncios a clientes ni reportes avanzados.
       </div>
 
@@ -470,7 +482,7 @@
         </button>
 
         <button type="submit" class="provider-plan-primary" [disabled]="!canPrepareProviderPlanPayment">
-          {{ selectedProviderPlan.id === 'freemium' ? 'Mantener Freemium' : 'Continuar a PayPal' }}
+          {{ selectedProviderPlan.id === 1 ? 'Mantener Freemium' : 'Continuar a PayPal' }}
         </button>
       </div>
     </form>

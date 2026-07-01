@@ -2,6 +2,7 @@ package com.nethink.b2b.controller;
 
 import com.nethink.b2b.dto.request.SuscripcionRequest;
 import com.nethink.b2b.dto.response.PayPalOrderResponse;
+import com.nethink.b2b.dto.response.SuscripcionStatusResponse;
 import com.nethink.b2b.service.SuscripcionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,9 +32,10 @@ public class SuscripcionController {
     // 2. Capturar pago después de PayPal
     @PostMapping("/capturar/{orderId}")
     public ResponseEntity<?> capturarPago(
-            @PathVariable String orderId) {
+            @PathVariable String orderId,
+            @RequestParam(required = false) Integer meses) {
 
-        suscripcionService.capturarPago(orderId);
+        suscripcionService.capturarPago(orderId, meses);
 
         return ResponseEntity.ok(
                 Map.of(
@@ -41,5 +43,11 @@ public class SuscripcionController {
                         "message", "Pago confirmado correctamente"
                 )
         );
+    }
+
+    @GetMapping("/estado/{idUsuario}")
+    public ResponseEntity<SuscripcionStatusResponse> obtenerEstado(
+            @PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(suscripcionService.obtenerEstadoSuscripcion(idUsuario));
     }
 }
