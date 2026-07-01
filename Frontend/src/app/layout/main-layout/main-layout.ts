@@ -190,6 +190,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     return true;
   }
 
+  get canAccessProviderShell(): boolean {
+    return this.selectedProviderPlanId === 3 && !this.providerAccessBlocked;
+  }
+
   abrirPlanesProveedor(): void {
     if (!this.isProvider) {
       return;
@@ -232,10 +236,8 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     );
 
     if (this.selectedProviderPlan.id === 1) {
-      localStorage.setItem('provider_current_plan', String(this.selectedProviderPlan.id));
-      this.providerAccessBlocked = false;
-      this.providerAccessMessage = '';
-      this.cerrarPlanesProveedor();
+      this.providerAccessMessage = 'Freemium ya fue utilizado. Elige Estándar o Premium para continuar.';
+      this.cdr.detectChanges();
       return;
     }
 

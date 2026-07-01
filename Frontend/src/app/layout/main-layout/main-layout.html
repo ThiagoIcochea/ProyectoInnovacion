@@ -75,7 +75,7 @@
       </nav>
     </ng-container>
 
-    <ng-container *ngIf="isProvider">
+    <ng-container *ngIf="isProvider && canAccessProviderShell">
 
       <div class="sidebar__badge">
         Proveedor
@@ -351,10 +351,10 @@
     </header>
 
     <main class="app-main">
-      <ng-container *ngIf="isProvider && providerAccessBlocked; else providerContent">
+      <ng-container *ngIf="isProvider && !canAccessProviderShell; else providerContent">
         <section class="provider-access-block">
           <h2>Acceso al panel proveedor bloqueado</h2>
-          <p>{{ providerAccessMessage || 'Tu plan actual ha vencido. Actualiza tu suscripción para seguir operando.' }}</p>
+          <p>{{ providerAccessMessage || 'Tu acceso al panel proveedor está deshabilitado hasta que cambies a Premium.' }}</p>
           <button type="button" class="provider-plan-primary" (click)="abrirPlanesProveedor()">
             Actualizar plan
           </button>
