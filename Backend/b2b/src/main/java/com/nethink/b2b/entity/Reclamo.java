@@ -19,6 +19,9 @@ public class Reclamo {
 
     @Column(name = "id_proveedor")
     private Integer idProveedor;
+    
+    @Column(name = "evidencia_url")
+private String evidenciaUrl;
 
     private String tipo;
 
@@ -27,6 +30,8 @@ public class Reclamo {
     private String estado;
 
     private LocalDateTime fechaCreacion;
+    
+    
 
     public Integer getIdReclamo() {
         return idReclamo;
@@ -91,4 +96,12 @@ public class Reclamo {
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
+    
+    public String getEvidenciaUrl() {
+    return evidenciaUrl;
+}
+
+public void setEvidenciaUrl(String evidenciaUrl) {
+    this.evidenciaUrl = evidenciaUrl;
+}
 }

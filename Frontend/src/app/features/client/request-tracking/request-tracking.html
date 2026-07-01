@@ -221,7 +221,21 @@
         maxlength="600"
         required>
       </textarea>
+       <label>
+  Evidencia (imagen o PDF)
+
+  <input
+    type="file"
+    accept=".pdf,image/*"
+    (change)="onEvidenceSelected($event)">
+</label>
+
+<small *ngIf="selectedEvidence">
+  {{ selectedEvidence.name }}
+</small>
     </label>
+
+
 
     <p class="claim-error" *ngIf="claimError">{{ claimError }}</p>
 

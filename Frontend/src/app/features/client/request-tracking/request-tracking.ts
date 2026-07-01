@@ -26,6 +26,7 @@ export class RequestTrackingComponent implements OnInit {
   claimPromisedDate = '';
   claimError = '';
   currentClaim: DelayClaim | null = null;
+  selectedEvidence?: File;
 
   constructor(
     private route: ActivatedRoute,
@@ -53,6 +54,18 @@ export class RequestTrackingComponent implements OnInit {
       Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token)}`
     });
   }
+
+  onEvidenceSelected(event: Event): void {
+
+  const input = event.target as HTMLInputElement;
+
+  if (!input.files?.length) {
+    this.selectedEvidence = undefined;
+    return;
+  }
+
+  this.selectedEvidence = input.files[0];
+}
 
   cargarTracking(id: string): void {
 
@@ -186,17 +199,18 @@ export class RequestTrackingComponent implements OnInit {
       return;
     }
 
-  this.delayClaimsService.save({
-  idSolicitud: Number(this.tracking.idSolicitud),
-  idProveedor: this.tracking?.idProveedor ?? null,
-  proveedor: this.tracking?.proveedor || 'Proveedor',
-  empresaCliente: this.tracking?.empresaCompradora?.razonSocial || 'Cliente',
-  orderCode: this.getRequestCode(),
-  motivo: 'DEMORA',
-  descripcion: description,
-  fechaPrometida: promisedDate.toISOString(),
-  diasDemora: this.getDelayDays(promisedDate)
-}).subscribe({
+  this.delayClaimsService.save( {
+    idSolicitud: Number(this.tracking.idSolicitud),
+    idProveedor: this.tracking?.idProveedor ?? null,
+    proveedor: this.tracking?.proveedor || 'Proveedor',
+    empresaCliente: this.tracking?.empresaCompradora?.razonSocial || 'Cliente',
+    orderCode: this.getRequestCode(),
+    motivo: 'DEMORA',
+    descripcion: description,
+    fechaPrometida: promisedDate.toISOString(),
+    diasDemora: this.getDelayDays(promisedDate)
+  },
+  this.selectedEvidence).subscribe({
   next: (res) => {
     console.log('Reclamo registrado', res);
 

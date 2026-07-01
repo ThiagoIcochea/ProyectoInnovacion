@@ -4,6 +4,8 @@
  */
 package com.nethink.b2b.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.nethink.b2b.dto.request.ReclamoRequest;
 import com.nethink.b2b.entity.Reclamo;
 import com.nethink.b2b.entity.Solicitud;
@@ -12,9 +14,12 @@ import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.repository.ReclamoRepository;
 import com.nethink.b2b.repository.SolicitudRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Service
@@ -24,24 +29,39 @@ public class ReclamoService {
     private final SolicitudRepository solicitudRepository;
     private final UsuarioRepository usuarioRepository;
     private final EmailService emailService;
+    private final Cloudinary cloudinary;
 
     public ReclamoService(
             ReclamoRepository reclamoRepository,
             SolicitudRepository solicitudRepository,
             UsuarioRepository usuarioRepository,
-            EmailService emailService) {
+            EmailService emailService,
+            Cloudinary cloudinary) {
 
         this.reclamoRepository = reclamoRepository;
         this.solicitudRepository = solicitudRepository;
         this.usuarioRepository = usuarioRepository;
         this.emailService = emailService;
+        this.cloudinary = cloudinary;
     }
+    
+    private String subirACloudinary(MultipartFile archivo) throws IOException {
+
+    Map uploadResult = cloudinary.uploader().upload(
+            archivo.getBytes(),
+            ObjectUtils.asMap(
+                    "folder", "b2b/reclamos"
+            )
+    );
+
+    return uploadResult.get("secure_url").toString();
+}
     
     @Transactional
 public void registrarReclamo(
         ReclamoRequest request,
         String correoUsuario
-) {
+) throws IOException {
 
     Usuario usuario = usuarioRepository
             .findByCorreo(correoUsuario)
@@ -69,12 +89,23 @@ public void registrarReclamo(
             request.getDescripcion());
     
     
-    reclamo.setTipo("DEMORA");
+    
 
     reclamo.setEstado("ABIERTO");
 
     reclamo.setFechaCreacion(
             LocalDateTime.now());
+    
+    String evidenciaUrl = null;
+
+if (request.getEvidencia() != null &&
+    !request.getEvidencia().isEmpty()) {
+
+    evidenciaUrl = subirACloudinary(
+            request.getEvidencia());
+}
+
+reclamo.setEvidenciaUrl(evidenciaUrl);
 
     reclamoRepository.save(reclamo);
 

@@ -4,6 +4,8 @@
  */
 package com.nethink.b2b.dto.request;
 
+import org.springframework.web.multipart.MultipartFile;
+
 
 public class ReclamoRequest {
 
@@ -12,6 +14,16 @@ public class ReclamoRequest {
     private String descripcion;
 
     private String tipo;
+    
+    private MultipartFile evidencia;
+
+public MultipartFile getEvidencia() {
+    return evidencia;
+}
+
+public void setEvidencia(MultipartFile evidencia) {
+    this.evidencia = evidencia;
+}
 
     public Integer getIdSolicitud() {
         return idSolicitud;

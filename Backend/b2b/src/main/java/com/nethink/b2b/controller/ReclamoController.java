@@ -3,10 +3,12 @@ package com.nethink.b2b.controller;
 import com.nethink.b2b.dto.request.ReclamoRequest;
 import com.nethink.b2b.service.ReclamoService;
 import com.nethink.b2b.service.SolicitudService;
+import java.io.IOException;
 import java.security.Principal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping("/api/reclamos")
@@ -22,21 +24,21 @@ public class ReclamoController {
     }
 
   
-    
-      @PostMapping("/demora")
-    public ResponseEntity<?> registrar(
-            @RequestBody ReclamoRequest request,
-            Principal p
-    ) {
+   @PostMapping(
+    value="/reclamos/demora",
+    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+)
+public ResponseEntity<?> crear(
 
-        reclamoService.registrarReclamo(
-                request,
-                p.getName());
+        @ModelAttribute ReclamoRequest request,
+        Principal principal
 
-        return ResponseEntity.ok(
-                Map.of(
-                        "message",
-                        "Reclamo registrado"
-                ));
-    }
+) throws IOException {
+
+    reclamoService.registrarReclamo(
+            request,
+            principal.getName());
+
+    return ResponseEntity.ok().build();
+}
 }

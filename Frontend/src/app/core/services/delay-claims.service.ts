@@ -35,22 +35,42 @@ export class DelayClaimsService {
     });
   }
 
-  save(
-    claim: Omit<DelayClaim, 'id' | 'createdAt' | 'updatedAt' | 'estado'>
-  ): Observable<any> {
+save(
+    claim: Omit<DelayClaim,'id'|'createdAt'|'updatedAt'|'estado'>,
+    evidencia?: File
+): Observable<any> {
+
+    const formData = new FormData();
+
+    formData.append(
+      'idSolicitud',
+      String(claim.idSolicitud)
+    );
+
+    formData.append(
+      'descripcion',
+      claim.descripcion
+    );
+
+    formData.append(
+      'tipo',
+      claim.motivo
+    );
+
+    if (evidencia) {
+      formData.append(
+        'evidencia',
+        evidencia
+      );
+    }
 
     return this.http.post(
       `${APP_API_BASE_URL}/reclamos/demora`,
-      {
-        idSolicitud: claim.idSolicitud,
-        descripcion: claim.descripcion,
-        tipo: claim.motivo
-      },
+      formData,
       {
         headers: this.headers()
       }
     );
-
-  }
+}
 
 }
