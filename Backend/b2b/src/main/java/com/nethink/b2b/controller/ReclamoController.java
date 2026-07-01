@@ -25,7 +25,7 @@ public class ReclamoController {
 
   
    @PostMapping(
-    value="/reclamos/demora",
+    value="/demora",
     consumes = MediaType.MULTIPART_FORM_DATA_VALUE
 )
 public ResponseEntity<?> crear(
