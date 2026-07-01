@@ -38,12 +38,12 @@ public class SuscripcionController {
             suscripcionService.capturarPago(token);
         }
 
-        response.sendRedirect("https://proyectoinnovacion.onrender.com/app/provider/dashboard?payment=success");
+        response.sendRedirect("https://proyectoinnovacion-1.onrender.com/app/provider/dashboard?payment=success");
     }
 
     @GetMapping("/cancel")
     public void cancel(HttpServletResponse response) throws IOException {
-        response.sendRedirect("https://proyectoinnovacion.onrender.com/app/provider/dashboard?payment=cancel");
+        response.sendRedirect("https://proyectoinnovacion-1.onrender.com/app/provider/dashboard?payment=cancel");
     }
 
     // Endpoint manual opcional para pruebas/dev.
