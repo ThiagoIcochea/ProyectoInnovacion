@@ -50,6 +50,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   providerRequestCount = 0;
   providerPaymentCount = 0;
   providerDeliveryCount = 0;
+  providerClaimCount = 0;
   menuMovilAbierto = false;
   plansModalOpen = false;
   selectedProviderPlanId : number = 1;
@@ -191,7 +192,15 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   get canAccessProviderShell(): boolean {
+    return !this.providerAccessBlocked;
+  }
+
+  get canAccessProviderDashboard(): boolean {
     return this.selectedProviderPlanId === 3 && !this.providerAccessBlocked;
+  }
+
+  get isProviderDashboardRoute(): boolean {
+    return this.router.url.startsWith('/app/provider/dashboard');
   }
 
   abrirPlanesProveedor(): void {
@@ -299,10 +308,9 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: (res) => {
         const planId = Number(res?.idPlan || this.selectedProviderPlanId || 1);
-        const isPremium = planId === 3;
         const isActive = res?.estado === 'ACTIVA' && res?.bloqueado !== true;
 
-        this.providerAccessBlocked = !isPremium && !isActive;
+        this.providerAccessBlocked = !isActive;
         this.providerAccessMessage = res?.mensaje || 'Tu suscripción necesita actualización.';
         this.selectedProviderPlanId = planId;
         localStorage.setItem('provider_current_plan', String(this.selectedProviderPlanId));
@@ -557,8 +565,12 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       entregas: this.http.get<any[]>(
         `${APP_API_BASE_URL}/solicitudes/proveedor/entregas`,
         options
+      ).pipe(catchError(() => of([]))),
+      reclamos: this.http.get<any[]>(
+        `${APP_API_BASE_URL}/reclamos/proveedor/mis-reclamos`,
+        options
       ).pipe(catchError(() => of([])))
-    }).subscribe(({ solicitudes, pagos, entregas }) => {
+    }).subscribe(({ solicitudes, pagos, entregas, reclamos }) => {
       this.providerRequestCount =
         (solicitudes || []).length;
 
@@ -568,7 +580,15 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       this.providerDeliveryCount =
         (entregas || []).length;
 
+      this.providerClaimCount =
+        (reclamos || []).length;
+
       this.cdr.detectChanges();
     });
   }
 }
+
+
+
+
+

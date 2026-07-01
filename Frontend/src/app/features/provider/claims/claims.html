@@ -1,0 +1,173 @@
+<div class="provider-claims-page">
+  <div class="page-header">
+    <div>
+      <span>Atencion postventa</span>
+      <h1>Gestion de Reclamos</h1>
+      <p>Revisa reclamos creados por clientes y registra la resolucion del proveedor.</p>
+    </div>
+  </div>
+
+  <div class="claims-grid">
+    <aside class="claims-card">
+      <div class="list-header">
+        <h2>Reclamos recibidos</h2>
+        <span>{{ filteredClaims.length }} reclamos</span>
+      </div>
+
+      <input
+        type="text"
+        class="search-box"
+        placeholder="Buscar por reclamo, orden, cliente o estado..."
+        [(ngModel)]="searchTerm"
+        (input)="filtrarReclamos()"
+      />
+
+      <div class="claim-list">
+        <button
+          class="claim-item"
+          *ngFor="let claim of filteredClaims"
+          [class.active]="selectedClaim?.idReclamo === claim.idReclamo"
+          (click)="seleccionarReclamo(claim)">
+          <div>
+            <strong>{{ getClaimCode(claim) }}</strong>
+            <p>{{ getTipoLabel(claim.tipo) }}</p>
+            <small>{{ claim.nombreEmpresa || claim.nombreCliente || 'Cliente' }}</small>
+          </div>
+
+          <div class="claim-meta">
+            <span>{{ getFecha(claim.fechaCreacion) }} a las {{ getHora(claim.fechaCreacion) }}</span>
+            <em [ngClass]="getEstadoClass(claim.estado)">{{ claim.estado }}</em>
+          </div>
+        </button>
+
+        <div class="empty-state" *ngIf="!cargando && filteredClaims.length === 0">
+          No se encontraron reclamos.
+        </div>
+
+        <div class="empty-state" *ngIf="cargando">
+          Cargando reclamos...
+        </div>
+      </div>
+    </aside>
+
+    <section class="claim-detail-card" *ngIf="selectedClaim as claim; else emptyDetail">
+      <div class="detail-header">
+        <div>
+          <span class="status-pill" [ngClass]="getEstadoClass(claim.estado)">{{ claim.estado }}</span>
+          <h2>{{ getClaimCode(claim) }}</h2>
+          <p>Solicitud {{ getOrderCode(claim) }} - {{ claim.estadoSolicitud || 'EN_RECLAMO' }}</p>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="claim-info">
+          <h3>Detalle del reclamo</h3>
+
+          <div class="info-grid">
+            <div>
+              <span>Tipo</span>
+              <strong>{{ getTipoLabel(claim.tipo) }}</strong>
+            </div>
+
+            <div>
+              <span>Cliente</span>
+              <strong>{{ claim.nombreCliente || 'Cliente' }}</strong>
+              <small>{{ claim.correoCliente }}</small>
+            </div>
+
+            <div>
+              <span>Empresa</span>
+              <strong>{{ claim.nombreEmpresa || 'No registrada' }}</strong>
+            </div>
+
+            <div>
+              <span>Total solicitud</span>
+              <strong>{{ claim.totalSolicitud ? ('S/ ' + claim.totalSolicitud) : 'Sin total' }}</strong>
+            </div>
+
+            <div class="full">
+              <span>Descripcion</span>
+              <strong>{{ claim.descripcion }}</strong>
+            </div>
+
+            <div class="full" *ngIf="claim.direccionEnvio">
+              <span>Direccion de entrega</span>
+              <strong>{{ claim.direccionEnvio }}</strong>
+            </div>
+
+            <div class="full" *ngIf="claim.resolucion">
+              <span>Resolucion registrada</span>
+              <strong>{{ claim.resolucion }}</strong>
+              <small *ngIf="claim.fechaResolucion">{{ getFecha(claim.fechaResolucion) }} a las {{ getHora(claim.fechaResolucion) }}</small>
+            </div>
+          </div>
+
+          <a
+            class="evidence-link"
+            *ngIf="claim.evidenciaUrl"
+            [href]="claim.evidenciaUrl"
+            target="_blank"
+            rel="noopener">
+            Ver evidencia adjunta
+          </a>
+        </div>
+
+        <aside class="claim-progress-card">
+          <h3>Historial</h3>
+
+          <div class="timeline" *ngIf="claim.historial.length; else noHistory">
+            <div class="timeline-item done" *ngFor="let item of claim.historial">
+              <div class="marker">
+                <span>OK</span>
+              </div>
+
+              <div>
+                <strong>{{ item.estado }}</strong>
+                <p>{{ item.descripcion }}</p>
+                <small>{{ item.fecha | date:'short' }}</small>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noHistory>
+            <div class="empty-state compact">Sin historial registrado.</div>
+          </ng-template>
+
+          <div class="update-box" *ngIf="getEstadosDisponibles().length > 0">
+            <h3>Actualizar estado</h3>
+
+            <label for="nuevoEstado">Nuevo estado</label>
+            <select id="nuevoEstado" [(ngModel)]="estadoSeleccionado">
+              <option value="">Seleccione...</option>
+              <option *ngFor="let estado of getEstadosDisponibles()" [value]="estado.value">
+                {{ estado.label }}
+              </option>
+            </select>
+
+            <label for="resolucion">Resolucion</label>
+            <textarea
+              id="resolucion"
+              [(ngModel)]="resolucion"
+              rows="4"
+              placeholder="Describe la revision, solucion o motivo de rechazo">
+            </textarea>
+
+            <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+            <button type="button" (click)="actualizarEstado()" [disabled]="guardando">
+              {{ guardando ? 'Actualizando...' : 'Actualizar reclamo' }}
+            </button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <ng-template #emptyDetail>
+      <section class="claim-detail-card empty-detail">
+        <div class="empty-state">Selecciona un reclamo para ver su detalle.</div>
+      </section>
+    </ng-template>
+  </div>
+</div>
+
+

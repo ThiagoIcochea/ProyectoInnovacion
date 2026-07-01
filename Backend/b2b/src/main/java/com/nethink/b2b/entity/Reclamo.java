@@ -29,7 +29,11 @@ private String evidenciaUrl;
 
     private String estado;
 
+    private String resolucion;
+
     private LocalDateTime fechaCreacion;
+
+    private LocalDateTime fechaResolucion;
     
     
 
@@ -104,4 +108,21 @@ private String evidenciaUrl;
 public void setEvidenciaUrl(String evidenciaUrl) {
     this.evidenciaUrl = evidenciaUrl;
 }
+
+    public String getResolucion() {
+        return resolucion;
+    }
+
+    public void setResolucion(String resolucion) {
+        this.resolucion = resolucion;
+    }
+
+    public LocalDateTime getFechaResolucion() {
+        return fechaResolucion;
+    }
+
+    public void setFechaResolucion(LocalDateTime fechaResolucion) {
+        this.fechaResolucion = fechaResolucion;
+    }
 }
+

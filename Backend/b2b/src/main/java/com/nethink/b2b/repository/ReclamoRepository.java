@@ -1,10 +1,13 @@
 package com.nethink.b2b.repository;
 
 import com.nethink.b2b.entity.Reclamo;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface ReclamoRepository extends JpaRepository<Reclamo, Integer> {
+
+    List<Reclamo> findByIdProveedorOrderByFechaCreacionDesc(Integer idProveedor);
 
     @Query("""
         SELECT COUNT(r)

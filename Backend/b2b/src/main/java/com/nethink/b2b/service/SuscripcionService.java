@@ -221,7 +221,7 @@ public class SuscripcionService {
                 ? suscripcion.getPrecio().getPlan().getIdPlan()
                 : 1);
         response.setIdPrecio(suscripcion.getPrecio() != null ? suscripcion.getPrecio().getIdPrecio() : 1);
-        response.setBloqueado(!accesoDashboard);
+        response.setBloqueado(!activa);
         response.setFechaFin(suscripcion.getFechaFin());
         response.setDiasRestantes(calcularDiasRestantes(suscripcion));
         response.setMensaje(accesoDashboard

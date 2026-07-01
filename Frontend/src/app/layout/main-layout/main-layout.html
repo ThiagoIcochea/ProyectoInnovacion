@@ -84,6 +84,7 @@
       <nav class="sidebar__nav">
 
         <a
+          *ngIf="canAccessProviderDashboard"
           [routerLink]="['/app/provider/dashboard']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
@@ -131,6 +132,19 @@
           </span>
         </a>
 
+
+        <a
+          [routerLink]="['/app/provider/claims']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
+          Reclamos
+
+          <span class="sidebar__count">
+            {{ providerClaimCount }}
+          </span>
+        </a>
         <a
           [routerLink]="['/app/provider/products']"
           routerLinkActive="active"
@@ -351,15 +365,27 @@
     </header>
 
     <main class="app-main">
-      <ng-container *ngIf="isProvider && !canAccessProviderShell; else providerContent">
+      <ng-container *ngIf="isProvider && !canAccessProviderShell; else providerShellContent">
         <section class="provider-access-block">
           <h2>Acceso al panel proveedor bloqueado</h2>
-          <p>{{ providerAccessMessage || 'Tu acceso al panel proveedor está deshabilitado hasta que cambies a Premium.' }}</p>
+          <p>{{ providerAccessMessage || 'Tu plan no esta activo. Actualiza a Estandar o Premium para continuar.' }}</p>
           <button type="button" class="provider-plan-primary" (click)="abrirPlanesProveedor()">
             Actualizar plan
           </button>
         </section>
       </ng-container>
+
+      <ng-template #providerShellContent>
+        <ng-container *ngIf="isProvider && isProviderDashboardRoute && !canAccessProviderDashboard; else providerContent">
+          <section class="provider-access-block">
+            <h2>Dashboard disponible solo con Premium</h2>
+            <p>Tu plan {{ currentProviderPlan.name }} permite usar los demas apartados del proveedor. Cambia a Premium para habilitar el dashboard.</p>
+            <button type="button" class="provider-plan-primary" (click)="abrirPlanesProveedor()">
+              Cambiar plan
+            </button>
+          </section>
+        </ng-container>
+      </ng-template>
 
       <ng-template #providerContent>
         <router-outlet></router-outlet>
@@ -474,3 +500,6 @@
     </form>
   </section>
 </div>
+
+
+
