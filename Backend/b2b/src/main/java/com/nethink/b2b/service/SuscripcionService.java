@@ -73,10 +73,15 @@ public class SuscripcionService {
         // 2. TOKEN REAL PAYPAL (sandbox)
         String token = payPalService.obtenerAccessToken();
 
+        String returnUrl = "https://proyectoinnovacion-1.onrender.com/api/suscripciones/success?subscriptionId=" + s.getIdSuscripcion();
+        String cancelUrl = "https://proyectoinnovacion-1.onrender.com/api/suscripciones/cancel?subscriptionId=" + s.getIdSuscripcion();
+
         // 3. Crear orden en PayPal
         Map order = payPalService.crearOrden(
                 token,
-                precio.getPrecio().toString()
+                precio.getPrecio().toPlainString(),
+                returnUrl,
+                cancelUrl
         );
 
         String orderId = order.get("id").toString();
@@ -103,6 +108,27 @@ public class SuscripcionService {
     }
 
     @Transactional
+    public void capturarPagoPorSuscripcion(Integer subscriptionId, String orderId) {
+        if (subscriptionId == null) {
+            throw new IllegalArgumentException("El id de la suscripción no puede estar vacío");
+        }
+
+        Suscripcion s = suscripcionRepo.findById(subscriptionId)
+                .orElseThrow(() -> new RuntimeException("Suscripción no encontrada"));
+
+        String orderToCapture = (orderId != null && !orderId.isBlank())
+                ? orderId
+                : s.getPaypalOrderId();
+
+        if (orderToCapture == null || orderToCapture.isBlank()) {
+            throw new IllegalArgumentException("El id de la orden no puede estar vacío");
+        }
+
+        Integer meses = s.getPrecio() != null ? s.getPrecio().getPeriodoMeses() : 1;
+        capturarPagoInterno(s, orderToCapture, meses);
+    }
+
+    @Transactional
     public void capturarPago(String orderId, Integer meses) {
         if (orderId == null || orderId.isBlank()) {
             throw new IllegalArgumentException("El id de la orden no puede estar vacío");
@@ -111,6 +137,11 @@ public class SuscripcionService {
         Suscripcion s = suscripcionRepo.findByPaypalOrderId(orderId)
                 .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
 
+        capturarPagoInterno(s, orderId, meses);
+    }
+
+    @Transactional
+    private void capturarPagoInterno(Suscripcion s, String orderId, Integer meses) {
         if (s.getEstado() == Suscripcion.EstadoSuscripcion.ACTIVA && s.getPaypalCaptureId() != null) {
             throw new IllegalStateException("La orden ya fue capturada previamente");
         }

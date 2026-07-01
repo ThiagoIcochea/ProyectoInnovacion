@@ -57,7 +57,7 @@ public class PayPalService {
     // =========================
     // 2. CREAR ORDEN PAYPAL
     // =========================
-    public Map crearOrden(String accessToken, String total) {
+    public Map crearOrden(String accessToken, String total, String returnUrl, String cancelUrl) {
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -75,8 +75,12 @@ public class PayPalService {
             purchaseUnit.put("amount", amount);
 
             Map<String, Object> experienceContext = new HashMap<>();
-            experienceContext.put("return_url", "https://proyectoinnovacion-1.onrender.com/api/suscripciones/success");
-            experienceContext.put("cancel_url", "https://proyectoinnovacion-1.onrender.com/api/suscripciones/cancel");
+            experienceContext.put("return_url", returnUrl != null && !returnUrl.isBlank()
+                    ? returnUrl
+                    : "https://proyectoinnovacion-1.onrender.com/api/suscripciones/success");
+            experienceContext.put("cancel_url", cancelUrl != null && !cancelUrl.isBlank()
+                    ? cancelUrl
+                    : "https://proyectoinnovacion-1.onrender.com/api/suscripciones/cancel");
 
             Map<String, Object> paymentSource = new HashMap<>();
             paymentSource.put("paypal", Map.of("experience_context", experienceContext));

@@ -32,8 +32,13 @@ public class SuscripcionController {
     }
 
     @GetMapping("/success")
-    public void success(@RequestParam(required = false) String token, HttpServletResponse response) throws IOException {
-        if (token != null && !token.isBlank()) {
+    public void success(
+            @RequestParam(required = false) String token,
+            @RequestParam(required = false) Integer subscriptionId,
+            HttpServletResponse response) throws IOException {
+        if (subscriptionId != null) {
+            suscripcionService.capturarPagoPorSuscripcion(subscriptionId, token);
+        } else if (token != null && !token.isBlank()) {
             suscripcionService.capturarPago(token);
         }
 
