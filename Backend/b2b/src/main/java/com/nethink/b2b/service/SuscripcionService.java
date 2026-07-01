@@ -13,6 +13,7 @@ import com.nethink.b2b.repository.SuscripcionRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -90,20 +91,55 @@ public class SuscripcionService {
     // =========================
     // CAPTURAR PAGO
     // =========================
+    @Transactional
     public void capturarPago(String orderId) {
         capturarPago(orderId, 1);
     }
 
+    @Transactional
     public void capturarPago(String orderId, Integer meses) {
-        Suscripcion s = suscripcionRepo.findAll()
-                .stream()
-                .filter(x -> orderId.equals(x.getPaypalOrderId()))
-                .findFirst()
+        if (orderId == null || orderId.isBlank()) {
+            throw new IllegalArgumentException("El id de la orden no puede estar vacío");
+        }
+
+        Suscripcion s = suscripcionRepo.findByPaypalOrderId(orderId)
                 .orElseThrow(() -> new RuntimeException("Orden no encontrada"));
+
+        if (s.getEstado() == Suscripcion.EstadoSuscripcion.ACTIVA && s.getPaypalCaptureId() != null) {
+            throw new IllegalStateException("La orden ya fue capturada previamente");
+        }
+
+        String token = payPalService.obtenerAccessToken();
+        Map captura = payPalService.capturarOrden(token, orderId);
+        String status = String.valueOf(captura.get("status"));
+
+        if (!"COMPLETED".equalsIgnoreCase(status)) {
+            throw new IllegalStateException("La captura de PayPal no fue completada: " + status);
+        }
+
+        String captureId = null;
+        Object purchaseUnits = captura.get("purchase_units");
+        if (purchaseUnits instanceof List<?> purchaseUnitList && !purchaseUnitList.isEmpty()) {
+            Object firstPurchaseUnit = purchaseUnitList.get(0);
+            if (firstPurchaseUnit instanceof Map<?, ?> purchaseUnitMap) {
+                Object payments = purchaseUnitMap.get("payments");
+                if (payments instanceof Map<?, ?> paymentsMap) {
+                    Object captures = paymentsMap.get("captures");
+                    if (captures instanceof List<?> captureList && !captureList.isEmpty()) {
+                        Object firstCapture = captureList.get(0);
+                        if (firstCapture instanceof Map<?, ?> captureMap) {
+                            captureId = String.valueOf(captureMap.get("id"));
+                        }
+                    }
+                }
+            }
+        }
 
         int mesesAplicar = meses != null && meses > 0 ? meses : 1;
         LocalDateTime ahora = LocalDateTime.now();
 
+        s.setPaypalCaptureId(captureId);
+        s.setPaypalOrderId(orderId);
         s.setEstado(Suscripcion.EstadoSuscripcion.ACTIVA);
         s.setFechaInicio(ahora);
         s.setFechaFin(ahora.plusMonths(mesesAplicar));

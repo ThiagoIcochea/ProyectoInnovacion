@@ -4,10 +4,13 @@ import com.nethink.b2b.dto.request.SuscripcionRequest;
 import com.nethink.b2b.dto.response.PayPalOrderResponse;
 import com.nethink.b2b.dto.response.SuscripcionStatusResponse;
 import com.nethink.b2b.service.SuscripcionService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.Map;
 
 @RestController
@@ -29,7 +32,21 @@ public class SuscripcionController {
         return ResponseEntity.ok(response);
     }
 
-    // 2. Capturar pago después de PayPal
+    @GetMapping("/success")
+    public void success(@RequestParam(required = false) String token, HttpServletResponse response) throws IOException {
+        if (token != null && !token.isBlank()) {
+            suscripcionService.capturarPago(token);
+        }
+
+        response.sendRedirect("https://proyectoinnovacion.onrender.com/app/provider/dashboard?payment=success");
+    }
+
+    @GetMapping("/cancel")
+    public void cancel(HttpServletResponse response) throws IOException {
+        response.sendRedirect("https://proyectoinnovacion.onrender.com/app/provider/dashboard?payment=cancel");
+    }
+
+    // Endpoint manual opcional para pruebas/dev.
     @PostMapping("/capturar/{orderId}")
     public ResponseEntity<?> capturarPago(
             @PathVariable String orderId,

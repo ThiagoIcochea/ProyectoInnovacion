@@ -74,7 +74,15 @@ public class PayPalService {
             Map<String, Object> purchaseUnit = new HashMap<>();
             purchaseUnit.put("amount", amount);
 
+            Map<String, Object> experienceContext = new HashMap<>();
+            experienceContext.put("return_url", "https://proyectoinnovacion.onrender.com/api/suscripciones/success");
+            experienceContext.put("cancel_url", "https://proyectoinnovacion.onrender.com/api/suscripciones/cancel");
+
+            Map<String, Object> paymentSource = new HashMap<>();
+            paymentSource.put("paypal", Map.of("experience_context", experienceContext));
+
             body.put("purchase_units", List.of(purchaseUnit));
+            body.put("payment_source", paymentSource);
 
             HttpEntity<Map> request = new HttpEntity<>(body, headers);
 
@@ -89,6 +97,27 @@ public class PayPalService {
 
         } catch (Exception e) {
             throw new RuntimeException("Error creando orden PayPal", e);
+        }
+    }
+
+    public Map capturarOrden(String accessToken, String orderId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Bearer " + accessToken);
+
+            HttpEntity<String> request = new HttpEntity<>(null, headers);
+
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    baseUrl + "/v2/checkout/orders/" + orderId + "/capture",
+                    HttpMethod.POST,
+                    request,
+                    Map.class
+            );
+
+            return response.getBody();
+        } catch (Exception e) {
+            throw new RuntimeException("Error capturando la orden PayPal", e);
         }
     }
 
