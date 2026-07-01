@@ -40,9 +40,8 @@ public class SecurityConfig {
                                 "/api/certificaciones",
                                 "/api/usuarios/register",
                                 "/api/provider/register",
-                                "/api/solicitudes/proveedor/*/metodos-pago"
-                                
-                                
+                                "/api/solicitudes/proveedor/*/metodos-pago",
+                                "/api/suscripciones/**"
                                 
                         ).permitAll()
                         .requestMatchers("/api/evaluaciones/")
@@ -55,8 +54,7 @@ public class SecurityConfig {
                         .hasRole(AppConstants.ROLE_ADMIN)
                         .requestMatchers("/api/solicitudes/proveedor/**")
                         .hasRole(AppConstants.ROLE_PROVEEDOR)
-                        .requestMatchers("/api/suscripciones/crear-orden")
-                        .hasRole(AppConstants.ROLE_PROVEEDOR)
+
 
                         .anyRequest().authenticated()
                 )
