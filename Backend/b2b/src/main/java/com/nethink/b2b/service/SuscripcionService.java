@@ -12,8 +12,10 @@ import com.nethink.b2b.repository.PlanRepository;
 import com.nethink.b2b.repository.SuscripcionRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,6 +45,10 @@ public class SuscripcionService {
     // CREAR ORDEN REAL PAYPAL
     // =========================
     public PayPalOrderResponse crearOrden(SuscripcionRequest req) {
+
+        if (req == null || req.getIdUsuario() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "idUsuario es obligatorio");
+        }
 
         Integer idPlan = req.getIdPlan() != null ? req.getIdPlan() : req.getIdPrecio();
         Integer meses = req.getMeses() != null && req.getMeses() > 0 ? req.getMeses() : 1;
@@ -220,7 +226,7 @@ public class SuscripcionService {
 
     private PlanPrecio obtenerPrecioParaPlan(Integer idPlan, Integer meses) {
         if (idPlan == null || meses == null || meses <= 0) {
-            throw new IllegalArgumentException("Debe indicar un plan y un periodo de meses válido");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe indicar un plan y un periodo de meses válido");
         }
 
         return precioRepo.findByPlan_IdPlanAndPeriodoMesesAndActivoTrue(idPlan, meses)

@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Map;
 
 @RestController
@@ -38,12 +37,12 @@ public class SuscripcionController {
             suscripcionService.capturarPago(token);
         }
 
-        response.sendRedirect("https://proyectoinnovacion-1.onrender.com/app/provider/dashboard?payment=success");
+        response.sendRedirect("https://proyectoinnovacion.onrender.com/app/provider/dashboard?payment=success");
     }
 
     @GetMapping("/cancel")
     public void cancel(HttpServletResponse response) throws IOException {
-        response.sendRedirect("https://proyectoinnovacion-1.onrender.com/app/provider/dashboard?payment=cancel");
+        response.sendRedirect("https://proyectoinnovacion.onrender.com/app/provider/dashboard?payment=cancel");
     }
 
     // Endpoint manual opcional para pruebas/dev.

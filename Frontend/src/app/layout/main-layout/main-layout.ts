@@ -233,10 +233,18 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const userId = this.getActiveUserId();
+
+    if (!userId) {
+      this.providerAccessMessage = 'No fue posible identificar el usuario para iniciar el pago.';
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.providerPlanPaymentReady = true;
 
     const request = {
-      idUsuario: this.usuario?.idUsuario ?? this.usuario?.id ?? Number(localStorage.getItem('auth_user_id')),
+      idUsuario: userId,
       idPlan: this.selectedProviderPlan.id,
       meses: Number(this.providerPlanBillingCycle),
       payerName: this.providerPlanPayment.payerName.trim(),
@@ -244,8 +252,20 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     };
 
     this.http.post(`${APP_API_BASE_URL}/suscripciones/crear-orden`, request)
-      .subscribe((res: any) => {
-        window.location.href = res.approvalUrl;
+      .subscribe({
+        next: (res: any) => {
+          if (res?.approvalUrl) {
+            window.location.href = res.approvalUrl;
+            return;
+          }
+
+          this.providerAccessMessage = 'No se pudo obtener la URL de PayPal.';
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.providerAccessMessage = err?.error?.message || 'No se pudo iniciar el pago con PayPal.';
+          this.cdr.detectChanges();
+        }
       });
   }
 
@@ -258,7 +278,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   cargarEstadoSuscripcionProveedor(): void {
-    const userId = this.usuario?.idUsuario ?? this.usuario?.id ?? Number(localStorage.getItem('auth_user_id'));
+    const userId = this.getActiveUserId();
 
     if (!userId) {
       return;
@@ -284,6 +304,25 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
         this.providerAccessMessage = '';
       }
     });
+  }
+
+  private getActiveUserId(): number | null {
+    const storageValue = localStorage.getItem('auth_user_id');
+
+    if (storageValue) {
+      const parsed = Number(storageValue);
+      if (Number.isFinite(parsed) && parsed > 0) {
+        return parsed;
+      }
+    }
+
+    const userValue = this.usuario?.idUsuario ?? this.usuario?.id;
+
+    if (typeof userValue === 'number' && userValue > 0) {
+      return userValue;
+    }
+
+    return null;
   }
 
   private hidratarPagoPlanProveedor(): void {
