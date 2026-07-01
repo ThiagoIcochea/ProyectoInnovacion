@@ -447,11 +447,11 @@
       </div>
 
       <div class="provider-plan-form-grid" *ngIf="selectedProviderPlan.id === 2">
-        <p>El plan Estándar no incluye acceso al dashboard del proveedor. Elige Premium para activar el panel.</p>
+        <p>El plan Estándar incluye gestión básica. El dashboard del proveedor queda habilitado solo con Premium.</p>
       </div>
 
       <div class="provider-plan-form-grid" *ngIf="selectedProviderPlan.id === 3">
-        <p>El pago se iniciará en PayPal y el acceso al dashboard se habilitará al completar la compra.</p>
+        <p>Premium incluye acceso completo al dashboard del proveedor y todas las funciones avanzadas.</p>
       </div>
 
       <div class="provider-plan-free" *ngIf="selectedProviderPlan.id === 1">
@@ -468,7 +468,7 @@
         </button>
 
         <button type="submit" class="provider-plan-primary" [disabled]="!canPrepareProviderPlanPayment">
-          {{ selectedProviderPlan.id === 1 ? (providerAccessBlocked ? 'Actualizar a Premium' : 'Mantener Freemium') : selectedProviderPlan.id === 2 ? 'Selecciona Premium' : 'Continuar a PayPal' }}
+          {{ selectedProviderPlan.id === 1 ? 'Mantener Freemium' : 'Continuar a PayPal' }}
         </button>
       </div>
     </form>

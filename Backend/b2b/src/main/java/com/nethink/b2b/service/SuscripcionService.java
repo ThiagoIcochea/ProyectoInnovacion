@@ -210,7 +210,7 @@ public class SuscripcionService {
         Integer idPlanActual = suscripcion.getPrecio() != null && suscripcion.getPrecio().getPlan() != null
                 ? suscripcion.getPrecio().getPlan().getIdPlan()
                 : 1;
-        boolean accesoDashboard = activa && (idPlanActual == 1 || idPlanActual == 3);
+        boolean accesoDashboard = activa && idPlanActual == 3;
 
         SuscripcionStatusResponse response = new SuscripcionStatusResponse();
         response.setEstado(suscripcion.getEstado().name());
@@ -226,11 +226,9 @@ public class SuscripcionService {
         response.setDiasRestantes(calcularDiasRestantes(suscripcion));
         response.setMensaje(accesoDashboard
                 ? "Acceso activo"
-                : idPlanActual == 2
-                        ? "El plan Estándar no incluye acceso al dashboard del proveedor. Actualiza a Premium."
-                        : activa
-                                ? "Tu plan actual no incluye acceso al dashboard del proveedor. Actualiza a Premium."
-                                : "Tu plan ha vencido. Actualiza tu suscripción para continuar.");
+                : activa
+                        ? "El dashboard del proveedor solo está disponible con el plan Premium."
+                        : "Tu plan ha vencido. Actualiza tu suscripción para continuar.");
 
         return response;
     }

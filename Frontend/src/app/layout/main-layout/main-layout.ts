@@ -187,14 +187,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    if (this.selectedProviderPlan.id === 2) {
-      return false;
-    }
-
-    if (this.selectedProviderPlan.id === 1) {
-      return !this.providerAccessBlocked;
-    }
-
     return true;
   }
 
@@ -226,14 +218,8 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.selectedProviderPlan.id === 2) {
-      this.providerAccessMessage = 'El plan Estándar no incluye acceso al dashboard del proveedor. Elige Premium para activar el panel.';
-      this.cdr.detectChanges();
-      return;
-    }
-
     if (this.selectedProviderPlan.id === 1 && this.providerAccessBlocked) {
-      this.providerAccessMessage = 'Tu acceso ha vencido. Elige Premium para seguir usando la plataforma.';
+      this.providerAccessMessage = 'Tu acceso ha vencido. Puedes elegir Estándar o Premium para continuar.';
       this.cdr.detectChanges();
       return;
     }
