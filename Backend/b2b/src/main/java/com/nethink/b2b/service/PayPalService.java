@@ -125,18 +125,26 @@ public class PayPalService {
     // 3. OBTENER URL DE PAGO
     // =========================
     public String obtenerApprovalUrl(Map orderResponse) {
-
         try {
-            List<Map> links = (List<Map>) orderResponse.get("links");
-
-            for (Map link : links) {
-                if ("approve".equals(link.get("rel"))) {
-                    return link.get("href").toString();
+            Object linksValue = orderResponse.get("links");
+            if (linksValue instanceof List<?> links) {
+                for (Object linkObj : links) {
+                    if (linkObj instanceof Map<?, ?> linkMap) {
+                        Object rel = linkMap.get("rel");
+                        Object href = linkMap.get("href");
+                        if ("approve".equals(String.valueOf(rel)) && href != null) {
+                            return href.toString();
+                        }
+                    }
                 }
             }
 
-            throw new RuntimeException("No se encontró approval URL");
+            String orderId = String.valueOf(orderResponse.getOrDefault("id", ""));
+            if (!orderId.isBlank()) {
+                return "https://www.sandbox.paypal.com/checkoutnow?token=" + orderId;
+            }
 
+            throw new RuntimeException("No se encontró approval URL");
         } catch (Exception e) {
             throw new RuntimeException("Error obteniendo approval URL", e);
         }
