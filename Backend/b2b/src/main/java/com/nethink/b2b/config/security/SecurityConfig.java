@@ -55,7 +55,8 @@ public class SecurityConfig {
                         .hasRole(AppConstants.ROLE_ADMIN)
                         .requestMatchers("/api/solicitudes/proveedor/**")
                         .hasRole(AppConstants.ROLE_PROVEEDOR)
-                        
+                        .requestMatchers("/api/suscripciones/crear-orden")
+                        .hasRole(AppConstants.ROLE_PROVEEDOR)
 
                         .anyRequest().authenticated()
                 )

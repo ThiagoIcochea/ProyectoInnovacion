@@ -44,20 +44,22 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     fotoPerfil: ''
   };
 
+  
+
   estadoApi: string = 'Desconectada';
   providerRequestCount = 0;
   providerPaymentCount = 0;
   providerDeliveryCount = 0;
   menuMovilAbierto = false;
   plansModalOpen = false;
-  selectedProviderPlanId = 'freemium';
+  selectedProviderPlanId : number = 1;
   providerPlanBillingCycle: '1' | '3' | '6' = '1';
   providerPlanPaymentReady = false;
   globalSearchTerm = '';
 
   providerPlans = [
     {
-      id: 'freemium',
+      id: 1,
       name: 'Freemium',
       price: 0,
       badge: '1 mes gratis',
@@ -69,7 +71,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       ]
     },
     {
-      id: 'standard',
+      id: 2,
       name: 'Estándar',
       price: 249,
       badge: 'Gestión diaria',
@@ -81,7 +83,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       ]
     },
     {
-      id: 'premium',
+      id: 3,
       name: 'Premium',
       price: 500,
       badge: 'Mayor exposición',
@@ -200,11 +202,11 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.plansModalOpen = false;
   }
 
-  seleccionarPlanProveedor(planId: string): void {
+  seleccionarPlanProveedor(planId: number): void {
     this.selectedProviderPlanId = planId;
     this.providerPlanPaymentReady = false;
 
-    if (planId === 'freemium') {
+    if (planId === 1) {
       this.providerPlanBillingCycle = '1';
     }
   }
@@ -228,15 +230,22 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.providerPlanPaymentReady = true;
 
     if (this.selectedProviderPlan.id !== 'freemium') {
-      window.open('https://www.paypal.com/signin', '_blank', 'noopener,noreferrer');
+      const request = {
+  idUsuario: this.usuario.id,
+  idPrecio: this.selectedProviderPlan.id 
+};
+     this.http.post(`${APP_API_BASE_URL}/suscripciones/crear-orden`, request)
+  .subscribe((res: any) => {
+    window.location.href = res.approvalUrl;
+  });
     }
   }
 
   private cargarPlanProveedorLocal(): void {
     const savedPlan = localStorage.getItem('provider_current_plan');
 
-    if (savedPlan && this.providerPlans.some(plan => plan.id === savedPlan)) {
-      this.selectedProviderPlanId = savedPlan;
+    if (savedPlan && this.providerPlans.some(plan => plan.id === Number(savedPlan))) {
+      this.selectedProviderPlanId = Number(savedPlan);
     }
   }
 
