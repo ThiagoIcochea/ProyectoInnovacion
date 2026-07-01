@@ -199,6 +199,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     return this.selectedProviderPlanId === 3 && !this.providerAccessBlocked;
   }
 
+  get shouldRedirectProviderToRequests(): boolean {
+    return this.isProvider && !this.canAccessProviderDashboard && !this.providerAccessBlocked;
+  }
+
   get isProviderDashboardRoute(): boolean {
     return this.router.url.startsWith('/app/provider/dashboard');
   }
@@ -308,7 +312,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: (res) => {
         const planId = Number(res?.idPlan || this.selectedProviderPlanId || 1);
-        const isActive = res?.estado === 'ACTIVA' && res?.bloqueado !== true;
+        const isActive = String(res?.estado || '').toUpperCase() === 'ACTIVA' && res?.bloqueado !== true;
 
         this.providerAccessBlocked = !isActive;
         this.providerAccessMessage = res?.mensaje || 'Tu suscripción necesita actualización.';
@@ -317,6 +321,8 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
         if (this.providerAccessBlocked) {
           this.plansModalOpen = true;
+        } else if (this.isProviderDashboardRoute && !this.canAccessProviderDashboard) {
+          this.router.navigate(['/app/provider/requests']);
         }
 
         this.cdr.detectChanges();
