@@ -55,6 +55,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   selectedProviderPlanId : number = 1;
   providerPlanBillingCycle: '1' | '3' | '6' = '1';
   providerPlanPaymentReady = false;
+  providerPlanSubmitting = false;
   globalSearchTerm = '';
   providerAccessBlocked = false;
   providerAccessMessage = '';
@@ -182,12 +183,19 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   get canPrepareProviderPlanPayment(): boolean {
-    if (this.selectedProviderPlan.id === 1) {
-      return true;
+    if (this.providerPlanSubmitting) {
+      return false;
     }
 
-    return !!this.providerPlanPayment.payerName.trim() &&
-      !!this.providerPlanPayment.payerEmail.trim();
+    if (this.selectedProviderPlan.id === 2) {
+      return false;
+    }
+
+    if (this.selectedProviderPlan.id === 1) {
+      return !this.providerAccessBlocked;
+    }
+
+    return true;
   }
 
   abrirPlanesProveedor(): void {
@@ -214,7 +222,19 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   prepararPagoPlanProveedor(): void {
-    if (!this.canPrepareProviderPlanPayment) {
+    if (this.providerPlanSubmitting || !this.canPrepareProviderPlanPayment) {
+      return;
+    }
+
+    if (this.selectedProviderPlan.id === 2) {
+      this.providerAccessMessage = 'El plan Estándar no incluye acceso al dashboard del proveedor. Elige Premium para activar el panel.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (this.selectedProviderPlan.id === 1 && this.providerAccessBlocked) {
+      this.providerAccessMessage = 'Tu acceso ha vencido. Elige Premium para seguir usando la plataforma.';
+      this.cdr.detectChanges();
       return;
     }
 
@@ -241,19 +261,20 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.providerPlanSubmitting = true;
     this.providerPlanPaymentReady = true;
 
     const request = {
       idUsuario: userId,
       idPlan: this.selectedProviderPlan.id,
-      meses: Number(this.providerPlanBillingCycle),
-      payerName: this.providerPlanPayment.payerName.trim(),
-      payerEmail: this.providerPlanPayment.payerEmail.trim()
+      meses: Number(this.providerPlanBillingCycle)
     };
 
     this.http.post(`${APP_API_BASE_URL}/suscripciones/crear-orden`, request)
       .subscribe({
         next: (res: any) => {
+          this.providerPlanSubmitting = false;
+
           if (res?.approvalUrl) {
             window.location.href = res.approvalUrl;
             return;
@@ -263,6 +284,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         },
         error: (err) => {
+          this.providerPlanSubmitting = false;
           this.providerAccessMessage = err?.error?.message || 'No se pudo iniciar el pago con PayPal.';
           this.cdr.detectChanges();
         }
@@ -288,9 +310,13 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       headers: this.headers()
     }).subscribe({
       next: (res) => {
-        this.providerAccessBlocked = res?.bloqueado === true;
+        const planId = Number(res?.idPlan || this.selectedProviderPlanId || 1);
+        const isPremium = planId === 3;
+        const isActive = res?.estado === 'ACTIVA' && res?.bloqueado !== true;
+
+        this.providerAccessBlocked = !isPremium && !isActive;
         this.providerAccessMessage = res?.mensaje || 'Tu suscripción necesita actualización.';
-        this.selectedProviderPlanId = Number(res?.idPlan || this.selectedProviderPlanId || 1);
+        this.selectedProviderPlanId = planId;
         localStorage.setItem('provider_current_plan', String(this.selectedProviderPlanId));
 
         if (this.providerAccessBlocked) {

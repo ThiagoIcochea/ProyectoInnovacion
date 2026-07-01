@@ -58,14 +58,19 @@ public class SuscripcionService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         LocalDateTime ahora = LocalDateTime.now();
-        Suscripcion s = new Suscripcion();
-        s.setUsuario(user);
+        Suscripcion s = obtenerSuscripcionPendiente(user.getIdUsuario());
+
+        if (s == null) {
+            s = new Suscripcion();
+            s.setUsuario(user);
+            s.setEstado(Suscripcion.EstadoSuscripcion.PENDIENTE);
+            s.setFechaCreacion(ahora);
+        }
+
         s.setPrecio(precio);
         s.setMontoPagado(precio.getPrecio());
-        s.setEstado(Suscripcion.EstadoSuscripcion.PENDIENTE);
         s.setFechaInicio(ahora);
         s.setFechaFin(ahora.plusMonths(meses));
-        s.setFechaCreacion(ahora);
         s.setFechaActualizacion(ahora);
 
         suscripcionRepo.save(s);
@@ -202,6 +207,10 @@ public class SuscripcionService {
         Suscripcion suscripcion = suscripciones.get(0);
         boolean activa = suscripcion.getEstado() == Suscripcion.EstadoSuscripcion.ACTIVA &&
                 (suscripcion.getFechaFin() == null || !suscripcion.getFechaFin().isBefore(LocalDateTime.now()));
+        Integer idPlanActual = suscripcion.getPrecio() != null && suscripcion.getPrecio().getPlan() != null
+                ? suscripcion.getPrecio().getPlan().getIdPlan()
+                : 1;
+        boolean accesoDashboard = activa && (idPlanActual == 1 || idPlanActual == 3);
 
         SuscripcionStatusResponse response = new SuscripcionStatusResponse();
         response.setEstado(suscripcion.getEstado().name());
@@ -212,10 +221,16 @@ public class SuscripcionService {
                 ? suscripcion.getPrecio().getPlan().getIdPlan()
                 : 1);
         response.setIdPrecio(suscripcion.getPrecio() != null ? suscripcion.getPrecio().getIdPrecio() : 1);
-        response.setBloqueado(!activa);
+        response.setBloqueado(!accesoDashboard);
         response.setFechaFin(suscripcion.getFechaFin());
         response.setDiasRestantes(calcularDiasRestantes(suscripcion));
-        response.setMensaje(activa ? "Acceso activo" : "Tu plan ha vencido. Actualiza tu suscripción para continuar.");
+        response.setMensaje(accesoDashboard
+                ? "Acceso activo"
+                : idPlanActual == 2
+                        ? "El plan Estándar no incluye acceso al dashboard del proveedor. Actualiza a Premium."
+                        : activa
+                                ? "Tu plan actual no incluye acceso al dashboard del proveedor. Actualiza a Premium."
+                                : "Tu plan ha vencido. Actualiza tu suscripción para continuar.");
 
         return response;
     }
@@ -244,6 +259,16 @@ public class SuscripcionService {
         response.setDiasRestantes(calcularDiasRestantes(freemium));
         response.setMensaje("Acceso activo");
         return response;
+    }
+
+    private Suscripcion obtenerSuscripcionPendiente(Integer idUsuario) {
+        return suscripcionRepo.findAll()
+                .stream()
+                .filter(s -> s.getUsuario() != null && idUsuario != null && idUsuario.equals(s.getUsuario().getIdUsuario()))
+                .filter(s -> s.getEstado() == Suscripcion.EstadoSuscripcion.PENDIENTE)
+                .sorted(Comparator.comparing(Suscripcion::getFechaCreacion, Comparator.nullsLast(LocalDateTime::compareTo)).reversed())
+                .findFirst()
+                .orElse(null);
     }
 
     private Integer calcularDiasRestantes(Suscripcion suscripcion) {
