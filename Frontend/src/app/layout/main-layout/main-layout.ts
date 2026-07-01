@@ -237,7 +237,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
     const request = {
       idUsuario: this.usuario?.idUsuario ?? this.usuario?.id ?? Number(localStorage.getItem('auth_user_id')),
-      idPrecio: this.selectedProviderPlan.id,
+      idPlan: this.selectedProviderPlan.id,
       meses: Number(this.providerPlanBillingCycle),
       payerName: this.providerPlanPayment.payerName.trim(),
       payerEmail: this.providerPlanPayment.payerEmail.trim()
@@ -270,7 +270,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.providerAccessBlocked = res?.bloqueado === true;
         this.providerAccessMessage = res?.mensaje || 'Tu suscripción necesita actualización.';
-        this.selectedProviderPlanId = Number(res?.idPrecio || this.selectedProviderPlanId || 1);
+        this.selectedProviderPlanId = Number(res?.idPlan || this.selectedProviderPlanId || 1);
         localStorage.setItem('provider_current_plan', String(this.selectedProviderPlanId));
 
         if (this.providerAccessBlocked) {

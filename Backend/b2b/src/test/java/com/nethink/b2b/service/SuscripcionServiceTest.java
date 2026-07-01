@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,7 +51,7 @@ class SuscripcionServiceTest {
         when(usuarioRepo.findById(1)).thenReturn(Optional.of(usuario));
         when(suscripcionRepo.findAll()).thenReturn(List.of());
         when(planRepo.findById(any())).thenReturn(Optional.empty());
-        when(precioRepo.findById(any())).thenReturn(Optional.empty());
+        when(precioRepo.findByPlan_IdPlanAndPeriodoMesesAndActivoTrue(anyInt(), anyInt())).thenReturn(Optional.empty());
         when(precioRepo.save(any(PlanPrecio.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(planRepo.save(any(Plan.class))).thenAnswer(invocation -> invocation.getArgument(0));
 

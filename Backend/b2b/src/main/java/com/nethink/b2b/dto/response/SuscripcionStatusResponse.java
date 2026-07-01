@@ -6,6 +6,7 @@ public class SuscripcionStatusResponse {
 
     private String estado;
     private String plan;
+    private Integer idPlan;
     private Integer idPrecio;
     private Boolean bloqueado;
     private Integer diasRestantes;
@@ -26,6 +27,14 @@ public class SuscripcionStatusResponse {
 
     public void setPlan(String plan) {
         this.plan = plan;
+    }
+
+    public Integer getIdPlan() {
+        return idPlan;
+    }
+
+    public void setIdPlan(Integer idPlan) {
+        this.idPlan = idPlan;
     }
 
     public Integer getIdPrecio() {

@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class SuscripcionService {
@@ -44,18 +43,23 @@ public class SuscripcionService {
     // =========================
     public PayPalOrderResponse crearOrden(SuscripcionRequest req) {
 
-        PlanPrecio precio = obtenerOCrearPrecio(req.idPrecio);
+        Integer idPlan = req.getIdPlan() != null ? req.getIdPlan() : req.getIdPrecio();
+        Integer meses = req.getMeses() != null && req.getMeses() > 0 ? req.getMeses() : 1;
+        PlanPrecio precio = obtenerPrecioParaPlan(idPlan, meses);
 
         Usuario user = usuarioRepo.findById(req.idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+        LocalDateTime ahora = LocalDateTime.now();
         Suscripcion s = new Suscripcion();
         s.setUsuario(user);
         s.setPrecio(precio);
         s.setMontoPagado(precio.getPrecio());
         s.setEstado(Suscripcion.EstadoSuscripcion.PENDIENTE);
-        s.setFechaCreacion(LocalDateTime.now());
-        s.setFechaActualizacion(LocalDateTime.now());
+        s.setFechaInicio(ahora);
+        s.setFechaFin(ahora.plusMonths(meses));
+        s.setFechaCreacion(ahora);
+        s.setFechaActualizacion(ahora);
 
         suscripcionRepo.save(s);
 
@@ -131,6 +135,9 @@ public class SuscripcionService {
         response.setPlan(suscripcion.getPrecio() != null && suscripcion.getPrecio().getPlan() != null
                 ? suscripcion.getPrecio().getPlan().getNombre()
                 : "Freemium");
+        response.setIdPlan(suscripcion.getPrecio() != null && suscripcion.getPrecio().getPlan() != null
+                ? suscripcion.getPrecio().getPlan().getIdPlan()
+                : 1);
         response.setIdPrecio(suscripcion.getPrecio() != null ? suscripcion.getPrecio().getIdPrecio() : 1);
         response.setBloqueado(!activa);
         response.setFechaFin(suscripcion.getFechaFin());
@@ -142,9 +149,10 @@ public class SuscripcionService {
 
     private SuscripcionStatusResponse crearEstadoFreemium(Usuario usuario) {
         LocalDateTime ahora = LocalDateTime.now();
+        PlanPrecio precioFreemium = obtenerPrecioParaPlan(1, 1);
         Suscripcion freemium = new Suscripcion();
         freemium.setUsuario(usuario);
-        freemium.setPrecio(obtenerOCrearPrecio(1));
+        freemium.setPrecio(precioFreemium);
         freemium.setMontoPagado(BigDecimal.ZERO);
         freemium.setEstado(Suscripcion.EstadoSuscripcion.ACTIVA);
         freemium.setFechaInicio(ahora);
@@ -156,7 +164,8 @@ public class SuscripcionService {
         SuscripcionStatusResponse response = new SuscripcionStatusResponse();
         response.setEstado("ACTIVA");
         response.setPlan("Freemium");
-        response.setIdPrecio(1);
+        response.setIdPlan(1);
+        response.setIdPrecio(precioFreemium.getIdPrecio());
         response.setBloqueado(false);
         response.setFechaFin(freemium.getFechaFin());
         response.setDiasRestantes(calcularDiasRestantes(freemium));
@@ -173,47 +182,55 @@ public class SuscripcionService {
         return Math.max(0, (int) diff);
     }
 
-    private PlanPrecio obtenerOCrearPrecio(Integer idPrecio) {
-        Optional<PlanPrecio> existente = precioRepo.findById(idPrecio);
-        if (existente.isPresent()) {
-            return existente.get();
+    private PlanPrecio obtenerPrecioParaPlan(Integer idPlan, Integer meses) {
+        if (idPlan == null || meses == null || meses <= 0) {
+            throw new IllegalArgumentException("Debe indicar un plan y un periodo de meses válido");
         }
 
-        Plan plan = planRepo.findById(idPrecio).orElseGet(() -> {
-            Plan nuevoPlan = new Plan();
-            nuevoPlan.setIdPlan(idPrecio);
-            nuevoPlan.setNombre(nombrePlan(idPrecio));
-            nuevoPlan.setDescripcion("Plan generado automáticamente para el flujo de suscripciones");
-            nuevoPlan.setActivo(true);
-            nuevoPlan.setFechaCreacion(LocalDateTime.now());
-            return planRepo.save(nuevoPlan);
-        });
+        return precioRepo.findByPlan_IdPlanAndPeriodoMesesAndActivoTrue(idPlan, meses)
+                .orElseGet(() -> {
+                    Plan plan = planRepo.findById(idPlan).orElseGet(() -> {
+                        Plan nuevoPlan = new Plan();
+                        nuevoPlan.setNombre(nombrePlan(idPlan));
+                        nuevoPlan.setDescripcion("Plan generado automáticamente para el flujo de suscripciones");
+                        nuevoPlan.setActivo(true);
+                        nuevoPlan.setFechaCreacion(LocalDateTime.now());
+                        return planRepo.save(nuevoPlan);
+                    });
 
-        PlanPrecio precio = new PlanPrecio();
-        precio.setIdPrecio(idPrecio);
-        precio.setPlan(plan);
-        precio.setPeriodoMeses(1);
-        precio.setPrecio(precioPorId(idPrecio));
-        precio.setActivo(true);
-        precio.setFechaCreacion(LocalDateTime.now());
-        return precioRepo.save(precio);
+                    PlanPrecio precio = new PlanPrecio();
+                    precio.setPlan(plan);
+                    precio.setPeriodoMeses(meses);
+                    precio.setPrecio(precioPorId(idPlan, meses));
+                    precio.setActivo(true);
+                    precio.setFechaCreacion(LocalDateTime.now());
+                    return precioRepo.save(precio);
+                });
     }
 
-    private BigDecimal precioPorId(Integer idPrecio) {
-        if (idPrecio == null) {
+    private BigDecimal precioPorId(Integer idPlan, Integer meses) {
+        if (idPlan == null) {
             return BigDecimal.ZERO;
         }
 
-        return switch (idPrecio) {
-            case 2 -> new BigDecimal("249.00");
-            case 3 -> new BigDecimal("500.00");
+        return switch (idPlan) {
+            case 2 -> switch (meses) {
+                case 3 -> new BigDecimal("747.00");
+                case 6 -> new BigDecimal("1494.00");
+                default -> new BigDecimal("249.00");
+            };
+            case 3 -> switch (meses) {
+                case 3 -> new BigDecimal("1500.00");
+                case 6 -> new BigDecimal("3000.00");
+                default -> new BigDecimal("500.00");
+            };
             default -> BigDecimal.ZERO;
         };
     }
 
-    private String nombrePlan(Integer idPrecio) {
-        return switch (idPrecio) {
-            case 2 -> "Estándar";
+    private String nombrePlan(Integer idPlan) {
+        return switch (idPlan) {
+            case 2 -> "Estandar";
             case 3 -> "Premium";
             default -> "Freemium";
         };

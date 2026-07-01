@@ -11,6 +11,7 @@ package com.nethink.b2b.dto.request;
 public class SuscripcionRequest {
 
     public Integer idUsuario;
+    public Integer idPlan;
     public Integer idPrecio;
     public Integer meses;
 
@@ -23,6 +24,14 @@ public class SuscripcionRequest {
 
     public void setIdUsuario(Integer idUsuario) {
         this.idUsuario = idUsuario;
+    }
+
+    public Integer getIdPlan() {
+        return idPlan;
+    }
+
+    public void setIdPlan(Integer idPlan) {
+        this.idPlan = idPlan;
     }
 
     public Integer getIdPrecio() {
