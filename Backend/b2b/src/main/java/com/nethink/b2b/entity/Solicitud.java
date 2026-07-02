@@ -103,7 +103,8 @@ public class Solicitud {
         EN_PREPARACION,
         RECLAMO_ABIERTO,
         RECLAMO_EN_REVISION,
-        RECLAMO_RECHAZADO
+        RECLAMO_RECHAZADO,
+        RECLAMO_RESUELTO
          
     }
 
