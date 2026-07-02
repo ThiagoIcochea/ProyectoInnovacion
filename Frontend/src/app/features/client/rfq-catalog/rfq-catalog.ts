@@ -76,6 +76,12 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
     this.route.queryParamMap.subscribe(params => {
 
       this.searchTerm = params.get('search')?.trim() || '';
+      const tab = params.get('tab');
+
+      if (tab === 'proveedores') {
+        this.activeTab = 'proveedores';
+        this.actualizarTopProviders();
+      }
 
       this.currentPage = 1;
 

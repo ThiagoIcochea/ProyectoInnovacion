@@ -136,6 +136,12 @@ public class UsuarioService {
         r.setFotoPerfil(usuario.getFotoPerfil());
         r.setRol(usuario.getRol().getNombre());
 
+        proveedorRepository.findByUsuario_Correo(usuario.getCorreo()).ifPresent(proveedor -> {
+            r.setRazonSocial(proveedor.getRazonSocial());
+            r.setRuc(proveedor.getRuc());
+            r.setDescripcion(proveedor.getDescripcion());
+        });
+
         r.setNotificacionesRfq(pref.getNotificacionesRfq());
         r.setEntregaRapida(pref.getEntregaRapida());
 
@@ -212,6 +218,13 @@ public class UsuarioService {
         }
 
         usuarioRepo.save(usuario);
+
+        proveedorRepository.findByUsuario_Correo(usuario.getCorreo()).ifPresent(proveedor -> {
+            proveedor.setRazonSocial(req.getRazonSocial());
+            proveedor.setRuc(req.getRuc());
+            proveedor.setDescripcion(req.getDescripcion());
+            proveedorRepository.save(proveedor);
+        });
         
         logsSistemaService.registrarLog(
     usuario.getIdUsuario(),

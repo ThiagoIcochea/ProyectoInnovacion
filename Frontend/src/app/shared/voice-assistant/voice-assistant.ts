@@ -191,7 +191,23 @@ export class VoiceAssistantComponent {
       return true;
     }
 
-    if (this.includesAny(normalized, ['crear solicitud', 'generar solicitud', 'buscar proveedores', 'crear rfq', 'cotizar carrito'])) {
+    if (this.includesAny(normalized, ['buscar proveedor', 'buscame un proveedor', 'busca un proveedor', 'ranking de proveedores', 'top proveedores', 'mejores proveedores'])) {
+      if (role !== 'CLIENTE') {
+        this.say('El ranking de proveedores esta disponible para clientes. Te llevo a tu panel permitido.');
+        this.router.navigate([role === 'PROVEEDOR' ? '/app/provider/dashboard' : '/app/admin/providers']);
+        return true;
+      }
+
+      if (this.readCart().length) {
+        await this.createRfqFromCart();
+        return true;
+      }
+
+      this.openProviderRanking();
+      return true;
+    }
+
+    if (this.includesAny(normalized, ['crear solicitud', 'generar solicitud', 'buscar proveedores', 'crear rfq', 'cotizar carrito', 'hacer solicitud', 'nueva solicitud'])) {
       if (role !== 'CLIENTE') {
         this.say('Las solicitudes RFQ las crea el cliente. Con tu rol puedo navegar a tus operaciones permitidas.');
         return true;
@@ -206,7 +222,7 @@ export class VoiceAssistantComponent {
       return true;
     }
 
-    if (this.includesAny(normalized, ['mejor proveedor', 'selecciona proveedor', 'elige proveedor'])) {
+    if (this.includesAny(normalized, ['mejor proveedor', 'selecciona proveedor', 'seleccionar proveedor', 'elige proveedor', 'elegir proveedor'])) {
       if (role !== 'CLIENTE') {
         this.say('La seleccion de proveedor corresponde al flujo del cliente.');
         return true;
@@ -226,7 +242,7 @@ export class VoiceAssistantComponent {
       return true;
     }
 
-    if (this.includesAny(normalized, ['actualiza mi cuenta', 'actualizar mi cuenta', 'cambiar mi perfil', 'actualiza mi perfil', 'cambia mi telefono', 'cambia mi whatsapp', 'cambia mi direccion', 'cambia mi correo'])) {
+    if (this.includesAny(normalized, ['actualiza mi cuenta', 'actualizar mi cuenta', 'cambiar mi perfil', 'actualiza mi perfil', 'cambia mi telefono', 'cambia mi whatsapp', 'cambia mi direccion', 'cambia mi correo', 'cambia mi ruc', 'cambia mi razon social', 'cambia mi descripcion'])) {
       await this.startProfileUpdate(normalized);
       return true;
     }
@@ -262,7 +278,7 @@ export class VoiceAssistantComponent {
       const field = this.detectProfileField(normalized);
       if (!field) {
         this.pending = pending;
-        this.say('Puedo cambiar telefono, WhatsApp, direccion, nombres, apellidos o correo. Dime cual campo quieres actualizar.');
+        this.say('Puedo cambiar telefono, WhatsApp, direccion, nombres, apellidos, correo, RUC, razon social o descripcion. Dime cual campo quieres actualizar.');
         return true;
       }
       this.pending = { type: 'PROFILE_VALUE', field };
@@ -418,6 +434,11 @@ export class VoiceAssistantComponent {
     this.router.navigate(['/app/rfq/quotation']);
   }
 
+  private openProviderRanking(): void {
+    this.say('Te muestro el ranking de proveedores mejor evaluados. Agrega productos al RFQ para buscar proveedores compatibles y crear una solicitud.');
+    this.router.navigate(['/app/rfq/catalog'], { queryParams: { tab: 'proveedores' } });
+  }
+
   private async startOrderConfirmation(normalized: string): Promise<void> {
     const provider = this.readSelectedProvider();
     if (!provider) {
@@ -499,7 +520,7 @@ export class VoiceAssistantComponent {
 
     if (!field) {
       this.pending = { type: 'PROFILE_FIELD' };
-      this.say('Puedo actualizar telefono, WhatsApp, direccion, nombres, apellidos o correo. Que campo quieres cambiar?');
+      this.say('Puedo actualizar telefono, WhatsApp, direccion, nombres, apellidos, correo, RUC, razon social o descripcion. Que campo quieres cambiar?');
       return;
     }
 
@@ -526,8 +547,21 @@ export class VoiceAssistantComponent {
       const currentEmail = localStorage.getItem('auth_user_email') || profile?.correo || '';
       const next = { ...profile, [field]: value.trim() };
       const formData = this.buildProfileFormData(next);
-      const method = this.preferredVoiceMfaMethod(next);
-      const start = await this.mfaService.startChallenge(currentEmail, 'PROFILE_UPDATE', method);
+      const validationError = this.validateProfilePatch(field, value.trim(), next);
+      if (validationError) {
+        this.thinking = false;
+        this.say(validationError);
+        return;
+      }
+
+      let method = this.preferredVoiceMfaMethod(profile);
+      let start: any;
+      try {
+        start = await this.mfaService.startChallenge(currentEmail, 'PROFILE_UPDATE', method);
+      } catch (mfaError: any) {
+        method = 'email';
+        start = await this.mfaService.startChallenge(currentEmail, 'PROFILE_UPDATE', method);
+      }
 
       window.dispatchEvent(new CustomEvent('voiceProfilePatch', {
         detail: { field, value: value.trim(), profile: next }
@@ -604,6 +638,9 @@ export class VoiceAssistantComponent {
     formData.append('telefono', profile.telefono || '');
     formData.append('whatsapp', profile.whatsapp || '');
     formData.append('direccion', profile.direccion || '');
+    formData.append('razonSocial', profile.razonSocial || '');
+    formData.append('ruc', profile.ruc || '');
+    formData.append('descripcion', profile.descripcion || '');
     formData.append('notificaciones', String(profile.notificacionesRfq ?? profile.preferencias?.notificaciones ?? true));
     formData.append('entregaRapida', String(profile.entregaRapida ?? profile.preferencias?.entregaRapida ?? false));
 
@@ -616,6 +653,66 @@ export class VoiceAssistantComponent {
     }
 
     return 'email';
+  }
+
+  private validateProfilePatch(field: string, value: string, profile: any): string {
+    const rules: Record<string, { pattern: RegExp; message: string }> = {
+      nombres: {
+        pattern: /^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/,
+        message: 'Nombre invalido. Debe iniciar con mayuscula y usar solo letras, por ejemplo Juan Carlos.'
+      },
+      apellidos: {
+        pattern: /^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/,
+        message: 'Apellido invalido. Debe iniciar con mayuscula y usar solo letras, por ejemplo Perez Ramos.'
+      },
+      correo: {
+        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+        message: 'Correo invalido. Usa un formato como usuario@empresa.com.'
+      },
+      telefono: {
+        pattern: /^(?:\+51\s?)?9\d{8}$/,
+        message: 'Telefono invalido. Debe ser celular peruano de 9 digitos e iniciar con 9.'
+      },
+      whatsapp: {
+        pattern: /^(?:\+51\s?)?9\d{8}$/,
+        message: 'WhatsApp invalido. Debe ser celular peruano de 9 digitos e iniciar con 9.'
+      },
+      direccion: {
+        pattern: /^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/-]{4,149}$/,
+        message: 'Direccion invalida. Debe iniciar con mayuscula o numero y tener al menos 5 caracteres.'
+      },
+      ruc: {
+        pattern: /^(10|20)\d{9}$/,
+        message: 'RUC invalido. Debe tener 11 digitos y empezar con 10 o 20.'
+      },
+      razonSocial: {
+        pattern: /^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,&-]{2,119}$/,
+        message: 'Razon social invalida. Debe iniciar con mayuscula o numero y tener al menos 3 caracteres.'
+      },
+      descripcion: {
+        pattern: /^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/&()-]{9,399}$/,
+        message: 'Descripcion invalida. Debe iniciar con mayuscula o numero y tener entre 10 y 400 caracteres.'
+      }
+    };
+
+    const rule = rules[field];
+    if (!rule) {
+      return '';
+    }
+
+    const normalizedValue = ['telefono', 'whatsapp'].includes(field)
+      ? value.replace(/\D/g, '')
+      : value;
+
+    if (!rule.pattern.test(normalizedValue)) {
+      return rule.message;
+    }
+
+    if (field === 'ruc' && (profile?.rol || '').toUpperCase().includes('PROVEEDOR') && !rule.pattern.test(value)) {
+      return rule.message;
+    }
+
+    return '';
   }
 
   private mfaMethodLabel(method: string): string {
@@ -792,6 +889,9 @@ export class VoiceAssistantComponent {
     if (value.includes('whatsapp')) return 'whatsapp';
     if (value.includes('direccion')) return 'direccion';
     if (value.includes('correo') || value.includes('email')) return 'correo';
+    if (value.includes('ruc')) return 'ruc';
+    if (value.includes('razon social') || value.includes('empresa')) return 'razonSocial';
+    if (value.includes('descripcion') || value.includes('descripción')) return 'descripcion';
     if (value.includes('nombre')) return 'nombres';
     if (value.includes('apellido')) return 'apellidos';
     return '';
@@ -822,7 +922,10 @@ export class VoiceAssistantComponent {
       direccion: 'direccion',
       correo: 'correo',
       nombres: 'nombres',
-      apellidos: 'apellidos'
+      apellidos: 'apellidos',
+      ruc: 'RUC',
+      razonSocial: 'razon social',
+      descripcion: 'descripcion'
     };
 
     return labels[field] || field;

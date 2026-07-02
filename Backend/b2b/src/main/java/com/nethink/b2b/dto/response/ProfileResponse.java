@@ -11,6 +11,9 @@ public class ProfileResponse {
     private String direccion;
     private String rol;
     private String fotoPerfil;
+    private String razonSocial;
+    private String ruc;
+    private String descripcion;
 
     private Boolean notificacionesRfq;
     private Boolean entregaRapida;
@@ -85,6 +88,30 @@ public class ProfileResponse {
 
     public void setFotoPerfil(String fotoPerfil) {
         this.fotoPerfil = fotoPerfil;
+    }
+
+    public String getRazonSocial() {
+        return razonSocial;
+    }
+
+    public void setRazonSocial(String razonSocial) {
+        this.razonSocial = razonSocial;
+    }
+
+    public String getRuc() {
+        return ruc;
+    }
+
+    public void setRuc(String ruc) {
+        this.ruc = ruc;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
     public Boolean getNotificacionesRfq() {

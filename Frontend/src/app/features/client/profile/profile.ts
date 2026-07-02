@@ -20,6 +20,17 @@ import { MfaService } from '../../../core/services/mfa.service';
 })
 export class ProfileComponent implements OnInit, OnDestroy {
 
+  private readonly validators = {
+    name: /^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/,
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+    phone: /^(?:\+51\s?)?9\d{8}$/,
+    ruc: /^(10|20)\d{9}$/,
+    razonSocial: /^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,&-]{2,119}$/,
+    address: /^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/-]{4,149}$/,
+    description: /^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/&()-]{9,399}$/,
+    url: /^https?:\/\/\S+\.\S+$/
+  };
+
   usuario: any = {
     nombres: '',
     apellidos: '',
@@ -122,12 +133,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
         this.usuario = res;
 
-        if (!this.usuario.preferencias) {
-          this.usuario.preferencias = {
-            notificaciones: true,
-            entregaRapida: false
-          };
-        }
+        this.usuario.preferencias = {
+          notificaciones: this.usuario.notificacionesRfq ?? this.usuario.preferencias?.notificaciones ?? true,
+          entregaRapida: this.usuario.entregaRapida ?? this.usuario.preferencias?.entregaRapida ?? false
+        };
 
         this.generarIniciales();
 
@@ -208,6 +217,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   async guardarPerfil(): Promise<void> {
+    const validationError = this.validateProfile();
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
 
     const formData = new FormData();
 
@@ -287,6 +301,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
       error: (err) => {
         console.error(err);
+        alert(err?.error?.message || 'No se pudo actualizar el perfil.');
       }
     });
   }
@@ -297,5 +312,60 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
 
     return 'email';
+  }
+
+  private validateProfile(): string {
+    const phone = this.onlyDigits(this.usuario.telefono);
+    const whatsapp = this.onlyDigits(this.usuario.whatsapp);
+
+    if (!this.validators.name.test(this.usuario.nombres || '')) {
+      return 'Nombres invalido: debe iniciar con mayuscula y usar solo letras. Ejemplo: Juan Carlos.';
+    }
+
+    if (!this.validators.name.test(this.usuario.apellidos || '')) {
+      return 'Apellidos invalido: debe iniciar con mayuscula y usar solo letras. Ejemplo: Perez Ramos.';
+    }
+
+    if (!this.validators.email.test(this.usuario.correo || '')) {
+      return 'Correo invalido: usa un formato como usuario@empresa.com.';
+    }
+
+    if (!this.validators.phone.test(phone)) {
+      return 'Telefono invalido: debe ser celular peruano de 9 digitos e iniciar con 9. Ejemplo: 987654321.';
+    }
+
+    if (!this.validators.phone.test(whatsapp)) {
+      return 'WhatsApp invalido: debe ser celular peruano de 9 digitos e iniciar con 9. Ejemplo: 987654321.';
+    }
+
+    if (!this.validators.address.test(this.usuario.direccion || '')) {
+      return 'Direccion invalida: debe iniciar con mayuscula o numero y tener al menos 5 caracteres.';
+    }
+
+    if (this.esProveedor) {
+      if (!this.validators.ruc.test(this.usuario.ruc || '')) {
+        return 'RUC invalido: debe tener 11 digitos y empezar con 10 o 20.';
+      }
+
+      if (!this.validators.razonSocial.test(this.usuario.razonSocial || '')) {
+        return 'Razon social invalida: debe iniciar con mayuscula o numero y tener al menos 3 caracteres.';
+      }
+
+      if (!this.validators.description.test(this.usuario.descripcion || '')) {
+        return 'Descripcion invalida: debe iniciar con mayuscula o numero y tener entre 10 y 400 caracteres.';
+      }
+    }
+
+    if (this.modoImagen === 'url' && this.fotoUrl && !this.validators.url.test(this.fotoUrl)) {
+      return 'URL de foto invalida: debe iniciar con http:// o https://.';
+    }
+
+    this.usuario.telefono = phone;
+    this.usuario.whatsapp = whatsapp;
+    return '';
+  }
+
+  private onlyDigits(value: string): string {
+    return String(value || '').replace(/\D/g, '');
   }
 }

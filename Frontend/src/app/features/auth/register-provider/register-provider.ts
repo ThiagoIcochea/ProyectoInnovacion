@@ -16,6 +16,19 @@ import { Router, RouterLink } from '@angular/router';
 })
 export class RegisterProviderComponent implements OnInit {
 
+  private readonly validators = {
+    name: /^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/,
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+    phone: /^(?:\+51\s?)?9\d{8}$/,
+    password: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/,
+    address: /^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/-]{4,149}$/,
+    ruc: /^(10|20)\d{9}$/,
+    razonSocial: /^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,&-]{2,119}$/,
+    description: /^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/&()-]{9,399}$/,
+    url: /^https?:\/\/\S+\.\S+$/,
+    apiToken: /^[A-Za-z0-9._~:/+=-]{8,}$/
+  };
+
   nombres = '';
   apellidos = '';
   correo = '';
@@ -303,10 +316,23 @@ export class RegisterProviderComponent implements OnInit {
       return;
     }
 
+    const account = this.onlyDigits(this.numeroCuenta);
+    const validAccount = ['YAPE', 'PLIN'].includes(this.tipoPago)
+      ? /^9\d{8}$/.test(account)
+      : /^\d{6,30}$/.test(account);
+
+    if (!validAccount) {
+      this.pagoError = ['YAPE', 'PLIN'].includes(this.tipoPago)
+        ? 'Yape/Plin debe usar un celular peruano de 9 digitos que inicia con 9.'
+        : 'La cuenta bancaria debe tener entre 6 y 30 digitos.';
+      alert(this.pagoError);
+      return;
+    }
+
     this.metodosPago.push({
       tipo: this.tipoPago,
       entidad: this.entidadPago,
-      numeroCuenta: this.numeroCuenta
+      numeroCuenta: account
     });
 
     this.tipoPago = '';
@@ -438,6 +464,13 @@ export class RegisterProviderComponent implements OnInit {
       return;
     }
 
+    const validationError = this.validateProviderForm();
+    if (validationError) {
+      this.formError = validationError;
+      alert(validationError);
+      return;
+    }
+
     if (this.metodosPago.length < 1) {
       this.formError = 'Debes agregar al menos 1 metodo de pago.';
       return;
@@ -514,5 +547,84 @@ export class RegisterProviderComponent implements OnInit {
         this.formError = err?.error?.message || 'No se pudo registrar el proveedor.';
       }
     });
+  }
+
+  private validateProviderForm(): string {
+    const telefono = this.onlyDigits(this.telefono);
+    const whatsapp = this.onlyDigits(this.whatsapp);
+
+    if (!this.validators.name.test(this.nombres)) {
+      return 'Nombres invalido: debe iniciar con mayuscula y usar solo letras. Ejemplo: Juan Carlos.';
+    }
+
+    if (!this.validators.name.test(this.apellidos)) {
+      return 'Apellidos invalido: debe iniciar con mayuscula y usar solo letras. Ejemplo: Perez Ramos.';
+    }
+
+    if (!this.validators.email.test(this.correo)) {
+      return 'Correo invalido: usa un formato como usuario@empresa.com.';
+    }
+
+    if (!this.validators.password.test(this.password)) {
+      return 'Contrasena invalida: minimo 8 caracteres, una mayuscula, una minuscula y un numero.';
+    }
+
+    if (!this.validators.phone.test(telefono)) {
+      return 'Telefono invalido: debe ser celular peruano de 9 digitos e iniciar con 9. Ejemplo: 987654321.';
+    }
+
+    if (!this.validators.phone.test(whatsapp)) {
+      return 'WhatsApp invalido: debe ser celular peruano de 9 digitos e iniciar con 9. Ejemplo: 987654321.';
+    }
+
+    if (!this.validators.address.test(this.direccion)) {
+      return 'Direccion invalida: debe iniciar con mayuscula o numero y tener al menos 5 caracteres.';
+    }
+
+    if (!this.validators.razonSocial.test(this.razonSocial)) {
+      return 'Razon social invalida: debe iniciar con mayuscula o numero y tener al menos 3 caracteres.';
+    }
+
+    if (!this.validators.ruc.test(this.ruc)) {
+      return 'RUC invalido: debe tener 11 digitos y empezar con 10 o 20.';
+    }
+
+    if (!this.validators.description.test(this.descripcion)) {
+      return 'Descripcion invalida: debe iniciar con mayuscula o numero y tener entre 10 y 400 caracteres.';
+    }
+
+    if (!this.validators.url.test(this.apiUrl)) {
+      return 'Endpoint API invalido: debe iniciar con http:// o https:// y tener dominio/ruta valida.';
+    }
+
+    if (!['REST', 'GRAPHQL', 'WEBHOOK'].includes(this.apiTipo)) {
+      return 'Tipo de API invalido: elige REST, GRAPHQL o WEBHOOK.';
+    }
+
+    if (!this.validators.apiToken.test(this.apiToken)) {
+      return 'API Token invalido: minimo 8 caracteres, solo letras, numeros y simbolos seguros como . _ - / : + =.';
+    }
+
+    const invalidPayment = this.metodosPago.find(mp => !this.validatePaymentMethod(mp));
+    if (invalidPayment) {
+      return 'Metodo de pago invalido: la cuenta debe tener entre 6 y 30 digitos, o 9 digitos para Yape/Plin.';
+    }
+
+    this.telefono = telefono;
+    this.whatsapp = whatsapp;
+    return '';
+  }
+
+  private validatePaymentMethod(mp: any): boolean {
+    const account = this.onlyDigits(mp?.numeroCuenta);
+    if (['YAPE', 'PLIN'].includes(String(mp?.tipo || '').toUpperCase())) {
+      return /^9\d{8}$/.test(account);
+    }
+
+    return /^\d{6,30}$/.test(account);
+  }
+
+  private onlyDigits(value: string): string {
+    return String(value || '').replace(/\D/g, '');
   }
 }

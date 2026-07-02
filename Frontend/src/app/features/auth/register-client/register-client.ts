@@ -19,6 +19,15 @@ import { APP_API_BASE_URL, APP_ROUTE_PATHS } from '../../../core/constants/app.c
 })
 export class RegisterClientComponent {
 
+  private readonly validators = {
+    name: /^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/,
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+    phone: /^(?:\+51\s?)?9\d{8}$/,
+    password: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/,
+    address: /^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/-]{4,149}$/,
+    url: /^https?:\/\/\S+\.\S+$/
+  };
+
   acepta = false;
   submitted = false;
   formError = '';
@@ -102,6 +111,13 @@ export class RegisterClientComponent {
       return;
     }
 
+    const validationError = this.validateForm();
+    if (validationError) {
+      this.formError = validationError;
+      alert(validationError);
+      return;
+    }
+
     if (!this.acepta) {
       this.formError = 'Debes aceptar los terminos, condiciones y politica de privacidad.';
       return;
@@ -130,5 +146,50 @@ export class RegisterClientComponent {
         alert('Error al registrar cliente');
       }
     });
+  }
+
+  private validateForm(): string {
+    const telefono = this.onlyDigits(this.form.telefono);
+    const whatsapp = this.onlyDigits(this.form.whatsapp);
+
+    if (!this.validators.name.test(this.form.nombres)) {
+      return 'Nombres invalido: debe iniciar con mayuscula y usar solo letras. Ejemplo: Juan Carlos.';
+    }
+
+    if (!this.validators.name.test(this.form.apellidos)) {
+      return 'Apellidos invalido: debe iniciar con mayuscula y usar solo letras. Ejemplo: Perez Ramos.';
+    }
+
+    if (!this.validators.email.test(this.form.correo)) {
+      return 'Correo invalido: usa un formato como usuario@empresa.com.';
+    }
+
+    if (!this.validators.phone.test(telefono)) {
+      return 'Telefono invalido: debe ser celular peruano de 9 digitos e iniciar con 9. Ejemplo: 987654321.';
+    }
+
+    if (!this.validators.phone.test(whatsapp)) {
+      return 'WhatsApp invalido: debe ser celular peruano de 9 digitos e iniciar con 9. Ejemplo: 987654321.';
+    }
+
+    if (!this.validators.password.test(this.form.password)) {
+      return 'Contrasena invalida: minimo 8 caracteres, una mayuscula, una minuscula y un numero.';
+    }
+
+    if (!this.validators.address.test(this.form.direccion)) {
+      return 'Direccion invalida: debe iniciar con mayuscula o numero y tener al menos 5 caracteres.';
+    }
+
+    if (this.form.fotoPerfil && !this.validators.url.test(this.form.fotoPerfil)) {
+      return 'URL de foto invalida: debe iniciar con http:// o https://.';
+    }
+
+    this.form.telefono = telefono;
+    this.form.whatsapp = whatsapp;
+    return '';
+  }
+
+  private onlyDigits(value: string): string {
+    return String(value || '').replace(/\D/g, '');
   }
 }

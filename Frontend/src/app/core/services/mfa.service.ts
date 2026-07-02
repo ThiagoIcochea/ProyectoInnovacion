@@ -35,16 +35,28 @@ export class MfaService {
   }
 
   async requestActionToken(email: string, purpose: MfaPurpose, method = 'email'): Promise<string> {
-    const start: any = await this.startChallenge(email, purpose, method);
+    let selectedMethod = method;
+    let start: any;
 
-    const channel = method === 'email' ? 'correo' : method;
+    try {
+      start = await this.startChallenge(email, purpose, selectedMethod);
+    } catch (error) {
+      if (selectedMethod === 'email') {
+        throw error;
+      }
+
+      selectedMethod = 'email';
+      start = await this.startChallenge(email, purpose, selectedMethod);
+    }
+
+    const channel = selectedMethod === 'email' ? 'correo' : selectedMethod;
     const code = window.prompt(`Ingresa el codigo multifactor enviado por ${channel}.`);
 
     if (!code) {
       throw new Error('Verificacion multifactor cancelada.');
     }
 
-    const verified: any = await this.verifyChallenge(email, start.tempToken, code, purpose, method);
+    const verified: any = await this.verifyChallenge(email, start.tempToken, code, purpose, selectedMethod);
 
     if (!verified?.mfaActionToken) {
       throw new Error('No se pudo obtener la autorizacion multifactor.');

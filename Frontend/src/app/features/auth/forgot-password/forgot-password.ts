@@ -13,6 +13,9 @@ import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../../co
   styleUrl: '../mfa/mfa.scss'
 })
 export class ForgotPasswordComponent {
+  private readonly emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  private readonly passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
+
   email = '';
   digits = ['', '', '', '', '', ''];
   newPassword = '';
@@ -29,8 +32,11 @@ export class ForgotPasswordComponent {
   ) {}
 
   start(): void {
-    if (!this.email.trim()) {
-      this.errorMessage = 'Ingresa tu correo.';
+    const cleanEmail = this.email.trim().toLowerCase();
+
+    if (!this.emailRegex.test(cleanEmail)) {
+      this.errorMessage = 'Correo invalido. Usa un formato como usuario@empresa.com.';
+      alert(this.errorMessage);
       return;
     }
 
@@ -38,17 +44,26 @@ export class ForgotPasswordComponent {
     this.errorMessage = '';
 
     this.http.post<any>(`${APP_API_BASE_URL}/auth/forgot-password/start`, {
-      email: this.email.trim(),
+      email: cleanEmail,
       method: 'email'
     }).subscribe({
       next: res => {
         this.tempToken = res?.tempToken || '';
+        if (!this.tempToken) {
+          this.loading = false;
+          this.errorMessage = 'No se recibio el flujo MFA. Intenta nuevamente.';
+          alert(this.errorMessage);
+          return;
+        }
+        this.email = cleanEmail;
         this.step = 'code';
         this.loading = false;
+        alert('Codigo MFA enviado a tu correo. Ingresa los 6 digitos para continuar.');
       },
       error: err => {
         this.loading = false;
         this.errorMessage = err?.error?.message || 'No se pudo enviar el codigo.';
+        alert(this.errorMessage);
       }
     });
   }
@@ -63,6 +78,10 @@ export class ForgotPasswordComponent {
 
     const next = Math.min(index + clean.length, 5);
     setTimeout(() => document.querySelector<HTMLInputElement>(`#reset-digit-${next}`)?.focus());
+
+    if (this.digits.every(Boolean)) {
+      this.verifyCode();
+    }
   }
 
   pasteCode(event: ClipboardEvent): void {
@@ -73,6 +92,10 @@ export class ForgotPasswordComponent {
   }
 
   verifyCode(): void {
+    if (this.loading) {
+      return;
+    }
+
     const code = this.digits.join('');
     if (code.length !== 6) {
       this.errorMessage = 'Ingresa los 6 digitos.';
@@ -91,24 +114,33 @@ export class ForgotPasswordComponent {
     }).subscribe({
       next: res => {
         this.actionToken = res?.mfaActionToken || '';
+        if (!this.actionToken) {
+          this.loading = false;
+          this.errorMessage = 'No se recibio la autorizacion MFA. Solicita un nuevo codigo.';
+          alert(this.errorMessage);
+          return;
+        }
         this.step = 'password';
         this.loading = false;
       },
       error: err => {
         this.loading = false;
         this.errorMessage = err?.error?.message || 'Codigo incorrecto o expirado.';
+        alert(this.errorMessage);
       }
     });
   }
 
   complete(): void {
-    if (this.newPassword.length < 6) {
-      this.errorMessage = 'La contrasena debe tener al menos 6 caracteres.';
+    if (!this.passwordRegex.test(this.newPassword)) {
+      this.errorMessage = 'Contrasena invalida: minimo 8 caracteres, una mayuscula, una minuscula y un numero.';
+      alert(this.errorMessage);
       return;
     }
 
     if (this.newPassword !== this.confirmPassword) {
       this.errorMessage = 'Las contrasenas no coinciden.';
+      alert(this.errorMessage);
       return;
     }
 
@@ -136,6 +168,7 @@ export class ForgotPasswordComponent {
       error: err => {
         this.loading = false;
         this.errorMessage = err?.error?.message || 'No se pudo actualizar la contrasena.';
+        alert(this.errorMessage);
       }
     });
   }
