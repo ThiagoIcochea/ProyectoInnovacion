@@ -33,6 +33,7 @@ public class PagoService {
     private final Cloudinary cloudinary;
     private final InventarioReservaService inventarioReservaService;
     private final LogsSistemaService logsSistemaService;
+    private final EmailService emailService;
     
 
     public PagoService(
@@ -42,7 +43,8 @@ public class PagoService {
             UsuarioRepository usuarioRepo,
             Cloudinary cloudinary,
             InventarioReservaService inventarioReservaService,
-            LogsSistemaService logsSistemaService
+            LogsSistemaService logsSistemaService,
+            EmailService emailService
     ) {
         this.pagoRepo = pagoRepo;
         this.solicitudRepo = solicitudRepo;
@@ -51,6 +53,7 @@ public class PagoService {
         this.cloudinary = cloudinary;
         this.inventarioReservaService= inventarioReservaService;
         this.logsSistemaService = logsSistemaService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -346,6 +349,12 @@ public void aprobarPago(Integer idPago, Integer idUsuario,HttpServletRequest req
         + solicitud.getIdSolicitud(),
     req
 );
+
+    emailService.enviarCorreoEstadoSolicitud(
+            solicitud,
+            Solicitud.EstadoSolicitud.PAGADA.name(),
+            "Pago aprobado por el proveedor"
+    );
     
         
       
@@ -355,7 +364,7 @@ public void aprobarPago(Integer idPago, Integer idUsuario,HttpServletRequest req
     
     
 @Transactional
-public void rechazarPago(Integer idPago, Integer idUsuario) {
+public void rechazarPago(Integer idPago, Integer idUsuario, HttpServletRequest req) {
 
     Pago pago = pagoRepo.findById(idPago)
             .orElseThrow(() ->
@@ -386,6 +395,8 @@ public void rechazarPago(Integer idPago, Integer idUsuario) {
     solicitud.setEstado(
             Solicitud.EstadoSolicitud.CANCELADA
     );
+    solicitud.setFechaCancelacion(LocalDateTime.now());
+    inventarioReservaService.cancelarReserva(solicitud.getIdSolicitud());
     
     
     
@@ -413,6 +424,28 @@ public void rechazarPago(Integer idPago, Integer idUsuario) {
     historialRepo.save(historial);  
     
     pagoRepo.save(pago);
+
+    logsSistemaService.registrarLog(
+            idUsuario,
+            "PAGO_RECHAZADO",
+            "PAGOS",
+            "Pago rechazado ID: " + pago.getIdPago() + " | Solicitud: " + solicitud.getIdSolicitud(),
+            req
+    );
+
+    logsSistemaService.registrarLog(
+            idUsuario,
+            "RESERVA_CANCELADA",
+            "INVENTARIO",
+            "Reservas eliminadas por rechazo de pago solicitud ID: " + solicitud.getIdSolicitud(),
+            req
+    );
+
+    emailService.enviarCorreoEstadoSolicitud(
+            solicitud,
+            Solicitud.EstadoSolicitud.CANCELADA.name(),
+            "Pago rechazado por el proveedor"
+    );
 
 } 
 

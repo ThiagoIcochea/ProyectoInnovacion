@@ -11,8 +11,6 @@ import com.nethink.b2b.repository.ConfiguracionRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -89,12 +87,10 @@ public class VoiceAssistantService {
                 Reglas obligatorias:
                 - Responde en espanol peruano, tono ejecutivo y accionable.
                 - Usa moneda peruana: soles, formato S/ 0.00. Nunca uses USD, dolares, k USD ni simbolos de otra moneda.
-                - Devuelve exactamente 3 puntos si hay poca data o exactamente 5 puntos si hay suficiente data accionable.
-                - Formato obligatorio: lista numerada. Cada punto debe ir en una linea separada.
-                - Cada item debe tener un titulo corto en negrita y una recomendacion concreta.
-                - No devuelvas parrafos largos ni mezcles dos puntos en la misma linea.
+                - Devuelve un solo parrafo de recomendacion general, sin enumerar, sin bullets y sin titulos en negrita.
+                - Explica de forma integrada como mejorar aprobaciones, pendientes, reclamos, API e ingresos segun los datos disponibles.
                 - No uses secciones como diagnostico, riesgos o acciones adicionales.
-                - Maximo 170 palabras.
+                - Maximo 120 palabras.
                 """.formatted(usuario.getNombres(), usuario.getApellidos(), stats);
 
         try {
@@ -123,15 +119,9 @@ public class VoiceAssistantService {
 
             JsonNode root = objectMapper.readTree(response.getBody());
             String content = root.path("choices").get(0).path("message").path("content").asText();
-            return Map.of("analysis", normalizeFiveInsights(content));
+            return Map.of("analysis", normalizeInsightParagraph(content));
         } catch (Exception e) {
-            return Map.of("analysis", """
-                    1. **Pagos por validar**: reduce los estados PAGO_VALIDANDO con revisiones diarias y responsables claros.
-                    2. **Solicitudes pendientes**: responde cada RFQ dentro de un SLA operativo para mejorar conversion.
-                    3. **API del proveedor**: conecta la API para actualizar stock, precios y estados sin reprocesos manuales.
-                    4. **Reclamos abiertos**: cierra reclamos con evidencia y resolucion para proteger ranking y confianza.
-                    5. **Ingresos en soles**: enfoca aprobaciones de mayor valor y mide ingresos estimados en S/ para decisiones locales.
-                    """);
+            return Map.of("analysis", "Para mejorar el rendimiento, prioriza una revision diaria de pagos y solicitudes pendientes, define responsables claros para responder cada RFQ dentro de un plazo corto y conecta la API para mantener stock, precios y estados actualizados sin reprocesos manuales. Tambien conviene cerrar reclamos con evidencia y resoluciones claras para proteger la confianza del cliente, mientras enfocas la atencion comercial en las oportunidades con mayor valor estimado en S/.");
         }
     }
 
@@ -177,45 +167,18 @@ public class VoiceAssistantService {
                 """.formatted(nombre, rol, currentPath, text);
     }
 
-    private String normalizeFiveInsights(String content) {
+    private String normalizeInsightParagraph(String content) {
         String clean = String.valueOf(content == null ? "" : content)
                 .replace("\r", "\n")
-                .replaceAll("(?m)^\\s*[-*]\\s+", "")
+                .replaceAll("\\*\\*", "")
+                .replaceAll("(?m)^\\s*(?:\\d+\\s*[\\).:-]|[-*])\\s*", "")
+                .replaceAll("\\n+", " ")
+                .replaceAll("\\s+", " ")
+                .replaceAll("\\bUSD\\b|\\bdolares\\b|\\bdólares\\b|\\bdÃ³lares\\b|k\\s*USD", "S/")
                 .trim();
 
-        Pattern itemPattern = Pattern.compile("(?s)(?:^|\\n)\\s*(\\d)\\s*[\\).:-]\\s*(.*?)(?=\\n\\s*\\d\\s*[\\).:-]|$)");
-        Matcher matcher = itemPattern.matcher(clean);
-        StringBuilder normalized = new StringBuilder();
-        int index = 1;
-
-        while (matcher.find() && index <= 5) {
-            String item = matcher.group(2)
-                    .replaceAll("(?<=\\d)\\s+(?=\\d)", "")
-                    .replaceAll(",\\s+(?=\\d)", ",")
-                    .replaceAll("\\s+", " ")
-                    .trim();
-            if (!item.isBlank()) {
-                normalized.append(index).append(". ").append(item).append("\n");
-                index++;
-            }
-        }
-
-        if (index > 5) {
-            return normalized.toString().trim();
-        }
-
-        String[] fallbackItems = clean.split("\\n+");
-        for (String fallbackItem : fallbackItems) {
-            if (index > 5) {
-                break;
-            }
-            String item = fallbackItem.replaceAll("^\\s*\\d?\\s*[\\).:-]?\\s*", "").replaceAll("\\s+", " ").trim();
-            if (!item.isBlank() && !normalized.toString().contains(item)) {
-                normalized.append(index).append(". ").append(item).append("\n");
-                index++;
-            }
-        }
-
-        return normalized.toString().trim();
+        return clean.isBlank()
+                ? "Para mejorar el rendimiento, enfoca al equipo en responder solicitudes pendientes con rapidez, validar pagos de forma diaria, mantener inventario y precios sincronizados por API, resolver reclamos con evidencia y priorizar oportunidades de mayor valor en S/."
+                : clean;
     }
 }

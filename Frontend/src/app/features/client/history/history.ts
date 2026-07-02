@@ -2,6 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
 @Component({
@@ -20,7 +21,8 @@ export class HistoryComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -44,6 +46,8 @@ export class HistoryComponent implements OnInit {
       next: (res) => {
 
         this.historyOriginal = res.map(s => ({
+
+          idSolicitud: s.idSolicitud,
 
           code: `RFQ-2026-${s.idSolicitud.toString().padStart(4, '0')}`,
 
@@ -109,5 +113,24 @@ export class HistoryComponent implements OnInit {
         h.status === 'Cancelada'
       );
     }
+  }
+
+  verTracking(item: any): void {
+    if (!item?.idSolicitud) {
+      return;
+    }
+
+    this.router.navigate(['/app/requests/tracking', item.idSolicitud]);
+  }
+
+  generarReclamo(item: any): void {
+    if (!item?.idSolicitud) {
+      return;
+    }
+
+    this.router.navigate(
+      ['/app/requests/tracking', item.idSolicitud],
+      { queryParams: { claim: 1 } }
+    );
   }
 }

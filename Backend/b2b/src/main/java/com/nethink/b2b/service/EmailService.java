@@ -12,6 +12,7 @@ public interface EmailService {
     void enviarCorreoEvaluacionCliente(Solicitud solicitud);
     void enviarCorreoReclamoDemora(Solicitud solicitud, String descripcion, String evidenciaJson);
     void enviarCorreoRegistroCliente(Usuario usuario);
+    void enviarCorreoActualizacionUsuario(Usuario usuario, String titulo, String mensaje, String asunto);
     void enviarCorreoActualizacionCliente(Solicitud solicitud, String titulo, String mensaje, String asunto);
     void enviarCorreoEstadoSolicitud(Solicitud solicitud, String estado, String descripcion);
     void enviarCorreoEstadoReclamo(Solicitud solicitud, String estado, String descripcion);

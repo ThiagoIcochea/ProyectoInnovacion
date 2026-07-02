@@ -103,6 +103,11 @@ export class RequestTrackingComponent implements OnInit {
         this.loading = false;
 
         this.cdr.detectChanges();
+
+        if (this.route.snapshot.queryParamMap.get('claim') === '1' && this.canCreateDelayClaim()) {
+          this.abrirReclamoDemora();
+          this.cdr.detectChanges();
+        }
       },
 
       error: (err) => {

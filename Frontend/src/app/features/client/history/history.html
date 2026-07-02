@@ -49,6 +49,7 @@
         <div>Creación</div>
         <div>Última actualización</div>
         <div>Estado</div>
+        <div>Acciones</div>
       </div>
 
       <div class="history-table__row" *ngFor="let item of history">
@@ -73,6 +74,20 @@
             {{ item.status }}
 
           </span>
+        </div>
+
+        <div class="row-actions">
+          <button type="button" (click)="verTracking(item)" title="Ver tracking">
+            Tracking
+          </button>
+
+          <button
+            type="button"
+            class="claim"
+            (click)="generarReclamo(item)"
+            title="Generar reclamo">
+            Reclamo
+          </button>
         </div>
 
       </div>

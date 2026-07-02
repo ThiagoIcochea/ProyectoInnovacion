@@ -543,18 +543,14 @@ BigDecimal totalItem =
     request
 );
         
-         List<InventarioReserva> reservas =
-            reservaRepo.findBySolicitud_IdSolicitud(idSolicitud);
-
-  
-    for (InventarioReserva r : reservas) {
-
-       
-        r.setEstado("CANCELADO");
-        r.setFechaActualizacion(LocalDateTime.now());
-
-        reservaRepo.save(r);
-    }
+        reservaService.cancelarReserva(idSolicitud);
+        logsSistemaService.registrarLog(
+                usuario.getIdUsuario(),
+                "RESERVA_CANCELADA",
+                "INVENTARIO",
+                "Reservas eliminadas y stock liberado para solicitud ID: " + solicitud.getIdSolicitud(),
+                request
+        );
 
         SolicitudHistorial historial =
                 new SolicitudHistorial();
@@ -629,6 +625,7 @@ BigDecimal totalItem =
         }
 
         // Marcar como completada si no hubo respuesta
+        @Transactional
         public void autoCompleteIfUnresolved(Integer idSolicitud) {
                 Solicitud s = solicitudRepo.findById(idSolicitud)
                                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
@@ -645,6 +642,42 @@ BigDecimal totalItem =
                         historial.setFecha(LocalDateTime.now());
                         historialRepo.save(historial);
                 }
+        }
+
+        @Transactional
+        public int autoCompletarEntregadasVencidas() {
+                LocalDateTime fechaLimite = LocalDateTime.now().minusHours(2);
+                List<Solicitud> solicitudes =
+                        historialRepo.listarSolicitudesEntregadasParaAutocompletar(fechaLimite);
+
+                for (Solicitud solicitud : solicitudes) {
+                        solicitud.setEstado(EstadoSolicitud.COMPLETADA);
+                        solicitudRepo.save(solicitud);
+
+                        SolicitudHistorial historial = new SolicitudHistorial();
+                        historial.setSolicitud(solicitud);
+                        historial.setIdUsuario(solicitud.getUsuario() != null ? solicitud.getUsuario().getIdUsuario() : null);
+                        historial.setEstado(EstadoSolicitud.COMPLETADA.name());
+                        historial.setDescripcion("Solicitud marcada como completada automaticamente tras 2 horas desde la entrega");
+                        historial.setFecha(LocalDateTime.now());
+                        historialRepo.save(historial);
+
+                        logsSistemaService.registrarLog(
+                                solicitud.getUsuario() != null ? solicitud.getUsuario().getIdUsuario() : null,
+                                "AUTO_COMPLETAR_SOLICITUD",
+                                "SOLICITUDES",
+                                "Solicitud completada automaticamente ID: " + solicitud.getIdSolicitud(),
+                                null
+                        );
+
+                        emailService.enviarCorreoEstadoSolicitud(
+                                solicitud,
+                                EstadoSolicitud.COMPLETADA.name(),
+                                "La solicitud fue completada automaticamente tras 2 horas desde la entrega."
+                        );
+                }
+
+                return solicitudes.size();
         }
 
         // Resolver evaluación enviada por cliente (marca completada)
@@ -718,6 +751,8 @@ BigDecimal totalItem =
             case   RECLAMO_RESUELTO -> "Reclamo Resuelto ";
 
             case ENTREGADA -> "Entregado";
+
+            case COMPLETADA -> "Completada";
 
             case CANCELADA -> "Cancelada";
 
@@ -1117,6 +1152,12 @@ public void aprobarPedido(Integer idSolicitud, String correoUsuario,HttpServletR
      ,
     req
 );
+
+    emailService.enviarCorreoEstadoSolicitud(
+            sol,
+            Solicitud.EstadoSolicitud.PEDIDO_APROBADO.name(),
+            "Pedido aprobado por el proveedor"
+    );
     
         SolicitudHistorial historial = new SolicitudHistorial();
         historial.setSolicitud(sol);
@@ -1171,6 +1212,7 @@ public void rechazarPedido(Integer idSolicitud,String prompt, String correoUsuar
     sol.setFechaCancelacion(LocalDateTime.now());
 
    sol = solicitudRepo.save(sol);
+   reservaService.cancelarReserva(idSolicitud);
 
   
     
@@ -1183,6 +1225,20 @@ public void rechazarPedido(Integer idSolicitud,String prompt, String correoUsuar
      ,
     req
 );
+
+    logsSistemaService.registrarLog(
+            usuario.getIdUsuario(),
+            "RESERVA_CANCELADA",
+            "INVENTARIO",
+            "Reservas eliminadas por rechazo de pedido ID: " + sol.getIdSolicitud(),
+            req
+    );
+
+    emailService.enviarCorreoEstadoSolicitud(
+            sol,
+            Solicitud.EstadoSolicitud.CANCELADA.name(),
+            "El pedido fue rechazado por el proveedor: " + prompt
+    );
     
         SolicitudHistorial historial = new SolicitudHistorial();
         historial.setSolicitud(sol);
@@ -1239,6 +1295,7 @@ public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, S
         
         solicitud.setFechaEntrega(LocalDateTime.now());
         emailService.enviarCorreoEvaluacionCliente(solicitud);
+        reservaService.entregarReserva(idSolicitud);
     }
     
 
@@ -1263,6 +1320,16 @@ public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, S
             "Solicitud " + solicitud.getIdSolicitud() + " cambio a " + nuevoEstado.name(),
             req
     );
+
+    if (nuevoEstado == EstadoSolicitud.ENTREGADA) {
+        logsSistemaService.registrarLog(
+                usuario.getIdUsuario(),
+                "RESERVA_ENTREGADA",
+                "INVENTARIO",
+                "Stock descontado y reservas cerradas para solicitud ID: " + solicitud.getIdSolicitud(),
+                req
+        );
+    }
 
     emailService.enviarCorreoEstadoSolicitud(
             solicitud,

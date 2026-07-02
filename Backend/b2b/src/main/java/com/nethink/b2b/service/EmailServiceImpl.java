@@ -445,6 +445,42 @@ public class EmailServiceImpl implements EmailService {
 
     @Async
     @Override
+    public void enviarCorreoActualizacionUsuario(Usuario usuario, String titulo, String mensaje, String asunto) {
+        try {
+            if (usuario == null || usuario.getCorreo() == null || usuario.getCorreo().isBlank()) return;
+
+            Resend resend = getResendClient();
+            String html = """
+                    <div style='font-family:Arial,sans-serif;background:#f8fafc;padding:32px'>
+                        <div style='max-width:640px;margin:auto;background:#fff;border-radius:12px;padding:28px'>
+                            <h2 style='margin-top:0;color:#0f172a'>%s</h2>
+                            <p>Hola <b>%s</b>,</p>
+                            <p>%s</p>
+                            <p><b>Correo:</b> %s</p>
+                        </div>
+                    </div>
+                    """.formatted(
+                    titulo == null ? "Actualizacion de datos" : titulo,
+                    usuario.getNombres(),
+                    mensaje == null ? "Tus datos fueron actualizados correctamente." : mensaje,
+                    usuario.getCorreo()
+            );
+
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                    .to(usuario.getCorreo())
+                    .subject(asunto == null ? "Datos actualizados - NETHINK B2B" : asunto)
+                    .html(html)
+                    .build();
+
+            resend.emails().send(params);
+        } catch (Exception e) {
+            System.out.println("Error correo actualizacion usuario: " + e.getMessage());
+        }
+    }
+
+    @Async
+    @Override
     public void enviarCorreoEstadoSolicitud(Solicitud solicitud, String estado, String descripcion) {
         try {
             if (solicitud == null) return;

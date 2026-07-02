@@ -49,6 +49,7 @@ public class ReclamoService {
     private final Cloudinary cloudinary;
     private final ModeracionService moderacionService;
     private final LogsSistemaService logsSistemaService;
+    private final InventarioReservaService inventarioReservaService;
 
     @Autowired
     public ReclamoService(
@@ -60,6 +61,7 @@ public class ReclamoService {
             EmailService emailService,
             Cloudinary cloudinary,
             ModeracionService moderacionService,
+            InventarioReservaService inventarioReservaService,
             LogsSistemaService logsSistemaService) {
 
         this.reclamoRepository = reclamoRepository;
@@ -71,6 +73,7 @@ public class ReclamoService {
         this.cloudinary = cloudinary;
         this.moderacionService = moderacionService;
         this.logsSistemaService = logsSistemaService;
+        this.inventarioReservaService = inventarioReservaService;
     }
 
     public ReclamoService(
@@ -91,6 +94,7 @@ public class ReclamoService {
                 emailService,
                 cloudinary,
                 moderacionService,
+                null,
                 null
         );
     }
@@ -235,6 +239,7 @@ public class ReclamoService {
 
         if ("CANCELAR".equals(accionNormalizada)) {
             cancelarSolicitud(solicitud, motivoCancelacion);
+            cancelarReservaSiExiste(solicitud);
             return;
         }
 
@@ -243,6 +248,7 @@ public class ReclamoService {
             if (nuevoEstadoSolicitud != null) {
                 if (nuevoEstadoSolicitud == EstadoSolicitud.ENTREGADA) {
                     validarCodigoEntrega(solicitud, codigoEntrega);
+                    entregarReservaSiExiste(solicitud);
                 }
                 solicitud.setEstado(nuevoEstadoSolicitud);
             }
@@ -353,6 +359,18 @@ public class ReclamoService {
                         : motivoCancelacion.trim()
         );
         solicitud.setFechaCancelacion(LocalDateTime.now());
+    }
+
+    private void cancelarReservaSiExiste(Solicitud solicitud) {
+        if (inventarioReservaService != null && solicitud != null && solicitud.getIdSolicitud() != null) {
+            inventarioReservaService.cancelarReserva(solicitud.getIdSolicitud());
+        }
+    }
+
+    private void entregarReservaSiExiste(Solicitud solicitud) {
+        if (inventarioReservaService != null && solicitud != null && solicitud.getIdSolicitud() != null) {
+            inventarioReservaService.entregarReserva(solicitud.getIdSolicitud());
+        }
     }
 
     private String normalizarTipo(String tipo) {

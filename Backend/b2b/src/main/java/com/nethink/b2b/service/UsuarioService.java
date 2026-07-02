@@ -236,6 +236,13 @@ public class UsuarioService {
     request
 );
 
+        emailService.enviarCorreoActualizacionUsuario(
+                usuario,
+                "Perfil actualizado",
+                "Tus datos de perfil fueron actualizados correctamente.",
+                "Perfil actualizado - NETHINK B2B"
+        );
+
         PreferenciaUsuario pref = prefRepo
                 .findByUsuario_IdUsuario(usuario.getIdUsuario())
                 .orElse(new PreferenciaUsuario());
@@ -369,6 +376,13 @@ public AdminUserResponse actualizarUsuarioAdmin(Integer idUsuario, AdminUserUpda
             "ADMIN",
             "Usuario gestionado por administrador",
             request
+    );
+
+    emailService.enviarCorreoActualizacionUsuario(
+            usuario,
+            "Datos actualizados",
+            "Un administrador actualizo los datos de tu cuenta.",
+            "Datos de cuenta actualizados - NETHINK B2B"
     );
 
     return toAdminUserResponse(usuario);
