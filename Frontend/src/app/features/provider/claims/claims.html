@@ -144,12 +144,11 @@
               </option>
             </select>
 
-            <label for="accionSolicitud" *ngIf="estadoSeleccionado === 'RESUELTO' || estadoSeleccionado === 'RECHAZADO'">
+            <label for="accionSolicitud">
               Acción para la solicitud
             </label>
             <select
               id="accionSolicitud"
-              *ngIf="estadoSeleccionado === 'RESUELTO' || estadoSeleccionado === 'RECHAZADO'"
               [(ngModel)]="accionSolicitud">
               <option *ngFor="let accion of getAccionesDisponibles()" [value]="accion.value">
                 {{ accion.label }}

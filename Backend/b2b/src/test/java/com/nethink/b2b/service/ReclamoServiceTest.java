@@ -16,9 +16,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -80,6 +82,39 @@ class ReclamoServiceTest {
         reclamoService.registrarReclamo(request, "cliente@test.com");
 
         assertEquals(Solicitud.EstadoSolicitud.EN_CAMINO, solicitud.getEstado());
+    }
+
+    @Test
+    void registrarReclamoConReclamoActivoPrevioLanzaConflict() throws Exception {
+        ReclamoRequest request = new ReclamoRequest();
+        request.setIdSolicitud(10);
+        request.setTipo("DEMORA");
+        request.setDescripcion("Demora en entrega");
+        request.setAccion("MANTENER");
+
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(7);
+        usuario.setCorreo("cliente@test.com");
+
+        Proveedor proveedor = new Proveedor();
+        proveedor.setIdProveedor(22);
+
+        Solicitud solicitud = new Solicitud();
+        solicitud.setIdSolicitud(10);
+        solicitud.setEstado(Solicitud.EstadoSolicitud.EN_CAMINO);
+        solicitud.setProveedor(proveedor);
+
+        Reclamo activo = new Reclamo();
+        activo.setIdReclamo(1);
+        activo.setIdSolicitud(10);
+        activo.setTipo("DEMORA");
+        activo.setEstado("ABIERTO");
+
+        when(usuarioRepository.findByCorreo("cliente@test.com")).thenReturn(Optional.of(usuario));
+        when(solicitudRepository.findById(10)).thenReturn(Optional.of(solicitud));
+        when(reclamoRepository.findByIdSolicitudAndTipoOrderByFechaCreacionDesc(10, "DEMORA")).thenReturn(List.of(activo));
+
+        assertThrows(org.springframework.web.server.ResponseStatusException.class, () -> reclamoService.registrarReclamo(request, "cliente@test.com"));
     }
 
     @Test

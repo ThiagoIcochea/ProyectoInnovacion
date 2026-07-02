@@ -107,14 +107,12 @@ export class ProviderClaimsComponent implements OnInit {
       return;
     }
 
-    if ((this.estadoSeleccionado === 'RESUELTO' || this.estadoSeleccionado === 'RECHAZADO')) {
-      const accionesDisponibles = this.getAccionesDisponibles();
-      const accionValida = accionesDisponibles.some(accion => accion.value === this.accionSolicitud);
+    const accionesDisponibles = this.getAccionesDisponibles();
+    const accionValida = accionesDisponibles.some(accion => accion.value === this.accionSolicitud);
 
-      if (!accionValida) {
-        this.errorMessage = 'Selecciona la acción que tomará la solicitud al cerrar el reclamo.';
-        return;
-      }
+    if (!accionValida) {
+      this.errorMessage = 'Selecciona la acción que tomará la solicitud.';
+      return;
     }
 
     this.guardando = true;
@@ -165,19 +163,23 @@ export class ProviderClaimsComponent implements OnInit {
       case 'CANCELACION':
         return [
           { value: 'MANTENER', label: 'Mantener el estado actual' },
-          { value: 'PAGO_PENDIENTE', label: 'Pasar a PAGO PENDIENTE' },
-          { value: 'PAGO_VALIDANDO', label: 'Pasar a PAGO VALIDANDO' },
+          { value: 'AVANZAR', label: 'Avanzar al siguiente estado' },
+          { value: 'RETROCEDER', label: 'Retroceder al estado anterior' },
           { value: 'CANCELAR', label: 'Cancelar la solicitud' }
         ];
       case 'ENTREGA_INCOMPLETA':
         return [
           { value: 'MANTENER', label: 'Mantener el estado actual' },
-          { value: 'EN_PREPARACION', label: 'Pasar a EN PREPARACION' }
+          { value: 'RETROCEDER', label: 'Retroceder al estado anterior' },
+          { value: 'AVANZAR', label: 'Avanzar al siguiente estado' },
+          { value: 'CANCELAR', label: 'Cancelar la solicitud' }
         ];
       default:
         return [
           { value: 'MANTENER', label: 'Mantener el estado actual' },
-          { value: 'EN_PREPARACION', label: 'Pasar a EN PREPARACION' }
+          { value: 'RETROCEDER', label: 'Retroceder al estado anterior' },
+          { value: 'AVANZAR', label: 'Avanzar al siguiente estado' },
+          { value: 'CANCELAR', label: 'Cancelar la solicitud' }
         ];
     }
   }

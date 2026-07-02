@@ -80,6 +80,13 @@ public class ReclamoService {
         String tipo = normalizarTipo(request.getTipo());
         String accion = normalizarAccion(request.getAccion(), tipo);
 
+        if (existeReclamoActivo(solicitud.getIdSolicitud(), tipo)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ya existe un reclamo activo para este tipo en la solicitud"
+            );
+        }
+
         Reclamo reclamo = new Reclamo();
         reclamo.setIdSolicitud(solicitud.getIdSolicitud());
         reclamo.setIdUsuario(usuario.getIdUsuario());
@@ -123,8 +130,28 @@ public class ReclamoService {
         String tipoNormalizado = normalizarTipo(tipo);
         String accionNormalizada = normalizarAccion(accion, tipoNormalizado);
 
-        if ("DEMORA".equals(tipoNormalizado) && "CANCELAR".equals(accionNormalizada)) {
+        if ("CANCELAR".equals(accionNormalizada)) {
             cancelarSolicitud(solicitud, motivoCancelacion);
+            return;
+        }
+
+        if ("AVANZAR".equals(accionNormalizada) || "RETROCEDER".equals(accionNormalizada)) {
+            EstadoSolicitud nuevoEstadoSolicitud = resolverEstadoPorAccion(solicitud.getEstado(), accionNormalizada);
+            if (nuevoEstadoSolicitud != null) {
+                solicitud.setEstado(nuevoEstadoSolicitud);
+            }
+            return;
+        }
+
+        if ("DEMORA".equals(tipoNormalizado)) {
+            switch (accionNormalizada) {
+                case "EN_PREPARACION" -> solicitud.setEstado(EstadoSolicitud.EN_PREPARACION);
+                case "PAGO_PENDIENTE" -> solicitud.setEstado(EstadoSolicitud.PAGO_PENDIENTE);
+                case "PAGO_VALIDANDO" -> solicitud.setEstado(EstadoSolicitud.PAGO_VALIDANDO);
+                default -> {
+                    // Mantener el estado actual del pedido.
+                }
+            }
             return;
         }
 
@@ -132,7 +159,7 @@ public class ReclamoService {
             switch (accionNormalizada) {
                 case "PAGO_PENDIENTE" -> solicitud.setEstado(EstadoSolicitud.PAGO_PENDIENTE);
                 case "PAGO_VALIDANDO" -> solicitud.setEstado(EstadoSolicitud.PAGO_VALIDANDO);
-                case "CANCELAR" -> cancelarSolicitud(solicitud, motivoCancelacion);
+                case "EN_PREPARACION" -> solicitud.setEstado(EstadoSolicitud.EN_PREPARACION);
                 default -> {
                     // Mantener el estado actual del pedido.
                 }
@@ -152,6 +179,42 @@ public class ReclamoService {
                 // Se mantiene el estado anterior si llega uno no soportado.
             }
         }
+    }
+
+    private EstadoSolicitud resolverEstadoPorAccion(EstadoSolicitud estadoActual, String accion) {
+        if (estadoActual == null) {
+            return null;
+        }
+
+        if ("AVANZAR".equals(accion)) {
+            return switch (estadoActual) {
+                case CREADA -> EstadoSolicitud.PEDIDO_APROBADO;
+                case PEDIDO_APROBADO -> EstadoSolicitud.PAGO_PENDIENTE;
+                case PAGO_PENDIENTE -> EstadoSolicitud.PAGO_VALIDANDO;
+                case PAGO_VALIDANDO -> EstadoSolicitud.PAGADA;
+                case PAGADA -> EstadoSolicitud.EN_PREPARACION;
+                case EN_PREPARACION -> EstadoSolicitud.EN_CAMINO;
+                case EN_CAMINO -> EstadoSolicitud.ENTREGADA;
+                case ENTREGADA -> EstadoSolicitud.COMPLETADA;
+                default -> estadoActual;
+            };
+        }
+
+        if ("RETROCEDER".equals(accion)) {
+            return switch (estadoActual) {
+                case PEDIDO_APROBADO -> EstadoSolicitud.CREADA;
+                case PAGO_PENDIENTE -> EstadoSolicitud.PEDIDO_APROBADO;
+                case PAGO_VALIDANDO -> EstadoSolicitud.PAGO_PENDIENTE;
+                case PAGADA -> EstadoSolicitud.PAGO_VALIDANDO;
+                case EN_PREPARACION -> EstadoSolicitud.PAGADA;
+                case EN_CAMINO -> EstadoSolicitud.EN_PREPARACION;
+                case ENTREGADA -> EstadoSolicitud.EN_CAMINO;
+                case COMPLETADA -> EstadoSolicitud.ENTREGADA;
+                default -> estadoActual;
+            };
+        }
+
+        return estadoActual;
     }
 
     private void cancelarSolicitud(Solicitud solicitud, String motivoCancelacion) {
@@ -181,8 +244,23 @@ public class ReclamoService {
             case "EN_PREPARACION" -> "EN_PREPARACION";
             case "PAGO_PENDIENTE" -> "PAGO_PENDIENTE";
             case "PAGO_VALIDANDO" -> "PAGO_VALIDANDO";
+            case "AVANZAR", "AVANZAR_ESTADO", "SIGUIENTE_ESTADO" -> "AVANZAR";
+            case "RETROCEDER", "RETROCEDER_ESTADO", "ESTADO_ANTERIOR" -> "RETROCEDER";
             default -> normalizado;
         };
+    }
+
+    private boolean existeReclamoActivo(Integer idSolicitud, String tipo) {
+        if (idSolicitud == null || tipo == null || tipo.isBlank()) {
+            return false;
+        }
+
+        return reclamoRepository.findByIdSolicitudAndTipoOrderByFechaCreacionDesc(idSolicitud, tipo)
+                .stream()
+                .anyMatch(reclamo -> {
+                    String estado = reclamo.getEstado();
+                    return estado != null && !List.of("RESUELTO", "RECHAZADO").contains(estado.trim().toUpperCase());
+                });
     }
 
     private String construirDescripcionReclamo(String tipo, String accion, String motivo, EstadoSolicitud estado) {

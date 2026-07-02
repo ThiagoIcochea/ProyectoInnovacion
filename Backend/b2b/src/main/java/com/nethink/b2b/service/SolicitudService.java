@@ -690,9 +690,11 @@ BigDecimal totalItem =
             
             case   RECLAMO_ABIERTO -> "Reclamo Abierto";
             
-            case   RECLAMO_EN_REVISION -> "Reclamo En Revision";
+            case   RECLAMO_EN_REVISION -> "Reclamo en Revision";
             
             case   RECLAMO_RECHAZADO -> "Reclamo rechazado";
+            
+            case   RECLAMO_RESUELTO -> "Reclamo Resuelto ";
 
             case ENTREGADA -> "Entregado";
 

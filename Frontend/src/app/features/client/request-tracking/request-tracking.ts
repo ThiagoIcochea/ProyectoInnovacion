@@ -214,24 +214,20 @@ export class RequestTrackingComponent implements OnInit {
     };
 
     this.delayClaimsService.save(payload, this.selectedEvidence).subscribe({
-  next: (res) => {
-    console.log('Reclamo registrado', res);
+      next: (res) => {
+        console.log('Reclamo registrado', res);
 
-    this.claimModalOpen = false;
-    this.claimError = '';
-    this.cdr.detectChanges();
-  },
-  error: (err) => {
-    console.error(err);
-  }
-});
+        this.claimModalOpen = false;
+        this.claimError = '';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(err);
+        this.claimError = err?.error?.message || 'No se pudo registrar el reclamo. Verifica si ya existe uno activo para este tipo.';
+        this.cdr.detectChanges();
+      }
+    });
 
-    
-    this.claimModalOpen = false;
-    this.claimError = '';
-    this.cdr.detectChanges();
-
-  
     const emailPayload = {
       idSolicitud: Number(this.tracking.idSolicitud),
       proveedor: this.tracking?.proveedor || 'Proveedor',

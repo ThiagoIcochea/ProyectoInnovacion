@@ -9,6 +9,8 @@ public interface ReclamoRepository extends JpaRepository<Reclamo, Integer> {
 
     List<Reclamo> findByIdProveedorOrderByFechaCreacionDesc(Integer idProveedor);
 
+    List<Reclamo> findByIdSolicitudAndTipoOrderByFechaCreacionDesc(Integer idSolicitud, String tipo);
+
     @Query("""
         SELECT COUNT(r)
         FROM Reclamo r
