@@ -62,6 +62,7 @@ public class UsuarioService {
     }
 
     public void registrarCliente(RegisterClientRequest req,  HttpServletRequest request) {
+        validarRegistroCliente(req);
 
         if (usuarioRepo.findByCorreo(req.getCorreo()).isPresent()) {
             throw new RuntimeException("Correo ya registrado");
@@ -155,6 +156,7 @@ public class UsuarioService {
             String fotoUrl,
              HttpServletRequest request
     ) {
+        validarPerfil(req);
 
         Usuario usuario = usuarioRepo.findByCorreo(correo)
                 .orElseThrow();
@@ -327,6 +329,8 @@ public class UsuarioService {
 }
 
 public AdminUserResponse actualizarUsuarioAdmin(Integer idUsuario, AdminUserUpdateRequest req, HttpServletRequest request) {
+    validarAdminUsuario(req);
+
     Usuario usuario = usuarioRepo.findById(idUsuario)
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -413,5 +417,65 @@ private AdminUserResponse toAdminUserResponse(Usuario u) {
     dto.setWhatsapp(u.getWhatsapp());
     dto.setDireccion(u.getDireccion());
     return dto;
+}
+
+private void validarRegistroCliente(RegisterClientRequest req) {
+    validarTexto(req.getNombres(), "Nombres invalidos", "^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$");
+    validarTexto(req.getApellidos(), "Apellidos invalidos", "^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$");
+    validarTexto(req.getCorreo(), "Correo invalido", "^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$");
+    validarTexto(soloDigitos(req.getTelefono()), "Telefono invalido", "^9\\d{8}$");
+    validarTexto(soloDigitos(req.getWhatsapp()), "WhatsApp invalido", "^9\\d{8}$");
+    validarTexto(req.getPassword(), "Contrasena invalida", "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$");
+    validarTexto(req.getDireccion(), "Direccion invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/-]{4,149}$");
+}
+
+private void validarPerfil(ProfileUpdateRequest req) {
+    validarTexto(req.getNombres(), "Nombres invalidos", "^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$");
+    validarTexto(req.getApellidos(), "Apellidos invalidos", "^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$");
+    validarTexto(req.getCorreo(), "Correo invalido", "^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$");
+    validarTexto(soloDigitos(req.getTelefono()), "Telefono invalido", "^9\\d{8}$");
+    validarTexto(soloDigitos(req.getWhatsapp()), "WhatsApp invalido", "^9\\d{8}$");
+    validarTexto(req.getDireccion(), "Direccion invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/-]{4,149}$");
+
+    if (req.getRuc() != null && !req.getRuc().isBlank()) {
+        validarTexto(req.getRuc(), "RUC invalido", "^(10|20)\\d{9}$");
+    }
+    if (req.getRazonSocial() != null && !req.getRazonSocial().isBlank()) {
+        validarTexto(req.getRazonSocial(), "Razon social invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,&-]{2,119}$");
+    }
+    if (req.getDescripcion() != null && !req.getDescripcion().isBlank()) {
+        validarTexto(req.getDescripcion(), "Descripcion invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/&()-]{9,399}$");
+    }
+}
+
+private void validarAdminUsuario(AdminUserUpdateRequest req) {
+    if (req.getNombres() != null && !req.getNombres().isBlank()) {
+        validarTexto(req.getNombres(), "Nombres invalidos", "^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$");
+    }
+    if (req.getApellidos() != null && !req.getApellidos().isBlank()) {
+        validarTexto(req.getApellidos(), "Apellidos invalidos", "^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$");
+    }
+    if (req.getCorreo() != null && !req.getCorreo().isBlank()) {
+        validarTexto(req.getCorreo(), "Correo invalido", "^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$");
+    }
+    if (req.getTelefono() != null && !req.getTelefono().isBlank()) {
+        validarTexto(soloDigitos(req.getTelefono()), "Telefono invalido", "^9\\d{8}$");
+    }
+    if (req.getWhatsapp() != null && !req.getWhatsapp().isBlank()) {
+        validarTexto(soloDigitos(req.getWhatsapp()), "WhatsApp invalido", "^9\\d{8}$");
+    }
+    if (req.getDireccion() != null && !req.getDireccion().isBlank()) {
+        validarTexto(req.getDireccion(), "Direccion invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/-]{4,149}$");
+    }
+}
+
+private void validarTexto(String valor, String mensaje, String regex) {
+    if (valor == null || !valor.trim().matches(regex)) {
+        throw new RuntimeException(mensaje);
+    }
+}
+
+private String soloDigitos(String valor) {
+    return String.valueOf(valor == null ? "" : valor).replaceAll("\\D", "");
 }
 }

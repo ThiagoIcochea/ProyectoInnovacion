@@ -14,7 +14,9 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/provider")
@@ -29,8 +31,10 @@ private ScoringService scoringService;
 
    @PostMapping("/register")
 public Map<String, String> register(@RequestBody RegisterProviderRequest req,  HttpServletRequest httpRequest) {
-    proveedorService.registerProvider(req, httpRequest);
-    return Map.of("message", "Proveedor registrado correctamente");
+    throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Usa /api/auth/register-provider/start para registrar proveedores con MFA por correo."
+    );
 }
 
 @GetMapping("/admin/listar")

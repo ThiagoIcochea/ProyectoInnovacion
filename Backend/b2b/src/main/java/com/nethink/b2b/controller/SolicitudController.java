@@ -224,7 +224,9 @@ public ResponseEntity<List<SolicitudResponse>> listarMisSolicitudesProveedor(
 public ResponseEntity<List<SolicitudEntregaResponse>>
 listarSolicitudesEntrega(
 
-        Principal principal
+        Principal principal,
+
+        HttpServletRequest httpRequest
 
 ) {
 
@@ -427,7 +429,9 @@ public ResponseEntity<Void> actualizarEstadoTracking(
 
         @RequestParam(required = false) String codigo,
 
-        Principal principal
+        Principal principal,
+
+        HttpServletRequest httpRequest
 
 ) {
 
@@ -451,7 +455,8 @@ public ResponseEntity<Void> actualizarEstadoTracking(
             idSolicitud,
             estado,
             codigo,
-            proveedor.getIdProveedor().toString()
+            principal.getName(),
+            httpRequest
     );
 
     return ResponseEntity.ok().build();

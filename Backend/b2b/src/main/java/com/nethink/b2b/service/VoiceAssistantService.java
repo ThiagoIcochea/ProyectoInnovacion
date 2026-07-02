@@ -89,9 +89,11 @@ public class VoiceAssistantService {
                 Reglas obligatorias:
                 - Responde en espanol peruano, tono ejecutivo y accionable.
                 - Usa moneda peruana: soles, formato S/ 0.00. Nunca uses USD, dolares, k USD ni simbolos de otra moneda.
-                - Devuelve exactamente 5 ideas clave y criticas a mejorar.
-                - Formato obligatorio: lista numerada del 1 al 5. Cada item debe tener un titulo corto en negrita y una recomendacion concreta.
-                - No uses secciones como diagnostico, riesgos o tres acciones.
+                - Devuelve exactamente 3 puntos si hay poca data o exactamente 5 puntos si hay suficiente data accionable.
+                - Formato obligatorio: lista numerada. Cada punto debe ir en una linea separada.
+                - Cada item debe tener un titulo corto en negrita y una recomendacion concreta.
+                - No devuelvas parrafos largos ni mezcles dos puntos en la misma linea.
+                - No uses secciones como diagnostico, riesgos o acciones adicionales.
                 - Maximo 170 palabras.
                 """.formatted(usuario.getNombres(), usuario.getApellidos(), stats);
 

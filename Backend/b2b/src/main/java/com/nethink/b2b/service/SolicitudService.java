@@ -39,6 +39,12 @@ import com.nethink.b2b.dto.response.SolicitudDetalleEntregaResponse;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -67,6 +73,7 @@ public class SolicitudService {
     private final InventarioReservaService reservaService;
     private final InventarioReservaRepository reservaRepo;
     private final DescuentoVolumenRepository descuentoVolumenRepo;
+    private final HttpClient httpClient = HttpClient.newHttpClient();
     
     private final ProductoEspecificacionRepository especificacionRepo; 
      
@@ -1194,7 +1201,8 @@ public void rechazarPedido(Integer idSolicitud,String prompt, String correoUsuar
 
 @Transactional
 public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, String codigoIngresado,
-        String correoUsuario     ) {
+        String correoUsuario,
+        HttpServletRequest req) {
 
     
     
@@ -1210,10 +1218,10 @@ public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, S
         // =========================
         // 2. BUSCAR USUARIO AUTENTICADO
         // =========================
-        //Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
-        //        .orElseThrow(() ->
-        //                new RuntimeException("Usuario no encontrado")
-        //        );
+        Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
+                .orElseThrow(() ->
+                        new RuntimeException("Usuario no encontrado")
+                );
     
     
     // =========================
@@ -1248,14 +1256,93 @@ public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, S
     
     String descripcion = generarDescripcion(nuevoEstado);
 
+    logsSistemaService.registrarLog(
+            usuario.getIdUsuario(),
+            "ACTUALIZAR_ESTADO_SOLICITUD",
+            "SOLICITUDES",
+            "Solicitud " + solicitud.getIdSolicitud() + " cambio a " + nuevoEstado.name(),
+            req
+    );
+
+    emailService.enviarCorreoEstadoSolicitud(
+            solicitud,
+            nuevoEstado.name(),
+            descripcion
+    );
+
+    if (nuevoEstado == EstadoSolicitud.EN_CAMINO) {
+        notificarPedidoEnCamino(solicitud, req, usuario.getIdUsuario());
+    }
+
     // 2. guardar historial
     SolicitudHistorial hist = new SolicitudHistorial();
     hist.setSolicitud(solicitud);
     hist.setEstado(nuevoEstado.name());
     hist.setDescripcion(descripcion); 
     hist.setFecha(LocalDateTime.now());
+    hist.setIdUsuario(usuario.getIdUsuario());
 
     historialRepo.save(hist);
+}
+
+private void notificarPedidoEnCamino(Solicitud solicitud, HttpServletRequest req, Integer idUsuario) {
+    if (solicitud == null || solicitud.getUsuario() == null) {
+        return;
+    }
+
+    Usuario cliente = solicitud.getUsuario();
+    String nombre = (cliente.getNombres() + " " + cliente.getApellidos()).trim();
+    String numero = firstNonBlank(cliente.getWhatsapp(), cliente.getTelefono());
+    String codigo = solicitud.getCodigoRecepcion();
+
+    if (numero.isBlank() || codigo == null || codigo.isBlank()) {
+        logsSistemaService.registrarLog(
+                idUsuario,
+                "MACRODROID_EN_CAMINO_OMITIDO",
+                "INTEGRACIONES",
+                "Faltan numero o codigo de recepcion para solicitud " + solicitud.getIdSolicitud(),
+                req
+        );
+        return;
+    }
+
+    String url = "https://trigger.macrodroid.com/543902b9-9627-4797-833f-8ab08ee4a3ec/encamino"
+            + "?nombre=" + encode(nombre)
+            + "&numero=" + encode(numero)
+            + "&codigo=" + encode(codigo);
+
+    try {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(url)).GET().build();
+        HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+        logsSistemaService.registrarLog(
+                idUsuario,
+                "MACRODROID_EN_CAMINO",
+                "INTEGRACIONES",
+                "Trigger EN_CAMINO solicitud " + solicitud.getIdSolicitud() + " estado HTTP " + response.statusCode(),
+                req
+        );
+    } catch (Exception e) {
+        logsSistemaService.registrarLog(
+                idUsuario,
+                "MACRODROID_EN_CAMINO_ERROR",
+                "INTEGRACIONES",
+                e.getMessage(),
+                req
+        );
+    }
+}
+
+private String firstNonBlank(String... values) {
+    for (String value : values) {
+        if (value != null && !value.isBlank()) {
+            return value.trim().replaceAll("\\D", "");
+        }
+    }
+    return "";
+}
+
+private String encode(String value) {
+    return URLEncoder.encode(String.valueOf(value == null ? "" : value), StandardCharsets.UTF_8);
 }
 
 

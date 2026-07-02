@@ -12,6 +12,7 @@ import com.nethink.b2b.service.SolicitudService;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -46,8 +47,11 @@ public class ReclamoController {
     }
 
     @PostMapping(value = "/demora", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> crear(@ModelAttribute ReclamoRequest request, Principal principal) throws IOException {
-        reclamoService.registrarReclamo(request, principal.getName());
+    public ResponseEntity<?> crear(
+            @ModelAttribute ReclamoRequest request,
+            Principal principal,
+            HttpServletRequest httpRequest) throws IOException {
+        reclamoService.registrarReclamo(request, principal.getName(), httpRequest);
         return ResponseEntity.ok().build();
     }
 
@@ -61,7 +65,8 @@ public class ReclamoController {
     public ResponseEntity<ReclamoProveedorResponse> actualizarEstadoProveedor(
             @PathVariable Integer idReclamo,
             @RequestBody ActualizarReclamoRequest request,
-            Principal principal) {
+            Principal principal,
+            HttpServletRequest httpRequest) {
 
         Proveedor proveedor = obtenerProveedor(principal);
         Usuario usuario = usuarioRepository.findByCorreo(principal.getName())
@@ -71,7 +76,8 @@ public class ReclamoController {
                 idReclamo,
                 proveedor.getIdProveedor(),
                 usuario.getIdUsuario(),
-                request
+                request,
+                httpRequest
         ));
     }
 

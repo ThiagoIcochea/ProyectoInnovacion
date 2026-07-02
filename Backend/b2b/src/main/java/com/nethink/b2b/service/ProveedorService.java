@@ -81,6 +81,7 @@ private LogsApiRepository logsApiRepository;
 
     @Transactional
     public void registerProvider(RegisterProviderRequest req,  HttpServletRequest request) {
+        validarRegistroProveedor(req);
 
         if (usuarioRepository.findByCorreo(req.getCorreo()).isPresent()) {
             logsSistemaService.registrarLog(
@@ -567,5 +568,49 @@ private boolean esProveedorActivo(Proveedor proveedor) {
             && proveedor.getUsuario().getEstado() == EstadoUsuario.ACTIVO;
 
     return proveedorActivo && usuarioActivo;
+}
+
+private void validarRegistroProveedor(RegisterProviderRequest req) {
+    validarTexto(req.getNombres(), "Nombres invalidos", "^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$");
+    validarTexto(req.getApellidos(), "Apellidos invalidos", "^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$");
+    validarTexto(req.getCorreo(), "Correo invalido", "^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$");
+    validarTexto(req.getPassword(), "Contrasena invalida", "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$");
+    validarTexto(soloDigitos(req.getTelefono()), "Telefono invalido", "^9\\d{8}$");
+    validarTexto(soloDigitos(req.getWhatsapp()), "WhatsApp invalido", "^9\\d{8}$");
+    validarTexto(req.getDireccion(), "Direccion invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/-]{4,149}$");
+    validarTexto(req.getRuc(), "RUC invalido", "^(10|20)\\d{9}$");
+    validarTexto(req.getRazonSocial(), "Razon social invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,&-]{2,119}$");
+    validarTexto(req.getDescripcion(), "Descripcion invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/&()-]{9,399}$");
+    validarTexto(req.getApiUrl(), "Endpoint API invalido", "^https?://\\S+\\.\\S+$");
+    validarTexto(req.getApiToken(), "API Token invalido", "^[A-Za-z0-9._~:/+=-]{8,}$");
+
+    String apiTipo = String.valueOf(req.getApiTipo() == null ? "" : req.getApiTipo()).trim().toUpperCase();
+    if (!List.of("REST", "GRAPHQL", "WEBHOOK").contains(apiTipo)) {
+        throw new RuntimeException("Tipo de API invalido");
+    }
+
+    if (req.getMetodosPago() == null || req.getMetodosPago().isEmpty()) {
+        throw new RuntimeException("Debe registrar al menos un metodo de pago");
+    }
+
+    for (MetodoPagoRequest metodo : req.getMetodosPago()) {
+        String cuenta = soloDigitos(metodo.getNumeroCuenta());
+        String tipo = String.valueOf(metodo.getTipo() == null ? "" : metodo.getTipo()).trim().toUpperCase();
+        if (List.of("YAPE", "PLIN").contains(tipo)) {
+            validarTexto(cuenta, "Metodo de pago invalido", "^9\\d{8}$");
+        } else {
+            validarTexto(cuenta, "Metodo de pago invalido", "^\\d{6,30}$");
+        }
+    }
+}
+
+private void validarTexto(String valor, String mensaje, String regex) {
+    if (valor == null || !valor.trim().matches(regex)) {
+        throw new RuntimeException(mensaje);
+    }
+}
+
+private String soloDigitos(String valor) {
+    return String.valueOf(valor == null ? "" : valor).replaceAll("\\D", "");
 }
 }
