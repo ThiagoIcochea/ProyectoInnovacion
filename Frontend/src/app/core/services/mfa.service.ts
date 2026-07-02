@@ -16,26 +16,35 @@ export class MfaService {
 
   constructor(private http: HttpClient) {}
 
-  async requestActionToken(email: string, purpose: MfaPurpose, method = 'email'): Promise<string> {
-    const start: any = await firstValueFrom(this.http.post(`${APP_API_BASE_URL}/auth/mfa/challenge`, {
+  startChallenge(email: string, purpose: MfaPurpose, method = 'email'): Promise<any> {
+    return firstValueFrom(this.http.post(`${APP_API_BASE_URL}/auth/mfa/challenge`, {
       email,
       purpose,
       method
     }));
+  }
 
-    const code = window.prompt('Ingresa el codigo multifactor enviado a tu correo.');
+  verifyChallenge(email: string, tempToken: string, code: string, purpose: MfaPurpose, method = 'email'): Promise<any> {
+    return firstValueFrom(this.http.post(`${APP_API_BASE_URL}/auth/mfa/verify`, {
+      email,
+      tempToken,
+      code,
+      method,
+      purpose
+    }));
+  }
+
+  async requestActionToken(email: string, purpose: MfaPurpose, method = 'email'): Promise<string> {
+    const start: any = await this.startChallenge(email, purpose, method);
+
+    const channel = method === 'email' ? 'correo' : method;
+    const code = window.prompt(`Ingresa el codigo multifactor enviado por ${channel}.`);
 
     if (!code) {
       throw new Error('Verificacion multifactor cancelada.');
     }
 
-    const verified: any = await firstValueFrom(this.http.post(`${APP_API_BASE_URL}/auth/mfa/verify`, {
-      email,
-      tempToken: start.tempToken,
-      code,
-      method,
-      purpose
-    }));
+    const verified: any = await this.verifyChallenge(email, start.tempToken, code, purpose, method);
 
     if (!verified?.mfaActionToken) {
       throw new Error('No se pudo obtener la autorizacion multifactor.');

@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {
   ChangeDetectorRef,
   Component,
+  OnDestroy,
   OnInit
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -17,7 +18,7 @@ import { MfaService } from '../../../core/services/mfa.service';
   templateUrl: './profile.html',
   styleUrl: './profile.scss'
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
 
   usuario: any = {
     nombres: '',
@@ -51,6 +52,23 @@ export class ProfileComponent implements OnInit {
 
   iniciales: string = '';
 
+  private voiceProfilePatchHandler = (event: Event): void => {
+    const detail = (event as CustomEvent).detail || {};
+    const patch = detail.profile || { [detail.field]: detail.value };
+
+    this.usuario = {
+      ...this.usuario,
+      ...patch,
+      preferencias: patch.preferencias || this.usuario.preferencias || {
+        notificaciones: true,
+        entregaRapida: false
+      }
+    };
+
+    this.generarIniciales();
+    this.cdr.detectChanges();
+  };
+
   constructor(
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
@@ -77,7 +95,12 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    window.addEventListener('voiceProfilePatch', this.voiceProfilePatchHandler);
     this.cargarPerfil();
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('voiceProfilePatch', this.voiceProfilePatchHandler);
   }
 
   private headers(): HttpHeaders {
@@ -237,7 +260,8 @@ export class ProfileComponent implements OnInit {
     try {
       mfaToken = await this.mfaService.requestActionToken(
         localStorage.getItem('auth_user_email') || this.usuario.correo || '',
-        'PROFILE_UPDATE'
+        'PROFILE_UPDATE',
+        this.preferredMfaMethod()
       );
     } catch (error: any) {
       alert(error?.message || 'No se completo la verificacion multifactor.');
@@ -265,5 +289,13 @@ export class ProfileComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+
+  private preferredMfaMethod(): string {
+    if (this.usuario.whatsapp || this.usuario.telefono) {
+      return 'whatsapp';
+    }
+
+    return 'email';
   }
 }

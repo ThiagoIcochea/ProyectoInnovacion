@@ -73,7 +73,10 @@
       <span>Groq AI</span>
       <h2>Insights para mejorar rendimiento</h2>
     </div>
-    <p>{{ loadingInsights ? 'Analizando metricas...' : insights }}</p>
+    <p *ngIf="loadingInsights">Analizando métricas...</p>
+    <ol *ngIf="!loadingInsights" class="insights-list">
+      <li *ngFor="let item of insightItems">{{ item }}</li>
+    </ol>
   </section>
 
   <section class="requests-card">

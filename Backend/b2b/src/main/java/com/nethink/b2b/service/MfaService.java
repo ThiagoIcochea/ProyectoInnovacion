@@ -4,6 +4,12 @@ import com.nethink.b2b.dto.response.MfaStartResponse;
 import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.entity.enums.EstadoUsuario;
 import com.nethink.b2b.repository.UsuarioRepository;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -29,6 +35,7 @@ public class MfaService {
     private final Map<String, Challenge> challenges = new ConcurrentHashMap<>();
     private final Map<String, ActionToken> actionTokens = new ConcurrentHashMap<>();
     private final SecureRandom random = new SecureRandom();
+    private final HttpClient httpClient = HttpClient.newHttpClient();
     private final EmailService emailService;
     private final UsuarioRepository usuarioRepository;
 
@@ -55,7 +62,7 @@ public class MfaService {
         challenge.emailOnly = emailOnly;
         challenges.put(tempToken, challenge);
 
-        emailService.enviarCodigoMfa(cleanEmail, code, selectedMethod, cleanPurpose, CODE_TTL_MINUTES);
+        sendCode(cleanEmail, code, selectedMethod, cleanPurpose);
         return buildResponse(cleanEmail, tempToken, cleanPurpose, redirectTo, emailOnly, challenge);
     }
 
@@ -65,7 +72,7 @@ public class MfaService {
         challenge.code = String.format("%06d", random.nextInt(1_000_000));
         challenge.expiresAt = LocalDateTime.now().plusMinutes(CODE_TTL_MINUTES);
         challenge.attempts = 0;
-        emailService.enviarCodigoMfa(challenge.email, challenge.code, challenge.method, challenge.purpose, CODE_TTL_MINUTES);
+        sendCode(challenge.email, challenge.code, challenge.method, challenge.purpose);
         return buildResponse(challenge.email, tempToken, challenge.purpose, challenge.redirectTo, challenge.emailOnly, challenge);
     }
 
@@ -152,6 +159,68 @@ public class MfaService {
             user.setEstado(EstadoUsuario.BLOQUEADO);
             usuarioRepository.save(user);
         });
+    }
+
+    private void sendCode(String email, String code, String method, String purpose) {
+        String selectedMethod = normalizeMethod(method);
+
+        if ("email".equals(selectedMethod)) {
+            emailService.enviarCodigoMfa(email, code, selectedMethod, purpose, CODE_TTL_MINUTES);
+            return;
+        }
+
+        Usuario usuario = usuarioRepository.findByCorreo(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado para enviar MFA."));
+
+        String phone = "whatsapp".equals(selectedMethod)
+                ? firstNonBlank(usuario.getWhatsapp(), usuario.getTelefono())
+                : firstNonBlank(usuario.getTelefono(), usuario.getWhatsapp());
+
+        if (phone == null || phone.isBlank()) {
+            throw new RuntimeException("No hay telefono registrado para enviar MFA por " + selectedMethod + ".");
+        }
+
+        String macroMethod = switch (selectedMethod) {
+            case "whatsapp" -> "wtsp";
+            case "call" -> "call";
+            case "sms" -> "sms";
+            default -> "email";
+        };
+
+        String name = firstNonBlank(
+                (usuario.getNombres() + " " + usuario.getApellidos()).trim(),
+                usuario.getCorreo()
+        );
+
+        String url = "https://trigger.macrodroid.com/543902b9-9627-4797-833f-8ab08ee4a3ec/otp"
+                + "?nombre=" + encode(name)
+                + "&numero=" + encode(phone)
+                + "&metodo=" + encode(macroMethod)
+                + "&codigo=" + encode(code);
+
+        try {
+            HttpRequest request = HttpRequest.newBuilder(URI.create(url)).GET().build();
+            httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding())
+                    .exceptionally(error -> {
+                        System.out.println("Error llamando trigger MFA: " + error.getMessage());
+                        return null;
+                    });
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudo enviar MFA por " + selectedMethod + ".", e);
+        }
+    }
+
+    private String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value.trim();
+            }
+        }
+        return "";
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(String.valueOf(value == null ? "" : value), StandardCharsets.UTF_8);
     }
 
     private String normalize(String value) {

@@ -80,15 +80,17 @@ public class VoiceAssistantService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         String prompt = """
-                Eres analista senior de performance B2B para proveedores. Analiza estas metricas reales y entrega recomendaciones concretas.
+                Eres analista senior de performance B2B para proveedores peruanos de infraestructura/redes. Analiza estas metricas reales y entrega recomendaciones concretas para Peru.
                 Proveedor: %s %s
                 Estadisticas JSON: %s
 
-                Devuelve un analisis en espanol con:
-                1. Diagnostico breve.
-                2. Riesgos operativos.
-                3. Tres acciones priorizadas para mejorar ranking, cumplimiento, reclamos e ingresos.
-                Maximo 180 palabras, tono ejecutivo y accionable.
+                Reglas obligatorias:
+                - Responde en espanol peruano, tono ejecutivo y accionable.
+                - Usa moneda peruana: soles, formato S/ 0.00. Nunca uses USD, dolares, k USD ni simbolos de otra moneda.
+                - Devuelve exactamente 5 ideas clave y criticas a mejorar.
+                - Formato obligatorio: lista numerada del 1 al 5. Cada item debe tener un titulo corto en negrita y una recomendacion concreta.
+                - No uses secciones como diagnostico, riesgos o tres acciones.
+                - Maximo 170 palabras.
                 """.formatted(usuario.getNombres(), usuario.getApellidos(), stats);
 
         try {
@@ -119,7 +121,13 @@ public class VoiceAssistantService {
             String content = root.path("choices").get(0).path("message").path("content").asText();
             return Map.of("analysis", content);
         } catch (Exception e) {
-            return Map.of("analysis", "No pude consultar Groq ahora. Prioriza reducir reclamos abiertos, responder solicitudes pendientes y mantener inventario actualizado para mejorar ranking y conversion.");
+            return Map.of("analysis", """
+                    1. **Pagos por validar**: reduce los estados PAGO_VALIDANDO con revisiones diarias y responsables claros.
+                    2. **Solicitudes pendientes**: responde cada RFQ dentro de un SLA operativo para mejorar conversion.
+                    3. **API del proveedor**: conecta la API para actualizar stock, precios y estados sin reprocesos manuales.
+                    4. **Reclamos abiertos**: cierra reclamos con evidencia y resolucion para proteger ranking y confianza.
+                    5. **Ingresos en soles**: enfoca aprobaciones de mayor valor y mide ingresos estimados en S/ para decisiones locales.
+                    """);
         }
     }
 

@@ -41,6 +41,7 @@ export class ProviderDashboardComponent implements OnInit {
   historyChart: any[] = [];
   statusChart: any[] = [];
   insights = 'Generando analisis...';
+  insightItems: string[] = [];
   loadingInsights = false;
 
   constructor(
@@ -144,21 +145,60 @@ export class ProviderDashboardComponent implements OnInit {
       rechazadas: this.countRejected(requests),
       reclamosAbiertos: claims.filter(claim => !['RESUELTO', 'RECHAZADO'].includes(String(claim?.estado || '').toUpperCase())).length,
       ingresosEstimados: estimatedIncome,
+      moneda: 'PEN',
+      contexto: 'Peru',
+      formatoEsperado: 'exactamente 5 ideas clave y criticas a mejorar en lista numerada',
       apiConectada: this.apiConnected,
       historico: this.historyChart,
       estados: this.statusChart
     }).subscribe({
       next: res => {
         this.insights = res?.analysis || 'No se recibio analisis.';
+        this.insightItems = this.parseInsightItems(this.insights);
         this.loadingInsights = false;
         this.cdr.detectChanges();
       },
       error: () => {
-        this.insights = 'No pude consultar Groq ahora. Reduce reclamos abiertos, responde solicitudes pendientes y actualiza inventario para mejorar ranking.';
+        this.insights = [
+          'Pagos por validar: reduce los estados PAGO_VALIDANDO con revisiones diarias.',
+          'Solicitudes pendientes: responde RFQ dentro de un SLA operativo.',
+          'API del proveedor: conecta stock, precios y estados sin reprocesos manuales.',
+          'Reclamos abiertos: cierra casos con evidencia y resolucion.',
+          'Ingresos en soles: prioriza solicitudes de mayor valor estimado en S/.'
+        ].join('\n');
+        this.insightItems = this.parseInsightItems(this.insights);
         this.loadingInsights = false;
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private parseInsightItems(value: string): string[] {
+    const cleaned = String(value || '')
+      .replace(/\r/g, '\n')
+      .replace(/\*\*(Diagnostico breve|Diagnóstico breve|Riesgos operativos|Tres acciones priorizadas)\*\*/gi, '\n')
+      .replace(/\bUSD\b|\bdolares\b|\bdólares\b|k\s*USD/gi, 'S/')
+      .replace(/\bsoles peruanos\b/gi, 'soles');
+
+    const items = cleaned
+      .split(/\n+|(?=\s*\d+[\).\s-]+\s*)/)
+      .map(item => item.replace(/^\s*\d+[\).\-\s]+/, '').replace(/\*\*/g, '').trim())
+      .filter(Boolean)
+      .slice(0, 5);
+
+    if (items.length >= 5) {
+      return items;
+    }
+
+    const fallback = [
+      'Pagos por validar: reduce estados PAGO_VALIDANDO con responsables diarios y evidencia de pago.',
+      'Solicitudes pendientes: responde RFQ dentro de un SLA corto para evitar cancelaciones.',
+      'API del proveedor: integra stock, precios y estados para disminuir reprocesos manuales.',
+      'Reclamos abiertos: prioriza cierres con sustento para proteger ranking y confianza.',
+      'Ingresos en soles: enfoca aprobaciones de mayor valor y mide oportunidades en S/.'
+    ];
+
+    return [...items, ...fallback].slice(0, 5);
   }
 
   private buildMonthlyHistory(requests: any[]): any[] {

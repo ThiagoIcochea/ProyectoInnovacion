@@ -153,6 +153,20 @@
     line-height: 1.65;
     margin: 0;
   }
+
+  .insights-list {
+    display: grid;
+    gap: 0.7rem;
+    margin: 0;
+    padding-left: 1.2rem;
+    color: #cbd5e1;
+    line-height: 1.55;
+  }
+
+  .insights-list li::marker {
+    color: #60a5fa;
+    font-weight: 800;
+  }
 }
 
 .metric-card {

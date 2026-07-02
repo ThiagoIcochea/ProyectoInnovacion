@@ -30,6 +30,7 @@ export class VoiceAssistantComponent {
     | { type: 'ADD_PRODUCT'; qty: number }
     | { type: 'PROFILE_FIELD' }
     | { type: 'PROFILE_VALUE'; field: string }
+    | { type: 'PROFILE_MFA_CODE'; email: string; tempToken: string; method: string; formData: FormData; field: string; value: string }
     | { type: 'ORDER_RUC' }
     | { type: 'ORDER_ADDRESS'; ruc: string }
     | null = null;
@@ -196,6 +197,11 @@ export class VoiceAssistantComponent {
         return true;
       }
 
+      if (this.readSelectedProvider()) {
+        await this.startOrderConfirmation(normalized);
+        return true;
+      }
+
       await this.createRfqFromCart();
       return true;
     }
@@ -266,6 +272,11 @@ export class VoiceAssistantComponent {
 
     if (pending.type === 'PROFILE_VALUE') {
       await this.updateProfileField(pending.field, text.trim());
+      return true;
+    }
+
+    if (pending.type === 'PROFILE_MFA_CODE') {
+      await this.completeVoiceProfileUpdate(pending, text);
       return true;
     }
 
@@ -382,7 +393,7 @@ export class VoiceAssistantComponent {
       next: providers => {
         this.thinking = false;
         sessionStorage.setItem('voice_last_providers', JSON.stringify(providers || []));
-        this.say(`Encontre ${(providers || []).length} proveedores compatibles. Te muestro las opciones.`);
+        this.say(`Encontré ${(providers || []).length} proveedores compatibles. Primero elige un proveedor. Luego te pediré el RUC y la dirección para crear la solicitud.`);
         this.router.navigate(['/app/rfq/results'], { state: { proveedores: providers || [] } });
       },
       error: () => {
@@ -410,19 +421,19 @@ export class VoiceAssistantComponent {
   private async startOrderConfirmation(normalized: string): Promise<void> {
     const provider = this.readSelectedProvider();
     if (!provider) {
-      this.say('Primero debes seleccionar un proveedor. Puedo elegir el mejor proveedor si ya buscaste proveedores.');
+      this.say('Primero debes seleccionar un proveedor. Si ya buscaste proveedores, dime elegir mejor proveedor.');
       return;
     }
 
     const ruc = this.extractRuc(normalized);
     if (!ruc) {
       this.pending = { type: 'ORDER_RUC' };
-      this.say('Para confirmar el pedido necesito el RUC de la empresa compradora.');
+      this.say('Proveedor seleccionado. Para crear la solicitud necesito el RUC de la empresa compradora.');
       return;
     }
 
     this.pending = { type: 'ORDER_ADDRESS', ruc };
-    this.say('Perfecto. Ahora dime la direccion de entrega.');
+    this.say('RUC recibido. Ahora dime la dirección de entrega.');
   }
 
   private async confirmOrder(ruc: string, address: string): Promise<void> {
@@ -513,35 +524,109 @@ export class VoiceAssistantComponent {
     try {
       const profile: any = await this.http.get(`${APP_API_BASE_URL}/usuarios/perfil`, { headers: this.headers() }).toPromise();
       const currentEmail = localStorage.getItem('auth_user_email') || profile?.correo || '';
-      const mfaToken = await this.mfaService.requestActionToken(currentEmail, 'PROFILE_UPDATE');
-      const formData = new FormData();
       const next = { ...profile, [field]: value.trim() };
+      const formData = this.buildProfileFormData(next);
+      const method = this.preferredVoiceMfaMethod(next);
+      const start = await this.mfaService.startChallenge(currentEmail, 'PROFILE_UPDATE', method);
 
-      formData.append('nombres', next.nombres || '');
-      formData.append('apellidos', next.apellidos || '');
-      formData.append('correo', next.correo || '');
-      formData.append('telefono', next.telefono || '');
-      formData.append('whatsapp', next.whatsapp || '');
-      formData.append('direccion', next.direccion || '');
-      formData.append('notificaciones', String(next.notificacionesRfq ?? next.preferencias?.notificaciones ?? true));
-      formData.append('entregaRapida', String(next.entregaRapida ?? next.preferencias?.entregaRapida ?? false));
+      window.dispatchEvent(new CustomEvent('voiceProfilePatch', {
+        detail: { field, value: value.trim(), profile: next }
+      }));
 
-      await this.http.put(`${APP_API_BASE_URL}/usuarios/perfil`, formData, {
-        headers: this.authOnlyHeaders().set('X-MFA-Authorization', mfaToken)
-      }).toPromise();
-
-      if (field === 'correo') {
-        localStorage.setItem('auth_user_email', value.trim());
-      }
-
-      window.dispatchEvent(new CustomEvent('profileUpdated'));
       this.thinking = false;
-      this.say(`${this.profileFieldLabel(field)} actualizado correctamente.`);
+      this.pending = {
+        type: 'PROFILE_MFA_CODE',
+        email: currentEmail,
+        tempToken: start.tempToken,
+        method,
+        formData,
+        field,
+        value: value.trim()
+      };
+      this.say(`He colocado ${this.profileFieldLabel(field)} en el formulario. Te envié el MFA por ${this.mfaMethodLabel(method)}. Dime el código para guardar el cambio.`);
       this.router.navigate(['/app/profile']);
     } catch (error: any) {
       this.thinking = false;
       this.say(error?.message || 'No pude actualizar tu perfil.');
     }
+  }
+
+  private async completeVoiceProfileUpdate(pending: Extract<NonNullable<typeof this.pending>, { type: 'PROFILE_MFA_CODE' }>, text: string): Promise<void> {
+    const code = this.extractMfaCode(text);
+
+    if (!code) {
+      this.pending = pending;
+      this.say('Necesito el código MFA de 6 dígitos para guardar el cambio.');
+      return;
+    }
+
+    this.thinking = true;
+
+    try {
+      const verified = await this.mfaService.verifyChallenge(
+        pending.email,
+        pending.tempToken,
+        code,
+        'PROFILE_UPDATE',
+        pending.method
+      );
+
+      const mfaToken = verified?.mfaActionToken;
+      if (!mfaToken) {
+        throw new Error('No se pudo obtener la autorización multifactor.');
+      }
+
+      await this.http.put(`${APP_API_BASE_URL}/usuarios/perfil`, pending.formData, {
+        headers: this.authOnlyHeaders().set('X-MFA-Authorization', mfaToken)
+      }).toPromise();
+
+      if (pending.field === 'correo') {
+        localStorage.setItem('auth_user_email', pending.value);
+      }
+
+      window.dispatchEvent(new CustomEvent('profileUpdated'));
+      this.thinking = false;
+      this.say(`${this.profileFieldLabel(pending.field)} guardado correctamente.`);
+      this.router.navigate(['/app/profile']);
+    } catch (error: any) {
+      this.thinking = false;
+      this.pending = pending;
+      this.say(error?.error?.message || error?.message || 'No pude validar el MFA. Dime el código otra vez.');
+    }
+  }
+
+  private buildProfileFormData(profile: any): FormData {
+    const formData = new FormData();
+
+    formData.append('nombres', profile.nombres || '');
+    formData.append('apellidos', profile.apellidos || '');
+    formData.append('correo', profile.correo || '');
+    formData.append('telefono', profile.telefono || '');
+    formData.append('whatsapp', profile.whatsapp || '');
+    formData.append('direccion', profile.direccion || '');
+    formData.append('notificaciones', String(profile.notificacionesRfq ?? profile.preferencias?.notificaciones ?? true));
+    formData.append('entregaRapida', String(profile.entregaRapida ?? profile.preferencias?.entregaRapida ?? false));
+
+    return formData;
+  }
+
+  private preferredVoiceMfaMethod(profile: any): string {
+    if (profile?.whatsapp || profile?.telefono) {
+      return 'whatsapp';
+    }
+
+    return 'email';
+  }
+
+  private mfaMethodLabel(method: string): string {
+    const labels: Record<string, string> = {
+      whatsapp: 'WhatsApp',
+      sms: 'SMS',
+      call: 'llamada',
+      email: 'correo'
+    };
+
+    return labels[method] || method;
   }
 
   private fetchProducts(): Promise<any[]> {
@@ -624,6 +709,10 @@ export class VoiceAssistantComponent {
 
   private extractRuc(value: string): string {
     return value.replace(/\D/g, '').match(/\d{11}/)?.[0] || '';
+  }
+
+  private extractMfaCode(value: string): string {
+    return value.replace(/\D/g, '').match(/\d{6}/)?.[0] || '';
   }
 
   private cleanProductQuery(value: string): string {
