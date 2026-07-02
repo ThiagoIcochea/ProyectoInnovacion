@@ -1,5 +1,6 @@
 package com.nethink.b2b.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nethink.b2b.dto.request.LoginRequest;
 import com.nethink.b2b.dto.request.MfaChallengeRequest;
 import com.nethink.b2b.dto.request.MfaVerifyRequest;
@@ -31,6 +32,9 @@ public class AuthController {
 
     @Autowired
     private ProveedorService proveedorService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @PostMapping("/login")
     public MfaStartResponse login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
@@ -97,13 +101,13 @@ public class AuthController {
         }
 
         if (MfaService.PURPOSE_REGISTER_CLIENT.equals(challenge.purpose)) {
-            usuarioService.registrarCliente((RegisterClientRequest) challenge.payload, httpRequest);
+            usuarioService.registrarCliente(toPayload(challenge.payload, RegisterClientRequest.class), httpRequest);
             response.setMessage("Cliente registrado correctamente");
             return response;
         }
 
         if (MfaService.PURPOSE_REGISTER_PROVIDER.equals(challenge.purpose)) {
-            proveedorService.registerProvider((RegisterProviderRequest) challenge.payload, httpRequest);
+            proveedorService.registerProvider(toPayload(challenge.payload, RegisterProviderRequest.class), httpRequest);
             response.setMessage("Proveedor registrado correctamente");
             return response;
         }
@@ -140,5 +144,13 @@ public class AuthController {
         response.setMessage("Contrasena actualizada correctamente");
         response.setLogin(service.completeLogin(request.getEmail(), httpRequest));
         return response;
+    }
+
+    private <T> T toPayload(Object payload, Class<T> targetClass) {
+        if (payload == null) {
+            throw new RuntimeException("No se encontro la informacion del registro. Inicia el registro nuevamente.");
+        }
+
+        return objectMapper.convertValue(payload, targetClass);
     }
 }
