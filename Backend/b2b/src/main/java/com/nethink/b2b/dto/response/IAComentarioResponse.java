@@ -9,6 +9,8 @@ public class IAComentarioResponse {
     private String tipo;
     private String estado;
     private String sentimiento;
+    private Boolean esReclamo;
+    private String razon;
 
     public String getTipo() {
         return tipo;
@@ -32,6 +34,22 @@ public class IAComentarioResponse {
 
     public void setSentimiento(String sentimiento) {
         this.sentimiento = sentimiento;
+    }
+
+    public Boolean getEsReclamo() {
+        return esReclamo;
+    }
+
+    public void setEsReclamo(Boolean esReclamo) {
+        this.esReclamo = esReclamo;
+    }
+
+    public String getRazon() {
+        return razon;
+    }
+
+    public void setRazon(String razon) {
+        this.razon = razon;
     }
     
 }

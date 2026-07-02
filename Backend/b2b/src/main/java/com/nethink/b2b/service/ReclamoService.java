@@ -6,6 +6,7 @@ import com.nethink.b2b.dto.request.ActualizarReclamoRequest;
 import com.nethink.b2b.dto.request.ReclamoRequest;
 import com.nethink.b2b.dto.response.ReclamoHistorialResponse;
 import com.nethink.b2b.dto.response.ReclamoProveedorResponse;
+import com.nethink.b2b.dto.response.IAComentarioResponse;
 import com.nethink.b2b.entity.Reclamo;
 import com.nethink.b2b.entity.Solicitud;
 import com.nethink.b2b.entity.Solicitud.EstadoSolicitud;
@@ -41,6 +42,7 @@ public class ReclamoService {
     private final UsuarioRepository usuarioRepository;
     private final EmailService emailService;
     private final Cloudinary cloudinary;
+    private final ModeracionService moderacionService;
 
     public ReclamoService(
             ReclamoRepository reclamoRepository,
@@ -48,7 +50,8 @@ public class ReclamoService {
             SolicitudHistorialRepository historialRepository,
             UsuarioRepository usuarioRepository,
             EmailService emailService,
-            Cloudinary cloudinary) {
+            Cloudinary cloudinary,
+            ModeracionService moderacionService) {
 
         this.reclamoRepository = reclamoRepository;
         this.solicitudRepository = solicitudRepository;
@@ -56,6 +59,7 @@ public class ReclamoService {
         this.usuarioRepository = usuarioRepository;
         this.emailService = emailService;
         this.cloudinary = cloudinary;
+        this.moderacionService = moderacionService;
     }
 
     private String subirACloudinary(MultipartFile archivo) throws IOException {
@@ -79,6 +83,16 @@ public class ReclamoService {
 
         String tipo = normalizarTipo(request.getTipo());
         String accion = normalizarAccion(request.getAccion(), tipo);
+
+        IAComentarioResponse evaluacion = moderacionService.moderarReclamo(request.getDescripcion());
+        if (evaluacion == null || !"OK".equalsIgnoreCase(evaluacion.getEstado()) || Boolean.FALSE.equals(evaluacion.getEsReclamo())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    evaluacion != null && evaluacion.getRazon() != null
+                            ? evaluacion.getRazon()
+                            : "El mensaje no corresponde a un reclamo válido"
+            );
+        }
 
         if (existeReclamoActivo(solicitud.getIdSolicitud(), tipo)) {
             throw new ResponseStatusException(
@@ -114,6 +128,12 @@ public class ReclamoService {
         );
 
         emailService.enviarCorreoReclamoDemora(solicitud, request.getDescripcion(), "");
+        emailService.enviarCorreoActualizacionCliente(
+                solicitud,
+                "Reclamo recibido",
+                "Hemos recibido tu reclamo para la solicitud " + solicitud.getIdSolicitud() + ". Un proveedor lo revisará pronto.",
+                "Reclamo recibido - Solicitud " + solicitud.getIdSolicitud()
+        );
     }
 
     private void aplicarAccionSolicitud(

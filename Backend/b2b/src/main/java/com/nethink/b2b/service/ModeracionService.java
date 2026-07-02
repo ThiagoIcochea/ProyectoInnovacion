@@ -34,14 +34,7 @@ public class ModeracionService {
     }
 
    public IAComentarioResponse moderar(String texto) {
-
-        Configuracion config = configRepository
-                .findByClave("AI_COMMENTS")
-                .orElseThrow();
-
-        String apiKey = config.getValor();
-
-        String prompt = """
+        return moderarTexto(texto, """
             Eres un sistema de moderación de comentarios.
 
             Analiza el comentario y responde únicamente JSON válido.
@@ -53,7 +46,38 @@ public class ModeracionService {
             }
 
             Comentario:
-            """ + texto;
+            """ + texto);
+    }
+
+    public IAComentarioResponse moderarReclamo(String texto) {
+        return moderarTexto(texto, """
+            Eres un analista de soporte de ventas B2B.
+            Debes decidir si el texto corresponde a un reclamo válido de un cliente.
+            Responde únicamente JSON válido con este esquema:
+
+            {
+              "tipo":"RECLAMO|SPAM|OFENSIVO|PROMOCIONAL|SIN_SENTIDO",
+              "estado":"OK|BLOQUEADO",
+              "esReclamo": true|false,
+              "razon":"explicación breve en español"
+            }
+
+            Reglas:
+            - Si el texto describe un problema real de una solicitud, entrega, pago, demora, cancelación o servicio, marca esReclamo=true.
+            - Si el texto es spam, publicidad, ofensivo, vacío, irrelevante o no describe ninguna incidencia de la compra, marca esReclamo=false y explica por qué.
+            - Si el texto es un reclamo legítimo, deja estado=OK.
+            - Si no es reclamo válido, deja estado=BLOQUEADO.
+
+            Texto:
+            """ + texto);
+    }
+
+    private IAComentarioResponse moderarTexto(String texto, String prompt) {
+        Configuracion config = configRepository
+                .findByClave("AI_COMMENTS")
+                .orElseThrow();
+
+        String apiKey = config.getValor();
 
         GroqMessage system = new GroqMessage();
         system.setRole("system");
@@ -80,7 +104,6 @@ public class ModeracionService {
                 );
 
         try {
-
             JsonNode root =
                     objectMapper.readTree(response.getBody());
 

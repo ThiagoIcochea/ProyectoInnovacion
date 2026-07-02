@@ -13,6 +13,7 @@ import com.nethink.b2b.repository.SolicitudHistorialRepository;
 import com.nethink.b2b.repository.SolicitudRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
+import com.nethink.b2b.dto.response.IAComentarioResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -32,6 +33,7 @@ class ReclamoServiceTest {
     private UsuarioRepository usuarioRepository;
     private EmailService emailService;
     private Cloudinary cloudinary;
+    private ModeracionService moderacionService;
     private ReclamoService reclamoService;
 
     @BeforeEach
@@ -42,6 +44,7 @@ class ReclamoServiceTest {
         usuarioRepository = Mockito.mock(UsuarioRepository.class);
         emailService = Mockito.mock(EmailService.class);
         cloudinary = Mockito.mock(Cloudinary.class);
+        moderacionService = Mockito.mock(ModeracionService.class);
 
         reclamoService = new ReclamoService(
                 reclamoRepository,
@@ -49,7 +52,8 @@ class ReclamoServiceTest {
                 historialRepository,
                 usuarioRepository,
                 emailService,
-                cloudinary
+                cloudinary,
+                moderacionService
         );
     }
 
@@ -143,6 +147,39 @@ class ReclamoServiceTest {
 
         assertThrows(org.springframework.web.server.ResponseStatusException.class,
                 () -> reclamoService.actualizarEstadoProveedor(100, 22, 7, request));
+    }
+
+    @Test
+    void registrarReclamoInvalidoPorIaLanzaError() throws Exception {
+        ReclamoRequest request = new ReclamoRequest();
+        request.setIdSolicitud(10);
+        request.setTipo("DEMORA");
+        request.setDescripcion("Compra tu producto ahora mismo");
+        request.setAccion("MANTENER");
+
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(7);
+        usuario.setCorreo("cliente@test.com");
+
+        Proveedor proveedor = new Proveedor();
+        proveedor.setIdProveedor(22);
+
+        Solicitud solicitud = new Solicitud();
+        solicitud.setIdSolicitud(10);
+        solicitud.setEstado(Solicitud.EstadoSolicitud.EN_CAMINO);
+        solicitud.setProveedor(proveedor);
+
+        IAComentarioResponse evaluacion = new IAComentarioResponse();
+        evaluacion.setEstado("BLOQUEADO");
+        evaluacion.setTipo("SPAM");
+        evaluacion.setEsReclamo(false);
+        evaluacion.setRazon("El mensaje no describe un reclamo válido.");
+
+        when(usuarioRepository.findByCorreo("cliente@test.com")).thenReturn(Optional.of(usuario));
+        when(solicitudRepository.findById(10)).thenReturn(Optional.of(solicitud));
+        when(moderacionService.moderarReclamo("Compra tu producto ahora mismo")).thenReturn(evaluacion);
+
+        assertThrows(org.springframework.web.server.ResponseStatusException.class, () -> reclamoService.registrarReclamo(request, "cliente@test.com"));
     }
 
     @Test

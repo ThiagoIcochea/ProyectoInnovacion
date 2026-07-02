@@ -314,6 +314,13 @@ BigDecimal totalItem =
                     finalizada
             );
 
+            emailService.enviarCorreoActualizacionCliente(
+                    finalizada,
+                    "Solicitud creada",
+                    "Tu solicitud " + finalizada.getIdSolicitud() + " fue registrada correctamente.",
+                    "Solicitud creada - Solicitud " + finalizada.getIdSolicitud()
+            );
+
         } catch (Exception e) {
 
             
@@ -512,6 +519,13 @@ BigDecimal totalItem =
         );
 
         solicitudRepo.save(solicitud);
+
+        emailService.enviarCorreoActualizacionCliente(
+                solicitud,
+                "Solicitud cancelada",
+                "Tu solicitud " + solicitud.getIdSolicitud() + " fue cancelada.",
+                "Solicitud cancelada - Solicitud " + solicitud.getIdSolicitud()
+        );
         
         logsSistemaService.registrarLog(
     usuario.getIdUsuario(),
@@ -1224,6 +1238,13 @@ public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, S
     solicitud.setEstado(nuevoEstado);
 
     solicitudRepo.save(solicitud);
+
+    emailService.enviarCorreoActualizacionCliente(
+            solicitud,
+            "Estado actualizado",
+            "La solicitud " + solicitud.getIdSolicitud() + " cambió de estado a " + nuevoEstado.name() + ".",
+            "Estado actualizado - Solicitud " + solicitud.getIdSolicitud()
+    );
     
     String descripcion = generarDescripcion(nuevoEstado);
 
