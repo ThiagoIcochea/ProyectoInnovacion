@@ -104,7 +104,7 @@ public class ReclamoService {
         reclamo.setEvidenciaUrl(evidenciaUrl);
         reclamoRepository.save(reclamo);
 
-        aplicarAccionSolicitud(solicitud, tipo, accion, request.getNuevoEstado(), request.getMotivoCancelacion());
+        aplicarAccionSolicitud(solicitud, tipo, accion, request.getNuevoEstado(), request.getMotivoCancelacion(), null);
         solicitudRepository.save(solicitud);
         guardarHistorialReclamo(
                 solicitud,
@@ -121,7 +121,8 @@ public class ReclamoService {
             String tipo,
             String accion,
             String nuevoEstado,
-            String motivoCancelacion) {
+            String motivoCancelacion,
+            String codigoEntrega) {
 
         if (solicitud == null) {
             return;
@@ -138,6 +139,9 @@ public class ReclamoService {
         if ("AVANZAR".equals(accionNormalizada) || "RETROCEDER".equals(accionNormalizada)) {
             EstadoSolicitud nuevoEstadoSolicitud = resolverEstadoPorAccion(solicitud.getEstado(), accionNormalizada);
             if (nuevoEstadoSolicitud != null) {
+                if (nuevoEstadoSolicitud == EstadoSolicitud.ENTREGADA) {
+                    validarCodigoEntrega(solicitud, codigoEntrega);
+                }
                 solicitud.setEstado(nuevoEstadoSolicitud);
             }
             return;
@@ -179,6 +183,27 @@ public class ReclamoService {
                 // Se mantiene el estado anterior si llega uno no soportado.
             }
         }
+    }
+
+    private void validarCodigoEntrega(Solicitud solicitud, String codigoIngresado) {
+        if (solicitud == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Código requerido para marcar como ENTREGADA");
+        }
+
+        if (codigoIngresado == null || codigoIngresado.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Código requerido para marcar como ENTREGADA");
+        }
+
+        String codigoRecepcion = solicitud.getCodigoRecepcion();
+        if (codigoRecepcion == null || codigoRecepcion.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Código requerido para marcar como ENTREGADA");
+        }
+
+        if (!codigoIngresado.trim().equalsIgnoreCase(codigoRecepcion.trim())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Código incorrecto");
+        }
+
+        solicitud.setFechaEntrega(LocalDateTime.now());
     }
 
     private EstadoSolicitud resolverEstadoPorAccion(EstadoSolicitud estadoActual, String accion) {
@@ -311,6 +336,10 @@ public class ReclamoService {
         reclamo.setEstado(nuevoEstado);
         reclamo.setResolucion(request.getResolucion());
 
+        if (request != null && "RESUELTO".equals(nuevoEstado) && "AVANZAR".equals(normalizarAccion(request.getAccion(), reclamo.getTipo()))) {
+            solicitudRepository.findById(reclamo.getIdSolicitud()).ifPresent(solicitud -> validarCodigoEntrega(solicitud, request.getCodigoEntrega()));
+        }
+
         if ("RESUELTO".equals(nuevoEstado) || "RECHAZADO".equals(nuevoEstado)) {
             reclamo.setFechaResolucion(LocalDateTime.now());
         } else {
@@ -321,7 +350,7 @@ public class ReclamoService {
         solicitudRepository.findById(reclamo.getIdSolicitud())
                 .ifPresent(solicitud -> {
                     if ("RESUELTO".equals(nuevoEstado) || "RECHAZADO".equals(nuevoEstado)) {
-                        aplicarAccionSolicitud(solicitud, reclamo.getTipo(), request.getAccion(), null, request.getResolucion());
+                        aplicarAccionSolicitud(solicitud, reclamo.getTipo(), request.getAccion(), null, request.getResolucion(), request.getCodigoEntrega());
                         solicitudRepository.save(solicitud);
                     }
                     guardarHistorialReclamo(

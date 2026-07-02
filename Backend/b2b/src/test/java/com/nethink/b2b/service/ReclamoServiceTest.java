@@ -118,6 +118,34 @@ class ReclamoServiceTest {
     }
 
     @Test
+    void avanzarAEntregadaSinCodigoLanzaError() {
+        Reclamo reclamo = new Reclamo();
+        reclamo.setIdReclamo(100);
+        reclamo.setIdSolicitud(10);
+        reclamo.setIdProveedor(22);
+        reclamo.setTipo("DEMORA");
+        reclamo.setEstado("EN_REVISION");
+
+        Solicitud solicitud = new Solicitud();
+        solicitud.setIdSolicitud(10);
+        solicitud.setEstado(Solicitud.EstadoSolicitud.EN_CAMINO);
+        solicitud.setCodigoRecepcion("NP123456");
+
+        ActualizarReclamoRequest request = new ActualizarReclamoRequest();
+        request.setEstado("RESUELTO");
+        request.setResolucion("Entregado");
+        request.setAccion("AVANZAR");
+
+        when(reclamoRepository.findById(100)).thenReturn(Optional.of(reclamo));
+        when(reclamoRepository.save(any(Reclamo.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(solicitudRepository.findById(10)).thenReturn(Optional.of(solicitud));
+        when(historialRepository.save(any(SolicitudHistorial.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assertThrows(org.springframework.web.server.ResponseStatusException.class,
+                () -> reclamoService.actualizarEstadoProveedor(100, 22, 7, request));
+    }
+
+    @Test
     void actualizarEstadoProveedorConResolucionResuelveYActualizaSolicitud() {
         Reclamo reclamo = new Reclamo();
         reclamo.setIdReclamo(99);

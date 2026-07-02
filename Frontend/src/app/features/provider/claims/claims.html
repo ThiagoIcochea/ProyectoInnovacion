@@ -155,6 +155,16 @@
               </option>
             </select>
 
+            <label for="codigoEntrega" *ngIf="debeSolicitarCodigoEntrega()">Código de entrega</label>
+            <input
+              id="codigoEntrega"
+              *ngIf="debeSolicitarCodigoEntrega()"
+              [(ngModel)]="codigoEntrega"
+              type="text"
+              placeholder="Ej. NP-482913"
+              aria-label="Código de entrega"
+            />
+
             <label for="resolucion">Resolucion</label>
             <textarea
               id="resolucion"

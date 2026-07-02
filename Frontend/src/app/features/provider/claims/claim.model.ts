@@ -32,4 +32,5 @@ export interface UpdateClaimStatusRequest {
   estado: ClaimStatus;
   resolucion?: string;
   accion?: string;
+  codigoEntrega?: string;
 }

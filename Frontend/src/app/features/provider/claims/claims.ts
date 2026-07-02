@@ -20,6 +20,7 @@ export class ProviderClaimsComponent implements OnInit {
   estadoSeleccionado: ClaimStatus | '' = '';
   resolucion = '';
   accionSolicitud = 'MANTENER';
+  codigoEntrega = '';
   guardando = false;
   cargando = false;
   errorMessage = '';
@@ -107,6 +108,11 @@ export class ProviderClaimsComponent implements OnInit {
       return;
     }
 
+    if (this.debeSolicitarCodigoEntrega() && !this.codigoEntrega.trim()) {
+      this.errorMessage = 'Debes ingresar el código de entrega.';
+      return;
+    }
+
     const accionesDisponibles = this.getAccionesDisponibles();
     const accionValida = accionesDisponibles.some(accion => accion.value === this.accionSolicitud);
 
@@ -119,7 +125,8 @@ export class ProviderClaimsComponent implements OnInit {
     this.claimsService.actualizarEstado(this.selectedClaim.idReclamo, {
       estado: this.estadoSeleccionado,
       resolucion: this.resolucion.trim(),
-      accion: this.accionSolicitud
+      accion: this.accionSolicitud,
+      codigoEntrega: this.codigoEntrega.trim()
     }).subscribe({
       next: (claim) => {
         this.claims = this.claims.map(item => item.idReclamo === claim.idReclamo ? claim : item);
@@ -193,6 +200,10 @@ export class ProviderClaimsComponent implements OnInit {
     }
   }
 
+  debeSolicitarCodigoEntrega(): boolean {
+    return this.accionSolicitud === 'AVANZAR' && this.normalizar(this.selectedClaim?.estadoSolicitud) === 'EN_CAMINO';
+  }
+
   getClaimCode(claim: ProviderClaim | null | undefined): string {
     if (!claim) {
       return '';
@@ -244,6 +255,7 @@ export class ProviderClaimsComponent implements OnInit {
     this.estadoSeleccionado = '';
     this.resolucion = '';
     this.accionSolicitud = 'MANTENER';
+    this.codigoEntrega = '';
     this.errorMessage = '';
   }
 
