@@ -687,6 +687,12 @@ BigDecimal totalItem =
             case EN_CAMINO -> "En camino";
                 
             case  EN_RECLAMO -> "En reclamo";
+            
+            case   RECLAMO_ABIERTO -> "Reclamo Abierto";
+            
+            case   RECLAMO_EN_REVISION -> "Reclamo En Revision";
+            
+            case   RECLAMO_RECHAZADO -> "Reclamo rechazado";
 
             case ENTREGADA -> "Entregado";
 

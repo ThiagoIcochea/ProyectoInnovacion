@@ -100,7 +100,11 @@ public class Solicitud {
         NO_ENTREGADA,
         EN_RECLAMO,
         VENCIDA,
-        EN_PREPARACION
+        EN_PREPARACION,
+        RECLAMO_ABIERTO,
+        RECLAMO_EN_REVISION,
+        RECLAMO_RECHAZADO
+         
     }
 
     public enum CanceladoPor {
