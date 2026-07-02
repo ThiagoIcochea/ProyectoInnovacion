@@ -1,0 +1,103 @@
+.mfa-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #f5f7fb;
+}
+
+.mfa-card {
+  width: min(440px, 100%);
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  padding: 28px;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+}
+
+.mfa-back,
+.mfa-resend {
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.mfa-icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  margin: 14px auto;
+  border-radius: 50%;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 700;
+}
+
+h1,
+p {
+  text-align: center;
+}
+
+.mfa-methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.mfa-methods button {
+  min-height: 42px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.mfa-methods .active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.mfa-email-only {
+  margin: 16px 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  text-align: center;
+}
+
+.mfa-digits {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin: 22px 0;
+}
+
+.mfa-digits input {
+  width: 100%;
+  aspect-ratio: 1;
+  text-align: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 22px;
+}
+
+.mfa-submit {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: #1d4ed8;
+  color: #fff;
+  cursor: pointer;
+}
+
+.mfa-error {
+  color: #dc2626;
+  font-size: 14px;
+}

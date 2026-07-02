@@ -1,10 +1,11 @@
 package com.nethink.b2b.service;
 
+import com.nethink.b2b.config.security.JwtUtil;
 import com.nethink.b2b.dto.response.LoginResponse;
+import com.nethink.b2b.dto.response.MfaStartResponse;
 import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.entity.enums.EstadoUsuario;
 import com.nethink.b2b.repository.UsuarioRepository;
-import com.nethink.b2b.config.security.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,54 +15,81 @@ public class AuthService {
 
     @Autowired
     private UsuarioRepository repo;
-    
-     @Autowired
+
+    @Autowired
     private LogsSistemaService logsSistemaService;
 
     @Autowired
     private JwtUtil jwtUtil;
 
-    public LoginResponse login(String correo, String password, HttpServletRequest request) {
+    @Autowired
+    private MfaService mfaService;
+
+    public MfaStartResponse login(String correo, String password, HttpServletRequest request) {
 
         Usuario user = repo.findByCorreo(correo)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-    
         if (user.getEstado() != EstadoUsuario.ACTIVO) {
-                  logsSistemaService.registrarLog(
-    user.getIdUsuario(),
-    "LOGIN",
-    "AUTH",
-    "Login no exitoso por usuario inactivo",
-    request
-);
-            throw new RuntimeException("Usuario inactivo");
+            logsSistemaService.registrarLog(
+                    user.getIdUsuario(),
+                    "LOGIN",
+                    "AUTH",
+                    "Login no exitoso por usuario inactivo",
+                    request
+            );
+            throw new RuntimeException("Usuario inactivo o bloqueado");
         }
 
-      
         if (!user.getPassword().equals(password)) {
-                  logsSistemaService.registrarLog(
-    user.getIdUsuario(),
-    "LOGIN",
-    "AUTH",
-    "Login no exitoso por contraseña erronea",
-    request
-);
+            logsSistemaService.registrarLog(
+                    user.getIdUsuario(),
+                    "LOGIN",
+                    "AUTH",
+                    "Login no exitoso por password erroneo",
+                    request
+            );
             throw new RuntimeException("Password incorrecto");
         }
 
-        
-        String token = jwtUtil.generateToken(user.getCorreo(),user.getRol().getNombre());
-        
-        logsSistemaService.registrarLog(
-    user.getIdUsuario(),
-    "LOGIN",
-    "AUTH",
-    "Inicio de sesión exitoso",
-    request
-);
+        return mfaService.start(
+                user.getCorreo(),
+                MfaService.PURPOSE_LOGIN,
+                "email",
+                redirectByRole(user.getRol().getNombre()),
+                false,
+                null
+        );
+    }
 
-        
+    public LoginResponse completeLogin(String correo, HttpServletRequest request) {
+        Usuario user = repo.findByCorreo(correo)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (user.getEstado() != EstadoUsuario.ACTIVO) {
+            throw new RuntimeException("Usuario inactivo o bloqueado");
+        }
+
+        String token = jwtUtil.generateToken(user.getCorreo(), user.getRol().getNombre());
+
+        logsSistemaService.registrarLog(
+                user.getIdUsuario(),
+                "LOGIN",
+                "AUTH",
+                "Inicio de sesion exitoso con MFA",
+                request
+        );
+
         return new LoginResponse(token, user.getCorreo(), user.getIdUsuario(), user.getRol().getNombre());
+    }
+
+    private String redirectByRole(String rol) {
+        String normalized = String.valueOf(rol == null ? "" : rol).toUpperCase().replace("ROLE_", "");
+
+        return switch (normalized) {
+            case "ADMIN" -> "/app/admin/dashboard";
+            case "PROVEEDOR" -> "/app/provider/dashboard";
+            default -> "/app/dashboard";
+        };
     }
 }

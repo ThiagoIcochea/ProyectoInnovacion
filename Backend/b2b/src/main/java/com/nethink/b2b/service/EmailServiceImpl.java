@@ -406,6 +406,79 @@ public class EmailServiceImpl implements EmailService {
             System.out.println("Error correo registro proveedor: " + e.getMessage());
         }
     }
+
+    @Async
+    @Override
+    public void enviarCorreoActualizacionCliente(Solicitud solicitud, String titulo, String mensaje, String asunto) {
+        try {
+            if (solicitud == null || solicitud.getUsuario() == null) return;
+
+            Resend resend = getResendClient();
+            String html = """
+                    <div style='font-family:Arial,sans-serif;background:#f8fafc;padding:32px'>
+                        <div style='max-width:640px;margin:auto;background:#fff;border-radius:12px;padding:28px'>
+                            <h2 style='margin-top:0;color:#0f172a'>%s</h2>
+                            <p>Hola <b>%s</b>,</p>
+                            <p>%s</p>
+                            <p><b>Solicitud:</b> %s</p>
+                        </div>
+                    </div>
+                    """.formatted(
+                    titulo == null ? "Actualizacion de solicitud" : titulo,
+                    solicitud.getUsuario().getNombres(),
+                    mensaje == null ? "Tu solicitud tiene una actualizacion." : mensaje,
+                    solicitud.getCodigoRecepcion()
+            );
+
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                    .to(solicitud.getUsuario().getCorreo())
+                    .subject(asunto == null ? "Actualizacion - NETHINK B2B" : asunto)
+                    .html(html)
+                    .build();
+
+            resend.emails().send(params);
+        } catch (Exception e) {
+            System.out.println("Error correo actualizacion cliente: " + e.getMessage());
+        }
+    }
+
+    @Async
+    @Override
+    public void enviarCodigoMfa(String correo, String codigo, String metodo, String proposito, int minutosExpiracion) {
+        try {
+            Resend resend = getResendClient();
+            String canal = switch (metodo == null ? "email" : metodo.toLowerCase()) {
+                case "sms" -> "SMS";
+                case "whatsapp" -> "WhatsApp";
+                case "call" -> "llamada";
+                default -> "correo";
+            };
+
+            String html = """
+                    <div style='font-family:Arial,sans-serif;background:#f4f6f9;padding:36px'>
+                        <div style='max-width:560px;margin:auto;background:white;border-radius:12px;padding:30px'>
+                            <h2 style='color:#0f172a;margin-top:0'>Verificacion multifactor</h2>
+                            <p>Usa este codigo para continuar en NETHINK B2B.</p>
+                            <div style='font-size:32px;letter-spacing:8px;font-weight:700;background:#eef2ff;color:#1e3a8a;padding:18px;text-align:center;border-radius:10px'>%s</div>
+                            <p style='color:#64748b'>Canal seleccionado: %s. Expira en %d minutos.</p>
+                            <p style='color:#94a3b8;font-size:13px'>Accion: %s</p>
+                        </div>
+                    </div>
+                    """.formatted(codigo, canal, minutosExpiracion, proposito);
+
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                    .to(correo)
+                    .subject("Codigo MFA - NETHINK B2B")
+                    .html(html)
+                    .build();
+
+            resend.emails().send(params);
+        } catch (Exception e) {
+            System.out.println("Error enviando codigo MFA: " + e.getMessage());
+        }
+    }
     
     @Async
 @Override

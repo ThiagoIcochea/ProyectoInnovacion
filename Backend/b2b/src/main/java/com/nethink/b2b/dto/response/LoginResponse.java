@@ -6,6 +6,11 @@ public class LoginResponse {
     private String correo;
     private String rol;
     private Integer idUsuario;
+    private boolean requiresMfa;
+    private String tempToken;
+    private String redirectTo;
+    private String purpose;
+    private boolean emailOnly;
 
     public LoginResponse(String token, String correo, Integer idUsuario, String rol) {
         this.token = token;
@@ -27,5 +32,45 @@ public class LoginResponse {
     }
     public String getRol() {
         return rol;
+    }
+
+    public boolean isRequiresMfa() {
+        return requiresMfa;
+    }
+
+    public void setRequiresMfa(boolean requiresMfa) {
+        this.requiresMfa = requiresMfa;
+    }
+
+    public String getTempToken() {
+        return tempToken;
+    }
+
+    public void setTempToken(String tempToken) {
+        this.tempToken = tempToken;
+    }
+
+    public String getRedirectTo() {
+        return redirectTo;
+    }
+
+    public void setRedirectTo(String redirectTo) {
+        this.redirectTo = redirectTo;
+    }
+
+    public String getPurpose() {
+        return purpose;
+    }
+
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
+    }
+
+    public boolean isEmailOnly() {
+        return emailOnly;
+    }
+
+    public void setEmailOnly(boolean emailOnly) {
+        this.emailOnly = emailOnly;
     }
 }

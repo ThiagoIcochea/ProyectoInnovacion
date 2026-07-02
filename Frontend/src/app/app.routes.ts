@@ -15,6 +15,11 @@ export const routes: Routes = [
       import('./features/auth/login/login').then(m => m.LoginComponent)
   },
   {
+    path: 'mfa',
+    loadComponent: () =>
+      import('./features/auth/mfa/mfa').then(m => m.MfaComponent)
+  },
+  {
     path: 'select-role',
     loadComponent: () =>
       import('./features/public/role-selection/role-selection').then(m => m.RoleSelectionComponent)

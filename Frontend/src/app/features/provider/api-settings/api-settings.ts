@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
+import { MfaService } from '../../../core/services/mfa.service';
 
 type ConnectionState = 'idle' | 'testing' | 'success' | 'error';
 
@@ -47,7 +48,8 @@ export class ProviderApiSettingsComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private mfaService: MfaService
   ) {}
 
   ngOnInit(): void {
@@ -93,18 +95,30 @@ export class ProviderApiSettingsComponent implements OnInit {
     });
   }
 
-  guardarConfiguracion(): void {
+  async guardarConfiguracion(): Promise<void> {
     const body = {
       apiUrl: this.config.apiUrl,
       apiTipo: this.config.apiTipo,
       apiToken: this.config.apiToken
     };
 
+    let mfaToken = '';
+
+    try {
+      mfaToken = await this.mfaService.requestActionToken(
+        localStorage.getItem('auth_user_email') || '',
+        'PROVIDER_API_UPDATE'
+      );
+    } catch (error: any) {
+      alert(error?.message || 'No se completo la verificacion multifactor.');
+      return;
+    }
+
     this.http.put(
       `${this.API_URL}`,
       body,
       {
-        headers: this.headers()
+        headers: this.headers().set('X-MFA-Authorization', mfaToken)
       }
     )
     .subscribe({

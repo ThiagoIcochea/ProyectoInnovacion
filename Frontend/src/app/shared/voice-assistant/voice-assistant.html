@@ -1,0 +1,15 @@
+<button
+  type="button"
+  class="voice-fab"
+  [class.is-listening]="listening"
+  [class.is-thinking]="thinking"
+  (click)="toggle()"
+  title="Asistente por voz">
+  <span class="voice-fab__icon" aria-hidden="true"></span>
+  <span class="voice-fab__pulse" aria-hidden="true"></span>
+</button>
+
+<div class="voice-status" *ngIf="listening || thinking || answer">
+  <strong>{{ listening ? 'Escuchando' : thinking ? 'Procesando' : 'Asistente' }}</strong>
+  <span>{{ listening ? 'Habla con naturalidad.' : thinking ? 'Consultando IA...' : answer }}</span>
+</div>

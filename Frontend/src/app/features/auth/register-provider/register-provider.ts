@@ -501,12 +501,13 @@ export class RegisterProviderComponent implements OnInit {
     };
 
     this.http.post(
-      `${this.baseUrl}/register`,
+      `${APP_API_BASE_URL}/auth/register-provider/start`,
       payload,
-      { headers: this.headers() }
+      {}
     ).subscribe({
-      next: () => {alert('Proveedor registrado correctamente')
-         this.router.navigate([APP_ROUTE_PATHS.login]);
+      next: (res: any) => {
+         sessionStorage.setItem('pending_mfa_flow', JSON.stringify(res));
+         this.router.navigate(['/mfa'], { replaceUrl: true });
       },
       error: err => {
         console.error(err);

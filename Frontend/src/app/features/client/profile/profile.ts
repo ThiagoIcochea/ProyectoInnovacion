@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
+import { MfaService } from '../../../core/services/mfa.service';
 
 @Component({
   selector: 'app-profile',
@@ -52,7 +53,8 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private mfaService: MfaService
   ) {}
 
   get esProveedor(): boolean {
@@ -182,7 +184,7 @@ export class ProfileComponent implements OnInit {
     reader.readAsDataURL(file);
   }
 
-  guardarPerfil(): void {
+  async guardarPerfil(): Promise<void> {
 
     const formData = new FormData();
 
@@ -230,11 +232,23 @@ export class ProfileComponent implements OnInit {
       formData.append('fotoUrl', this.fotoUrl);
     }
 
+    let mfaToken = '';
+
+    try {
+      mfaToken = await this.mfaService.requestActionToken(
+        localStorage.getItem('auth_user_email') || this.usuario.correo || '',
+        'PROFILE_UPDATE'
+      );
+    } catch (error: any) {
+      alert(error?.message || 'No se completo la verificacion multifactor.');
+      return;
+    }
+
     this.http.put(
       `${APP_API_BASE_URL}/usuarios/perfil`,
       formData,
       {
-        headers: this.headers()
+        headers: this.headers().set('X-MFA-Authorization', mfaToken)
       }
     ).subscribe({
 

@@ -4,6 +4,7 @@ import com.nethink.b2b.dto.request.ProfileUpdateRequest;
 import com.nethink.b2b.dto.request.RegisterClientRequest;
 import com.nethink.b2b.dto.response.ProfileResponse;
 import com.nethink.b2b.service.UsuarioService;
+import com.nethink.b2b.service.MfaService;
 import java.security.Principal;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,12 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
      private final UsuarioRepository usuarioRepo;
+     private final MfaService mfaService;
 
-    public UsuarioController(UsuarioService usuarioService,  UsuarioRepository usuarioRepo) {
+    public UsuarioController(UsuarioService usuarioService,  UsuarioRepository usuarioRepo, MfaService mfaService) {
         this.usuarioService = usuarioService;
         this.usuarioRepo = usuarioRepo;
+        this.mfaService = mfaService;
     }
 
     @PostMapping("/register")
@@ -54,8 +57,10 @@ public class UsuarioController {
             @ModelAttribute ProfileUpdateRequest req,
             @RequestParam(value = "foto", required = false) MultipartFile foto,
             @RequestParam(value = "fotoUrl", required = false) String fotoUrl,
+            @RequestHeader(value = "X-MFA-Authorization", required = false) String mfaActionToken,
             HttpServletRequest httpRequest
     ) {
+        mfaService.consumeActionToken(mfaActionToken, principal.getName(), MfaService.PURPOSE_PROFILE_UPDATE);
 
         usuarioService.actualizarPerfil(
                 principal.getName(),

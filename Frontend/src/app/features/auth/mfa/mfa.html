@@ -1,0 +1,44 @@
+<div class="mfa-page">
+  <section class="mfa-card">
+    <button type="button" class="mfa-back" routerLink="/login">Volver</button>
+
+    <div class="mfa-icon" aria-hidden="true">MFA</div>
+    <h1>Verificacion multifactor</h1>
+    <p>Confirma el codigo enviado a {{ flow?.email }}.</p>
+
+    <div class="mfa-methods" *ngIf="!flow?.emailOnly">
+      <button type="button" [class.active]="method === 'email'" (click)="method = 'email'">Correo</button>
+      <button type="button" [class.active]="method === 'sms'" (click)="method = 'sms'">SMS</button>
+      <button type="button" [class.active]="method === 'whatsapp'" (click)="method = 'whatsapp'">WhatsApp</button>
+      <button type="button" [class.active]="method === 'call'" (click)="method = 'call'">Llamada</button>
+    </div>
+
+    <div class="mfa-email-only" *ngIf="flow?.emailOnly">
+      Registro protegido por correo electronico.
+    </div>
+
+    <form (ngSubmit)="verify()">
+      <div class="mfa-digits">
+        <input
+          *ngFor="let digit of digits; let i = index"
+          [id]="'mfa-digit-' + i"
+          inputmode="numeric"
+          maxlength="1"
+          [ngModel]="digits[i]"
+          [name]="'digit' + i"
+          (ngModelChange)="updateDigit(i, $event)"
+        />
+      </div>
+
+      <p class="mfa-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <button type="submit" class="mfa-submit" [disabled]="loading">
+        {{ loading ? 'Verificando...' : 'Verificar' }}
+      </button>
+    </form>
+
+    <button type="button" class="mfa-resend" (click)="resend()" [disabled]="resendSeconds > 0">
+      {{ resendSeconds > 0 ? ('Reenviar en ' + resendSeconds + 's') : 'Reenviar codigo' }}
+    </button>
+  </section>
+</div>

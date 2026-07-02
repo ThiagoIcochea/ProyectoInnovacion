@@ -107,20 +107,15 @@ export class RegisterClientComponent {
       return;
     }
 
-    this.http.post(
-      `${APP_API_BASE_URL}/usuarios/register`,
+    this.http.post<any>(
+      `${APP_API_BASE_URL}/auth/register-client/start`,
       this.form,
-      {
-        responseType: 'text'
-      }
     )
     .subscribe({
 
       next: (res) => {
-
-        alert(res);
-
-        this.router.navigate([APP_ROUTE_PATHS.login]);
+        sessionStorage.setItem('pending_mfa_flow', JSON.stringify(res));
+        this.router.navigate(['/mfa'], { replaceUrl: true });
       },
 
       error: (err) => {

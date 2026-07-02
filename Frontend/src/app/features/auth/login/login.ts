@@ -89,6 +89,19 @@ export class LoginComponent implements OnInit, OnDestroy {
             res?.usuario?.role
           );
 
+          if (res?.requiresMfa && res?.tempToken) {
+            sessionStorage.setItem('pending_mfa_flow', JSON.stringify({
+              email: res.email || res.correo || correo,
+              tempToken: res.tempToken,
+              purpose: res.purpose || 'LOGIN',
+              redirectTo: res.redirectTo || APP_ROUTE_PATHS.clientDashboard,
+              emailOnly: Boolean(res.emailOnly)
+            }));
+            this.loading = false;
+            this.router.navigate(['/mfa'], { replaceUrl: true });
+            return;
+          }
+
           if (!res?.token || !normalizedRole) {
             this.loading = false;
             this.errorMessage = 'Respuesta de login incompleta.';

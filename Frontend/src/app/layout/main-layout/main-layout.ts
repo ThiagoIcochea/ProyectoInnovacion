@@ -21,6 +21,7 @@ import {
 } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../core/constants/app.constants';
+import { VoiceAssistantComponent } from '../../shared/voice-assistant/voice-assistant';
 
 @Component({
   selector: 'app-main-layout',
@@ -30,7 +31,8 @@ import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../core/
     FormsModule,
     RouterOutlet,
     RouterLink,
-    RouterLinkActive
+    RouterLinkActive,
+    VoiceAssistantComponent
   ],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss'
