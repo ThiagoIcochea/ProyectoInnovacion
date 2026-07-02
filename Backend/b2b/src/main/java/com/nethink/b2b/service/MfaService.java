@@ -200,11 +200,10 @@ public class MfaService {
 
         try {
             HttpRequest request = HttpRequest.newBuilder(URI.create(url)).GET().build();
-            httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding())
-                    .exceptionally(error -> {
-                        System.out.println("Error llamando trigger MFA: " + error.getMessage());
-                        return null;
-                    });
+            HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                throw new RuntimeException("Trigger MFA respondio con estado " + response.statusCode());
+            }
         } catch (Exception e) {
             throw new RuntimeException("No se pudo enviar MFA por " + selectedMethod + ".", e);
         }
