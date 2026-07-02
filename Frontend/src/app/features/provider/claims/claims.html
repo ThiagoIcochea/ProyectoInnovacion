@@ -1,9 +1,9 @@
 <div class="provider-claims-page">
   <div class="page-header">
     <div>
-      <span>Atencion postventa</span>
-      <h1>Gestion de Reclamos</h1>
-      <p>Revisa reclamos creados por clientes y registra la resolucion del proveedor.</p>
+      <span>Atención postventa</span>
+      <h1>Gestión de Reclamos</h1>
+      <p>Revisa reclamos creados por clientes y registra la resolución del proveedor.</p>
     </div>
   </div>
 
@@ -86,17 +86,17 @@
             </div>
 
             <div class="full">
-              <span>Descripcion</span>
+              <span>Descripción</span>
               <strong>{{ claim.descripcion }}</strong>
             </div>
 
             <div class="full" *ngIf="claim.direccionEnvio">
-              <span>Direccion de entrega</span>
+              <span>Dirección de entrega</span>
               <strong>{{ claim.direccionEnvio }}</strong>
             </div>
 
             <div class="full" *ngIf="claim.resolucion">
-              <span>Resolucion registrada</span>
+              <span>Resolución registrada</span>
               <strong>{{ claim.resolucion }}</strong>
               <small *ngIf="claim.fechaResolucion">{{ getFecha(claim.fechaResolucion) }} a las {{ getHora(claim.fechaResolucion) }}</small>
             </div>
@@ -167,12 +167,12 @@
               />
             </ng-container>
 
-            <label for="resolucion">Resolucion</label>
+            <label for="resolucion">Resolución</label>
             <textarea
               id="resolucion"
               [(ngModel)]="resolucion"
               rows="4"
-              placeholder="Describe la revision, solucion o motivo de rechazo">
+              placeholder="Describe la revisión, solución o motivo de rechazo">
             </textarea>
 
             <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
@@ -192,5 +192,4 @@
     </ng-template>
   </div>
 </div>
-
 

@@ -368,7 +368,7 @@
       <ng-container *ngIf="isProvider && !canAccessProviderShell; else providerShellContent">
         <section class="provider-access-block">
           <h2>Acceso al panel proveedor bloqueado</h2>
-          <p>{{ providerAccessMessage || 'Tu plan no esta activo. Actualiza a Estandar o Premium para continuar.' }}</p>
+          <p>{{ providerAccessMessage || 'Tu plan no está activo. Actualiza a Estándar o Premium para continuar.' }}</p>
           <button type="button" class="provider-plan-primary" (click)="abrirPlanesProveedor()">
             Actualizar plan
           </button>
@@ -379,7 +379,7 @@
         <ng-container *ngIf="isProvider && isProviderDashboardRoute && !canAccessProviderDashboard; else providerContent">
           <section class="provider-access-block">
             <h2>Dashboard disponible solo con Premium</h2>
-            <p>Tu plan {{ currentProviderPlan.name }} permite usar los demas apartados del proveedor. Cambia a Premium para habilitar el dashboard.</p>
+            <p>Tu plan {{ currentProviderPlan.name }} permite usar los demás apartados del proveedor. Cambia a Premium para habilitar el dashboard.</p>
             <button type="button" class="provider-plan-primary" (click)="abrirPlanesProveedor()">
               Cambiar plan
             </button>
@@ -486,7 +486,7 @@
 
       <div class="provider-plan-actions">
         <p *ngIf="providerPlanPaymentReady">
-          Datos listos: nombre, correo PayPal y monto. Backend creara la orden y enviara al checkout con el total fijado.
+          Datos listos: nombre, correo PayPal y monto. Backend creará la orden y enviará al checkout con el total fijado.
         </p>
 
         <button type="button" class="provider-plan-secondary" (click)="cerrarPlanesProveedor()">

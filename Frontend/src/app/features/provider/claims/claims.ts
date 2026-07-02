@@ -104,7 +104,7 @@ export class ProviderClaimsComponent implements OnInit {
     }
 
     if ((this.estadoSeleccionado === 'RESUELTO' || this.estadoSeleccionado === 'RECHAZADO') && !this.resolucion.trim()) {
-      this.errorMessage = 'Ingresa la resolucion antes de cerrar el reclamo.';
+      this.errorMessage = 'Ingresa la resolución antes de cerrar el reclamo.';
       return;
     }
 
@@ -150,7 +150,7 @@ export class ProviderClaimsComponent implements OnInit {
 
     switch (this.normalizar(this.selectedClaim.estado)) {
       case 'ABIERTO':
-        return [{ value: 'EN_REVISION', label: 'En revision' }];
+        return [{ value: 'EN_REVISION', label: 'En revisión' }];
       case 'EN_REVISION':
         return [
           { value: 'RESUELTO', label: 'Resuelto' },
@@ -241,7 +241,7 @@ export class ProviderClaimsComponent implements OnInit {
   getTipoLabel(tipo?: string): string {
     const labels: Record<string, string> = {
       NO_ENTREGA: 'No entrega',
-      PRODUCTO_DANADO: 'Producto danado',
+      PRODUCTO_DANADO: 'Producto dañado',
       PRODUCTO_INCORRECTO: 'Producto incorrecto',
       DEMORA: 'Demora',
       CANCELACION: 'Cancelación',
