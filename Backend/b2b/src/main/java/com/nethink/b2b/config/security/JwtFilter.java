@@ -48,6 +48,13 @@ protected void doFilterInternal(HttpServletRequest request,
     }
 
     String authHeader = request.getHeader("Authorization");
+    
+    //  CAMBIO MINIMO: obligar token SOLO en rutas protegidas
+if (!path.startsWith("/api/auth") && authHeader == null) {
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    return;
+}
+    
 
     if (authHeader != null && authHeader.startsWith("Bearer ")) {
 

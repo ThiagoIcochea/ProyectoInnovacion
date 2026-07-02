@@ -42,6 +42,9 @@ public class SecurityConfig {
                                 "/api/provider/register"
                                 
                                 
+                                
+                                
+                                
                         ).permitAll()
 
                         .requestMatchers("/api/config/**")
@@ -50,6 +53,10 @@ public class SecurityConfig {
                         .hasRole(AppConstants.ROLE_ADMIN)
                         .requestMatchers("/api/solicitudes/proveedor/**")
                         .hasRole(AppConstants.ROLE_PROVEEDOR)
+                        
+                        .requestMatchers("/api/dashboard/**")
+                        .hasRole(AppConstants.ROLE_PROVEEDOR)
+                        
                         
 
                         .anyRequest().authenticated()

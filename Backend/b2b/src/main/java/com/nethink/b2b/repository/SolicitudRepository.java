@@ -12,6 +12,7 @@ import com.nethink.b2b.entity.Solicitud.EstadoSolicitud;
 //se añadio para que detalle solicitud pueda gestionarse en la lista val
 import com.nethink.b2b.entity.DetalleSolicitud;
 import com.nethink.b2b.dto.response.SolicitudEntregaResponse;
+import java.time.LocalDateTime;
 
 
 
@@ -130,14 +131,123 @@ List<Solicitud> listarSolicitudes(@Param("idProveedor") Integer idProveedor);
 
 
 
+  
+// consulta de cantidad de ingresos de mes actual  en función de solicitudes pagadas
+
+@Query("""
+SELECT
+    COALESCE(
+        SUM(
+            CASE
+                WHEN s.fechaCreacion >= :inicioMesActual
+                 AND s.fechaCreacion < :finMesActual
+                THEN s.total
+                ELSE 0
+            END
+        ),
+        0
+    ),
+
+    COALESCE(
+        SUM(
+            CASE
+                WHEN s.fechaCreacion >= :inicioMesAnterior
+                 AND s.fechaCreacion < :finMesAnterior
+                THEN s.total
+                ELSE 0
+            END
+        ),
+        0
+    )
+
+FROM Solicitud s
+
+WHERE s.proveedor.idProveedor = :idProveedor
+
+AND EXISTS (
+
+    SELECT 1
+    FROM SolicitudHistorial h
+    WHERE h.solicitud.idSolicitud = s.idSolicitud
+    AND h.estado = 'PAGADA'
+
+)
+
+AND s.fechaCreacion >= :inicioMesAnterior
+AND s.fechaCreacion < :finMesActual
+""")
+Object[] obtenerIngresosDashboard(
+
+        @Param("idProveedor") Integer idProveedor,
+
+        @Param("inicioMesActual") LocalDateTime inicioMesActual,
+
+        @Param("finMesActual") LocalDateTime finMesActual,
+
+        @Param("inicioMesAnterior") LocalDateTime inicioMesAnterior,
+
+        @Param("finMesAnterior") LocalDateTime finMesAnterior
+
+);    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+//@Query("""
+//SELECT
+//    COALESCE(
+//        SUM(
+//            CASE
+//                WHEN s.fechaCreacion >= :inicioMesActual
+//                 AND s.fechaCreacion < :finMesActual
+//                THEN s.total
+//                ELSE 0
+//            END
+//        ),
+//        0
+//    ),
+//
+//    COALESCE(
+//        SUM(
+//            CASE
+//                WHEN s.fechaCreacion >= :inicioMesAnterior
+//                 AND s.fechaCreacion < :finMesAnterior
+//                THEN s.total
+//                ELSE 0
+//            END
+//        ),
+//        0
+//    )
+//
+//FROM Solicitud s
+//
+//WHERE EXISTS (
+//
+//    SELECT 1
+//    FROM SolicitudHistorial h
+//    WHERE h.solicitud.idSolicitud = s.idSolicitud
+//    AND h.estado = 'PAGADA'
+//
+//)
+//
+//AND s.fechaCreacion >= :inicioMesAnterior
+//AND s.fechaCreacion < :finMesActual
+//""")
+//Object[] obtenerIngresosDashboard(
+//        @Param("inicioMesActual") LocalDateTime inicioMesActual,
+//        @Param("finMesActual") LocalDateTime finMesActual,
+//        @Param("inicioMesAnterior") LocalDateTime inicioMesAnterior,
+//        @Param("finMesAnterior") LocalDateTime finMesAnterior
+//);
 
 
 
-
-
-
-
-
+//modify
 
 
 

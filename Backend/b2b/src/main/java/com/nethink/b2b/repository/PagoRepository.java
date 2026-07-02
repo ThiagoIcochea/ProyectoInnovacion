@@ -6,7 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import java.util.List; 
+import java.util.List;
+import java.time.LocalDateTime; 
+
 
 @Repository
 public interface PagoRepository extends JpaRepository<Pago, Integer> {
@@ -28,10 +30,70 @@ List<Pago> listarPagosProveedor(
     
     
     
-    
-    
-    
-    
+  // suma de ingresos de solicitudes pagadas por cada mes para dashboard grafica   
+  
+@Query(value = """
+SELECT
+    YEAR(p.fecha_pago) AS anio,
+    MONTH(p.fecha_pago) AS mes,
+    SUM(p.monto) AS ingresos
+
+FROM pago p
+
+INNER JOIN solicitud s
+    ON s.id_solicitud = p.id_solicitud
+
+WHERE s.id_proveedor = :idProveedor
+AND p.estado = 'APROBADO'
+AND p.fecha_pago >= :fechaInicio
+AND p.fecha_pago < :fechaFin
+
+GROUP BY
+    YEAR(p.fecha_pago),
+    MONTH(p.fecha_pago)
+
+ORDER BY
+    YEAR(p.fecha_pago),
+    MONTH(p.fecha_pago)
+""", nativeQuery = true)
+List<Object[]> obtenerIngresosUltimos12Meses(
+
+        @Param("idProveedor") Integer idProveedor,
+
+        @Param("fechaInicio") LocalDateTime fechaInicio,
+
+        @Param("fechaFin") LocalDateTime fechaFin
+
+);
+
+
+
+
+
+// @Query(value = """
+//SELECT
+//    YEAR(p.fecha_pago) AS anio,
+//    MONTH(p.fecha_pago) AS mes,
+//    SUM(p.monto) AS ingresos
+//FROM pago p
+//WHERE p.estado = 'APROBADO'
+//AND p.fecha_pago >= :fechaInicio
+//AND p.fecha_pago < :fechaFin
+//GROUP BY
+//    YEAR(p.fecha_pago),
+//    MONTH(p.fecha_pago)
+//ORDER BY
+//    YEAR(p.fecha_pago),
+//    MONTH(p.fecha_pago)
+//""", nativeQuery = true)
+//List<Object[]> obtenerIngresosUltimos12Meses(
+//        @Param("fechaInicio") LocalDateTime fechaInicio,
+//        @Param("fechaFin") LocalDateTime fechaFin
+//);   
+  
+
+
+
     
     
 }
