@@ -27,6 +27,10 @@ export class RequestTrackingComponent implements OnInit {
   claimError = '';
   currentClaim: DelayClaim | null = null;
   selectedEvidence?: File;
+  claimType: 'DEMORA' | 'CANCELACION' | 'ENTREGA_INCOMPLETA' = 'DEMORA';
+  claimAction = 'MANTENER';
+  claimCancelReason = '';
+  claimActionOptions: Array<{ value: string; label: string }> = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -170,9 +174,13 @@ export class RequestTrackingComponent implements OnInit {
       return;
     }
 
+    this.claimType = this.getClaimTypeByState();
+    this.claimAction = this.getDefaultClaimAction(this.claimType);
     this.claimError = '';
     this.claimDescription = this.getDefaultClaimDescription();
     this.claimPromisedDate = this.getDefaultPromisedDateInput();
+    this.claimCancelReason = '';
+    this.claimActionOptions = this.getClaimActionOptions(this.claimType);
     this.claimModalOpen = true;
   }
 
@@ -189,28 +197,37 @@ export class RequestTrackingComponent implements OnInit {
     const promisedDate = this.getClaimPromisedDate();
     const description = this.claimDescription.trim();
 
-    if (!promisedDate) {
+    if (this.claimType === 'DEMORA' && !promisedDate) {
       this.claimError = 'Indica la fecha prometida por el proveedor.';
       return;
     }
 
     if (!description) {
-      this.claimError = 'Describe brevemente el reclamo por demora.';
+      this.claimError = 'Describe brevemente el reclamo.';
       return;
     }
 
-  this.delayClaimsService.save( {
-    idSolicitud: Number(this.tracking.idSolicitud),
-    idProveedor: this.tracking?.idProveedor ?? null,
-    proveedor: this.tracking?.proveedor || 'Proveedor',
-    empresaCliente: this.tracking?.empresaCompradora?.razonSocial || 'Cliente',
-    orderCode: this.getRequestCode(),
-    motivo: 'DEMORA',
-    descripcion: description,
-    fechaPrometida: promisedDate.toISOString(),
-    diasDemora: this.getDelayDays(promisedDate)
-  },
-  this.selectedEvidence).subscribe({
+    if (this.claimType === 'CANCELACION' && this.claimAction === 'CANCELAR' && !this.claimCancelReason.trim()) {
+      this.claimError = 'Indica el motivo de la cancelación.';
+      return;
+    }
+
+    const payload = {
+      idSolicitud: Number(this.tracking.idSolicitud),
+      idProveedor: this.tracking?.idProveedor ?? null,
+      proveedor: this.tracking?.proveedor || 'Proveedor',
+      empresaCliente: this.tracking?.empresaCompradora?.razonSocial || 'Cliente',
+      orderCode: this.getRequestCode(),
+      motivo: this.claimType,
+      descripcion: description,
+      accion: this.claimAction,
+      nuevoEstado: this.getClaimTargetState(this.claimType, this.claimAction),
+      motivoCancelacion: this.claimCancelReason.trim(),
+      fechaPrometida: promisedDate?.toISOString(),
+      diasDemora: this.getDelayDays(promisedDate)
+    };
+
+    this.delayClaimsService.save(payload, this.selectedEvidence).subscribe({
   next: (res) => {
     console.log('Reclamo registrado', res);
 
@@ -233,9 +250,9 @@ export class RequestTrackingComponent implements OnInit {
       idSolicitud: Number(this.tracking.idSolicitud),
       proveedor: this.tracking?.proveedor || 'Proveedor',
       empresaCliente: this.tracking?.empresaCompradora?.razonSocial || 'Cliente',
-      motivo: 'DEMORA_ENTREGA',
+      motivo: this.claimType,
       descripcion: description,
-      fechaPrometida: promisedDate.toISOString(),
+      fechaPrometida: promisedDate?.toISOString() || null,
       evidencia: [] 
     };
 
@@ -304,27 +321,40 @@ export class RequestTrackingComponent implements OnInit {
   }
 
   canCreateDelayClaim(): boolean {
-    if (!this.tracking || this.currentClaim || !this.esEnCamino()) {
+    if (!this.tracking || this.currentClaim) {
       return false;
     }
 
-    return this.getDelayDays() > 0 || !this.getPromisedDate();
+    const estado = this.normalizarEstado(this.tracking?.estado);
+    const estadosReclamo = [
+      'PAGO_PENDIENTE',
+      'PAGO_VALIDANDO',
+      'PEDIDO_APROBADO',
+      'EN_PREPARACION',
+      'EN_CAMINO',
+      'ENTREGADA',
+      'COMPLETADA'
+    ];
+
+    return estadosReclamo.includes(estado);
   }
 
   getDelayClaimHint(): string {
-    const promisedDate = this.getPromisedDate();
-
-    if (!promisedDate) {
-      return 'El backend aun no expone la fecha limite. Puedes registrar la fecha prometida por el proveedor en el reclamo.';
+    const estado = this.normalizarEstado(this.tracking?.estado);
+    switch (estado) {
+      case 'PAGO_PENDIENTE':
+      case 'PAGO_VALIDANDO':
+        return 'Puedes registrar un reclamo de cancelación y decidir si mantener el estado o moverlo a PAGO PENDIENTE/PAGO VALIDANDO.';
+      case 'PEDIDO_APROBADO':
+      case 'EN_PREPARACION':
+      case 'EN_CAMINO':
+        return 'Puedes reportar demora, cancelación o una entrega incompleta según lo que haya ocurrido con tu pedido.';
+      case 'ENTREGADA':
+      case 'COMPLETADA':
+        return 'Puedes reportar que la entrega no se realizó como esperabas y decidir si se mantiene el estado o se devuelve a EN PREPARACION.';
+      default:
+        return 'Puedes abrir un reclamo para este pedido.';
     }
-
-    const days = this.getDelayDays(promisedDate);
-
-    if (days > 0) {
-      return `La entrega supera la fecha prometida por ${days} dia${days === 1 ? '' : 's'}.`;
-    }
-
-    return 'La entrega aun esta dentro del plazo registrado.';
   }
 
   formatClaimDate(value?: string): string {
@@ -366,6 +396,69 @@ export class RequestTrackingComponent implements OnInit {
   private isDelivered(): boolean {
     const estado = this.normalizarEstado(this.tracking?.estado);
     return estado === 'ENTREGADA' || estado === 'COMPLETADA';
+  }
+
+  private getClaimTypeByState(): 'DEMORA' | 'CANCELACION' | 'ENTREGA_INCOMPLETA' {
+    const estado = this.normalizarEstado(this.tracking?.estado);
+    if (estado === 'PAGO_PENDIENTE' || estado === 'PAGO_VALIDANDO') {
+      return 'CANCELACION';
+    }
+
+    if (estado === 'ENTREGADA' || estado === 'COMPLETADA') {
+      return 'ENTREGA_INCOMPLETA';
+    }
+
+    return 'DEMORA';
+  }
+
+  getDefaultClaimAction(type: 'DEMORA' | 'CANCELACION' | 'ENTREGA_INCOMPLETA'): string {
+    if (type === 'CANCELACION') {
+      return 'CANCELAR';
+    }
+
+    if (type === 'ENTREGA_INCOMPLETA') {
+      return 'MANTENER';
+    }
+
+    return 'MANTENER';
+  }
+
+  getClaimActionOptions(type: 'DEMORA' | 'CANCELACION' | 'ENTREGA_INCOMPLETA'): Array<{ value: string; label: string }> {
+    if (type === 'CANCELACION') {
+      return [
+        { value: 'MANTENER', label: 'Mantener el estado actual' },
+        { value: 'PAGO_PENDIENTE', label: 'Pasar a PAGO PENDIENTE' },
+        { value: 'PAGO_VALIDANDO', label: 'Pasar a PAGO VALIDANDO' },
+        { value: 'CANCELAR', label: 'Cancelar la solicitud' }
+      ];
+    }
+
+    if (type === 'ENTREGA_INCOMPLETA') {
+      return [
+        { value: 'MANTENER', label: 'Mantener el estado actual' },
+        { value: 'EN_PREPARACION', label: 'Pasar a EN PREPARACION' }
+      ];
+    }
+
+    return [
+      { value: 'MANTENER', label: 'Mantener el estado actual' }
+    ];
+  }
+
+  private getClaimTargetState(type: 'DEMORA' | 'CANCELACION' | 'ENTREGA_INCOMPLETA', action: string): string | undefined {
+    if (type === 'CANCELACION' && action === 'PAGO_PENDIENTE') {
+      return 'PAGO_PENDIENTE';
+    }
+
+    if (type === 'CANCELACION' && action === 'PAGO_VALIDANDO') {
+      return 'PAGO_VALIDANDO';
+    }
+
+    if (type === 'ENTREGA_INCOMPLETA' && action === 'EN_PREPARACION') {
+      return 'EN_PREPARACION';
+    }
+
+    return undefined;
   }
 
   private isFinalStatus(): boolean {

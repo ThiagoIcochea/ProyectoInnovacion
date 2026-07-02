@@ -175,7 +175,9 @@ export class ProviderClaimsComponent implements OnInit {
       NO_ENTREGA: 'No entrega',
       PRODUCTO_DANADO: 'Producto danado',
       PRODUCTO_INCORRECTO: 'Producto incorrecto',
-      DEMORA: 'Demora'
+      DEMORA: 'Demora',
+      CANCELACION: 'Cancelación',
+      ENTREGA_INCOMPLETA: 'Entrega incompleta'
     };
 
     return labels[this.normalizar(tipo)] || tipo || 'Reclamo';

@@ -145,11 +145,11 @@
 
         <ng-template #delayClaimAction>
           <div class="delay-claim-card delay-claim-card--warning" *ngIf="canCreateDelayClaim()">
-            <span>Posible demora</span>
+            <span>Accion postventa</span>
             <strong>Solicitud de reclamo</strong>
             <p>{{ getDelayClaimHint() }}</p>
             <button type="button" class="btn-delay-claim" (click)="abrirReclamoDemora()">
-              Generar reclamo por demora
+              Generar reclamo
             </button>
           </div>
         </ng-template>
@@ -201,15 +201,36 @@
     </div>
 
     <div>
-      <span>Demora calculada</span>
-      <strong>{{ getDelayDays(getClaimPromisedDate()) }} dia{{ getDelayDays(getClaimPromisedDate()) === 1 ? '' : 's' }}</strong>
+      <span>Tipo</span>
+      <strong>{{ claimType === 'DEMORA' ? 'Demora' : claimType === 'CANCELACION' ? 'Cancelación' : 'Entrega incompleta' }}</strong>
     </div>
   </div>
 
   <form class="claim-form" (ngSubmit)="guardarReclamoDemora()">
     <label>
+      Tipo de reclamo
+      <select name="claimType" [(ngModel)]="claimType" (change)="claimAction = getDefaultClaimAction(claimType); claimActionOptions = getClaimActionOptions(claimType)">
+        <option value="DEMORA">Demora</option>
+        <option value="CANCELACION">Cancelación</option>
+        <option value="ENTREGA_INCOMPLETA">Entrega incompleta</option>
+      </select>
+    </label>
+
+    <label *ngIf="claimType === 'DEMORA'">
       Fecha prometida por el proveedor
       <input type="date" name="claimPromisedDate" [(ngModel)]="claimPromisedDate" required>
+    </label>
+
+    <label>
+      Acción a tomar
+      <select name="claimAction" [(ngModel)]="claimAction">
+        <option *ngFor="let option of claimActionOptions" [value]="option.value">{{ option.label }}</option>
+      </select>
+    </label>
+
+    <label *ngIf="claimType === 'CANCELACION' && claimAction === 'CANCELAR'">
+      Motivo de cancelación
+      <textarea name="claimCancelReason" [(ngModel)]="claimCancelReason" rows="3" maxlength="500"></textarea>
     </label>
 
     <label>
@@ -221,21 +242,14 @@
         maxlength="600"
         required>
       </textarea>
-       <label>
-  Evidencia (imagen o PDF)
-
-  <input
-    type="file"
-    accept=".pdf,image/*"
-    (change)="onEvidenceSelected($event)">
-</label>
-
-<small *ngIf="selectedEvidence">
-  {{ selectedEvidence.name }}
-</small>
     </label>
 
+    <label>
+      Evidencia (imagen o PDF)
+      <input type="file" accept=".pdf,image/*" (change)="onEvidenceSelected($event)">
+    </label>
 
+    <small *ngIf="selectedEvidence">{{ selectedEvidence.name }}</small>
 
     <p class="claim-error" *ngIf="claimError">{{ claimError }}</p>
 

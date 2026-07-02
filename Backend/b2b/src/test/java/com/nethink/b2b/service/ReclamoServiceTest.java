@@ -1,0 +1,83 @@
+package com.nethink.b2b.service;
+
+import com.cloudinary.Cloudinary;
+import com.nethink.b2b.dto.request.ReclamoRequest;
+import com.nethink.b2b.entity.Proveedor;
+import com.nethink.b2b.entity.Reclamo;
+import com.nethink.b2b.entity.Solicitud;
+import com.nethink.b2b.entity.SolicitudHistorial;
+import com.nethink.b2b.entity.Usuario;
+import com.nethink.b2b.repository.ReclamoRepository;
+import com.nethink.b2b.repository.SolicitudHistorialRepository;
+import com.nethink.b2b.repository.SolicitudRepository;
+import com.nethink.b2b.repository.UsuarioRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+class ReclamoServiceTest {
+
+    private ReclamoRepository reclamoRepository;
+    private SolicitudRepository solicitudRepository;
+    private SolicitudHistorialRepository historialRepository;
+    private UsuarioRepository usuarioRepository;
+    private EmailService emailService;
+    private Cloudinary cloudinary;
+    private ReclamoService reclamoService;
+
+    @BeforeEach
+    void setUp() {
+        reclamoRepository = Mockito.mock(ReclamoRepository.class);
+        solicitudRepository = Mockito.mock(SolicitudRepository.class);
+        historialRepository = Mockito.mock(SolicitudHistorialRepository.class);
+        usuarioRepository = Mockito.mock(UsuarioRepository.class);
+        emailService = Mockito.mock(EmailService.class);
+        cloudinary = Mockito.mock(Cloudinary.class);
+
+        reclamoService = new ReclamoService(
+                reclamoRepository,
+                solicitudRepository,
+                historialRepository,
+                usuarioRepository,
+                emailService,
+                cloudinary
+        );
+    }
+
+    @Test
+    void registrarReclamoConAccionMantenerNoCambiaEstado() throws Exception {
+        ReclamoRequest request = new ReclamoRequest();
+        request.setIdSolicitud(10);
+        request.setTipo("DEMORA");
+        request.setDescripcion("Demora en entrega");
+        request.setAccion("MANTENER");
+
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(7);
+        usuario.setCorreo("cliente@test.com");
+
+        Proveedor proveedor = new Proveedor();
+        proveedor.setIdProveedor(22);
+
+        Solicitud solicitud = new Solicitud();
+        solicitud.setIdSolicitud(10);
+        solicitud.setEstado(Solicitud.EstadoSolicitud.EN_CAMINO);
+        solicitud.setProveedor(proveedor);
+
+        when(usuarioRepository.findByCorreo("cliente@test.com")).thenReturn(Optional.of(usuario));
+        when(solicitudRepository.findById(10)).thenReturn(Optional.of(solicitud));
+        when(reclamoRepository.save(any(Reclamo.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(solicitudRepository.save(any(Solicitud.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(historialRepository.save(any(SolicitudHistorial.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        reclamoService.registrarReclamo(request, "cliente@test.com");
+
+        assertEquals(Solicitud.EstadoSolicitud.EN_CAMINO, solicitud.getEstado());
+    }
+}

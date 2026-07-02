@@ -13,10 +13,13 @@ export interface DelayClaim {
   proveedor: string;
   empresaCliente: string;
   orderCode: string;
-  motivo: 'DEMORA';
+  motivo: 'DEMORA' | 'CANCELACION' | 'ENTREGA_INCOMPLETA';
   descripcion: string;
-  fechaPrometida: string;
-  diasDemora: number;
+  fechaPrometida?: string;
+  diasDemora?: number;
+  accion?: string;
+  nuevoEstado?: string;
+  motivoCancelacion?: string;
   estado?: 'PENDIENTE_PROVEEDOR' | 'RESPONDIDO' | 'CERRADO';
   createdAt?: string;
   updatedAt?: string;
@@ -56,6 +59,19 @@ save(
       'tipo',
       claim.motivo
     );
+
+    formData.append(
+      'accion',
+      claim.accion || 'MANTENER'
+    );
+
+    if (claim.nuevoEstado) {
+      formData.append('nuevoEstado', claim.nuevoEstado);
+    }
+
+    if (claim.motivoCancelacion) {
+      formData.append('motivoCancelacion', claim.motivoCancelacion);
+    }
 
     if (evidencia) {
       formData.append(

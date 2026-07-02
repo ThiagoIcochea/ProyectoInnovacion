@@ -77,11 +77,14 @@ public class ReclamoService {
                 .findById(request.getIdSolicitud())
                 .orElseThrow();
 
+        String tipo = normalizarTipo(request.getTipo());
+        String accion = normalizarAccion(request.getAccion(), tipo);
+
         Reclamo reclamo = new Reclamo();
         reclamo.setIdSolicitud(solicitud.getIdSolicitud());
         reclamo.setIdUsuario(usuario.getIdUsuario());
         reclamo.setIdProveedor(solicitud.getProveedor().getIdProveedor());
-        reclamo.setTipo(request.getTipo());
+        reclamo.setTipo(tipo);
         reclamo.setDescripcion(request.getDescripcion());
         reclamo.setEstado("ABIERTO");
         reclamo.setFechaCreacion(LocalDateTime.now());
@@ -94,11 +97,114 @@ public class ReclamoService {
         reclamo.setEvidenciaUrl(evidenciaUrl);
         reclamoRepository.save(reclamo);
 
-        solicitud.setEstado(EstadoSolicitud.EN_RECLAMO);
+        aplicarAccionSolicitud(solicitud, tipo, accion, request.getNuevoEstado(), request.getMotivoCancelacion());
         solicitudRepository.save(solicitud);
-        guardarHistorialReclamo(solicitud, usuario.getIdUsuario(), "ABIERTO", "Reclamo abierto por el cliente");
+        guardarHistorialReclamo(
+                solicitud,
+                usuario.getIdUsuario(),
+                "ABIERTO",
+                construirDescripcionReclamo(tipo, accion, request.getMotivoCancelacion(), solicitud.getEstado())
+        );
 
         emailService.enviarCorreoReclamoDemora(solicitud, request.getDescripcion(), "");
+    }
+
+    private void aplicarAccionSolicitud(
+            Solicitud solicitud,
+            String tipo,
+            String accion,
+            String nuevoEstado,
+            String motivoCancelacion) {
+
+        if (solicitud == null) {
+            return;
+        }
+
+        String tipoNormalizado = normalizarTipo(tipo);
+        String accionNormalizada = normalizarAccion(accion, tipoNormalizado);
+
+        if ("DEMORA".equals(tipoNormalizado) && "CANCELAR".equals(accionNormalizada)) {
+            cancelarSolicitud(solicitud, motivoCancelacion);
+            return;
+        }
+
+        if ("CANCELACION".equals(tipoNormalizado)) {
+            switch (accionNormalizada) {
+                case "PAGO_PENDIENTE" -> solicitud.setEstado(EstadoSolicitud.PAGO_PENDIENTE);
+                case "PAGO_VALIDANDO" -> solicitud.setEstado(EstadoSolicitud.PAGO_VALIDANDO);
+                case "CANCELAR" -> cancelarSolicitud(solicitud, motivoCancelacion);
+                default -> {
+                    // Mantener el estado actual del pedido.
+                }
+            }
+            return;
+        }
+
+        if ("ENTREGA_INCOMPLETA".equals(tipoNormalizado) && "EN_PREPARACION".equals(accionNormalizada)) {
+            solicitud.setEstado(EstadoSolicitud.EN_PREPARACION);
+            return;
+        }
+
+        if (nuevoEstado != null && !nuevoEstado.isBlank()) {
+            try {
+                solicitud.setEstado(EstadoSolicitud.valueOf(nuevoEstado.trim().toUpperCase()));
+            } catch (IllegalArgumentException ignored) {
+                // Se mantiene el estado anterior si llega uno no soportado.
+            }
+        }
+    }
+
+    private void cancelarSolicitud(Solicitud solicitud, String motivoCancelacion) {
+        solicitud.setEstado(EstadoSolicitud.CANCELADA);
+        solicitud.setCanceladoPor(Solicitud.CanceladoPor.CLIENTE);
+        solicitud.setMotivoCancelacion(
+                (motivoCancelacion == null || motivoCancelacion.isBlank())
+                        ? "Cancelación solicitada por el cliente a través del reclamo"
+                        : motivoCancelacion.trim()
+        );
+        solicitud.setFechaCancelacion(LocalDateTime.now());
+    }
+
+    private String normalizarTipo(String tipo) {
+        return tipo == null || tipo.isBlank() ? "DEMORA" : tipo.trim().toUpperCase();
+    }
+
+    private String normalizarAccion(String accion, String tipo) {
+        if (accion == null || accion.isBlank()) {
+            return "MANTENER";
+        }
+
+        String normalizado = accion.trim().toUpperCase().replace(' ', '_');
+        return switch (normalizado) {
+            case "MANTENER", "MANTENER_ESTADO" -> "MANTENER";
+            case "CANCELAR", "CANCELAR_SOLICITUD" -> "CANCELAR";
+            case "EN_PREPARACION" -> "EN_PREPARACION";
+            case "PAGO_PENDIENTE" -> "PAGO_PENDIENTE";
+            case "PAGO_VALIDANDO" -> "PAGO_VALIDANDO";
+            default -> normalizado;
+        };
+    }
+
+    private String construirDescripcionReclamo(String tipo, String accion, String motivo, EstadoSolicitud estado) {
+        String base = switch (tipo) {
+            case "CANCELACION" -> "Reclamo por cancelación registrado por el cliente";
+            case "ENTREGA_INCOMPLETA" -> "Reclamo por entrega incompleta registrado por el cliente";
+            default -> "Reclamo por demora registrado por el cliente";
+        };
+
+        String detalle = switch (accion) {
+            case "CANCELAR" -> " con acción de cancelación";
+            case "EN_PREPARACION" -> " con cambio a EN PREPARACION";
+            case "PAGO_PENDIENTE" -> " con cambio a PAGO PENDIENTE";
+            case "PAGO_VALIDANDO" -> " con cambio a PAGO VALIDANDO";
+            default -> " manteniendo el estado actual";
+        };
+
+        if (motivo != null && !motivo.isBlank()) {
+            return base + detalle + ". Motivo: " + motivo.trim();
+        }
+
+        return base + detalle + ". Estado final: " + (estado != null ? estado.name() : "SIN_CAMBIO");
     }
 
     @Transactional(readOnly = true)

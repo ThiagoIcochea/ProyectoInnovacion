@@ -14,6 +14,12 @@ public class ReclamoRequest {
     private String descripcion;
 
     private String tipo;
+
+    private String accion;
+
+    private String nuevoEstado;
+
+    private String motivoCancelacion;
     
     private MultipartFile evidencia;
 
@@ -49,5 +55,27 @@ public void setEvidencia(MultipartFile evidencia) {
         this.tipo = tipo;
     }
 
-    
+    public String getAccion() {
+        return accion;
+    }
+
+    public void setAccion(String accion) {
+        this.accion = accion;
+    }
+
+    public String getNuevoEstado() {
+        return nuevoEstado;
+    }
+
+    public void setNuevoEstado(String nuevoEstado) {
+        this.nuevoEstado = nuevoEstado;
+    }
+
+    public String getMotivoCancelacion() {
+        return motivoCancelacion;
+    }
+
+    public void setMotivoCancelacion(String motivoCancelacion) {
+        this.motivoCancelacion = motivoCancelacion;
+    }
 }
