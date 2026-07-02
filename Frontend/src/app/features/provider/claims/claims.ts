@@ -192,6 +192,12 @@ export class ProviderClaimsComponent implements OnInit {
   }
 
   onEstadoSeleccionadoCambio(): void {
+    if (this.estadoSeleccionado !== 'RESUELTO' && this.estadoSeleccionado !== 'RECHAZADO') {
+      this.accionSolicitud = 'MANTENER';
+      this.codigoEntrega = '';
+      return;
+    }
+
     const accionesDisponibles = this.getAccionesDisponibles();
     const tieneAccionValida = accionesDisponibles.some(accion => accion.value === this.accionSolicitud);
 
@@ -201,7 +207,9 @@ export class ProviderClaimsComponent implements OnInit {
   }
 
   debeSolicitarCodigoEntrega(): boolean {
-    return this.accionSolicitud === 'AVANZAR' && this.normalizar(this.selectedClaim?.estadoSolicitud) === 'EN_CAMINO';
+    return this.estadoSeleccionado === 'RESUELTO' || this.estadoSeleccionado === 'RECHAZADO'
+      ? this.accionSolicitud === 'AVANZAR' && this.normalizar(this.selectedClaim?.estadoSolicitud) === 'EN_CAMINO'
+      : false;
   }
 
   getClaimCode(claim: ProviderClaim | null | undefined): string {

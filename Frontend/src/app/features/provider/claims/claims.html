@@ -144,26 +144,28 @@
               </option>
             </select>
 
-            <label for="accionSolicitud">
-              Acción para la solicitud
-            </label>
-            <select
-              id="accionSolicitud"
-              [(ngModel)]="accionSolicitud">
-              <option *ngFor="let accion of getAccionesDisponibles()" [value]="accion.value">
-                {{ accion.label }}
-              </option>
-            </select>
+            <ng-container *ngIf="estadoSeleccionado === 'RESUELTO' || estadoSeleccionado === 'RECHAZADO'">
+              <label for="accionSolicitud">
+                Acción para la solicitud
+              </label>
+              <select
+                id="accionSolicitud"
+                [(ngModel)]="accionSolicitud">
+                <option *ngFor="let accion of getAccionesDisponibles()" [value]="accion.value">
+                  {{ accion.label }}
+                </option>
+              </select>
 
-            <label for="codigoEntrega" *ngIf="debeSolicitarCodigoEntrega()">Código de entrega</label>
-            <input
-              id="codigoEntrega"
-              *ngIf="debeSolicitarCodigoEntrega()"
-              [(ngModel)]="codigoEntrega"
-              type="text"
-              placeholder="Ej. NP-482913"
-              aria-label="Código de entrega"
-            />
+              <label for="codigoEntrega" *ngIf="debeSolicitarCodigoEntrega()">Código de entrega</label>
+              <input
+                id="codigoEntrega"
+                *ngIf="debeSolicitarCodigoEntrega()"
+                [(ngModel)]="codigoEntrega"
+                type="text"
+                placeholder="Ej. NP-482913"
+                aria-label="Código de entrega"
+              />
+            </ng-container>
 
             <label for="resolucion">Resolucion</label>
             <textarea
