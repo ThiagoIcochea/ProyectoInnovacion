@@ -130,9 +130,32 @@ export class DashboardComponent implements OnInit {
   }
 
   irPublicidad(pub: any): void {
+    if (pub?.idProducto) {
+      this.router.navigate(['/app/rfq/product', pub.idProducto]);
+      return;
+    }
+
+    if (pub?.enlace?.startsWith('/app/')) {
+      this.router.navigate([pub.enlace]);
+      return;
+    }
+
     if (pub?.enlace) {
       window.open(pub.enlace, '_blank');
     }
+  }
+
+  getPublicidadDetalle(pub: any): string {
+    if (!pub) {
+      return '';
+    }
+
+    if (pub.origen === 'PROVEEDOR_PREMIUM') {
+      const ventas = Number(pub.unidadesVendidas || 0);
+      return `${pub.proveedor} promociona uno de sus productos mas vendidos: ${ventas} unidad${ventas === 1 ? '' : 'es'} vendida${ventas === 1 ? '' : 's'}.`;
+    }
+
+    return pub.enlace || pub.proveedor || '';
   }
 
   cargarCarrito(): void {

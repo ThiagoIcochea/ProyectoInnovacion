@@ -17,6 +17,7 @@ export class ForgotPasswordComponent {
   private readonly passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
 
   email = '';
+  method: 'email' | 'whatsapp' | 'sms' | 'call' = 'email';
   digits = ['', '', '', '', '', ''];
   newPassword = '';
   confirmPassword = '';
@@ -45,7 +46,7 @@ export class ForgotPasswordComponent {
 
     this.http.post<any>(`${APP_API_BASE_URL}/auth/forgot-password/start`, {
       email: cleanEmail,
-      method: 'email'
+      method: this.method
     }).subscribe({
       next: res => {
         this.tempToken = res?.tempToken || '';
@@ -58,7 +59,7 @@ export class ForgotPasswordComponent {
         this.email = cleanEmail;
         this.step = 'code';
         this.loading = false;
-        alert('Codigo MFA enviado a tu correo. Ingresa los 6 digitos para continuar.');
+        alert(`Codigo MFA enviado por ${this.methodLabel(this.method)}. Ingresa los 6 digitos para continuar.`);
       },
       error: err => {
         this.loading = false;
@@ -109,7 +110,7 @@ export class ForgotPasswordComponent {
       email: this.email.trim(),
       tempToken: this.tempToken,
       code,
-      method: 'email',
+      method: this.method,
       purpose: 'PASSWORD_RESET'
     }).subscribe({
       next: res => {
@@ -181,5 +182,16 @@ export class ForgotPasswordComponent {
     if (role === 'ADMIN') return APP_ROUTE_PATHS.adminDashboard;
     if (role === 'PROVEEDOR') return APP_ROUTE_PATHS.providerDashboard;
     return APP_ROUTE_PATHS.clientDashboard;
+  }
+
+  methodLabel(method: string): string {
+    const labels: Record<string, string> = {
+      email: 'correo',
+      whatsapp: 'WhatsApp',
+      sms: 'SMS',
+      call: 'llamada'
+    };
+
+    return labels[method] || method;
   }
 }

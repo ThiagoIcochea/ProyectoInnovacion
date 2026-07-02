@@ -176,7 +176,8 @@ p {
 .mfa-form-field {
   margin: 18px 0;
 
-  input {
+  input,
+  select {
     width: 100%;
     height: 46px;
     border: 1px solid #374151;
@@ -187,7 +188,8 @@ p {
     outline: none;
   }
 
-  input:focus {
+  input:focus,
+  select:focus {
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
   }

@@ -11,6 +11,8 @@ import com.nethink.b2b.repository.ConfiguracionRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -119,7 +121,7 @@ public class VoiceAssistantService {
 
             JsonNode root = objectMapper.readTree(response.getBody());
             String content = root.path("choices").get(0).path("message").path("content").asText();
-            return Map.of("analysis", content);
+            return Map.of("analysis", normalizeFiveInsights(content));
         } catch (Exception e) {
             return Map.of("analysis", """
                     1. **Pagos por validar**: reduce los estados PAGO_VALIDANDO con revisiones diarias y responsables claros.
@@ -146,9 +148,17 @@ public class VoiceAssistantService {
                 PROVEEDOR: solicitudes recibidas, pagos, entregas, reclamos, productos, configuracion API, perfil.
                 ADMIN: dashboard, usuarios, proveedores, RFQs, productos, integraciones, logs, configuracion.
 
+                Acciones asistidas:
+                - CLIENTE puede crear solicitudes RFQ, confirmar pedidos, cambiar datos de perfil y pedir tracking.
+                - PROVEEDOR puede actualizar productos, stock, API, perfil, revisar solicitudes, pagos, entregas y reclamos.
+                - ADMIN puede preparar cambios sobre usuarios, proveedores, productos, RFQs, integraciones y configuracion.
+                - MFA no bloquea la intencion: primero recolecta datos y envia/prepara la accion; luego pide MFA solo para confirmar acciones sensibles.
+                - Para crear solicitudes cliente, siempre pide RUC de 11 digitos y ubicacion/direccion de entrega si faltan.
+                - Para cambios de datos pide campo, valor nuevo y despues indica que se enviara codigo MFA.
+
                 Reglas de seguridad:
                 - Nunca permitas acciones fuera del rol. Si el cliente pide logs, productos de proveedor o admin, niega con una alternativa util.
-                - Cambiar perfil o API requiere MFA: marca requiresMfa=true.
+                - Cambiar perfil, API o datos administrativos requiere MFA despues de recopilar los datos: marca requiresMfa=true.
                 - Para navegacion devuelve action=NAVIGATE y route permitida.
                 - Para busquedas devuelve action=SEARCH y search con el texto limpio.
                 - Si detectas logout, tracking, carrito, solicitud RFQ, seleccion de proveedor, confirmacion de pedido o actualizacion de perfil,
@@ -163,5 +173,47 @@ public class VoiceAssistantService {
                 Responde solamente JSON valido:
                 {"answer":"respuesta breve para hablar","action":"NAVIGATE|SEARCH|NONE","route":"ruta o null","search":"texto o null","requiresMfa":false}
                 """.formatted(nombre, rol, currentPath, text);
+    }
+
+    private String normalizeFiveInsights(String content) {
+        String clean = String.valueOf(content == null ? "" : content)
+                .replace("\r", "\n")
+                .replaceAll("(?m)^\\s*[-*]\\s+", "")
+                .trim();
+
+        Pattern itemPattern = Pattern.compile("(?s)(?:^|\\n)\\s*(\\d)\\s*[\\).:-]\\s*(.*?)(?=\\n\\s*\\d\\s*[\\).:-]|$)");
+        Matcher matcher = itemPattern.matcher(clean);
+        StringBuilder normalized = new StringBuilder();
+        int index = 1;
+
+        while (matcher.find() && index <= 5) {
+            String item = matcher.group(2)
+                    .replaceAll("(?<=\\d)\\s+(?=\\d)", "")
+                    .replaceAll(",\\s+(?=\\d)", ",")
+                    .replaceAll("\\s+", " ")
+                    .trim();
+            if (!item.isBlank()) {
+                normalized.append(index).append(". ").append(item).append("\n");
+                index++;
+            }
+        }
+
+        if (index > 5) {
+            return normalized.toString().trim();
+        }
+
+        String[] fallbackItems = clean.split("\\n+");
+        for (String fallbackItem : fallbackItems) {
+            if (index > 5) {
+                break;
+            }
+            String item = fallbackItem.replaceAll("^\\s*\\d?\\s*[\\).:-]?\\s*", "").replaceAll("\\s+", " ").trim();
+            if (!item.isBlank() && !normalized.toString().contains(item)) {
+                normalized.append(index).append(". ").append(item).append("\n");
+                index++;
+            }
+        }
+
+        return normalized.toString().trim();
     }
 }

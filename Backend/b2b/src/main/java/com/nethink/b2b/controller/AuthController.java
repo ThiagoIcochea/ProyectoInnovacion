@@ -117,9 +117,9 @@ public class AuthController {
         return mfaService.start(
                 request.getEmail(),
                 MfaService.PURPOSE_PASSWORD_RESET,
-                "email",
+                request.getMethod(),
                 null,
-                true,
+                false,
                 null
         );
     }
