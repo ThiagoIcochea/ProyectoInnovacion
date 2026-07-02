@@ -157,7 +157,7 @@ public class ScoringService {
                 comentarioRepo.contarComentariosNegativos(idProveedor);
 
         Integer reclamos =
-                reclamoRepo.contarReclamos(idProveedor);
+                reclamoRepo.contarReclamosPenalizables(idProveedor);
 
         int pos = positivos != null ? positivos : 0;
         int neg = negativos != null ? negativos : 0;
@@ -224,7 +224,7 @@ public class ScoringService {
 
         Integer reclamos =
                 reclamoRepo
-                        .contarReclamos(idProveedor);
+                        .contarReclamosPenalizables(idProveedor);
 
         int pos = positivos != null ? positivos : 0;
         int neg = negativos != null ? negativos : 0;
@@ -407,17 +407,7 @@ public class ScoringService {
             ==========================================
         */
 
-        if (rec >= 3) {
-            scoreFinal -= 0.05;
-        }
-
-        if (rec >= 5) {
-            scoreFinal -= 0.10;
-        }
-
-        if (rec >= 10) {
-            scoreFinal -= 0.20;
-        }
+        scoreFinal -= Math.min(0.45, rec * 0.08);
 
         if (neg > pos && neg >= 5) {
             scoreFinal -= 0.10;

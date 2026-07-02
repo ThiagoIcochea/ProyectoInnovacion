@@ -17,4 +17,14 @@ public interface ReclamoRepository extends JpaRepository<Reclamo, Integer> {
         WHERE r.idProveedor = :idProveedor
     """)
     Integer contarReclamos(Integer idProveedor);
+
+    @Query("""
+        SELECT COUNT(r)
+        FROM Reclamo r
+        WHERE r.idProveedor = :idProveedor
+        AND (r.estado IS NULL OR UPPER(r.estado) NOT IN ('RESUELTO', 'RECHAZADO'))
+    """)
+    Integer contarReclamosPenalizables(Integer idProveedor);
+
+    List<Reclamo> findByIdProveedor(Integer idProveedor);
 }

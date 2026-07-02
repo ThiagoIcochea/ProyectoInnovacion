@@ -156,7 +156,7 @@
             "
 
             [class.suspended]="
-              user?.estado === 'SUSPENDIDO'
+              user?.estado === 'SUSPENDIDO' || user?.estado === 'BLOQUEADO'
             "
           >
 
@@ -178,7 +178,7 @@
 
         <div>
 
-          <button class="btn-secondary">
+          <button class="btn-secondary" (click)="gestionar(user)">
             Gestionar
           </button>
 
@@ -198,6 +198,68 @@
 
     </div>
 
+  </section>
+
+  <section class="manage-modal" *ngIf="selectedUser">
+    <div class="manage-panel">
+      <div class="manage-panel__header">
+        <div>
+          <span>Gestionar usuario</span>
+          <h2>{{ selectedUser?.nombreCompleto }}</h2>
+        </div>
+        <button type="button" class="btn-secondary" (click)="cerrarGestion()">Cerrar</button>
+      </div>
+
+      <form class="manage-form" (ngSubmit)="guardarGestion()">
+        <label>
+          Nombres
+          <input name="nombres" [(ngModel)]="editForm.nombres" />
+        </label>
+        <label>
+          Apellidos
+          <input name="apellidos" [(ngModel)]="editForm.apellidos" />
+        </label>
+        <label>
+          Correo
+          <input name="correo" type="email" [(ngModel)]="editForm.correo" />
+        </label>
+        <label>
+          Telefono
+          <input name="telefono" [(ngModel)]="editForm.telefono" />
+        </label>
+        <label>
+          WhatsApp
+          <input name="whatsapp" [(ngModel)]="editForm.whatsapp" />
+        </label>
+        <label>
+          Direccion
+          <input name="direccion" [(ngModel)]="editForm.direccion" />
+        </label>
+        <label>
+          Nueva contrasena
+          <input name="password" type="password" [(ngModel)]="editForm.password" placeholder="Dejar vacio para conservar" />
+        </label>
+        <label>
+          Estado
+          <select name="estado" [(ngModel)]="editForm.estado">
+            <option value="ACTIVO">ACTIVO</option>
+            <option value="INACTIVO">INACTIVO</option>
+            <option value="BLOQUEADO">BLOQUEADO</option>
+          </select>
+        </label>
+
+        <p class="manage-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+        <div class="manage-actions">
+          <button type="button" class="btn-secondary" *ngIf="editForm.estado !== 'ACTIVO'" (click)="activarUsuario()">
+            Quitar de lista negra
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="saving">
+            {{ saving ? 'Guardando...' : 'Guardar con MFA' }}
+          </button>
+        </div>
+      </form>
+    </div>
   </section>
 
 </div>

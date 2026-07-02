@@ -38,7 +38,10 @@ public class AuthService {
                     "Login no exitoso por usuario inactivo",
                     request
             );
-            throw new RuntimeException("Usuario inactivo o bloqueado");
+            if (user.getEstado() == EstadoUsuario.BLOQUEADO) {
+                throw new RuntimeException("Se han detectado gestiones inapropiadas por las cuales la cuenta ha sido suspendida. Contactese con el administrador.");
+            }
+            throw new RuntimeException("Usuario inactivo");
         }
 
         if (!user.getPassword().equals(password)) {

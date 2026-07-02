@@ -12,7 +12,9 @@ import com.nethink.b2b.entity.Solicitud;
 import com.nethink.b2b.entity.Solicitud.EstadoSolicitud;
 import com.nethink.b2b.entity.SolicitudHistorial;
 import com.nethink.b2b.entity.Usuario;
+import com.nethink.b2b.entity.enums.EstadoUsuario;
 import com.nethink.b2b.repository.ReclamoRepository;
+import com.nethink.b2b.repository.ProveedorRepository;
 import com.nethink.b2b.repository.SolicitudHistorialRepository;
 import com.nethink.b2b.repository.SolicitudRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
@@ -40,6 +42,7 @@ public class ReclamoService {
     private final SolicitudRepository solicitudRepository;
     private final SolicitudHistorialRepository historialRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ProveedorRepository proveedorRepository;
     private final EmailService emailService;
     private final Cloudinary cloudinary;
     private final ModeracionService moderacionService;
@@ -49,6 +52,7 @@ public class ReclamoService {
             SolicitudRepository solicitudRepository,
             SolicitudHistorialRepository historialRepository,
             UsuarioRepository usuarioRepository,
+            ProveedorRepository proveedorRepository,
             EmailService emailService,
             Cloudinary cloudinary,
             ModeracionService moderacionService) {
@@ -57,6 +61,7 @@ public class ReclamoService {
         this.solicitudRepository = solicitudRepository;
         this.historialRepository = historialRepository;
         this.usuarioRepository = usuarioRepository;
+        this.proveedorRepository = proveedorRepository;
         this.emailService = emailService;
         this.cloudinary = cloudinary;
         this.moderacionService = moderacionService;
@@ -117,6 +122,7 @@ public class ReclamoService {
 
         reclamo.setEvidenciaUrl(evidenciaUrl);
         reclamoRepository.save(reclamo);
+        evaluarSuspensionProveedor(reclamo.getIdProveedor());
 
         aplicarAccionSolicitud(solicitud, tipo, accion, request.getNuevoEstado(), request.getMotivoCancelacion(), null);
         solicitudRepository.save(solicitud);
@@ -134,6 +140,37 @@ public class ReclamoService {
                 "Hemos recibido tu reclamo para la solicitud " + solicitud.getIdSolicitud() + ". Un proveedor lo revisará pronto.",
                 "Reclamo recibido - Solicitud " + solicitud.getIdSolicitud()
         );
+    }
+
+    private void evaluarSuspensionProveedor(Integer idProveedor) {
+        if (idProveedor == null) {
+            return;
+        }
+
+        int reclamos = reclamoRepository.contarReclamosPenalizables(idProveedor) != null
+                ? reclamoRepository.contarReclamosPenalizables(idProveedor)
+                : 0;
+
+        if (reclamos < 5) {
+            return;
+        }
+
+        proveedorRepository.findById(idProveedor).ifPresent(proveedor -> {
+            proveedor.setEstado("SUSPENDIDO");
+            if (proveedor.getUsuario() != null) {
+                proveedor.getUsuario().setEstado(EstadoUsuario.BLOQUEADO);
+            }
+            proveedorRepository.save(proveedor);
+
+            usuarioRepository.findAdministradores().forEach(admin ->
+                    emailService.enviarAlertaProveedorSuspendido(
+                            admin.getCorreo(),
+                            proveedor.getRazonSocial(),
+                            proveedor.getUsuario() != null ? proveedor.getUsuario().getCorreo() : "Sin correo",
+                            reclamos
+                    )
+            );
+        });
     }
 
     private void aplicarAccionSolicitud(

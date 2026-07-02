@@ -14,6 +14,7 @@ import {
 
 import { FormsModule } from '@angular/forms';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
+import { MfaService } from '../../../core/services/mfa.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -38,12 +39,17 @@ implements OnInit {
   searchTerm: string = '';
 
   loading: boolean = false;
+  saving: boolean = false;
+  selectedUser: any | null = null;
+  editForm: any = {};
+  errorMessage = '';
   readonly skeletonRows = Array.from({ length: 5 });
 
   constructor(
     private http: HttpClient,
     private zone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private mfaService: MfaService
   ) {}
 
   ngOnInit(): void {
@@ -188,8 +194,7 @@ implements OnInit {
 
       u =>
 
-        u?.estado?.toUpperCase()
-        === 'SUSPENDIDO'
+        ['SUSPENDIDO', 'BLOQUEADO'].includes(u?.estado?.toUpperCase())
 
     ).length;
   }
@@ -213,5 +218,82 @@ implements OnInit {
           year: 'numeric'
         }
       );
+  }
+
+  gestionar(user: any): void {
+    this.selectedUser = user;
+    this.errorMessage = '';
+    this.editForm = {
+      nombres: user?.nombres || this.splitName(user?.nombreCompleto).nombres,
+      apellidos: user?.apellidos || this.splitName(user?.nombreCompleto).apellidos,
+      correo: user?.correo || '',
+      telefono: user?.telefono || '',
+      whatsapp: user?.whatsapp || '',
+      direccion: user?.direccion || '',
+      password: '',
+      estado: user?.estado || 'ACTIVO'
+    };
+  }
+
+  cerrarGestion(): void {
+    this.selectedUser = null;
+    this.editForm = {};
+    this.errorMessage = '';
+  }
+
+  async guardarGestion(): Promise<void> {
+    if (!this.selectedUser || this.saving) {
+      return;
+    }
+
+    this.saving = true;
+    this.errorMessage = '';
+
+    try {
+      const adminEmail = localStorage.getItem('auth_user_email') || '';
+      const token = await this.mfaService.requestActionToken(adminEmail, 'ADMIN_ACTION');
+      const body = { ...this.editForm };
+
+      if (!body.password) {
+        delete body.password;
+      }
+
+      this.http.put<any>(
+        `${APP_API_BASE_URL}/usuarios/admin/${this.selectedUser.idUsuario}`,
+        body,
+        {
+          headers: this.headers().set('X-MFA-Authorization', token)
+        }
+      ).subscribe({
+        next: updated => {
+          this.saving = false;
+          this.users = this.users.map(user => user.idUsuario === updated.idUsuario ? updated : user);
+          this.filtrarUsuarios();
+          this.cerrarGestion();
+          this.cdr.detectChanges();
+        },
+        error: err => {
+          this.saving = false;
+          this.errorMessage = err?.error?.message || 'No se pudo guardar el usuario.';
+          this.cdr.detectChanges();
+        }
+      });
+    } catch (error: any) {
+      this.saving = false;
+      this.errorMessage = error?.message || 'MFA cancelado.';
+      this.cdr.detectChanges();
+    }
+  }
+
+  activarUsuario(): void {
+    this.editForm.estado = 'ACTIVO';
+  }
+
+  private splitName(value: string): { nombres: string; apellidos: string } {
+    const parts = String(value || '').trim().split(/\s+/);
+    return {
+      nombres: parts.slice(0, 2).join(' '),
+      apellidos: parts.slice(2).join(' ')
+    };
   }
 }

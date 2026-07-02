@@ -95,7 +95,11 @@ export class LoginComponent implements OnInit, OnDestroy {
               tempToken: res.tempToken,
               purpose: res.purpose || 'LOGIN',
               redirectTo: res.redirectTo || APP_ROUTE_PATHS.clientDashboard,
-              emailOnly: Boolean(res.emailOnly)
+              emailOnly: Boolean(res.emailOnly),
+              expiresInSeconds: res.expiresInSeconds,
+              resendInSeconds: res.resendInSeconds,
+              expiresAt: Date.now() + Number(res.expiresInSeconds || 300) * 1000,
+              resendAt: Date.now() + Number(res.resendInSeconds || 30) * 1000
             }));
             this.loading = false;
             this.router.navigate(['/mfa'], { replaceUrl: true });

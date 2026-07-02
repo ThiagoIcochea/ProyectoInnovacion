@@ -7,6 +7,8 @@ public class AdminUserResponse {
     private Integer idUsuario;
 
     private String nombreCompleto;
+    private String nombres;
+    private String apellidos;
 
     private String correo;
 
@@ -17,6 +19,9 @@ public class AdminUserResponse {
     private LocalDateTime fechaRegistro;
 
     private String fotoPerfil;
+    private String telefono;
+    private String whatsapp;
+    private String direccion;
 
     public Integer getIdUsuario() {
         return idUsuario;
@@ -32,6 +37,22 @@ public class AdminUserResponse {
 
     public void setNombreCompleto(String nombreCompleto) {
         this.nombreCompleto = nombreCompleto;
+    }
+
+    public String getNombres() {
+        return nombres;
+    }
+
+    public void setNombres(String nombres) {
+        this.nombres = nombres;
+    }
+
+    public String getApellidos() {
+        return apellidos;
+    }
+
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
     }
 
     public String getCorreo() {
@@ -72,5 +93,29 @@ public class AdminUserResponse {
 
     public void setFotoPerfil(String fotoPerfil) {
         this.fotoPerfil = fotoPerfil;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getWhatsapp() {
+        return whatsapp;
+    }
+
+    public void setWhatsapp(String whatsapp) {
+        this.whatsapp = whatsapp;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
     }
 }

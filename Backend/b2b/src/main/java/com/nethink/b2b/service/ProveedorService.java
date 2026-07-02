@@ -68,6 +68,9 @@ private LogsSistemaService logsSistemaService;
 private LogsApiRepository logsApiRepository;
 
     @Autowired
+    private ReclamoRepository reclamoRepository;
+
+    @Autowired
     private SuscripcionRepository suscripcionRepository;
 
     @Autowired
@@ -404,6 +407,10 @@ public List<IndicadorProveedorResponse> top10Proveedores() {
 
     for (Proveedor p : proveedores) {
 
+        if (!esProveedorActivo(p)) {
+            continue;
+        }
+
         int completadas = solicitudRepo
                 .countByProveedor_IdProveedorAndEstado(
                         p.getIdProveedor(),
@@ -548,5 +555,17 @@ public List<IndicadorProveedorResponse> top10Proveedores() {
             )
             .limit(10)
             .toList();
+}
+
+private boolean esProveedorActivo(Proveedor proveedor) {
+    if (proveedor == null) {
+        return false;
+    }
+
+    boolean proveedorActivo = "ACTIVO".equalsIgnoreCase(proveedor.getEstado());
+    boolean usuarioActivo = proveedor.getUsuario() != null
+            && proveedor.getUsuario().getEstado() == EstadoUsuario.ACTIVO;
+
+    return proveedorActivo && usuarioActivo;
 }
 }

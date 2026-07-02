@@ -10,6 +10,7 @@ public class MfaStartResponse {
     private boolean emailOnly;
     private String message;
     private int expiresInSeconds;
+    private int resendInSeconds;
 
     public MfaStartResponse() {
     }
@@ -23,6 +24,7 @@ public class MfaStartResponse {
         this.emailOnly = emailOnly;
         this.message = "Codigo MFA enviado";
         this.expiresInSeconds = 300;
+        this.resendInSeconds = 30;
     }
 
     public boolean isRequiresMfa() {
@@ -87,5 +89,13 @@ public class MfaStartResponse {
 
     public void setExpiresInSeconds(int expiresInSeconds) {
         this.expiresInSeconds = expiresInSeconds;
+    }
+
+    public int getResendInSeconds() {
+        return resendInSeconds;
+    }
+
+    public void setResendInSeconds(int resendInSeconds) {
+        this.resendInSeconds = resendInSeconds;
     }
 }

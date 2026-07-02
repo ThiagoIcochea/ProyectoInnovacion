@@ -20,6 +20,7 @@ public class MfaService {
     public static final String PURPOSE_PROFILE_UPDATE = "PROFILE_UPDATE";
     public static final String PURPOSE_PROVIDER_API_UPDATE = "PROVIDER_API_UPDATE";
     public static final String PURPOSE_ADMIN_ACTION = "ADMIN_ACTION";
+    public static final String PURPOSE_PASSWORD_RESET = "PASSWORD_RESET";
 
     private static final int CODE_TTL_MINUTES = 5;
     private static final int ACTION_TOKEN_TTL_MINUTES = 10;
@@ -55,7 +56,7 @@ public class MfaService {
         challenges.put(tempToken, challenge);
 
         emailService.enviarCodigoMfa(cleanEmail, code, selectedMethod, cleanPurpose, CODE_TTL_MINUTES);
-        return new MfaStartResponse(cleanEmail, tempToken, cleanPurpose, redirectTo, emailOnly);
+        return buildResponse(cleanEmail, tempToken, cleanPurpose, redirectTo, emailOnly, challenge);
     }
 
     public MfaStartResponse resend(String email, String tempToken, String method) {
@@ -65,7 +66,7 @@ public class MfaService {
         challenge.expiresAt = LocalDateTime.now().plusMinutes(CODE_TTL_MINUTES);
         challenge.attempts = 0;
         emailService.enviarCodigoMfa(challenge.email, challenge.code, challenge.method, challenge.purpose, CODE_TTL_MINUTES);
-        return new MfaStartResponse(challenge.email, tempToken, challenge.purpose, challenge.redirectTo, challenge.emailOnly);
+        return buildResponse(challenge.email, tempToken, challenge.purpose, challenge.redirectTo, challenge.emailOnly, challenge);
     }
 
     public Challenge verifyChallenge(String email, String tempToken, String code, String purpose) {
@@ -134,6 +135,16 @@ public class MfaService {
         }
 
         return challenge;
+    }
+
+    private MfaStartResponse buildResponse(String email, String tempToken, String purpose, String redirectTo, boolean emailOnly, Challenge challenge) {
+        MfaStartResponse response = new MfaStartResponse(email, tempToken, purpose, redirectTo, emailOnly);
+        if (challenge != null && challenge.expiresAt != null) {
+            long seconds = java.time.Duration.between(LocalDateTime.now(), challenge.expiresAt).getSeconds();
+            response.setExpiresInSeconds((int) Math.max(0, seconds));
+        }
+        response.setResendInSeconds(30);
+        return response;
     }
 
     private void blockUserIfExists(String email) {

@@ -313,12 +313,16 @@ export class VoiceAssistantComponent {
     try {
       const products = await this.fetchProducts();
       const normalizedQuery = this.normalize(query);
-      const product = products.find((item: any) => this.productMatches(item, normalizedQuery));
+      const product = this.findBestProduct(products, normalizedQuery);
 
       if (!product) {
         this.thinking = false;
         this.pending = { type: 'ADD_PRODUCT', qty };
-        this.say('No encontre ese producto con claridad. Dime otro nombre, marca o categoria.');
+        this.say(this.random([
+          'No encontre una coincidencia clara. Dime otra pista como marca, categoria o modelo.',
+          'No estoy seguro de cual producto agregar. Prueba con el nombre, marca o una caracteristica.',
+          'Tengo dudas con ese producto. Dame un dato mas, por ejemplo modelo, marca o categoria.'
+        ]));
         return;
       }
 
@@ -629,7 +633,23 @@ export class VoiceAssistantComponent {
       .trim();
   }
 
-  private productMatches(product: any, query: string): boolean {
+  private findBestProduct(products: any[], query: string): any | null {
+    const terms = query.split(' ').filter(term => term.length > 1);
+    if (!terms.length) {
+      return null;
+    }
+
+    const ranked = products
+      .map(product => ({
+        product,
+        score: this.productScore(product, query, terms)
+      }))
+      .sort((a, b) => b.score - a.score);
+
+    return ranked[0]?.score >= 0.42 ? ranked[0].product : null;
+  }
+
+  private productScore(product: any, query: string, terms: string[]): number {
     const haystack = this.normalize([
       product.producto,
       product.marca,
@@ -638,7 +658,44 @@ export class VoiceAssistantComponent {
       ...(product.especificaciones || []).map((spec: any) => `${spec?.nombre || ''} ${spec?.valor || ''}`)
     ].filter(Boolean).join(' '));
 
-    return query.split(' ').filter(Boolean).every(part => haystack.includes(part));
+    const exactName = this.normalize(product.producto || '');
+    let score = exactName.includes(query) || query.includes(exactName) ? 0.45 : 0;
+
+    const matched = terms.filter(part =>
+      haystack.includes(part) ||
+      haystack.split(' ').some(word => this.levenshtein(word, part) <= Math.max(1, Math.floor(part.length * 0.25)))
+    ).length;
+
+    score += matched / terms.length * 0.45;
+
+    if (this.normalize(product.marca || '').split(' ').some((brand: string) => terms.includes(brand))) {
+      score += 0.08;
+    }
+
+    if (this.normalize(product.categoria || '').split(' ').some((category: string) => terms.includes(category))) {
+      score += 0.08;
+    }
+
+    return Math.min(1, score);
+  }
+
+  private levenshtein(a: string, b: string): number {
+    const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+    for (let i = 1; i <= b.length; i++) {
+      for (let j = 1; j <= a.length; j++) {
+        matrix[i][j] = b.charAt(i - 1) === a.charAt(j - 1)
+          ? matrix[i - 1][j - 1]
+          : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+      }
+    }
+
+    return matrix[b.length][a.length];
+  }
+
+  private random(options: string[]): string {
+    return options[Math.floor(Math.random() * options.length)] || options[0];
   }
 
   private detectProfileField(value: string): string {

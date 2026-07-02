@@ -3,6 +3,7 @@ package com.nethink.b2b.controller;
 import com.nethink.b2b.dto.request.LoginRequest;
 import com.nethink.b2b.dto.request.MfaChallengeRequest;
 import com.nethink.b2b.dto.request.MfaVerifyRequest;
+import com.nethink.b2b.dto.request.PasswordResetCompleteRequest;
 import com.nethink.b2b.dto.request.RegisterClientRequest;
 import com.nethink.b2b.dto.request.RegisterProviderRequest;
 import com.nethink.b2b.dto.response.MfaStartResponse;
@@ -108,6 +109,36 @@ public class AuthController {
         }
 
         response.setMfaActionToken(mfaService.issueActionToken(challenge.email, challenge.purpose));
+        return response;
+    }
+
+    @PostMapping("/forgot-password/start")
+    public MfaStartResponse forgotPasswordStart(@RequestBody MfaChallengeRequest request) {
+        return mfaService.start(
+                request.getEmail(),
+                MfaService.PURPOSE_PASSWORD_RESET,
+                "email",
+                null,
+                true,
+                null
+        );
+    }
+
+    @PostMapping("/forgot-password/complete")
+    public MfaVerifyResponse forgotPasswordComplete(
+            @RequestBody PasswordResetCompleteRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        mfaService.consumeActionToken(
+                request.getMfaActionToken(),
+                request.getEmail(),
+                MfaService.PURPOSE_PASSWORD_RESET
+        );
+        usuarioService.completarResetPassword(request);
+
+        MfaVerifyResponse response = new MfaVerifyResponse();
+        response.setMessage("Contrasena actualizada correctamente");
+        response.setLogin(service.completeLogin(request.getEmail(), httpRequest));
         return response;
     }
 }

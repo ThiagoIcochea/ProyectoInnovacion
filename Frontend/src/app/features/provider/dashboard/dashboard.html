@@ -10,6 +10,10 @@
     <div class="api-status" [class.api-status--pending]="!apiConnected">
       {{ apiStatus }}
     </div>
+
+    <button type="button" class="export-btn" (click)="exportarDashboard()">
+      Exportar informe
+    </button>
   </div>
 
   <div class="metrics-grid">
@@ -23,6 +27,54 @@
       <p>{{ metric.change }}</p>
     </div>
   </div>
+
+  <section class="analytics-grid">
+    <div class="chart-panel">
+      <div class="chart-panel__header">
+        <h2>Historico de solicitudes</h2>
+        <p>Volumen mensual e ingresos asociados.</p>
+      </div>
+
+      <div class="bar-chart" *ngIf="historyChart.length; else noHistory">
+        <div class="bar-row" *ngFor="let item of historyChart">
+          <span>{{ item.label }}</span>
+          <div class="bar-track">
+            <div class="bar-fill" [style.width.%]="item.width"></div>
+          </div>
+          <strong>{{ item.count }}</strong>
+        </div>
+      </div>
+
+      <ng-template #noHistory>
+        <div class="empty-state">Aun no hay historico suficiente.</div>
+      </ng-template>
+    </div>
+
+    <div class="chart-panel">
+      <div class="chart-panel__header">
+        <h2>Estados operativos</h2>
+        <p>Distribucion actual de solicitudes.</p>
+      </div>
+
+      <div class="bar-chart">
+        <div class="bar-row" *ngFor="let item of statusChart">
+          <span>{{ item.label }}</span>
+          <div class="bar-track">
+            <div class="bar-fill" [style.width.%]="item.width" [style.background]="item.color"></div>
+          </div>
+          <strong>{{ item.count }}</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="insights-panel">
+    <div>
+      <span>Groq AI</span>
+      <h2>Insights para mejorar rendimiento</h2>
+    </div>
+    <p>{{ loadingInsights ? 'Analizando metricas...' : insights }}</p>
+  </section>
 
   <section class="requests-card">
     <div class="requests-card__header">

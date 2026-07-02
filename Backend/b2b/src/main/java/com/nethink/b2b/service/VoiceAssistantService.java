@@ -10,6 +10,7 @@ import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.repository.ConfiguracionRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -71,6 +72,54 @@ public class VoiceAssistantService {
             fallback.setAction("NONE");
             fallback.setAnswer("Puedo ayudarte a navegar, buscar y preparar acciones segun tu rol, pero ahora no pude consultar la IA. Intenta de nuevo en unos segundos.");
             return fallback;
+        }
+    }
+
+    public Map<String, String> providerInsights(String correo, Map<String, Object> stats) {
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        String prompt = """
+                Eres analista senior de performance B2B para proveedores. Analiza estas metricas reales y entrega recomendaciones concretas.
+                Proveedor: %s %s
+                Estadisticas JSON: %s
+
+                Devuelve un analisis en espanol con:
+                1. Diagnostico breve.
+                2. Riesgos operativos.
+                3. Tres acciones priorizadas para mejorar ranking, cumplimiento, reclamos e ingresos.
+                Maximo 180 palabras, tono ejecutivo y accionable.
+                """.formatted(usuario.getNombres(), usuario.getApellidos(), stats);
+
+        try {
+            Configuracion config = configRepository.findByClave("AI_COMMENTS").orElseThrow();
+            String apiKey = config.getValor();
+
+            GroqMessage system = new GroqMessage();
+            system.setRole("user");
+            system.setContent(prompt);
+
+            GroqRequest requestBody = new GroqRequest();
+            requestBody.setModel("openai/gpt-oss-20b");
+            requestBody.setTemperature(0.45);
+            requestBody.setMessages(List.of(system));
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(apiKey);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    HttpMethod.POST,
+                    new HttpEntity<>(requestBody, headers),
+                    String.class
+            );
+
+            JsonNode root = objectMapper.readTree(response.getBody());
+            String content = root.path("choices").get(0).path("message").path("content").asText();
+            return Map.of("analysis", content);
+        } catch (Exception e) {
+            return Map.of("analysis", "No pude consultar Groq ahora. Prioriza reducir reclamos abiertos, responder solicitudes pendientes y mantener inventario actualizado para mejorar ranking y conversion.");
         }
     }
 

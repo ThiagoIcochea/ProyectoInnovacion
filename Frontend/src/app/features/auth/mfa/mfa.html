@@ -54,8 +54,14 @@
           [ngModel]="digits[i]"
           [name]="'digit' + i"
           (ngModelChange)="updateDigit(i, $event)"
+          (keydown)="handleKeydown(i, $event)"
+          (paste)="pasteCode($event)"
         />
       </div>
+
+      <p class="mfa-countdown">
+        El codigo expira en {{ expiresSeconds }}s.
+      </p>
 
       <p class="mfa-error" *ngIf="errorMessage">{{ errorMessage }}</p>
 

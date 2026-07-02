@@ -1,6 +1,7 @@
 package com.nethink.b2b.controller;
 
 import com.nethink.b2b.dto.request.ProfileUpdateRequest;
+import com.nethink.b2b.dto.request.AdminUserUpdateRequest;
 import com.nethink.b2b.dto.request.RegisterClientRequest;
 import com.nethink.b2b.dto.response.ProfileResponse;
 import com.nethink.b2b.service.UsuarioService;
@@ -81,5 +82,17 @@ listarUsuarios(Principal principal, HttpServletRequest httpRequest) {
     return ResponseEntity.ok(
             usuarioService.listarUsuarios(usuario.getIdUsuario(),httpRequest)
     );
+}
+
+@PutMapping("/admin/{idUsuario}")
+public ResponseEntity<AdminUserResponse> actualizarUsuarioAdmin(
+        @PathVariable Integer idUsuario,
+        @RequestBody AdminUserUpdateRequest request,
+        @RequestHeader(value = "X-MFA-Authorization", required = false) String mfaActionToken,
+        Principal principal,
+        HttpServletRequest httpRequest
+) {
+    mfaService.consumeActionToken(mfaActionToken, principal.getName(), MfaService.PURPOSE_ADMIN_ACTION);
+    return ResponseEntity.ok(usuarioService.actualizarUsuarioAdmin(idUsuario, request, httpRequest));
 }
 }

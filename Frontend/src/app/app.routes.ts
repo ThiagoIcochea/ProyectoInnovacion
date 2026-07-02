@@ -20,6 +20,11 @@ export const routes: Routes = [
       import('./features/auth/mfa/mfa').then(m => m.MfaComponent)
   },
   {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/auth/forgot-password/forgot-password').then(m => m.ForgotPasswordComponent)
+  },
+  {
     path: 'select-role',
     loadComponent: () =>
       import('./features/public/role-selection/role-selection').then(m => m.RoleSelectionComponent)

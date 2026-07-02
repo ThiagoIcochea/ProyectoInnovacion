@@ -3,6 +3,8 @@ package com.nethink.b2b.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.nethink.b2b.dto.request.ProfileUpdateRequest;
+import com.nethink.b2b.dto.request.AdminUserUpdateRequest;
+import com.nethink.b2b.dto.request.PasswordResetCompleteRequest;
 import com.nethink.b2b.dto.request.RegisterClientRequest;
 import com.nethink.b2b.dto.response.ProfileResponse;
 import com.nethink.b2b.entity.PreferenciaUsuario;
@@ -34,6 +36,8 @@ public class UsuarioService {
     private final RolRepository rolRepository;
     private final EmailService emailService;
     private final LogsSistemaService logsSistemaService;
+    private final ProveedorRepository proveedorRepository;
+    private final ReclamoRepository reclamoRepository;
 
     public UsuarioService(
             UsuarioRepository usuarioRepo,
@@ -41,7 +45,9 @@ public class UsuarioService {
             Cloudinary cloudinary,
             RolRepository rolRepository,
             EmailService emailService,
-            LogsSistemaService logsSistemaService
+            LogsSistemaService logsSistemaService,
+            ProveedorRepository proveedorRepository,
+            ReclamoRepository reclamoRepository
     ) {
         this.usuarioRepo = usuarioRepo;
         this.prefRepo = prefRepo;
@@ -49,6 +55,8 @@ public class UsuarioService {
         this.rolRepository = rolRepository;
         this.emailService=emailService;
         this.logsSistemaService = logsSistemaService;
+        this.proveedorRepository = proveedorRepository;
+        this.reclamoRepository = reclamoRepository;
     }
 
     public void registrarCliente(RegisterClientRequest req,  HttpServletRequest request) {
@@ -271,6 +279,8 @@ public class UsuarioService {
                 + " "
                 + u.getApellidos()
         );
+        dto.setNombres(u.getNombres());
+        dto.setApellidos(u.getApellidos());
 
         dto.setCorreo(
                 u.getCorreo()
@@ -291,10 +301,100 @@ public class UsuarioService {
         dto.setFotoPerfil(
                 u.getFotoPerfil()
         );
+        dto.setTelefono(u.getTelefono());
+        dto.setWhatsapp(u.getWhatsapp());
+        dto.setDireccion(u.getDireccion());
 
         response.add(dto);
     }
 
     return response;
+}
+
+public AdminUserResponse actualizarUsuarioAdmin(Integer idUsuario, AdminUserUpdateRequest req, HttpServletRequest request) {
+    Usuario usuario = usuarioRepo.findById(idUsuario)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    if (req.getCorreo() != null && !req.getCorreo().isBlank() && !req.getCorreo().equalsIgnoreCase(usuario.getCorreo())) {
+        usuarioRepo.findByCorreo(req.getCorreo()).ifPresent(existente -> {
+            if (!existente.getIdUsuario().equals(usuario.getIdUsuario())) {
+                throw new RuntimeException("El correo ya esta registrado por otro usuario");
+            }
+        });
+        usuario.setCorreo(req.getCorreo().trim());
+    }
+
+    if (req.getNombres() != null) usuario.setNombres(req.getNombres().trim());
+    if (req.getApellidos() != null) usuario.setApellidos(req.getApellidos().trim());
+    if (req.getTelefono() != null) usuario.setTelefono(req.getTelefono().trim());
+    if (req.getWhatsapp() != null) usuario.setWhatsapp(req.getWhatsapp().trim());
+    if (req.getDireccion() != null) usuario.setDireccion(req.getDireccion().trim());
+    if (req.getPassword() != null && !req.getPassword().isBlank()) usuario.setPassword(req.getPassword());
+
+    EstadoUsuario estadoAnterior = usuario.getEstado();
+    if (req.getEstado() != null && !req.getEstado().isBlank()) {
+        usuario.setEstado(EstadoUsuario.valueOf(req.getEstado().trim().toUpperCase()));
+    }
+
+    usuario = usuarioRepo.save(usuario);
+
+    if (estadoAnterior != EstadoUsuario.ACTIVO && usuario.getEstado() == EstadoUsuario.ACTIVO) {
+        reactivarProveedorSiCorresponde(usuario);
+    }
+
+    logsSistemaService.registrarLog(
+            usuario.getIdUsuario(),
+            "ADMIN_USUARIO_ACTUALIZADO",
+            "ADMIN",
+            "Usuario gestionado por administrador",
+            request
+    );
+
+    return toAdminUserResponse(usuario);
+}
+
+public void completarResetPassword(PasswordResetCompleteRequest req) {
+    Usuario usuario = usuarioRepo.findByCorreo(req.getEmail())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    if (req.getNewPassword() == null || req.getNewPassword().trim().length() < 6) {
+        throw new RuntimeException("La nueva contrasena debe tener al menos 6 caracteres");
+    }
+
+    usuario.setPassword(req.getNewPassword());
+    usuarioRepo.save(usuario);
+}
+
+private void reactivarProveedorSiCorresponde(Usuario usuario) {
+    proveedorRepository.findByUsuario_Correo(usuario.getCorreo()).ifPresent(proveedor -> {
+        proveedor.setEstado("ACTIVO");
+        proveedorRepository.save(proveedor);
+
+        reclamoRepository.findByIdProveedor(proveedor.getIdProveedor()).forEach(reclamo -> {
+            reclamo.setEstado("RESUELTO");
+            reclamo.setResolucion("Penalizacion reiniciada por reactivacion administrativa.");
+            if (reclamo.getFechaResolucion() == null) {
+                reclamo.setFechaResolucion(LocalDateTime.now());
+            }
+            reclamoRepository.save(reclamo);
+        });
+    });
+}
+
+private AdminUserResponse toAdminUserResponse(Usuario u) {
+    AdminUserResponse dto = new AdminUserResponse();
+    dto.setIdUsuario(u.getIdUsuario());
+    dto.setNombreCompleto((u.getNombres() + " " + u.getApellidos()).trim());
+    dto.setNombres(u.getNombres());
+    dto.setApellidos(u.getApellidos());
+    dto.setCorreo(u.getCorreo());
+    dto.setRol(u.getRol().getNombre());
+    dto.setEstado(u.getEstado().name());
+    dto.setFechaRegistro(u.getFechaRegistro());
+    dto.setFotoPerfil(u.getFotoPerfil());
+    dto.setTelefono(u.getTelefono());
+    dto.setWhatsapp(u.getWhatsapp());
+    dto.setDireccion(u.getDireccion());
+    return dto;
 }
 }

@@ -479,6 +479,41 @@ public class EmailServiceImpl implements EmailService {
             System.out.println("Error enviando codigo MFA: " + e.getMessage());
         }
     }
+
+    @Async
+    @Override
+    public void enviarAlertaProveedorSuspendido(String correoAdmin, String proveedor, String correoProveedor, int reclamos) {
+        try {
+            if (correoAdmin == null || correoAdmin.isBlank()) return;
+
+            Resend resend = getResendClient();
+            String html = """
+                    <div style='font-family:Arial,sans-serif;background:#fff1f2;padding:36px'>
+                        <div style='max-width:620px;margin:auto;background:white;border-radius:12px;padding:30px'>
+                            <h2 style='color:#991b1b;margin-top:0'>Proveedor suspendido automaticamente</h2>
+                            <p>Se detectaron gestiones inapropiadas asociadas a un proveedor.</p>
+                            <div style='background:#fee2e2;padding:18px;border-radius:10px'>
+                                <p><b>Proveedor:</b> %s</p>
+                                <p><b>Correo:</b> %s</p>
+                                <p><b>Reclamos activos:</b> %d</p>
+                            </div>
+                            <p>La cuenta fue bloqueada y el proveedor dejo de aparecer en busquedas de clientes.</p>
+                        </div>
+                    </div>
+                    """.formatted(proveedor, correoProveedor, reclamos);
+
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                    .to(correoAdmin)
+                    .subject("Proveedor suspendido - NETHINK B2B")
+                    .html(html)
+                    .build();
+
+            resend.emails().send(params);
+        } catch (Exception e) {
+            System.out.println("Error alerta proveedor suspendido: " + e.getMessage());
+        }
+    }
     
     @Async
 @Override
