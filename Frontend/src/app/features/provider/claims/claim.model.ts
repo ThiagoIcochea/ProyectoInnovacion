@@ -31,4 +31,5 @@ export interface ProviderClaim {
 export interface UpdateClaimStatusRequest {
   estado: ClaimStatus;
   resolucion?: string;
+  accion?: string;
 }

@@ -209,7 +209,7 @@
   <form class="claim-form" (ngSubmit)="guardarReclamoDemora()">
     <label>
       Tipo de reclamo
-      <select name="claimType" [(ngModel)]="claimType" (change)="claimAction = getDefaultClaimAction(claimType); claimActionOptions = getClaimActionOptions(claimType)">
+      <select name="claimType" [(ngModel)]="claimType">
         <option value="DEMORA">Demora</option>
         <option value="CANCELACION">Cancelación</option>
         <option value="ENTREGA_INCOMPLETA">Entrega incompleta</option>
@@ -219,18 +219,6 @@
     <label *ngIf="claimType === 'DEMORA'">
       Fecha prometida por el proveedor
       <input type="date" name="claimPromisedDate" [(ngModel)]="claimPromisedDate" required>
-    </label>
-
-    <label>
-      Acción a tomar
-      <select name="claimAction" [(ngModel)]="claimAction">
-        <option *ngFor="let option of claimActionOptions" [value]="option.value">{{ option.label }}</option>
-      </select>
-    </label>
-
-    <label *ngIf="claimType === 'CANCELACION' && claimAction === 'CANCELAR'">
-      Motivo de cancelación
-      <textarea name="claimCancelReason" [(ngModel)]="claimCancelReason" rows="3" maxlength="500"></textarea>
     </label>
 
     <label>

@@ -4,6 +4,7 @@ public class ActualizarReclamoRequest {
 
     private String estado;
     private String resolucion;
+    private String accion;
 
     public String getEstado() {
         return estado;
@@ -19,5 +20,13 @@ public class ActualizarReclamoRequest {
 
     public void setResolucion(String resolucion) {
         this.resolucion = resolucion;
+    }
+
+    public String getAccion() {
+        return accion;
+    }
+
+    public void setAccion(String accion) {
+        this.accion = accion;
     }
 }

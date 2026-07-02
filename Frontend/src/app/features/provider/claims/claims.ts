@@ -19,6 +19,7 @@ export class ProviderClaimsComponent implements OnInit {
   searchTerm = '';
   estadoSeleccionado: ClaimStatus | '' = '';
   resolucion = '';
+  accionSolicitud = 'MANTENER';
   guardando = false;
   cargando = false;
   errorMessage = '';
@@ -106,10 +107,21 @@ export class ProviderClaimsComponent implements OnInit {
       return;
     }
 
+    if ((this.estadoSeleccionado === 'RESUELTO' || this.estadoSeleccionado === 'RECHAZADO')) {
+      const accionesDisponibles = this.getAccionesDisponibles();
+      const accionValida = accionesDisponibles.some(accion => accion.value === this.accionSolicitud);
+
+      if (!accionValida) {
+        this.errorMessage = 'Selecciona la acción que tomará la solicitud al cerrar el reclamo.';
+        return;
+      }
+    }
+
     this.guardando = true;
     this.claimsService.actualizarEstado(this.selectedClaim.idReclamo, {
       estado: this.estadoSeleccionado,
-      resolucion: this.resolucion.trim()
+      resolucion: this.resolucion.trim(),
+      accion: this.accionSolicitud
     }).subscribe({
       next: (claim) => {
         this.claims = this.claims.map(item => item.idReclamo === claim.idReclamo ? claim : item);
@@ -141,6 +153,41 @@ export class ProviderClaimsComponent implements OnInit {
         ];
       default:
         return [];
+    }
+  }
+
+  getAccionesDisponibles(): { value: string; label: string }[] {
+    if (!this.selectedClaim) {
+      return [];
+    }
+
+    switch (this.normalizar(this.selectedClaim.tipo)) {
+      case 'CANCELACION':
+        return [
+          { value: 'MANTENER', label: 'Mantener el estado actual' },
+          { value: 'PAGO_PENDIENTE', label: 'Pasar a PAGO PENDIENTE' },
+          { value: 'PAGO_VALIDANDO', label: 'Pasar a PAGO VALIDANDO' },
+          { value: 'CANCELAR', label: 'Cancelar la solicitud' }
+        ];
+      case 'ENTREGA_INCOMPLETA':
+        return [
+          { value: 'MANTENER', label: 'Mantener el estado actual' },
+          { value: 'EN_PREPARACION', label: 'Pasar a EN PREPARACION' }
+        ];
+      default:
+        return [
+          { value: 'MANTENER', label: 'Mantener el estado actual' },
+          { value: 'EN_PREPARACION', label: 'Pasar a EN PREPARACION' }
+        ];
+    }
+  }
+
+  onEstadoSeleccionadoCambio(): void {
+    const accionesDisponibles = this.getAccionesDisponibles();
+    const tieneAccionValida = accionesDisponibles.some(accion => accion.value === this.accionSolicitud);
+
+    if (!tieneAccionValida) {
+      this.accionSolicitud = 'MANTENER';
     }
   }
 
@@ -194,6 +241,7 @@ export class ProviderClaimsComponent implements OnInit {
   private resetForm(): void {
     this.estadoSeleccionado = '';
     this.resolucion = '';
+    this.accionSolicitud = 'MANTENER';
     this.errorMessage = '';
   }
 

@@ -241,12 +241,18 @@ public class ReclamoService {
 
         Reclamo guardado = reclamoRepository.save(reclamo);
         solicitudRepository.findById(reclamo.getIdSolicitud())
-                .ifPresent(solicitud -> guardarHistorialReclamo(
-                        solicitud,
-                        idUsuario,
-                        nuevoEstado,
-                        descripcionCambioReclamo(nuevoEstado, request.getResolucion())
-                ));
+                .ifPresent(solicitud -> {
+                    if ("RESUELTO".equals(nuevoEstado) || "RECHAZADO".equals(nuevoEstado)) {
+                        aplicarAccionSolicitud(solicitud, reclamo.getTipo(), request.getAccion(), null, request.getResolucion());
+                        solicitudRepository.save(solicitud);
+                    }
+                    guardarHistorialReclamo(
+                            solicitud,
+                            idUsuario,
+                            nuevoEstado,
+                            descripcionCambioReclamo(nuevoEstado, request.getResolucion())
+                    );
+                });
 
         return toProveedorResponse(guardado);
     }

@@ -28,9 +28,6 @@ export class RequestTrackingComponent implements OnInit {
   currentClaim: DelayClaim | null = null;
   selectedEvidence?: File;
   claimType: 'DEMORA' | 'CANCELACION' | 'ENTREGA_INCOMPLETA' = 'DEMORA';
-  claimAction = 'MANTENER';
-  claimCancelReason = '';
-  claimActionOptions: Array<{ value: string; label: string }> = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -175,12 +172,9 @@ export class RequestTrackingComponent implements OnInit {
     }
 
     this.claimType = this.getClaimTypeByState();
-    this.claimAction = this.getDefaultClaimAction(this.claimType);
     this.claimError = '';
     this.claimDescription = this.getDefaultClaimDescription();
     this.claimPromisedDate = this.getDefaultPromisedDateInput();
-    this.claimCancelReason = '';
-    this.claimActionOptions = this.getClaimActionOptions(this.claimType);
     this.claimModalOpen = true;
   }
 
@@ -207,11 +201,6 @@ export class RequestTrackingComponent implements OnInit {
       return;
     }
 
-    if (this.claimType === 'CANCELACION' && this.claimAction === 'CANCELAR' && !this.claimCancelReason.trim()) {
-      this.claimError = 'Indica el motivo de la cancelación.';
-      return;
-    }
-
     const payload = {
       idSolicitud: Number(this.tracking.idSolicitud),
       idProveedor: this.tracking?.idProveedor ?? null,
@@ -220,9 +209,6 @@ export class RequestTrackingComponent implements OnInit {
       orderCode: this.getRequestCode(),
       motivo: this.claimType,
       descripcion: description,
-      accion: this.claimAction,
-      nuevoEstado: this.getClaimTargetState(this.claimType, this.claimAction),
-      motivoCancelacion: this.claimCancelReason.trim(),
       fechaPrometida: promisedDate?.toISOString(),
       diasDemora: this.getDelayDays(promisedDate)
     };
@@ -409,56 +395,6 @@ export class RequestTrackingComponent implements OnInit {
     }
 
     return 'DEMORA';
-  }
-
-  getDefaultClaimAction(type: 'DEMORA' | 'CANCELACION' | 'ENTREGA_INCOMPLETA'): string {
-    if (type === 'CANCELACION') {
-      return 'CANCELAR';
-    }
-
-    if (type === 'ENTREGA_INCOMPLETA') {
-      return 'MANTENER';
-    }
-
-    return 'MANTENER';
-  }
-
-  getClaimActionOptions(type: 'DEMORA' | 'CANCELACION' | 'ENTREGA_INCOMPLETA'): Array<{ value: string; label: string }> {
-    if (type === 'CANCELACION') {
-      return [
-        { value: 'MANTENER', label: 'Mantener el estado actual' },
-        { value: 'PAGO_PENDIENTE', label: 'Pasar a PAGO PENDIENTE' },
-        { value: 'PAGO_VALIDANDO', label: 'Pasar a PAGO VALIDANDO' },
-        { value: 'CANCELAR', label: 'Cancelar la solicitud' }
-      ];
-    }
-
-    if (type === 'ENTREGA_INCOMPLETA') {
-      return [
-        { value: 'MANTENER', label: 'Mantener el estado actual' },
-        { value: 'EN_PREPARACION', label: 'Pasar a EN PREPARACION' }
-      ];
-    }
-
-    return [
-      { value: 'MANTENER', label: 'Mantener el estado actual' }
-    ];
-  }
-
-  private getClaimTargetState(type: 'DEMORA' | 'CANCELACION' | 'ENTREGA_INCOMPLETA', action: string): string | undefined {
-    if (type === 'CANCELACION' && action === 'PAGO_PENDIENTE') {
-      return 'PAGO_PENDIENTE';
-    }
-
-    if (type === 'CANCELACION' && action === 'PAGO_VALIDANDO') {
-      return 'PAGO_VALIDANDO';
-    }
-
-    if (type === 'ENTREGA_INCOMPLETA' && action === 'EN_PREPARACION') {
-      return 'EN_PREPARACION';
-    }
-
-    return undefined;
   }
 
   private isFinalStatus(): boolean {

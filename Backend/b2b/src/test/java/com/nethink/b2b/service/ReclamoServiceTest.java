@@ -1,6 +1,7 @@
 package com.nethink.b2b.service;
 
 import com.cloudinary.Cloudinary;
+import com.nethink.b2b.dto.request.ActualizarReclamoRequest;
 import com.nethink.b2b.dto.request.ReclamoRequest;
 import com.nethink.b2b.entity.Proveedor;
 import com.nethink.b2b.entity.Reclamo;
@@ -79,5 +80,34 @@ class ReclamoServiceTest {
         reclamoService.registrarReclamo(request, "cliente@test.com");
 
         assertEquals(Solicitud.EstadoSolicitud.EN_CAMINO, solicitud.getEstado());
+    }
+
+    @Test
+    void actualizarEstadoProveedorConResolucionResuelveYActualizaSolicitud() {
+        Reclamo reclamo = new Reclamo();
+        reclamo.setIdReclamo(99);
+        reclamo.setIdSolicitud(10);
+        reclamo.setIdProveedor(22);
+        reclamo.setTipo("ENTREGA_INCOMPLETA");
+        reclamo.setEstado("EN_REVISION");
+
+        Solicitud solicitud = new Solicitud();
+        solicitud.setIdSolicitud(10);
+        solicitud.setEstado(Solicitud.EstadoSolicitud.EN_CAMINO);
+
+        ActualizarReclamoRequest request = new ActualizarReclamoRequest();
+        request.setEstado("RESUELTO");
+        request.setResolucion("Se movio a preparacion");
+        request.setAccion("EN_PREPARACION");
+
+        when(reclamoRepository.findById(99)).thenReturn(Optional.of(reclamo));
+        when(reclamoRepository.save(any(Reclamo.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(solicitudRepository.findById(10)).thenReturn(Optional.of(solicitud));
+        when(historialRepository.save(any(SolicitudHistorial.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        reclamoService.actualizarEstadoProveedor(99, 22, 7, request);
+
+        assertEquals(Solicitud.EstadoSolicitud.EN_PREPARACION, solicitud.getEstado());
+        assertEquals("RESUELTO", reclamo.getEstado());
     }
 }

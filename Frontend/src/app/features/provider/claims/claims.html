@@ -137,10 +137,22 @@
             <h3>Actualizar estado</h3>
 
             <label for="nuevoEstado">Nuevo estado</label>
-            <select id="nuevoEstado" [(ngModel)]="estadoSeleccionado">
+            <select id="nuevoEstado" [(ngModel)]="estadoSeleccionado" (ngModelChange)="onEstadoSeleccionadoCambio()">
               <option value="">Seleccione...</option>
               <option *ngFor="let estado of getEstadosDisponibles()" [value]="estado.value">
                 {{ estado.label }}
+              </option>
+            </select>
+
+            <label for="accionSolicitud" *ngIf="estadoSeleccionado === 'RESUELTO' || estadoSeleccionado === 'RECHAZADO'">
+              Acción para la solicitud
+            </label>
+            <select
+              id="accionSolicitud"
+              *ngIf="estadoSeleccionado === 'RESUELTO' || estadoSeleccionado === 'RECHAZADO'"
+              [(ngModel)]="accionSolicitud">
+              <option *ngFor="let accion of getAccionesDisponibles()" [value]="accion.value">
+                {{ accion.label }}
               </option>
             </select>
 
