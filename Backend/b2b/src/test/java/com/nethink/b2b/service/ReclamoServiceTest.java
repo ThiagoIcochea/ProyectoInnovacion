@@ -9,6 +9,7 @@ import com.nethink.b2b.entity.Solicitud;
 import com.nethink.b2b.entity.SolicitudHistorial;
 import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.repository.ReclamoRepository;
+import com.nethink.b2b.repository.ProveedorRepository;
 import com.nethink.b2b.repository.SolicitudHistorialRepository;
 import com.nethink.b2b.repository.SolicitudRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
@@ -31,6 +32,7 @@ class ReclamoServiceTest {
     private SolicitudRepository solicitudRepository;
     private SolicitudHistorialRepository historialRepository;
     private UsuarioRepository usuarioRepository;
+    private ProveedorRepository proveedorRepository;
     private EmailService emailService;
     private Cloudinary cloudinary;
     private ModeracionService moderacionService;
@@ -42,6 +44,7 @@ class ReclamoServiceTest {
         solicitudRepository = Mockito.mock(SolicitudRepository.class);
         historialRepository = Mockito.mock(SolicitudHistorialRepository.class);
         usuarioRepository = Mockito.mock(UsuarioRepository.class);
+        proveedorRepository = Mockito.mock(ProveedorRepository.class);
         emailService = Mockito.mock(EmailService.class);
         cloudinary = Mockito.mock(Cloudinary.class);
         moderacionService = Mockito.mock(ModeracionService.class);
@@ -51,6 +54,7 @@ class ReclamoServiceTest {
                 solicitudRepository,
                 historialRepository,
                 usuarioRepository,
+                proveedorRepository,
                 emailService,
                 cloudinary,
                 moderacionService

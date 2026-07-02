@@ -12,6 +12,8 @@ import com.nethink.b2b.entity.Rol;
 import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.entity.enums.EstadoUsuario;
 import com.nethink.b2b.repository.PreferenciaUsuarioRepository;
+import com.nethink.b2b.repository.ProveedorRepository;
+import com.nethink.b2b.repository.ReclamoRepository;
 import com.nethink.b2b.repository.RolRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -316,12 +318,14 @@ public AdminUserResponse actualizarUsuarioAdmin(Integer idUsuario, AdminUserUpda
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
     if (req.getCorreo() != null && !req.getCorreo().isBlank() && !req.getCorreo().equalsIgnoreCase(usuario.getCorreo())) {
-        usuarioRepo.findByCorreo(req.getCorreo()).ifPresent(existente -> {
-            if (!existente.getIdUsuario().equals(usuario.getIdUsuario())) {
-                throw new RuntimeException("El correo ya esta registrado por otro usuario");
-            }
-        });
-        usuario.setCorreo(req.getCorreo().trim());
+        String correo = req.getCorreo().trim();
+        Usuario existente = usuarioRepo.findByCorreo(correo).orElse(null);
+
+        if (existente != null && !existente.getIdUsuario().equals(usuario.getIdUsuario())) {
+            throw new RuntimeException("El correo ya esta registrado por otro usuario");
+        }
+
+        usuario.setCorreo(correo);
     }
 
     if (req.getNombres() != null) usuario.setNombres(req.getNombres().trim());
