@@ -94,6 +94,8 @@ public class VoiceAssistantService {
                 - Cambiar perfil o API requiere MFA: marca requiresMfa=true.
                 - Para navegacion devuelve action=NAVIGATE y route permitida.
                 - Para busquedas devuelve action=SEARCH y search con el texto limpio.
+                - Si detectas logout, tracking, carrito, solicitud RFQ, seleccion de proveedor, confirmacion de pedido o actualizacion de perfil,
+                  explica brevemente que el asistente puede guiar la accion y pide el dato faltante si no esta completo.
                 - Para consultas sin accion devuelve action=NONE.
 
                 Rutas:

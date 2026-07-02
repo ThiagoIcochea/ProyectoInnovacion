@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +12,7 @@ import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.
   templateUrl: './rfq-catalog.html',
   styleUrl: './rfq-catalog.scss'
 })
-export class RfqCatalogComponent implements OnInit {
+export class RfqCatalogComponent implements OnInit, OnDestroy {
 
   products: any[] = [];
   productsOriginal: any[] = [];
@@ -55,6 +55,11 @@ export class RfqCatalogComponent implements OnInit {
   pageSize: number = 8;
 
   private readonly API_BASE = APP_API_BASE_URL;
+  private voiceCartUpdatedHandler = (event: Event) => {
+    const cart = (event as CustomEvent<any[]>).detail;
+    this.requestItems = Array.isArray(cart) ? cart : [];
+    this.cdr.detectChanges();
+  };
 
   constructor(
     private http: HttpClient,
@@ -64,6 +69,7 @@ export class RfqCatalogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    window.addEventListener('voiceCartUpdated', this.voiceCartUpdatedHandler);
 
     this.cargarCarritoLocal();
 
@@ -82,6 +88,10 @@ export class RfqCatalogComponent implements OnInit {
     this.aplicarFiltrosRefinado();
 
     this.actualizarTopProviders();
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('voiceCartUpdated', this.voiceCartUpdatedHandler);
   }
 
   private getHeaders(): HttpHeaders {
