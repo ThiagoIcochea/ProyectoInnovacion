@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.nethink.b2b.dto.response.TrackingStepEntregaResponse;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
+import java.time.LocalDateTime;
 
 public interface SolicitudHistorialRepository
         extends JpaRepository<SolicitudHistorial, Integer> {
@@ -61,7 +62,100 @@ listarTrackingSolicitud(
 ); 
     
     
-    
+// cantidad de solicitudes creadas mensual  
+
+@Query("""
+SELECT COUNT(DISTINCT h.solicitud.idSolicitud)
+FROM SolicitudHistorial h
+WHERE h.solicitud.proveedor.idProveedor = :idProveedor       
+AND h.estado = 'CREADA'
+AND h.fecha >= :inicioMesActual
+AND h.fecha < :finMesActual
+AND NOT EXISTS (
+    SELECT 1
+    FROM SolicitudHistorial hc
+    WHERE hc.solicitud.idSolicitud = h.solicitud.idSolicitud
+    AND hc.estado = 'CANCELADA'
+)
+""")
+Long contarSolicitudesMesActual(
+        @Param("idProveedor") Integer idProveedor,
+        @Param("inicioMesActual") LocalDateTime inicioMesActual,
+        @Param("finMesActual") LocalDateTime finMesActual
+        
+        
+);
+
+
+
+
+// solicitudes creadas del mes anterior
+
+@Query("""
+SELECT COUNT(DISTINCT h.solicitud.idSolicitud)
+FROM SolicitudHistorial h
+WHERE h.solicitud.proveedor.idProveedor = :idProveedor       
+AND h.estado = 'CREADA'
+AND h.fecha >= :inicioMesAnterior
+AND h.fecha < :finMesAnterior
+AND NOT EXISTS (
+    SELECT 1
+    FROM SolicitudHistorial hc
+    WHERE hc.solicitud.idSolicitud = h.solicitud.idSolicitud
+    AND hc.estado = 'CANCELADA'
+)
+""")
+Long contarSolicitudesMesAnterior(
+        @Param("idProveedor") Integer idProveedor,
+        @Param("inicioMesAnterior") LocalDateTime inicioMesAnterior,
+        @Param("finMesAnterior") LocalDateTime finMesAnterior
+        
+);
+
+
+
+// cantidad de solciitudes aceptadas en el mes actual y anterior
+
+@Query("""
+SELECT
+    COALESCE(
+        SUM(
+            CASE
+                WHEN h.fecha >= :inicioMesActual
+                 AND h.fecha < :finMesActual
+                THEN 1
+                ELSE 0
+            END
+        ),
+        0
+    ),
+
+    COALESCE(
+        SUM(
+            CASE
+                WHEN h.fecha >= :inicioMesAnterior
+                 AND h.fecha < :finMesAnterior
+                THEN 1
+                ELSE 0
+            END
+        ),
+        0
+    )
+
+FROM SolicitudHistorial h
+WHERE h.solicitud.proveedor.idProveedor = :idProveedor       
+
+AND h.estado = 'PEDIDO_APROBADO'
+AND h.fecha >= :inicioMesAnterior
+AND h.fecha < :finMesActual
+""")
+Object[] obtenerSolicitudesAprobadasDashboard(
+        @Param("idProveedor") Integer idProveedor,       
+        @Param("inicioMesActual") LocalDateTime inicioMesActual,
+        @Param("finMesActual") LocalDateTime finMesActual,
+        @Param("inicioMesAnterior") LocalDateTime inicioMesAnterior,
+        @Param("finMesAnterior") LocalDateTime finMesAnterior
+);    
     
     
     

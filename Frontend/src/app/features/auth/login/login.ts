@@ -213,4 +213,21 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     return 'Credenciales incorrectas o usuario inactivo.';
   }
+
+
+  // Botón de pánico para desarrollo local
+  forzarEntradaDesarrollo(): void {
+    const rolSimulado = 'PROVEEDOR'; // Cambia a 'ADMIN' o 'CLIENTE' según lo que vayas a programar
+    
+    localStorage.setItem(APP_STORAGE_KEYS.token, 'TOKEN_MOCK_DESARROLLO_JWT');
+    localStorage.setItem(APP_STORAGE_KEYS.role, rolSimulado);
+    localStorage.setItem('auth_user_email', 'dev@nethink.com');
+    localStorage.setItem('auth_user_id', '999');
+
+    this.redirectByRole(rolSimulado);
+  }
+
+
+
+
 }

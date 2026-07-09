@@ -41,7 +41,8 @@ public class SecurityConfig {
                                 "/api/usuarios/register",
                                 "/api/provider/register",
                                 "/api/solicitudes/proveedor/*/metodos-pago",
-                                "/api/suscripciones/**"
+                                "/api/suscripciones/**", 
+                                "/api/dashboard/proveedor"
                                 
                         ).permitAll()
                         .requestMatchers("/api/evaluaciones/")

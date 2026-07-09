@@ -3,7 +3,10 @@ import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
+import { ProveedorDashboardService } from './dashboard.service';
+import { DashboardResponse } from './dashboard-response.model';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
+import { Chart } from 'chart.js';
 
 @Component({
   selector: 'app-provider-dashboard',
@@ -13,6 +16,150 @@ import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
   styleUrl: './dashboard.scss'
 })
 export class ProviderDashboardComponent implements OnInit {
+  
+  dashboard?: DashboardResponse;
+
+  cargando = false;
+  error = false;
+
+private graficoIngresos?: Chart;
+  private graficoProductos?: Chart;
+
+
+  constructor(
+    private dashboardService: ProveedorDashboardService
+  ) { }
+
+  ngOnInit(): void {
+    this.cargarDashboard();
+  }
+
+  cargarDashboard(): void {
+
+    this.cargando = true;
+    this.error = false;
+
+    this.dashboardService.getDashboard()
+      .subscribe({
+
+        next: (response: DashboardResponse) => {
+
+          this.dashboard = response;
+           console.log(
+  JSON.stringify(response, null, 2)
+);
+
+          this.cargando = false;
+
+          // Aquí luego puedes crear tus gráficos
+          this.crearGraficoIngresos();
+          //this.crearGraficoProductos();
+
+        },
+
+        error: (err) => {
+
+          console.error(err);
+
+          this.error = true;
+          this.cargando = false;
+
+        }
+
+      });
+    
+    }
+
+
+   private crearGraficoIngresos():void{
+
+
+
+    if (!this.dashboard) {
+        return;
+    }
+
+    const labels =
+        this.dashboard.graficoIngresos.map(
+            x => x.mes
+        );
+
+    const valores =
+        this.dashboard.graficoIngresos.map(
+            x => x.ingresos
+        );
+
+    if (this.graficoIngresos) {
+        this.graficoIngresos.destroy();
+    }
+
+    this.graficoIngresos = new Chart("graficoIngresos", {
+
+        type: "line",
+
+        data: {
+
+            labels,
+
+            datasets: [
+
+                {
+
+                    label: "Ingresos",
+
+                    data: valores,
+
+                    borderWidth: 3,
+
+                    tension: 0.3,
+
+                    fill: false
+
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false
+
+        }
+
+    });
+
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  /*
+  
+  
   metrics = [
     {
       title: 'Solicitudes recibidas',
@@ -171,19 +318,19 @@ export class ProviderDashboardComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
-  }
-
+  }  */
+/*
   private parseInsightItems(value: string): string[] {
     const cleaned = String(value || '')
       .replace(/\r/g, '\n')
-      .replace(/\*\*(Diagnostico breve|Diagnóstico breve|Riesgos operativos|Tres acciones priorizadas)\*\*/gi, '\n')
-      .replace(/\bUSD\b|\bdolares\b|\bdólares\b|k\s*USD/gi, 'S/')
+      .replace(/\*\*(Diagnostico breve|Diagnóstico breve|Riesgos operativos|Tres acciones priorizadas)\*\*//*gi, '\n')*/
+     /* .replace(/\bUSD\b|\bdolares\b|\bdólares\b|k\s*USD/gi, 'S/')
       .replace(/\bsoles peruanos\b/gi, 'soles');
 
     const items = cleaned
       .split(/\n+|(?=\s*\d+[\).\s-]+\s*)/)
-      .map(item => item.replace(/^\s*\d+[\).\-\s]+/, '').replace(/\*\*/g, '').trim())
-      .filter(Boolean)
+      .map(item => item.replace(/^\s*\d+[\).\-\s]+/, '').replace(/\*\*//*g, '').trim())
+     /* .filter(Boolean)
       .slice(0, 5);
 
     if (items.length >= 5) {
@@ -283,4 +430,9 @@ export class ProviderDashboardComponent implements OnInit {
       maximumFractionDigits: 2
     })}`;
   }
+  
 }
+*/
+
+}
+

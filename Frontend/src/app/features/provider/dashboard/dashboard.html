@@ -3,7 +3,7 @@
   <div class="page-header">
     <div>
       <span>Resumen general</span>
-      <h1>Hola, {{ providerName }}</h1>
+      <h1>Hola, Nombreproveedor</h1>
       <p>Aqui tienes el resumen de tu actividad y solicitudes en la plataforma.</p>
     </div>
 
@@ -17,14 +17,14 @@
   </div>
 
   <div class="metrics-grid">
-    <div class="metric-card" *ngFor="let metric of metrics">
+    <div class="metric-card" *ngFor="let metric of dashboard">
       <div class="metric-card__top">
-        <span>{{ metric.title }}</span>
-        <div class="metric-icon">{{ metric.icon }}</div>
+        <span> SoliMesActu{{ metric.solicitudesMesActual }}</span>
+        <div class="metric-icon">   icono</div>
       </div>
 
-      <strong>{{ metric.value }}</strong>
-      <p>{{ metric.change }}</p>
+      <strong> hjhk</strong>
+      <p>hjhfffff</p>
     </div>
   </div>
 

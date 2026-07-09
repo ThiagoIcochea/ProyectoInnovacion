@@ -3,10 +3,13 @@ package com.nethink.b2b.repository;
 import com.nethink.b2b.entity.DetalleSolicitud;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 import org.springframework.data.repository.query.Param;
 import java.util.List;
+import java.time.LocalDateTime;
 import org.springframework.data.jpa.repository.Query;
 import com.nethink.b2b.dto.response.SolicitudDetalleEntregaResponse; 
 
@@ -89,7 +92,42 @@ listarDetallesEntregaProveedor(
 );
 
 
+// cinco productos más vendidos en el mes actual 
 
+
+@Query("""
+SELECT
+    d.proveedorProducto.producto.nombre,
+    SUM(d.cantidad)
+
+FROM DetalleSolicitud d
+
+WHERE d.solicitud.proveedor.idProveedor = :idProveedor
+
+AND EXISTS (
+
+    SELECT 1
+    FROM Pago p
+    WHERE p.solicitud.idSolicitud = d.solicitud.idSolicitud
+    AND p.estado = 'APROBADO'
+    AND p.fechaPago >= :inicioMesActual
+    AND p.fechaPago < :finMesActual
+
+)
+
+GROUP BY
+    d.proveedorProducto.producto.idProducto,
+    d.proveedorProducto.producto.nombre
+
+ORDER BY
+    SUM(d.cantidad) DESC
+""")
+List<Object[]> obtenerProductosMasVendidosMesActual(
+        @Param("idProveedor") Integer idProveedor,
+        @Param("inicioMesActual") LocalDateTime inicioMesActual,
+        @Param("finMesActual") LocalDateTime finMesActual,
+        Pageable pageable
+);
 
 
 
