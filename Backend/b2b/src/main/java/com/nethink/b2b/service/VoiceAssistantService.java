@@ -87,10 +87,10 @@ public class VoiceAssistantService {
                 Reglas obligatorias:
                 - Responde en espanol peruano, tono ejecutivo y accionable.
                 - Usa moneda peruana: soles, formato S/ 0.00. Nunca uses USD, dolares, k USD ni simbolos de otra moneda.
-                - Devuelve exactamente 5 ideas clave y criticas a mejorar.
-                - Formato obligatorio: lista numerada del 1 al 5. Cada item debe tener un titulo corto en negrita y una recomendacion concreta.
-                - No uses secciones como diagnostico, riesgos o tres acciones.
-                - Maximo 170 palabras.
+                - Devuelve un solo parrafo de recomendacion general, sin enumerar, sin bullets y sin titulos en negrita.
+                - Explica de forma integrada como mejorar aprobaciones, pendientes, reclamos, API e ingresos segun los datos disponibles.
+                - No uses secciones como diagnostico, riesgos o acciones adicionales.
+                - Maximo 120 palabras.
                 """.formatted(usuario.getNombres(), usuario.getApellidos(), stats);
 
         try {
@@ -119,15 +119,9 @@ public class VoiceAssistantService {
 
             JsonNode root = objectMapper.readTree(response.getBody());
             String content = root.path("choices").get(0).path("message").path("content").asText();
-            return Map.of("analysis", content);
+            return Map.of("analysis", normalizeInsightParagraph(content));
         } catch (Exception e) {
-            return Map.of("analysis", """
-                    1. **Pagos por validar**: reduce los estados PAGO_VALIDANDO con revisiones diarias y responsables claros.
-                    2. **Solicitudes pendientes**: responde cada RFQ dentro de un SLA operativo para mejorar conversion.
-                    3. **API del proveedor**: conecta la API para actualizar stock, precios y estados sin reprocesos manuales.
-                    4. **Reclamos abiertos**: cierra reclamos con evidencia y resolucion para proteger ranking y confianza.
-                    5. **Ingresos en soles**: enfoca aprobaciones de mayor valor y mide ingresos estimados en S/ para decisiones locales.
-                    """);
+            return Map.of("analysis", "Para mejorar el rendimiento, prioriza una revision diaria de pagos y solicitudes pendientes, define responsables claros para responder cada RFQ dentro de un plazo corto y conecta la API para mantener stock, precios y estados actualizados sin reprocesos manuales. Tambien conviene cerrar reclamos con evidencia y resoluciones claras para proteger la confianza del cliente, mientras enfocas la atencion comercial en las oportunidades con mayor valor estimado en S/.");
         }
     }
 
@@ -146,9 +140,17 @@ public class VoiceAssistantService {
                 PROVEEDOR: solicitudes recibidas, pagos, entregas, reclamos, productos, configuracion API, perfil.
                 ADMIN: dashboard, usuarios, proveedores, RFQs, productos, integraciones, logs, configuracion.
 
+                Acciones asistidas:
+                - CLIENTE puede crear solicitudes RFQ, confirmar pedidos, cambiar datos de perfil y pedir tracking.
+                - PROVEEDOR puede actualizar productos, stock, API, perfil, revisar solicitudes, pagos, entregas y reclamos.
+                - ADMIN puede preparar cambios sobre usuarios, proveedores, productos, RFQs, integraciones y configuracion.
+                - MFA no bloquea la intencion: primero recolecta datos y envia/prepara la accion; luego pide MFA solo para confirmar acciones sensibles.
+                - Para crear solicitudes cliente, siempre pide RUC de 11 digitos y ubicacion/direccion de entrega si faltan.
+                - Para cambios de datos pide campo, valor nuevo y despues indica que se enviara codigo MFA.
+
                 Reglas de seguridad:
                 - Nunca permitas acciones fuera del rol. Si el cliente pide logs, productos de proveedor o admin, niega con una alternativa util.
-                - Cambiar perfil o API requiere MFA: marca requiresMfa=true.
+                - Cambiar perfil, API o datos administrativos requiere MFA despues de recopilar los datos: marca requiresMfa=true.
                 - Para navegacion devuelve action=NAVIGATE y route permitida.
                 - Para busquedas devuelve action=SEARCH y search con el texto limpio.
                 - Si detectas logout, tracking, carrito, solicitud RFQ, seleccion de proveedor, confirmacion de pedido o actualizacion de perfil,
@@ -163,5 +165,20 @@ public class VoiceAssistantService {
                 Responde solamente JSON valido:
                 {"answer":"respuesta breve para hablar","action":"NAVIGATE|SEARCH|NONE","route":"ruta o null","search":"texto o null","requiresMfa":false}
                 """.formatted(nombre, rol, currentPath, text);
+    }
+
+    private String normalizeInsightParagraph(String content) {
+        String clean = String.valueOf(content == null ? "" : content)
+                .replace("\r", "\n")
+                .replaceAll("\\*\\*", "")
+                .replaceAll("(?m)^\\s*(?:\\d+\\s*[\\).:-]|[-*])\\s*", "")
+                .replaceAll("\\n+", " ")
+                .replaceAll("\\s+", " ")
+                .replaceAll("\\bUSD\\b|\\bdolares\\b|\\bdólares\\b|\\bdÃ³lares\\b|k\\s*USD", "S/")
+                .trim();
+
+        return clean.isBlank()
+                ? "Para mejorar el rendimiento, enfoca al equipo en responder solicitudes pendientes con rapidez, validar pagos de forma diaria, mantener inventario y precios sincronizados por API, resolver reclamos con evidencia y priorizar oportunidades de mayor valor en S/."
+                : clean;
     }
 }

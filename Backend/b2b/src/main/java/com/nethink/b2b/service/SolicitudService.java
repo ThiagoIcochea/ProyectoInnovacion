@@ -39,6 +39,12 @@ import com.nethink.b2b.dto.response.SolicitudDetalleEntregaResponse;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -67,6 +73,7 @@ public class SolicitudService {
     private final InventarioReservaService reservaService;
     private final InventarioReservaRepository reservaRepo;
     private final DescuentoVolumenRepository descuentoVolumenRepo;
+    private final HttpClient httpClient = HttpClient.newHttpClient();
     
     private final ProductoEspecificacionRepository especificacionRepo; 
      
@@ -536,18 +543,14 @@ BigDecimal totalItem =
     request
 );
         
-         List<InventarioReserva> reservas =
-            reservaRepo.findBySolicitud_IdSolicitud(idSolicitud);
-
-  
-    for (InventarioReserva r : reservas) {
-
-       
-        r.setEstado("CANCELADO");
-        r.setFechaActualizacion(LocalDateTime.now());
-
-        reservaRepo.save(r);
-    }
+        reservaService.cancelarReserva(idSolicitud);
+        logsSistemaService.registrarLog(
+                usuario.getIdUsuario(),
+                "RESERVA_CANCELADA",
+                "INVENTARIO",
+                "Reservas eliminadas y stock liberado para solicitud ID: " + solicitud.getIdSolicitud(),
+                request
+        );
 
         SolicitudHistorial historial =
                 new SolicitudHistorial();
@@ -622,6 +625,7 @@ BigDecimal totalItem =
         }
 
         // Marcar como completada si no hubo respuesta
+        @Transactional
         public void autoCompleteIfUnresolved(Integer idSolicitud) {
                 Solicitud s = solicitudRepo.findById(idSolicitud)
                                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
@@ -638,6 +642,42 @@ BigDecimal totalItem =
                         historial.setFecha(LocalDateTime.now());
                         historialRepo.save(historial);
                 }
+        }
+
+        @Transactional
+        public int autoCompletarEntregadasVencidas() {
+                LocalDateTime fechaLimite = LocalDateTime.now().minusHours(2);
+                List<Solicitud> solicitudes =
+                        historialRepo.listarSolicitudesEntregadasParaAutocompletar(fechaLimite);
+
+                for (Solicitud solicitud : solicitudes) {
+                        solicitud.setEstado(EstadoSolicitud.COMPLETADA);
+                        solicitudRepo.save(solicitud);
+
+                        SolicitudHistorial historial = new SolicitudHistorial();
+                        historial.setSolicitud(solicitud);
+                        historial.setIdUsuario(solicitud.getUsuario() != null ? solicitud.getUsuario().getIdUsuario() : null);
+                        historial.setEstado(EstadoSolicitud.COMPLETADA.name());
+                        historial.setDescripcion("Solicitud marcada como completada automaticamente tras 2 horas desde la entrega");
+                        historial.setFecha(LocalDateTime.now());
+                        historialRepo.save(historial);
+
+                        logsSistemaService.registrarLog(
+                                solicitud.getUsuario() != null ? solicitud.getUsuario().getIdUsuario() : null,
+                                "AUTO_COMPLETAR_SOLICITUD",
+                                "SOLICITUDES",
+                                "Solicitud completada automaticamente ID: " + solicitud.getIdSolicitud(),
+                                null
+                        );
+
+                        emailService.enviarCorreoEstadoSolicitud(
+                                solicitud,
+                                EstadoSolicitud.COMPLETADA.name(),
+                                "La solicitud fue completada automaticamente tras 2 horas desde la entrega."
+                        );
+                }
+
+                return solicitudes.size();
         }
 
         // Resolver evaluación enviada por cliente (marca completada)
@@ -711,6 +751,8 @@ BigDecimal totalItem =
             case   RECLAMO_RESUELTO -> "Reclamo Resuelto ";
 
             case ENTREGADA -> "Entregado";
+
+            case COMPLETADA -> "Completada";
 
             case CANCELADA -> "Cancelada";
 
@@ -1110,6 +1152,12 @@ public void aprobarPedido(Integer idSolicitud, String correoUsuario,HttpServletR
      ,
     req
 );
+
+    emailService.enviarCorreoEstadoSolicitud(
+            sol,
+            Solicitud.EstadoSolicitud.PEDIDO_APROBADO.name(),
+            "Pedido aprobado por el proveedor"
+    );
     
         SolicitudHistorial historial = new SolicitudHistorial();
         historial.setSolicitud(sol);
@@ -1164,6 +1212,7 @@ public void rechazarPedido(Integer idSolicitud,String prompt, String correoUsuar
     sol.setFechaCancelacion(LocalDateTime.now());
 
    sol = solicitudRepo.save(sol);
+   reservaService.cancelarReserva(idSolicitud);
 
   
     
@@ -1176,6 +1225,20 @@ public void rechazarPedido(Integer idSolicitud,String prompt, String correoUsuar
      ,
     req
 );
+
+    logsSistemaService.registrarLog(
+            usuario.getIdUsuario(),
+            "RESERVA_CANCELADA",
+            "INVENTARIO",
+            "Reservas eliminadas por rechazo de pedido ID: " + sol.getIdSolicitud(),
+            req
+    );
+
+    emailService.enviarCorreoEstadoSolicitud(
+            sol,
+            Solicitud.EstadoSolicitud.CANCELADA.name(),
+            "El pedido fue rechazado por el proveedor: " + prompt
+    );
     
         SolicitudHistorial historial = new SolicitudHistorial();
         historial.setSolicitud(sol);
@@ -1194,7 +1257,8 @@ public void rechazarPedido(Integer idSolicitud,String prompt, String correoUsuar
 
 @Transactional
 public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, String codigoIngresado,
-        String correoUsuario     ) {
+        String correoUsuario,
+        HttpServletRequest req) {
 
     
     
@@ -1210,10 +1274,10 @@ public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, S
         // =========================
         // 2. BUSCAR USUARIO AUTENTICADO
         // =========================
-        //Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
-        //        .orElseThrow(() ->
-        //                new RuntimeException("Usuario no encontrado")
-        //        );
+        Usuario usuario = usuarioRepo.findByCorreo(correoUsuario)
+                .orElseThrow(() ->
+                        new RuntimeException("Usuario no encontrado")
+                );
     
     
     // =========================
@@ -1231,6 +1295,7 @@ public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, S
         
         solicitud.setFechaEntrega(LocalDateTime.now());
         emailService.enviarCorreoEvaluacionCliente(solicitud);
+        reservaService.entregarReserva(idSolicitud);
     }
     
 
@@ -1248,14 +1313,103 @@ public void actualizarEstado(Integer idSolicitud, EstadoSolicitud nuevoEstado, S
     
     String descripcion = generarDescripcion(nuevoEstado);
 
+    logsSistemaService.registrarLog(
+            usuario.getIdUsuario(),
+            "ACTUALIZAR_ESTADO_SOLICITUD",
+            "SOLICITUDES",
+            "Solicitud " + solicitud.getIdSolicitud() + " cambio a " + nuevoEstado.name(),
+            req
+    );
+
+    if (nuevoEstado == EstadoSolicitud.ENTREGADA) {
+        logsSistemaService.registrarLog(
+                usuario.getIdUsuario(),
+                "RESERVA_ENTREGADA",
+                "INVENTARIO",
+                "Stock descontado y reservas cerradas para solicitud ID: " + solicitud.getIdSolicitud(),
+                req
+        );
+    }
+
+    emailService.enviarCorreoEstadoSolicitud(
+            solicitud,
+            nuevoEstado.name(),
+            descripcion
+    );
+
+    if (nuevoEstado == EstadoSolicitud.EN_CAMINO) {
+        notificarPedidoEnCamino(solicitud, req, usuario.getIdUsuario());
+    }
+
     // 2. guardar historial
     SolicitudHistorial hist = new SolicitudHistorial();
     hist.setSolicitud(solicitud);
     hist.setEstado(nuevoEstado.name());
     hist.setDescripcion(descripcion); 
     hist.setFecha(LocalDateTime.now());
+    hist.setIdUsuario(usuario.getIdUsuario());
 
     historialRepo.save(hist);
+}
+
+private void notificarPedidoEnCamino(Solicitud solicitud, HttpServletRequest req, Integer idUsuario) {
+    if (solicitud == null || solicitud.getUsuario() == null) {
+        return;
+    }
+
+    Usuario cliente = solicitud.getUsuario();
+    String nombre = (cliente.getNombres() + " " + cliente.getApellidos()).trim();
+    String numero = firstNonBlank(cliente.getWhatsapp(), cliente.getTelefono());
+    String codigo = solicitud.getCodigoRecepcion();
+
+    if (numero.isBlank() || codigo == null || codigo.isBlank()) {
+        logsSistemaService.registrarLog(
+                idUsuario,
+                "MACRODROID_EN_CAMINO_OMITIDO",
+                "INTEGRACIONES",
+                "Faltan numero o codigo de recepcion para solicitud " + solicitud.getIdSolicitud(),
+                req
+        );
+        return;
+    }
+
+    String url = "https://trigger.macrodroid.com/543902b9-9627-4797-833f-8ab08ee4a3ec/encamino"
+            + "?nombre=" + encode(nombre)
+            + "&numero=" + encode(numero)
+            + "&codigo=" + encode(codigo);
+
+    try {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(url)).GET().build();
+        HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+        logsSistemaService.registrarLog(
+                idUsuario,
+                "MACRODROID_EN_CAMINO",
+                "INTEGRACIONES",
+                "Trigger EN_CAMINO solicitud " + solicitud.getIdSolicitud() + " estado HTTP " + response.statusCode(),
+                req
+        );
+    } catch (Exception e) {
+        logsSistemaService.registrarLog(
+                idUsuario,
+                "MACRODROID_EN_CAMINO_ERROR",
+                "INTEGRACIONES",
+                e.getMessage(),
+                req
+        );
+    }
+}
+
+private String firstNonBlank(String... values) {
+    for (String value : values) {
+        if (value != null && !value.isBlank()) {
+            return value.trim().replaceAll("\\D", "");
+        }
+    }
+    return "";
+}
+
+private String encode(String value) {
+    return URLEncoder.encode(String.valueOf(value == null ? "" : value), StandardCharsets.UTF_8);
 }
 
 

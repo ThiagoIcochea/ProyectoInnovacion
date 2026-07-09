@@ -68,7 +68,7 @@
 .history-table__head,
 .history-table__row {
   display: grid;
-  grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1.3fr 1.4fr 0.9fr 0.9fr 1fr 0.9fr 1.3fr;
   gap: 1rem;
   padding: 1rem 1.5rem;
   align-items: center;
@@ -88,6 +88,37 @@
 
   &:hover {
     background: rgba(39, 52, 73, 0.45);
+  }
+}
+
+.row-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  button {
+    height: 34px;
+    padding: 0 0.7rem;
+    border-radius: 8px;
+    border: 1px solid rgba(96, 165, 250, 0.55);
+    background: rgba(37, 99, 235, 0.14);
+    color: #bfdbfe;
+    font-weight: 800;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(37, 99, 235, 0.24);
+    }
+
+    &.claim {
+      border-color: rgba(251, 146, 60, 0.55);
+      background: rgba(249, 115, 22, 0.14);
+      color: #fed7aa;
+
+      &:hover {
+        background: rgba(249, 115, 22, 0.24);
+      }
+    }
   }
 }
 
@@ -124,5 +155,9 @@
 
   .history-table__row {
     grid-template-columns: 1fr;
+  }
+
+  .row-actions {
+    justify-content: flex-start;
   }
 }

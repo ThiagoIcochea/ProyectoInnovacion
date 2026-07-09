@@ -16,7 +16,8 @@ type MfaMethod = 'email' | 'sms' | 'whatsapp' | 'call';
 })
 export class MfaComponent implements OnInit, OnDestroy {
 
-  digits = ['', '', '', '', '', ''];
+  code = '';
+  readonly digitSlots = Array.from({ length: 6 });
   method: MfaMethod = 'email';
   loading = false;
   errorMessage = '';
@@ -51,49 +52,70 @@ export class MfaComponent implements OnInit, OnDestroy {
     this.clearTimer();
   }
 
-  updateDigit(index: number, value: string): void {
-    const clean = value.replace(/\D/g, '');
+  updateCode(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const sanitized = input.value.replace(/\D/g, '').slice(0, 6);
+    this.code = sanitized;
+    if (input.value !== sanitized) {
+      input.value = sanitized;
+    }
+    this.errorMessage = '';
+  }
 
-    if (clean.length > 1) {
-      this.fillDigits(clean, index);
+  getDigit(index: number): string {
+    return this.code[index] || '';
+  }
+
+  updateDigit(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value.replace(/\D/g, '');
+
+    if (value.length > 1) {
+      this.setCodeFrom(index, value);
       return;
     }
 
-    const digit = clean.slice(-1);
-    this.digits[index] = digit;
+    const digits = this.code.padEnd(6, ' ').split('');
+    digits[index] = value || ' ';
+    this.code = digits.join('').replace(/\s/g, '').slice(0, 6);
+    input.value = value;
+    this.errorMessage = '';
 
-    if (digit && index < 5) {
-      const next = document.querySelector<HTMLInputElement>(`#mfa-digit-${index + 1}`);
-      next?.focus();
-    }
-
-    if (this.digits.every(Boolean)) {
-      this.verify();
+    if (value && index < 5) {
+      this.focusDigit(index + 1);
     }
   }
 
-  handleKeydown(index: number, event: KeyboardEvent): void {
-    if (event.key !== 'Backspace') {
-      return;
-    }
+  handleDigitKeydown(event: KeyboardEvent, index: number): void {
+    const input = event.target as HTMLInputElement;
 
-    if (!this.digits[index] && index > 0) {
+    if (event.key === 'Backspace' && !input.value && index > 0) {
       event.preventDefault();
-      this.digits[index - 1] = '';
+      this.removeDigit(index - 1);
       this.focusDigit(index - 1);
     }
+
+    if (event.key === 'ArrowLeft' && index > 0) {
+      event.preventDefault();
+      this.focusDigit(index - 1);
+    }
+
+    if (event.key === 'ArrowRight' && index < 5) {
+      event.preventDefault();
+      this.focusDigit(index + 1);
+    }
   }
 
-  pasteCode(event: ClipboardEvent): void {
-    const text = event.clipboardData?.getData('text') || '';
-    const clean = text.replace(/\D/g, '');
+  pasteCode(event: ClipboardEvent, index: number): void {
+    const pasted = event.clipboardData?.getData('text') || '';
+    const digits = pasted.replace(/\D/g, '');
 
-    if (!clean) {
+    if (!digits) {
       return;
     }
 
     event.preventDefault();
-    this.fillDigits(clean, 0);
+    this.setCodeFrom(index, digits);
   }
 
   resend(): void {
@@ -120,7 +142,7 @@ export class MfaComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const code = this.digits.join('');
+    const code = this.code;
 
     if (code.length !== 6) {
       this.errorMessage = 'Ingresa los 6 digitos.';
@@ -152,9 +174,35 @@ export class MfaComponent implements OnInit, OnDestroy {
       },
       error: err => {
         this.loading = false;
-        this.digits = ['', '', '', '', '', ''];
+        this.code = '';
         this.errorMessage = err?.error?.message || 'Codigo incorrecto o expirado.';
+        this.focusDigit(0);
       }
+    });
+  }
+
+  private setCodeFrom(index: number, value: string): void {
+    const digits = this.code.padEnd(6, ' ').split('');
+    value.replace(/\D/g, '').slice(0, 6 - index).split('').forEach((digit, offset) => {
+      digits[index + offset] = digit;
+    });
+
+    this.code = digits.join('').replace(/\s/g, '').slice(0, 6);
+    this.errorMessage = '';
+    this.focusDigit(Math.min(index + value.length, 5));
+  }
+
+  private removeDigit(index: number): void {
+    const digits = this.code.padEnd(6, ' ').split('');
+    digits[index] = ' ';
+    this.code = digits.join('').replace(/\s/g, '').slice(0, 6);
+  }
+
+  private focusDigit(index: number): void {
+    setTimeout(() => {
+      const input = document.getElementById(`mfa-digit-${index}`) as HTMLInputElement | null;
+      input?.focus();
+      input?.select();
     });
   }
 
@@ -185,27 +233,6 @@ export class MfaComponent implements OnInit, OnDestroy {
       clearInterval(this.timer);
       this.timer = null;
     }
-  }
-
-  private fillDigits(value: string, startIndex: number): void {
-    const chars = value.slice(0, 6 - startIndex).split('');
-
-    chars.forEach((char, offset) => {
-      this.digits[startIndex + offset] = char;
-    });
-
-    const nextIndex = Math.min(startIndex + chars.length, 5);
-    this.focusDigit(nextIndex);
-
-    if (this.digits.every(Boolean)) {
-      this.verify();
-    }
-  }
-
-  private focusDigit(index: number): void {
-    setTimeout(() => {
-      document.querySelector<HTMLInputElement>(`#mfa-digit-${index}`)?.focus();
-    });
   }
 
   private hydrateTimers(): void {

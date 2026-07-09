@@ -39,9 +39,9 @@
 
       <div class="promo-card" *ngIf="!loadingPublicidad && publicidades.length > 0">
         <span>{{ publicidades[currentPublicidadIndex]?.origen }}</span>
-        <div class="promo-card__icon">▣</div>
+        <div class="promo-card__icon">TOP</div>
         <h3>{{ publicidades[currentPublicidadIndex]?.titulo }}</h3>
-        <p>{{ publicidades[currentPublicidadIndex]?.enlace }}</p>
+        <p>{{ getPublicidadDetalle(publicidades[currentPublicidadIndex]) }}</p>
         
         <img
           [src]="publicidades[currentPublicidadIndex]?.imagen"

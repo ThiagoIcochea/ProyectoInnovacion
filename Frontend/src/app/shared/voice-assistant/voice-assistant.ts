@@ -278,7 +278,11 @@ export class VoiceAssistantComponent {
       const field = this.detectProfileField(normalized);
       if (!field) {
         this.pending = pending;
-        this.say('Puedo cambiar telefono, WhatsApp, direccion, nombres, apellidos, correo, RUC, razon social o descripcion. Dime cual campo quieres actualizar.');
+        this.say(`Puedo cambiar ${this.allowedProfileFieldsLabel()}. Dime cual campo quieres actualizar.`);
+        return true;
+      }
+      if (!this.canUpdateProfileField(field)) {
+        this.say(`Ese campo no esta disponible para tu rol. Puedes actualizar ${this.allowedProfileFieldsLabel()}.`);
         return true;
       }
       this.pending = { type: 'PROFILE_VALUE', field };
@@ -287,6 +291,10 @@ export class VoiceAssistantComponent {
     }
 
     if (pending.type === 'PROFILE_VALUE') {
+      if (!this.canUpdateProfileField(pending.field)) {
+        this.say(`Ese campo no esta disponible para tu rol. Puedes actualizar ${this.allowedProfileFieldsLabel()}.`);
+        return true;
+      }
       await this.updateProfileField(pending.field, text.trim());
       return true;
     }
@@ -494,6 +502,11 @@ export class VoiceAssistantComponent {
             }))
           }, { headers: this.headers() }).subscribe({
             next: res => {
+              if (!res?.idSolicitud) {
+                this.thinking = false;
+                this.say('El backend respondio, pero no confirmo el numero de solicitud. Revisa tus solicitudes antes de continuar.');
+                return;
+              }
               localStorage.setItem(APP_STORAGE_KEYS.currentSolicitudId, String(res.idSolicitud));
               localStorage.removeItem(APP_STORAGE_KEYS.rfqCart);
               localStorage.removeItem(APP_STORAGE_KEYS.selectedProvider);
@@ -520,7 +533,12 @@ export class VoiceAssistantComponent {
 
     if (!field) {
       this.pending = { type: 'PROFILE_FIELD' };
-      this.say('Puedo actualizar telefono, WhatsApp, direccion, nombres, apellidos, correo, RUC, razon social o descripcion. Que campo quieres cambiar?');
+      this.say(`Puedo actualizar ${this.allowedProfileFieldsLabel()}. Que campo quieres cambiar?`);
+      return;
+    }
+
+    if (!this.canUpdateProfileField(field)) {
+      this.say(`Ese campo no esta disponible para tu rol. Puedes actualizar ${this.allowedProfileFieldsLabel()}.`);
       return;
     }
 
@@ -534,6 +552,11 @@ export class VoiceAssistantComponent {
   }
 
   private async updateProfileField(field: string, value: string): Promise<void> {
+    if (!this.canUpdateProfileField(field)) {
+      this.say(`Ese campo no esta disponible para tu rol. Puedes actualizar ${this.allowedProfileFieldsLabel()}.`);
+      return;
+    }
+
     if (!value.trim()) {
       this.pending = { type: 'PROFILE_VALUE', field };
       this.say(`Necesito el nuevo valor para ${this.profileFieldLabel(field)}.`);
@@ -929,5 +952,32 @@ export class VoiceAssistantComponent {
     };
 
     return labels[field] || field;
+  }
+
+  private canUpdateProfileField(field: string): boolean {
+    const role = (localStorage.getItem(APP_STORAGE_KEYS.role) || '').toUpperCase();
+    const common = ['telefono', 'whatsapp', 'direccion', 'correo', 'nombres', 'apellidos'];
+    const providerOnly = ['ruc', 'razonSocial', 'descripcion'];
+
+    if (common.includes(field)) {
+      return true;
+    }
+
+    if (providerOnly.includes(field)) {
+      return role === 'PROVEEDOR';
+    }
+
+    return false;
+  }
+
+  private allowedProfileFieldsLabel(): string {
+    const role = (localStorage.getItem(APP_STORAGE_KEYS.role) || '').toUpperCase();
+    const fields = ['telefono', 'WhatsApp', 'direccion', 'nombres', 'apellidos', 'correo'];
+
+    if (role === 'PROVEEDOR') {
+      fields.push('RUC', 'razon social', 'descripcion');
+    }
+
+    return fields.join(', ');
   }
 }

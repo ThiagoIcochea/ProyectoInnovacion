@@ -18,10 +18,12 @@ import com.nethink.b2b.repository.ProveedorRepository;
 import com.nethink.b2b.repository.SolicitudHistorialRepository;
 import com.nethink.b2b.repository.SolicitudRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,33 @@ public class ReclamoService {
     private final EmailService emailService;
     private final Cloudinary cloudinary;
     private final ModeracionService moderacionService;
+    private final LogsSistemaService logsSistemaService;
+    private final InventarioReservaService inventarioReservaService;
+
+    @Autowired
+    public ReclamoService(
+            ReclamoRepository reclamoRepository,
+            SolicitudRepository solicitudRepository,
+            SolicitudHistorialRepository historialRepository,
+            UsuarioRepository usuarioRepository,
+            ProveedorRepository proveedorRepository,
+            EmailService emailService,
+            Cloudinary cloudinary,
+            ModeracionService moderacionService,
+            InventarioReservaService inventarioReservaService,
+            LogsSistemaService logsSistemaService) {
+
+        this.reclamoRepository = reclamoRepository;
+        this.solicitudRepository = solicitudRepository;
+        this.historialRepository = historialRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.proveedorRepository = proveedorRepository;
+        this.emailService = emailService;
+        this.cloudinary = cloudinary;
+        this.moderacionService = moderacionService;
+        this.logsSistemaService = logsSistemaService;
+        this.inventarioReservaService = inventarioReservaService;
+    }
 
     public ReclamoService(
             ReclamoRepository reclamoRepository,
@@ -56,15 +85,18 @@ public class ReclamoService {
             EmailService emailService,
             Cloudinary cloudinary,
             ModeracionService moderacionService) {
-
-        this.reclamoRepository = reclamoRepository;
-        this.solicitudRepository = solicitudRepository;
-        this.historialRepository = historialRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.proveedorRepository = proveedorRepository;
-        this.emailService = emailService;
-        this.cloudinary = cloudinary;
-        this.moderacionService = moderacionService;
+        this(
+                reclamoRepository,
+                solicitudRepository,
+                historialRepository,
+                usuarioRepository,
+                proveedorRepository,
+                emailService,
+                cloudinary,
+                moderacionService,
+                null,
+                null
+        );
     }
 
     private String subirACloudinary(MultipartFile archivo) throws IOException {
@@ -78,6 +110,11 @@ public class ReclamoService {
 
     @Transactional
     public void registrarReclamo(ReclamoRequest request, String correoUsuario) throws IOException {
+        registrarReclamo(request, correoUsuario, null);
+    }
+
+    @Transactional
+    public void registrarReclamo(ReclamoRequest request, String correoUsuario, HttpServletRequest httpRequest) throws IOException {
         Usuario usuario = usuarioRepository
                 .findByCorreo(correoUsuario)
                 .orElseThrow();
@@ -122,6 +159,13 @@ public class ReclamoService {
 
         reclamo.setEvidenciaUrl(evidenciaUrl);
         reclamoRepository.save(reclamo);
+        registrarLog(
+                usuario.getIdUsuario(),
+                "REGISTRAR_RECLAMO",
+                "RECLAMOS",
+                "Reclamo " + reclamo.getTipo() + " registrado para solicitud " + solicitud.getIdSolicitud(),
+                httpRequest
+        );
         evaluarSuspensionProveedor(reclamo.getIdProveedor());
 
         aplicarAccionSolicitud(solicitud, tipo, accion, request.getNuevoEstado(), request.getMotivoCancelacion(), null);
@@ -139,6 +183,11 @@ public class ReclamoService {
                 "Reclamo recibido",
                 "Hemos recibido tu reclamo para la solicitud " + solicitud.getIdSolicitud() + ". Un proveedor lo revisará pronto.",
                 "Reclamo recibido - Solicitud " + solicitud.getIdSolicitud()
+        );
+        emailService.enviarCorreoEstadoReclamo(
+                solicitud,
+                "ABIERTO",
+                "Se registro un reclamo para la solicitud " + solicitud.getIdSolicitud() + "."
         );
     }
 
@@ -190,6 +239,7 @@ public class ReclamoService {
 
         if ("CANCELAR".equals(accionNormalizada)) {
             cancelarSolicitud(solicitud, motivoCancelacion);
+            cancelarReservaSiExiste(solicitud);
             return;
         }
 
@@ -198,6 +248,7 @@ public class ReclamoService {
             if (nuevoEstadoSolicitud != null) {
                 if (nuevoEstadoSolicitud == EstadoSolicitud.ENTREGADA) {
                     validarCodigoEntrega(solicitud, codigoEntrega);
+                    entregarReservaSiExiste(solicitud);
                 }
                 solicitud.setEstado(nuevoEstadoSolicitud);
             }
@@ -310,6 +361,18 @@ public class ReclamoService {
         solicitud.setFechaCancelacion(LocalDateTime.now());
     }
 
+    private void cancelarReservaSiExiste(Solicitud solicitud) {
+        if (inventarioReservaService != null && solicitud != null && solicitud.getIdSolicitud() != null) {
+            inventarioReservaService.cancelarReserva(solicitud.getIdSolicitud());
+        }
+    }
+
+    private void entregarReservaSiExiste(Solicitud solicitud) {
+        if (inventarioReservaService != null && solicitud != null && solicitud.getIdSolicitud() != null) {
+            inventarioReservaService.entregarReserva(solicitud.getIdSolicitud());
+        }
+    }
+
     private String normalizarTipo(String tipo) {
         return tipo == null || tipo.isBlank() ? "DEMORA" : tipo.trim().toUpperCase();
     }
@@ -381,6 +444,16 @@ public class ReclamoService {
             Integer idProveedor,
             Integer idUsuario,
             ActualizarReclamoRequest request) {
+        return actualizarEstadoProveedor(idReclamo, idProveedor, idUsuario, request, null);
+    }
+
+    @Transactional
+    public ReclamoProveedorResponse actualizarEstadoProveedor(
+            Integer idReclamo,
+            Integer idProveedor,
+            Integer idUsuario,
+            ActualizarReclamoRequest request,
+            HttpServletRequest httpRequest) {
 
         Reclamo reclamo = reclamoRepository.findById(idReclamo)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reclamo no encontrado"));
@@ -416,9 +489,29 @@ public class ReclamoService {
                             nuevoEstado,
                             descripcionCambioReclamo(nuevoEstado, request.getResolucion())
                     );
+                    emailService.enviarCorreoEstadoReclamo(
+                            solicitud,
+                            nuevoEstado,
+                            descripcionCambioReclamo(nuevoEstado, request.getResolucion())
+                    );
                 });
 
+        registrarLog(
+                idUsuario,
+                "ACTUALIZAR_ESTADO_RECLAMO",
+                "RECLAMOS",
+                "Reclamo " + idReclamo + " cambio a " + nuevoEstado,
+                httpRequest
+        );
+
         return toProveedorResponse(guardado);
+    }
+
+    private void registrarLog(Integer idUsuario, String accion, String modulo, String descripcion, HttpServletRequest request) {
+        if (logsSistemaService == null) {
+            return;
+        }
+        logsSistemaService.registrarLog(idUsuario, accion, modulo, descripcion, request);
     }
 
     private String normalizarEstado(String estado) {

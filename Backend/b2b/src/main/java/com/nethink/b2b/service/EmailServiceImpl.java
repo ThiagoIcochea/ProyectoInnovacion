@@ -445,6 +445,136 @@ public class EmailServiceImpl implements EmailService {
 
     @Async
     @Override
+    public void enviarCorreoActualizacionUsuario(Usuario usuario, String titulo, String mensaje, String asunto) {
+        try {
+            if (usuario == null || usuario.getCorreo() == null || usuario.getCorreo().isBlank()) return;
+
+            Resend resend = getResendClient();
+            String html = """
+                    <div style='font-family:Arial,sans-serif;background:#f8fafc;padding:32px'>
+                        <div style='max-width:640px;margin:auto;background:#fff;border-radius:12px;padding:28px'>
+                            <h2 style='margin-top:0;color:#0f172a'>%s</h2>
+                            <p>Hola <b>%s</b>,</p>
+                            <p>%s</p>
+                            <p><b>Correo:</b> %s</p>
+                        </div>
+                    </div>
+                    """.formatted(
+                    titulo == null ? "Actualizacion de datos" : titulo,
+                    usuario.getNombres(),
+                    mensaje == null ? "Tus datos fueron actualizados correctamente." : mensaje,
+                    usuario.getCorreo()
+            );
+
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                    .to(usuario.getCorreo())
+                    .subject(asunto == null ? "Datos actualizados - NETHINK B2B" : asunto)
+                    .html(html)
+                    .build();
+
+            resend.emails().send(params);
+        } catch (Exception e) {
+            System.out.println("Error correo actualizacion usuario: " + e.getMessage());
+        }
+    }
+
+    @Async
+    @Override
+    public void enviarCorreoEstadoSolicitud(Solicitud solicitud, String estado, String descripcion) {
+        try {
+            if (solicitud == null) return;
+
+            String asunto = "Estado de solicitud actualizado - NETHINK B2B";
+            String html = """
+                    <div style='font-family:Arial,sans-serif;background:#f8fafc;padding:32px'>
+                        <div style='max-width:640px;margin:auto;background:#fff;border-radius:12px;padding:28px'>
+                            <h2 style='margin-top:0;color:#0f172a'>Solicitud %s</h2>
+                            <p><b>Estado:</b> %s</p>
+                            <p>%s</p>
+                            <p><b>Codigo de recepcion:</b> %s</p>
+                        </div>
+                    </div>
+                    """.formatted(
+                    "RFQ-2026" + solicitud.getIdSolicitud(),
+                    estado,
+                    descripcion == null || descripcion.isBlank() ? "Tu solicitud tiene una actualizacion." : descripcion,
+                    solicitud.getCodigoRecepcion()
+            );
+
+            Resend resend = getResendClient();
+            if (solicitud.getUsuario() != null && solicitud.getUsuario().getCorreo() != null) {
+                resend.emails().send(CreateEmailOptions.builder()
+                        .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                        .to(solicitud.getUsuario().getCorreo())
+                        .subject(asunto)
+                        .html(html)
+                        .build());
+            }
+
+            if (solicitud.getProveedor() != null
+                    && solicitud.getProveedor().getUsuario() != null
+                    && solicitud.getProveedor().getUsuario().getCorreo() != null) {
+                resend.emails().send(CreateEmailOptions.builder()
+                        .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                        .to(solicitud.getProveedor().getUsuario().getCorreo())
+                        .subject(asunto)
+                        .html(html)
+                        .build());
+            }
+        } catch (Exception e) {
+            System.out.println("Error correo estado solicitud: " + e.getMessage());
+        }
+    }
+
+    @Async
+    @Override
+    public void enviarCorreoEstadoReclamo(Solicitud solicitud, String estado, String descripcion) {
+        try {
+            if (solicitud == null) return;
+
+            String html = """
+                    <div style='font-family:Arial,sans-serif;background:#fff7ed;padding:32px'>
+                        <div style='max-width:640px;margin:auto;background:#fff;border-radius:12px;padding:28px'>
+                            <h2 style='margin-top:0;color:#9a3412'>Reclamo actualizado</h2>
+                            <p><b>Solicitud:</b> %s</p>
+                            <p><b>Estado del reclamo:</b> %s</p>
+                            <p>%s</p>
+                        </div>
+                    </div>
+                    """.formatted(
+                    "RFQ-2026" + solicitud.getIdSolicitud(),
+                    estado,
+                    descripcion == null || descripcion.isBlank() ? "El reclamo tiene una actualizacion." : descripcion
+            );
+
+            Resend resend = getResendClient();
+            if (solicitud.getUsuario() != null && solicitud.getUsuario().getCorreo() != null) {
+                resend.emails().send(CreateEmailOptions.builder()
+                        .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                        .to(solicitud.getUsuario().getCorreo())
+                        .subject("Reclamo actualizado - NETHINK B2B")
+                        .html(html)
+                        .build());
+            }
+
+            if (solicitud.getProveedor() != null
+                    && solicitud.getProveedor().getUsuario() != null
+                    && solicitud.getProveedor().getUsuario().getCorreo() != null) {
+                resend.emails().send(CreateEmailOptions.builder()
+                        .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
+                        .to(solicitud.getProveedor().getUsuario().getCorreo())
+                        .subject("Reclamo actualizado - NETHINK B2B")
+                        .html(html)
+                        .build());
+            }
+        } catch (Exception e) {
+            System.out.println("Error correo estado reclamo: " + e.getMessage());
+        }
+    }
+
+    @Async
+    @Override
     public void enviarCodigoMfa(String correo, String codigo, String metodo, String proposito, int minutosExpiracion) {
         try {
             Resend resend = getResendClient();

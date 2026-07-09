@@ -8,6 +8,7 @@ import com.nethink.b2b.service.UsuarioService;
 import com.nethink.b2b.service.MfaService;
 import java.security.Principal;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,7 @@ import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.repository.UsuarioRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -35,10 +37,10 @@ public class UsuarioController {
     public ResponseEntity<?> register(
             @RequestBody RegisterClientRequest request, HttpServletRequest httpRequest
     ) {
-
-        usuarioService.registrarCliente(request,httpRequest);
-
-        return ResponseEntity.ok("Cliente registrado correctamente");
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Usa /api/auth/register-client/start para registrar clientes con MFA por correo."
+        );
     }
 
     @GetMapping("/perfil")

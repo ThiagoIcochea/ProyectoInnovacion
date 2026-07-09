@@ -111,7 +111,9 @@ public ResponseEntity<?> aprobarPago(
 
 @PutMapping("/{idPago}/rechazar")
 public ResponseEntity<?> rechazarPago(
-        @PathVariable Integer idPago, Principal principal
+        @PathVariable Integer idPago,
+        Principal principal,
+        HttpServletRequest httpRequest
 ) {
 
     
@@ -119,7 +121,7 @@ public ResponseEntity<?> rechazarPago(
             .orElseThrow(() ->
                     new RuntimeException("Usuario no encontrado"));
 
-    pagoService.rechazarPago(idPago, usuario.getIdUsuario());
+    pagoService.rechazarPago(idPago, usuario.getIdUsuario(), httpRequest);
     
     
 

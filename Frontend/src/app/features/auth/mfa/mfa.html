@@ -45,17 +45,19 @@
     </div>
 
     <form (ngSubmit)="verify()">
-      <div class="mfa-digits">
+      <div class="mfa-digits" role="group" aria-label="Codigo MFA de 6 digitos">
         <input
-          *ngFor="let digit of digits; let i = index"
+          *ngFor="let digit of digitSlots; let i = index"
           [id]="'mfa-digit-' + i"
+          [name]="'mfaDigit' + i"
           inputmode="numeric"
+          autocomplete="one-time-code"
           maxlength="1"
-          [ngModel]="digits[i]"
-          [name]="'digit' + i"
-          (ngModelChange)="updateDigit(i, $event)"
-          (keydown)="handleKeydown(i, $event)"
-          (paste)="pasteCode($event)"
+          [value]="getDigit(i)"
+          (input)="updateDigit($event, i)"
+          (keydown)="handleDigitKeydown($event, i)"
+          (paste)="pasteCode($event, i)"
+          aria-label="Digito {{ i + 1 }}"
         />
       </div>
 

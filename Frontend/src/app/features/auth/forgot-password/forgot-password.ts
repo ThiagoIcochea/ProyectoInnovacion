@@ -5,6 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
+type MfaMethod = 'email' | 'whatsapp' | 'sms' | 'call';
+
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
@@ -17,6 +19,7 @@ export class ForgotPasswordComponent {
   private readonly passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
 
   email = '';
+  method: MfaMethod = 'email';
   digits = ['', '', '', '', '', ''];
   newPassword = '';
   confirmPassword = '';
@@ -45,7 +48,7 @@ export class ForgotPasswordComponent {
 
     this.http.post<any>(`${APP_API_BASE_URL}/auth/forgot-password/start`, {
       email: cleanEmail,
-      method: 'email'
+      method: this.method
     }).subscribe({
       next: res => {
         this.tempToken = res?.tempToken || '';
@@ -58,7 +61,7 @@ export class ForgotPasswordComponent {
         this.email = cleanEmail;
         this.step = 'code';
         this.loading = false;
-        alert('Codigo MFA enviado a tu correo. Ingresa los 6 digitos para continuar.');
+        alert(`Codigo MFA enviado por ${this.methodLabel(this.method)}. Ingresa los 6 digitos para continuar.`);
       },
       error: err => {
         this.loading = false;
@@ -82,6 +85,43 @@ export class ForgotPasswordComponent {
     if (this.digits.every(Boolean)) {
       this.verifyCode();
     }
+  }
+
+  changeMethod(method: MfaMethod): void {
+    if (this.loading || this.method === method) {
+      return;
+    }
+
+    this.method = method;
+    this.resendCode();
+  }
+
+  resendCode(): void {
+    if (this.loading || !this.tempToken) {
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.http.post<any>(`${APP_API_BASE_URL}/auth/mfa/resend`, {
+      email: this.email.trim(),
+      tempToken: this.tempToken,
+      method: this.method
+    }).subscribe({
+      next: res => {
+        this.tempToken = res?.tempToken || this.tempToken;
+        this.digits = ['', '', '', '', '', ''];
+        this.loading = false;
+        alert(`Codigo reenviado por ${this.methodLabel(this.method)}.`);
+        setTimeout(() => document.querySelector<HTMLInputElement>('#reset-digit-0')?.focus());
+      },
+      error: err => {
+        this.loading = false;
+        this.errorMessage = err?.error?.message || `No se pudo reenviar por ${this.methodLabel(this.method)}.`;
+        alert(this.errorMessage);
+      }
+    });
   }
 
   pasteCode(event: ClipboardEvent): void {
@@ -109,7 +149,7 @@ export class ForgotPasswordComponent {
       email: this.email.trim(),
       tempToken: this.tempToken,
       code,
-      method: 'email',
+      method: this.method,
       purpose: 'PASSWORD_RESET'
     }).subscribe({
       next: res => {
@@ -181,5 +221,16 @@ export class ForgotPasswordComponent {
     if (role === 'ADMIN') return APP_ROUTE_PATHS.adminDashboard;
     if (role === 'PROVEEDOR') return APP_ROUTE_PATHS.providerDashboard;
     return APP_ROUTE_PATHS.clientDashboard;
+  }
+
+  methodLabel(method: string): string {
+    const labels: Record<string, string> = {
+      email: 'correo',
+      whatsapp: 'WhatsApp',
+      sms: 'SMS',
+      call: 'llamada'
+    };
+
+    return labels[method] || method;
   }
 }
