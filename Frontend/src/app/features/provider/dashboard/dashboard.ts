@@ -4,7 +4,15 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin, Subscription, timeout } from 'rxjs';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
-import { ProviderShellDataService } from '../../../core/services/provider-shell-data.service';
+import {
+  ProviderClaimSummary,
+  ProviderRequestSummary,
+  ProviderShellDataService
+} from '../../../core/services/provider-shell-data.service';
+
+interface ProviderInsightsResponse {
+  analysis?: string;
+}
 
 @Component({
   selector: 'app-provider-dashboard',
@@ -143,12 +151,16 @@ export class ProviderDashboardComponent implements OnInit, OnDestroy {
     win?.print();
   }
 
-  private generarInsights(requests: any[], claims: any[], estimatedIncome: number): void {
+  private generarInsights(
+    requests: ProviderRequestSummary[],
+    claims: ProviderClaimSummary[],
+    estimatedIncome: number
+  ): void {
     this.loadingInsights = true;
     this.cdr.detectChanges();
 
     this.insightsSubscription?.unsubscribe();
-    this.insightsSubscription = this.http.post<any>(`${APP_API_BASE_URL}/assistant/provider-insights`, {
+    this.insightsSubscription = this.http.post<ProviderInsightsResponse>(`${APP_API_BASE_URL}/assistant/provider-insights`, {
       solicitudes: requests.length,
       aprobadas: requests.filter(request => this.isApproved(request?.estado)).length,
       pendientes: this.countPending(requests),
@@ -253,7 +265,7 @@ export class ProviderDashboardComponent implements OnInit, OnDestroy {
     }));
   }
 
-  private isApproved(status: string): boolean {
+  private isApproved(status?: string): boolean {
     return ['PAGADA', 'EN_PREPARACION', 'EN_CAMINO', 'ENTREGADA', 'COMPLETADA', 'Pedido aprobado'].includes(status || '');
   }
 

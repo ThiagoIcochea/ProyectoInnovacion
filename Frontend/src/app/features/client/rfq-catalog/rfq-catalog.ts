@@ -182,7 +182,7 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
     };
 
     this.productsRequest?.unsubscribe();
-    this.productsRequest = this.http.post<any[]>(
+    this.productsRequest = this.http.post<unknown[]>(
       `${this.API_BASE}/productos/catalogo/filtrado`,
       body,
       {

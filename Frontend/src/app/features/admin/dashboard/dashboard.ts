@@ -5,6 +5,28 @@ import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
+interface AdminUserSummary {
+  rol?: string;
+  estado?: string;
+}
+
+interface AdminProviderSummary {
+  estado?: string;
+}
+
+interface AdminRfqSummary {
+  total?: number | string;
+  estado?: string;
+  fechaCreacion?: string;
+}
+
+interface AdminLogSummary {
+  accion?: string;
+  modulo?: string;
+  descripcion?: string;
+  fecha?: string;
+}
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -50,7 +72,7 @@ export class AdminDashboardComponent implements OnInit {
   private cargarDashboard(): void {
     const options = { headers: this.headers() };
 
-    this.http.get<any[]>(`${APP_API_BASE_URL}/usuarios/admin/listar`, options)
+    this.http.get<AdminUserSummary[]>(`${APP_API_BASE_URL}/usuarios/admin/listar`, options)
       .pipe(catchError(() => of([])))
       .subscribe(users => {
         const visibleUsers = users.filter(user => user?.rol !== 'ADMIN');
@@ -63,7 +85,7 @@ export class AdminDashboardComponent implements OnInit {
         });
       });
 
-    this.http.get<any[]>(`${APP_API_BASE_URL}/provider/admin/listar`, options)
+    this.http.get<AdminProviderSummary[]>(`${APP_API_BASE_URL}/provider/admin/listar`, options)
       .pipe(catchError(() => of([])))
       .subscribe(providers => {
         const activeProviders = providers.filter(provider => (provider?.estado || '').toUpperCase() === 'ACTIVO');
@@ -75,7 +97,7 @@ export class AdminDashboardComponent implements OnInit {
         });
       });
 
-    this.http.get<any[]>(`${APP_API_BASE_URL}/solicitudes/admin/listar`, options)
+    this.http.get<AdminRfqSummary[]>(`${APP_API_BASE_URL}/solicitudes/admin/listar`, options)
       .pipe(catchError(() => of([])))
       .subscribe(rfqs => {
         const totalAmount = rfqs.reduce((sum, rfq) => sum + Number(rfq?.total || 0), 0);
@@ -96,7 +118,7 @@ export class AdminDashboardComponent implements OnInit {
         this.cdr.detectChanges();
       });
 
-    this.http.get<any[]>(`${APP_API_BASE_URL}/logs/admin`, options)
+    this.http.get<AdminLogSummary[]>(`${APP_API_BASE_URL}/logs/admin`, options)
       .pipe(catchError(() => of([])))
       .subscribe(logs => {
         this.activity = this.buildActivity(logs);
@@ -114,11 +136,11 @@ export class AdminDashboardComponent implements OnInit {
       this.cdr.detectChanges();
   }
 
-  private countOpenRfqs(rfqs: any[]): number {
+  private countOpenRfqs(rfqs: AdminRfqSummary[]): number {
     return rfqs.filter(rfq => !['CANCELADA', 'COMPLETADA', 'ENTREGADA'].includes((rfq?.estado || '').toUpperCase())).length;
   }
 
-  private buildActivity(logs: any[]): Array<{ title: string; detail: string; status: string }> {
+  private buildActivity(logs: AdminLogSummary[]): Array<{ title: string; detail: string; status: string }> {
     return logs.slice(0, 5).map(log => ({
       title: log?.accion || log?.modulo || 'Actividad del sistema',
       detail: log?.descripcion || this.formatDate(log?.fecha) || 'Registro sin descripcion',
@@ -126,7 +148,7 @@ export class AdminDashboardComponent implements OnInit {
     }));
   }
 
-  private buildChartBars(rfqs: any[]): Array<{ label: string; height: number; active: boolean }> {
+  private buildChartBars(rfqs: AdminRfqSummary[]): Array<{ label: string; height: number; active: boolean }> {
     const monthFormatter = new Intl.DateTimeFormat('es-PE', { month: 'short' });
     const months = Array.from({ length: 7 }, (_, index) => {
       const date = new Date();
@@ -140,7 +162,11 @@ export class AdminDashboardComponent implements OnInit {
     });
 
     rfqs.forEach(rfq => {
-      const date = new Date(rfq?.fechaCreacion);
+      if (!rfq.fechaCreacion) {
+        return;
+      }
+
+      const date = new Date(rfq.fechaCreacion);
       const month = months.find(item => item.key === `${date.getFullYear()}-${date.getMonth()}`);
 
       if (month) {

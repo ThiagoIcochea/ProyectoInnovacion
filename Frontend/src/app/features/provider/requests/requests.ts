@@ -331,11 +331,12 @@ export class ProviderRequestsComponent implements OnInit {
   }
 
   private updateRequestState(requestId: number, estado: string): void {
-    const update = (request: any) =>
-      request?.idSolicitud === requestId ? { ...request, estado } : request;
-
-    this.requests = this.requests.map(update);
-    this.filteredRequests = this.filteredRequests.map(update);
+    this.requests = this.requests.map(request =>
+      request?.idSolicitud === requestId ? { ...request, estado } : request
+    );
+    this.filteredRequests = this.filteredRequests.map(request =>
+      request?.idSolicitud === requestId ? { ...request, estado } : request
+    );
 
     if (this.selectedRequest?.idSolicitud === requestId) {
       this.selectedRequest = { ...this.selectedRequest, estado };
