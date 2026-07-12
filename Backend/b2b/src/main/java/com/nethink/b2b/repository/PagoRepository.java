@@ -37,9 +37,9 @@ SELECT
     MONTH(p.fecha_pago) AS mes,
     SUM(p.monto) AS ingresos
 
-FROM pago p
+FROM pagos p
 
-INNER JOIN solicitud s
+INNER JOIN solicitudes s
     ON s.id_solicitud = p.id_solicitud
 
 WHERE s.id_proveedor = :idProveedor

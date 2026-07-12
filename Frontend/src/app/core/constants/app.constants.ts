@@ -1,6 +1,6 @@
 // Centralized app constants to keep API and storage changes in one place.
-export const APP_API_BASE_URL = 'https://proyectoinnovacion.onrender.com/api';
-export const APP_API_ORIGIN = 'https://proyectoinnovacion.onrender.com';
+export const APP_API_BASE_URL = 'http://localhost:8080/api';
+export const APP_API_ORIGIN = 'http://localhost:8080';
 export const APP_FRONTEND_ORIGIN = 'https://proyectoinnovacion-1.onrender.com';
 
 export const APP_STORAGE_KEYS = {

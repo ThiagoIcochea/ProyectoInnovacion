@@ -174,7 +174,7 @@ AND EXISTS (
 AND s.fechaCreacion >= :inicioMesAnterior
 AND s.fechaCreacion < :finMesActual
 """)
-Object[] obtenerIngresosDashboard(
+List<Object[]> obtenerIngresosDashboard(
 
         @Param("idProveedor") Integer idProveedor,
 

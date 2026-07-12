@@ -13,6 +13,7 @@ import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 
 @Injectable({
   providedIn: 'root'
+  
 })
 export class ProveedorDashboardService {
 

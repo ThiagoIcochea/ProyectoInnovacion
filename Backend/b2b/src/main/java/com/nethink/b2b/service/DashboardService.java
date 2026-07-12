@@ -138,7 +138,7 @@ public class DashboardService {
     // indicador de ingresos   
        
        
-     Object[] ingresos =
+     List<Object[]> listaIngresos =
         solicitudRepo.obtenerIngresosDashboard(
                 idProveedor, 
                 inicioMesActual,
@@ -146,16 +146,39 @@ public class DashboardService {
                 inicioMesAnterior,
                 finMesAnterior
         );
+     
+     
+     
+     BigDecimal ingresosMesActual = BigDecimal.ZERO;
+    BigDecimal ingresosMesAnterior = BigDecimal.ZERO;
+     
+     // Verificamos que la lista no esté vacía y que tenga al menos una fila
+    if (listaIngresos != null && !listaIngresos.isEmpty()) {
+        Object[] filaIngresos = listaIngresos.get(0); // Tomamos la primera fila
+        
+        if (filaIngresos != null) {
+            if (filaIngresos.length > 0 && filaIngresos[0] != null) {
+                ingresosMesActual = BigDecimal.valueOf(((Number) filaIngresos[0]).doubleValue());
+            }
+            if (filaIngresos.length > 1 && filaIngresos[1] != null) {
+                ingresosMesAnterior = BigDecimal.valueOf(((Number) filaIngresos[1]).doubleValue());
+            }
+        }
+     
+        
+    }
+     
+     
 
-BigDecimal ingresosMesActual =
-        ingresos[0] == null
-        ? BigDecimal.ZERO
-        : (BigDecimal) ingresos[0];
-
-BigDecimal ingresosMesAnterior =
-        ingresos[1] == null
-        ? BigDecimal.ZERO
-        : (BigDecimal) ingresos[1];
+//BigDecimal ingresosMesActual =
+//        ingresos[0] == null
+//        ? BigDecimal.ZERO
+//        : (BigDecimal) ingresos[0];
+//
+//BigDecimal ingresosMesAnterior =
+//        ingresos[1] == null
+//        ? BigDecimal.ZERO
+//        : (BigDecimal) ingresos[1];
     
     
  Double porcentajeIngresos=calcularPorcentaje(
@@ -169,7 +192,7 @@ BigDecimal ingresosMesAnterior =
 // indicador de solicitudes aprobadas mensual
 
 
-Object[] resultado =
+List<Object[]> listaAprobadas =
         historialRepo.obtenerSolicitudesAprobadasDashboard(
                 idProveedor, 
                 inicioMesActual,
@@ -178,15 +201,39 @@ Object[] resultado =
                 finMesAnterior
         );
 
-Long solicitudesAprobadasMesActual =
-        resultado[0] == null
-        ? 0L
-        : ((Number) resultado[0]).longValue();
 
-Long solicitudesAprobadasMesAnterior =
-        resultado[1] == null
-        ? 0L
-        : ((Number) resultado[1]).longValue();
+
+
+Long solicitudesAprobadasMesActual = 0L;
+    Long solicitudesAprobadasMesAnterior = 0L;
+
+    
+if (listaAprobadas != null && !listaAprobadas.isEmpty()) {
+        Object[] filaAprobadas = listaAprobadas.get(0); // Tomamos la primera fila
+        
+        if (filaAprobadas != null) {
+            if (filaAprobadas.length > 0 && filaAprobadas[0] != null) {
+                solicitudesAprobadasMesActual = ((Number) filaAprobadas[0]).longValue();
+            }
+            if (filaAprobadas.length > 1 && filaAprobadas[1] != null) {
+                solicitudesAprobadasMesAnterior = ((Number) filaAprobadas[1]).longValue();
+            }
+        }
+}
+
+
+
+
+
+//Long solicitudesAprobadasMesActual =
+//        resultado[0] == null
+//        ? 0L
+//        : ((Number) resultado[0]).longValue();
+//
+//Long solicitudesAprobadasMesAnterior =
+//        resultado[1] == null
+//        ? 0L
+//        : ((Number) resultado[1]).longValue();
 
 
 
@@ -311,14 +358,28 @@ private Double calcularPorcentaje(
 
     for (Object[] fila : datos) {
 
-        Integer anio =
+      Integer anio =
                 ((Number) fila[0]).intValue();
 
         Integer mes =
                 ((Number) fila[1]).intValue();
 
-        BigDecimal ingreso =
-                (BigDecimal) fila[2];
+        //  CORRECCIÓN ULTRA SEGURA: Convierte cualquier tipo numérico (Double/Decimal) a BigDecimal de forma limpia
+        BigDecimal ingreso = fila[2] == null 
+                ? BigDecimal.ZERO 
+                : BigDecimal.valueOf(((Number) fila[2]).doubleValue());  
+        
+        
+//        Integer anio =
+//                ((Number) fila[0]).intValue();
+//
+//        Integer mes =
+//                ((Number) fila[1]).intValue();
+//
+//        BigDecimal ingreso =
+//                (BigDecimal) fila[2];
+
+
 
         mapaIngresos.put(
                 YearMonth.of(anio, mes),
@@ -375,7 +436,7 @@ private Double calcularPorcentaje(
         LocalDateTime finMesActual
 ) {
 
-    List<Object[]> datos =
+    org.springframework.data.domain.Page<Object[]> paginaDatos =
             detalleSolicitudRepository.obtenerProductosMasVendidosMesActual(
                     idProveedor,
                     inicioMesActual,
@@ -384,17 +445,40 @@ private Double calcularPorcentaje(
             );
 
     List<ProductoMasVendidoResponse> productos = new ArrayList<>();
+    
+    
+    // 2. Extraemos la lista de filas reales usando .getContent() y validamos que no esté vacía
+    if (paginaDatos != null && paginaDatos.hasContent()) {
+        List<Object[]> datos = paginaDatos.getContent();
 
-    for (Object[] fila : datos) {
+        for (Object[] fila : datos) {
+            // Verificación por si la fila viene corrupta o vacía
+            if (fila == null || fila.length < 2) {
+                continue;
+            }
 
-        String nombre = (String) fila[0];
+            // Extraemos el nombre (Columna 0)
+            String nombre = fila[0] != null ? fila[0].toString() : "Producto sin nombre";
 
-        Long cantidad = ((Number) fila[1]).longValue();
+            // Extraemos la cantidad de forma segura (Columna 1)
+            Long cantidad = fila[1] != null ? ((Number) fila[1]).longValue() : 0L;
 
-        productos.add(
-                new ProductoMasVendidoResponse(nombre, cantidad)
-        );
+            productos.add(
+                    new ProductoMasVendidoResponse(nombre, cantidad)
+            );
+        }
     }
+
+//    for (Object[] fila : datos) {
+//
+//        String nombre = (String) fila[0];
+//
+//        Long cantidad = ((Number) fila[1]).longValue();
+//
+//        productos.add(
+//                new ProductoMasVendidoResponse(nombre, cantidad)
+//        );
+//    }
 
     return productos;
 } 

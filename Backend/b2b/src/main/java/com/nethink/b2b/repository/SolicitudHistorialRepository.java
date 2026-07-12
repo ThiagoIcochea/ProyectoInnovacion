@@ -163,7 +163,7 @@ AND h.estado = 'PEDIDO_APROBADO'
 AND h.fecha >= :inicioMesAnterior
 AND h.fecha < :finMesActual
 """)
-Object[] obtenerSolicitudesAprobadasDashboard(
+List<Object[]> obtenerSolicitudesAprobadasDashboard(
         @Param("idProveedor") Integer idProveedor,       
         @Param("inicioMesActual") LocalDateTime inicioMesActual,
         @Param("finMesActual") LocalDateTime finMesActual,

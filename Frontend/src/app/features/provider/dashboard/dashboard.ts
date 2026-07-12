@@ -6,7 +6,8 @@ import { catchError, forkJoin, of } from 'rxjs';
 import { ProveedorDashboardService } from './dashboard.service';
 import { DashboardResponse } from './dashboard-response.model';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
-import { Chart } from 'chart.js';
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-provider-dashboard',
