@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { catchError, forkJoin, of } from 'rxjs';
+import { catchError, of } from 'rxjs';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
 @Component({
@@ -50,48 +50,68 @@ export class AdminDashboardComponent implements OnInit {
   private cargarDashboard(): void {
     const options = { headers: this.headers() };
 
-    forkJoin({
-      users: this.http.get<any[]>(`${APP_API_BASE_URL}/usuarios/admin/listar`, options).pipe(catchError(() => of([]))),
-      providers: this.http.get<any[]>(`${APP_API_BASE_URL}/provider/admin/listar`, options).pipe(catchError(() => of([]))),
-      rfqs: this.http.get<any[]>(`${APP_API_BASE_URL}/solicitudes/admin/listar`, options).pipe(catchError(() => of([]))),
-      logs: this.http.get<any[]>(`${APP_API_BASE_URL}/logs/admin`, options).pipe(catchError(() => of([])))
-    }).subscribe(({ users, providers, rfqs, logs }) => {
-      const visibleUsers = users.filter(user => user?.rol !== 'ADMIN');
-      const activeUsers = visibleUsers.filter(user => (user?.estado || '').toUpperCase() === 'ACTIVO');
-      const activeProviders = providers.filter(provider => (provider?.estado || '').toUpperCase() === 'ACTIVO');
-      const totalAmount = rfqs.reduce((sum, rfq) => sum + Number(rfq?.total || 0), 0);
+    this.http.get<any[]>(`${APP_API_BASE_URL}/usuarios/admin/listar`, options)
+      .pipe(catchError(() => of([])))
+      .subscribe(users => {
+        const visibleUsers = users.filter(user => user?.rol !== 'ADMIN');
+        const activeUsers = visibleUsers.filter(user => (user?.estado || '').toUpperCase() === 'ACTIVO');
 
-      this.metrics = [
-        {
-          title: 'Usuarios activos',
+        this.updateMetric(0, {
           value: this.formatCount(activeUsers.length || visibleUsers.length),
           change: `${this.formatCount(visibleUsers.length)} usuarios registrados`,
           type: 'positive'
-        },
-        {
-          title: 'Proveedores registrados',
+        });
+      });
+
+    this.http.get<any[]>(`${APP_API_BASE_URL}/provider/admin/listar`, options)
+      .pipe(catchError(() => of([])))
+      .subscribe(providers => {
+        const activeProviders = providers.filter(provider => (provider?.estado || '').toUpperCase() === 'ACTIVO');
+
+        this.updateMetric(1, {
           value: this.formatCount(providers.length),
           change: `${this.formatCount(activeProviders.length)} activos`,
           type: 'positive'
-        },
-        {
-          title: 'Solicitudes RFQ totales',
+        });
+      });
+
+    this.http.get<any[]>(`${APP_API_BASE_URL}/solicitudes/admin/listar`, options)
+      .pipe(catchError(() => of([])))
+      .subscribe(rfqs => {
+        const totalAmount = rfqs.reduce((sum, rfq) => sum + Number(rfq?.total || 0), 0);
+
+        this.updateMetric(2, {
           value: this.formatCount(rfqs.length),
           change: `${this.formatCount(this.countOpenRfqs(rfqs))} en curso`,
           type: 'positive'
-        },
-        {
-          title: 'Volumen transaccional',
+        });
+
+        this.updateMetric(3, {
           value: this.formatMoney(totalAmount),
           change: 'Calculado desde RFQs registradas',
           type: totalAmount > 0 ? 'positive' : 'negative'
-        }
-      ];
+        });
 
-      this.chartBars = this.buildChartBars(rfqs);
-      this.activity = this.buildActivity(logs);
+        this.chartBars = this.buildChartBars(rfqs);
+        this.cdr.detectChanges();
+      });
+
+    this.http.get<any[]>(`${APP_API_BASE_URL}/logs/admin`, options)
+      .pipe(catchError(() => of([])))
+      .subscribe(logs => {
+        this.activity = this.buildActivity(logs);
+        this.cdr.detectChanges();
+      });
+  }
+
+  private updateMetric(index: number, changes: Partial<{ value: string; change: string; type: string }>): void {
+    this.metrics = this.metrics.map((metric, currentIndex) =>
+      currentIndex === index
+        ? { ...metric, ...changes }
+        : metric
+    );
+
       this.cdr.detectChanges();
-    });
   }
 
   private countOpenRfqs(rfqs: any[]): number {

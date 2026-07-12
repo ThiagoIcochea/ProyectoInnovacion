@@ -19,8 +19,9 @@ import {
   RouterLinkActive,
   RouterOutlet
 } from '@angular/router';
-import { catchError, forkJoin, of } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../core/constants/app.constants';
+import { ProviderShellDataService } from '../../core/services/provider-shell-data.service';
 import { VoiceAssistantComponent } from '../../shared/voice-assistant/voice-assistant';
 
 @Component({
@@ -109,7 +110,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   private fotoPerfilCacheBust = Date.now();
   private providerCountsRefreshHandler = () => {
     if (this.isProvider) {
-      this.cargarIndicadoresProveedor();
+      this.cargarIndicadoresProveedor(true);
     }
   };
   private profileUpdatedHandler = (event: Event) => {
@@ -128,12 +129,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.cargarPerfil();
   };
 
-  private API_URL =
-  `${APP_API_BASE_URL}/proveedor-api`;
-
   constructor(
     public router: Router,
     private http: HttpClient,
+    private providerShellData: ProviderShellDataService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -526,14 +525,9 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     });
   }
 
-  cargarEstadoApi(): void {
+  cargarEstadoApi(refresh = false): void {
 
-  this.http.get<any>(
-    this.API_URL,
-    {
-      headers: this.headers()
-    }
-  )
+  this.providerShellData.getProviderApi(refresh)
   .subscribe({
 
     next: (res) => {
@@ -556,28 +550,12 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   });
 }
 
-  cargarIndicadoresProveedor(): void {
-    const options = {
-      headers: this.headers()
-    };
-
+  cargarIndicadoresProveedor(refresh = false): void {
     forkJoin({
-      solicitudes: this.http.get<any[]>(
-        `${APP_API_BASE_URL}/solicitudes/proveedor/mis-solicitudes`,
-        options
-      ).pipe(catchError(() => of([]))),
-      pagos: this.http.get<any[]>(
-        `${APP_API_BASE_URL}/pagos/proveedor/mis-pagos`,
-        options
-      ).pipe(catchError(() => of([]))),
-      entregas: this.http.get<any[]>(
-        `${APP_API_BASE_URL}/solicitudes/proveedor/entregas`,
-        options
-      ).pipe(catchError(() => of([]))),
-      reclamos: this.http.get<any[]>(
-        `${APP_API_BASE_URL}/reclamos/proveedor/mis-reclamos`,
-        options
-      ).pipe(catchError(() => of([])))
+      solicitudes: this.providerShellData.getProviderRequests(refresh),
+      pagos: this.providerShellData.getProviderPayments(refresh),
+      entregas: this.providerShellData.getProviderDeliveries(refresh),
+      reclamos: this.providerShellData.getProviderClaims(refresh)
     }).subscribe(({ solicitudes, pagos, entregas, reclamos }) => {
       this.providerRequestCount =
         (solicitudes || []).length;

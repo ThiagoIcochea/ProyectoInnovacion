@@ -6,7 +6,6 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 import { DelayClaim, DelayClaimsService } from '../../../core/services/delay-claims.service';
-import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-request-tracking',
@@ -27,6 +26,7 @@ export class RequestTrackingComponent implements OnInit {
   claimError = '';
   currentClaim: DelayClaim | null = null;
   selectedEvidence?: File;
+  claimSubmitting = false;
   claimType: 'DEMORA' | 'CANCELACION' | 'ENTREGA_INCOMPLETA' = 'DEMORA';
 
   constructor(
@@ -34,8 +34,7 @@ export class RequestTrackingComponent implements OnInit {
     private http: HttpClient,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private delayClaimsService: DelayClaimsService,
-    private notification: NotificationService
+    private delayClaimsService: DelayClaimsService
   ) {}
 
   ngOnInit(): void {
@@ -184,11 +183,19 @@ export class RequestTrackingComponent implements OnInit {
   }
 
   cerrarReclamoDemora(): void {
+    if (this.claimSubmitting) {
+      return;
+    }
+
     this.claimModalOpen = false;
     this.claimError = '';
   }
 
   guardarReclamoDemora(): void {
+    if (this.claimSubmitting) {
+      return;
+    }
+
     if (!this.tracking?.idSolicitud) {
       return;
     }
@@ -218,34 +225,30 @@ export class RequestTrackingComponent implements OnInit {
       diasDemora: this.getDelayDays(promisedDate)
     };
 
+    this.claimSubmitting = true;
+    this.claimError = '';
+
     this.delayClaimsService.save(payload, this.selectedEvidence).subscribe({
       next: (res) => {
         console.log('Reclamo registrado', res);
 
+        this.currentClaim = {
+          ...payload,
+          estado: 'PENDIENTE_PROVEEDOR',
+          createdAt: new Date().toISOString()
+        };
+        this.claimSubmitting = false;
         this.claimModalOpen = false;
         this.claimError = '';
+        this.selectedEvidence = undefined;
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error(err);
+        this.claimSubmitting = false;
         this.claimError = err?.error?.message || 'No se pudo registrar el reclamo. Verifica si ya existe uno activo para este tipo.';
         this.cdr.detectChanges();
       }
-    });
-
-    const emailPayload = {
-      idSolicitud: Number(this.tracking.idSolicitud),
-      proveedor: this.tracking?.proveedor || 'Proveedor',
-      empresaCliente: this.tracking?.empresaCompradora?.razonSocial || 'Cliente',
-      motivo: this.claimType,
-      descripcion: description,
-      fechaPrometida: promisedDate?.toISOString() || null,
-      evidencia: [] 
-    };
-
-    this.notification.sendDelayClaimEmail(emailPayload).subscribe({
-      next: () => console.log('Reclamo enviado por correo (backend).'),
-      error: (err) => console.warn('Error enviando reclamo por correo', err)
     });
   }
 

@@ -8,7 +8,7 @@
     </div>
   </div>
 
-  <div class="profile-grid">
+  <div class="profile-grid" [class.profile-grid--provider]="esProveedor">
 
     <section class="profile-card">
 
@@ -169,7 +169,7 @@
 
     </section>
 
-    <aside class="settings-card">
+    <aside class="settings-card" *ngIf="!esProveedor">
 
       <h2>Preferencias</h2>
 

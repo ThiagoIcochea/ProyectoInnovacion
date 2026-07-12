@@ -28,6 +28,10 @@ export class RequestEvaluationComponent implements OnInit {
 
   comment = '';
 
+  submitting = false;
+
+  errorMessage = '';
+
   providerName = '';
 
   fechaEntrega = '';
@@ -81,6 +85,12 @@ export class RequestEvaluationComponent implements OnInit {
 
   submitEvaluation(){
 
+    if (this.submitting) {
+
+      return;
+
+    }
+
     if(
       this.servicio==0 ||
       this.calidad==0 ||
@@ -112,7 +122,8 @@ export class RequestEvaluationComponent implements OnInit {
 
     console.log(body);
 
-   
+    this.submitting = true;
+    this.errorMessage = '';
 
     this.notification
         .registrarEvaluacion(body)
@@ -120,15 +131,22 @@ export class RequestEvaluationComponent implements OnInit {
 
             next:()=>{
 
+                this.submitting = false;
+
                 alert("Evaluación registrada correctamente.");
 
                 this.router.navigate(['/app/history']);
 
             },
 
-            error:()=>{
+            error:(err)=>{
 
-                alert("Ocurrió un error.");
+                this.submitting = false;
+                this.errorMessage =
+                  err?.error?.message || "Ocurrio un error.";
+
+                alert(this.errorMessage);
+
 
             }
 
@@ -137,8 +155,6 @@ export class RequestEvaluationComponent implements OnInit {
     
 
     
-
-    this.router.navigate(['/app/history']);
 
   }
 

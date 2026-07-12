@@ -110,10 +110,18 @@
 
         <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
 
-        <div class="validation-actions" *ngIf="selectedRequest?.estado === 'PAGO_PENDIENTE'">
-          <button class="btn-danger" (click)="rechazarPedido()">Rechazar pedido</button>
-          <button class="btn-primary" (click)="aprobarPedido()" [disabled]="!selectedRequest">
-            Aprobar pedido
+        <div class="validation-actions" *ngIf="canProcessSelectedRequest() || isProcessingSelectedRequest()">
+          <button
+            class="btn-danger"
+            (click)="rechazarPedido()"
+            [disabled]="!canProcessSelectedRequest()">
+            {{ processingAction === 'RECHAZAR' ? 'Rechazando...' : 'Rechazar pedido' }}
+          </button>
+          <button
+            class="btn-primary"
+            (click)="aprobarPedido()"
+            [disabled]="!canProcessSelectedRequest()">
+            {{ processingAction === 'APROBAR' ? 'Aprobando...' : 'Aprobar pedido' }}
           </button>
         </div>
       </ng-container>

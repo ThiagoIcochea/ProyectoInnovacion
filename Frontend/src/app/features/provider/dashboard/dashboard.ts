@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { catchError, forkJoin, of } from 'rxjs';
+import { forkJoin, Subscription, timeout } from 'rxjs';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
+import { ProviderShellDataService } from '../../../core/services/provider-shell-data.service';
 
 @Component({
   selector: 'app-provider-dashboard',
@@ -12,7 +13,7 @@ import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
-export class ProviderDashboardComponent implements OnInit {
+export class ProviderDashboardComponent implements OnInit, OnDestroy {
   metrics = [
     {
       title: 'Solicitudes recibidas',
@@ -43,9 +44,12 @@ export class ProviderDashboardComponent implements OnInit {
   insights = 'Generando analisis...';
   insightItems: string[] = [];
   loadingInsights = false;
+  private dashboardSubscription?: Subscription;
+  private insightsSubscription?: Subscription;
 
   constructor(
     private http: HttpClient,
+    private providerShellData: ProviderShellDataService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -53,11 +57,16 @@ export class ProviderDashboardComponent implements OnInit {
     this.cargarDashboard();
   }
 
+  ngOnDestroy(): void {
+    this.dashboardSubscription?.unsubscribe();
+    this.insightsSubscription?.unsubscribe();
+  }
+
   private cargarDashboard(): void {
-    forkJoin({
-      requests: this.http.get<any[]>(`${APP_API_BASE_URL}/solicitudes/proveedor/mis-solicitudes`).pipe(catchError(() => of([]))),
-      apiConfig: this.http.get<any>(`${APP_API_BASE_URL}/proveedor-api`).pipe(catchError(() => of(null))),
-      claims: this.http.get<any[]>(`${APP_API_BASE_URL}/reclamos/proveedor/mis-reclamos`).pipe(catchError(() => of([])))
+    this.dashboardSubscription = forkJoin({
+      requests: this.providerShellData.getProviderRequests(),
+      apiConfig: this.providerShellData.getProviderApi(),
+      claims: this.providerShellData.getProviderClaims()
     }).subscribe(({ requests, apiConfig, claims }) => {
       const approved = requests.filter(request => this.isApproved(request?.estado));
       const estimatedIncome = approved.reduce((sum, request) => sum + Number(request?.total || 0), 0);
@@ -98,9 +107,8 @@ export class ProviderDashboardComponent implements OnInit {
 
       this.historyChart = this.buildMonthlyHistory(requests);
       this.statusChart = this.buildStatusChart(requests);
-      this.generarInsights(requests, claims, estimatedIncome);
-
       this.cdr.detectChanges();
+      this.generarInsights(requests, claims, estimatedIncome);
     });
   }
 
@@ -137,8 +145,10 @@ export class ProviderDashboardComponent implements OnInit {
 
   private generarInsights(requests: any[], claims: any[], estimatedIncome: number): void {
     this.loadingInsights = true;
+    this.cdr.detectChanges();
 
-    this.http.post<any>(`${APP_API_BASE_URL}/assistant/provider-insights`, {
+    this.insightsSubscription?.unsubscribe();
+    this.insightsSubscription = this.http.post<any>(`${APP_API_BASE_URL}/assistant/provider-insights`, {
       solicitudes: requests.length,
       aprobadas: requests.filter(request => this.isApproved(request?.estado)).length,
       pendientes: this.countPending(requests),
@@ -151,7 +161,9 @@ export class ProviderDashboardComponent implements OnInit {
       apiConectada: this.apiConnected,
       historico: this.historyChart,
       estados: this.statusChart
-    }).subscribe({
+    }).pipe(
+      timeout(12000)
+    ).subscribe({
       next: res => {
         this.insights = res?.analysis || 'No se recibio analisis.';
         this.insightItems = this.parseInsightItems(this.insights);

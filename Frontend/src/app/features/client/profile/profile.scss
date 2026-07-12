@@ -29,6 +29,10 @@
   display: grid;
   grid-template-columns: 1fr 360px;
   gap: 1.5rem;
+
+  &.profile-grid--provider {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .profile-card,

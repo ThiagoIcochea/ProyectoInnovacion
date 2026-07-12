@@ -3,8 +3,8 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
-import { WebsocketService } from '../../../core/services/websocket.service';
 
 @Component({
   selector: 'app-provider-reviews',
@@ -42,12 +42,15 @@ export class ProviderReviewsComponent implements OnInit {
   } = {};
 
   private readonly API_BASE = APP_API_BASE_URL;
+  private readonly loadedCommentKeys = new Set<string>();
+  private readonly loadingCommentKeys = new Set<string>();
+  private readonly loadedIndicatorIds = new Set<number>();
+  private readonly loadingIndicatorIds = new Set<number>();
 
   constructor(
     private router: Router,
     private http: HttpClient,
-    private cdr: ChangeDetectorRef,
-    private websocket: WebsocketService
+    private cdr: ChangeDetectorRef
   ) {
     const nav = this.router.getCurrentNavigation();
     const state = nav?.extras?.state ?? history.state;
@@ -88,41 +91,8 @@ export class ProviderReviewsComponent implements OnInit {
         this.filterProvidersForProduct(stateProviders)
       );
 
-      this.providers.forEach(provider => {
-        this.cargarIndicadoresProveedor(provider);
-        this.cargarComentariosProveedor(provider);
-      });
-
       this.loadingProviders = false;
       this.initialProvidersLoaded = true;
-    }
-
-    // Connect to websocket (optional) to receive live reviews
-    try {
-      this.websocket.connect();
-      this.websocket.onMessage().subscribe((msg: any) => {
-        if (!msg) return;
-
-        // expected shape: { type: 'review.created', providerId, productId, review }
-        if (msg.type === 'review.created') {
-          const pid = String(msg.providerId || msg.provider || msg.idProveedor || msg.id_proveedor || msg.providerIdLocal || '');
-          const prod = String(msg.productId || msg.product || msg.idProducto || msg.id_producto || '');
-
-          this.providers = this.providers.map(p => {
-            const pId = String(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider ?? '');
-            if (pId === pid) {
-              const comentario = this.normalizarComentario(msg.review || msg.payload || msg);
-              p.comentarios = [comentario, ...(p.comentarios || [])];
-              this.recalcularMetricasProveedor(p);
-            }
-            return p;
-          });
-
-          this.cdr.detectChanges();
-        }
-      });
-    } catch (e) {
-      console.warn('Websocket unavailable, falling back to HTTP polling', e);
     }
   }
 
@@ -152,12 +122,6 @@ export class ProviderReviewsComponent implements OnInit {
       return;
     }
 
-    if (!this.initialProvidersLoaded && this.providers.length > 0) {
-      this.providers.forEach(provider => {
-        this.cargarIndicadoresProveedor(provider);
-        this.cargarComentariosProveedor(provider);
-      });
-    }
   }
 
   private getHeaders(): HttpHeaders {
@@ -206,11 +170,6 @@ export class ProviderReviewsComponent implements OnInit {
     if (providersFromProduct.length > 0) {
       this.setProviderList(providersFromProduct);
 
-      this.providers.forEach(provider => {
-        this.cargarIndicadoresProveedor(provider);
-        this.cargarComentariosProveedor(provider);
-      });
-
       this.loadingProviders = false;
       this.cdr.detectChanges();
       return;
@@ -248,11 +207,6 @@ export class ProviderReviewsComponent implements OnInit {
 
         this.setProviderList(proveedoresRaw);
 
-        this.providers.forEach(provider => {
-          this.cargarIndicadoresProveedor(provider);
-          this.cargarComentariosProveedor(provider);
-        });
-
         this.loadingProviders = false;
         this.cdr.detectChanges();
       },
@@ -266,7 +220,7 @@ export class ProviderReviewsComponent implements OnInit {
     });
   }
 
-  cargarComentariosProveedor(provider: any): void {
+  cargarComentariosProveedor(provider: any, force = false): void {
     const idProveedor =
       provider?.idProveedor ||
       provider?.id_proveedor ||
@@ -296,12 +250,22 @@ export class ProviderReviewsComponent implements OnInit {
     }
 
     const providerId = Number(idProveedor);
+    const commentKey = `${providerId}:${Number(idProducto)}`;
+
+    if (this.loadingCommentKeys.has(commentKey) || (!force && this.loadedCommentKeys.has(commentKey))) {
+      return;
+    }
+
+    this.loadingCommentKeys.add(commentKey);
 
     this.http.get<any[]>(
       `${this.API_BASE}/comentarios/${idProveedor}/${idProducto}`,
       { headers: this.getHeaders() }
+    ).pipe(
+      finalize(() => this.loadingCommentKeys.delete(commentKey))
     ).subscribe({
       next: (res) => {
+        this.loadedCommentKeys.add(commentKey);
         const comentarios = this.extractCommentsPayload(res)
           .map((comentario: any) => this.normalizarComentario(comentario));
 
@@ -518,17 +482,27 @@ export class ProviderReviewsComponent implements OnInit {
     this.recalcularMetricasProveedor(provider);
   }
 
-  cargarIndicadoresProveedor(provider: any): void {
+  cargarIndicadoresProveedor(provider: any, force = false): void {
     const idProveedor =
       provider?.idProveedor ?? provider?.id_proveedor ?? provider?.idProvider ?? provider?.id;
 
     if (!idProveedor) return;
 
+    const providerId = Number(idProveedor);
+    if (this.loadingIndicatorIds.has(providerId) || (!force && this.loadedIndicatorIds.has(providerId))) {
+      return;
+    }
+
+    this.loadingIndicatorIds.add(providerId);
+
     this.http.get<any>(
       `${this.API_BASE}/provider/${idProveedor}/indicadores`,
       { headers: this.getHeaders() }
+    ).pipe(
+      finalize(() => this.loadingIndicatorIds.delete(providerId))
     ).subscribe({
       next: (res) => {
+        this.loadedIndicatorIds.add(providerId);
         const index = this.providers.findIndex(
           p => Number(p.idProveedor ?? p.id_proveedor ?? p.id ?? p.idProvider) === Number(idProveedor)
         );
@@ -1279,7 +1253,7 @@ export class ProviderReviewsComponent implements OnInit {
       draft.comentario = '';
       draft.error = '';
 
-      this.cargarComentariosProveedor(provider);
+      this.cargarComentariosProveedor(provider, true);
       this.cdr.detectChanges();
     },
     error: (err) => {
@@ -1353,7 +1327,7 @@ getReviewLikes(review: any): number {
         comentario.userReaction = tipo;
 
         if (provider) {
-          this.cargarComentariosProveedor(provider);
+          this.cargarComentariosProveedor(provider, true);
         }
 
         this.cdr.detectChanges();

@@ -17,6 +17,8 @@ export class ProviderRequestsComponent implements OnInit {
   searchTerm = '';
   loading = true;
   errorMessage = '';
+  processingRequestId: number | null = null;
+  processingAction: 'APROBAR' | 'RECHAZAR' | null = null;
 
   selectedRequest: any | null = null;
   productos: any[] = [];
@@ -155,6 +157,19 @@ export class ProviderRequestsComponent implements OnInit {
 
   }
 
+  isProcessingSelectedRequest(): boolean {
+
+    return !!this.selectedRequest &&
+      this.processingRequestId === this.selectedRequest.idSolicitud;
+
+  }
+
+  canProcessSelectedRequest(): boolean {
+    return !!this.selectedRequest &&
+      this.normalizarEstado(this.selectedRequest.estado) === 'PAGO_PENDIENTE' &&
+      !this.isProcessingSelectedRequest();
+  }
+
   getRfQCode(request: any): string {
 
     if (!request) {
@@ -224,20 +239,35 @@ export class ProviderRequestsComponent implements OnInit {
 
   aprobarPedido(): void {
 
-    if (!this.selectedRequest) {
+    if (!this.canProcessSelectedRequest() || this.processingRequestId) {
 
       return;
 
     }
 
+    const requestId = this.selectedRequest.idSolicitud;
+
+    this.processingRequestId = requestId;
+    this.processingAction = 'APROBAR';
+    this.errorMessage = '';
+
     this.requestService
-      .aprobarPedido(this.selectedRequest.idSolicitud)
+      .aprobarPedido(requestId)
       .subscribe({
 
-        next: () => this.loadRequests(),
+        next: () => {
+
+          this.updateRequestState(requestId, 'PEDIDO_APROBADO');
+          this.processingRequestId = null;
+          this.processingAction = null;
+          this.loadRequests();
+
+        },
 
         error: () => {
 
+          this.processingRequestId = null;
+          this.processingAction = null;
           this.errorMessage =
             'Error al aprobar pedido.';
 
@@ -249,7 +279,7 @@ export class ProviderRequestsComponent implements OnInit {
 
   rechazarPedido(): void {
 
-    if (!this.selectedRequest) {
+    if (!this.canProcessSelectedRequest() || this.processingRequestId) {
 
       return;
 
@@ -265,17 +295,32 @@ export class ProviderRequestsComponent implements OnInit {
 
     }
 
+    const requestId = this.selectedRequest.idSolicitud;
+
+    this.processingRequestId = requestId;
+    this.processingAction = 'RECHAZAR';
+    this.errorMessage = '';
+
     this.requestService
       .rechazarPedido(
-        this.selectedRequest.idSolicitud,
+        requestId,
         motivo.trim()
       )
       .subscribe({
 
-        next: () => this.loadRequests(),
+        next: () => {
+
+          this.updateRequestState(requestId, 'CANCELADA');
+          this.processingRequestId = null;
+          this.processingAction = null;
+          this.loadRequests();
+
+        },
 
         error: () => {
 
+          this.processingRequestId = null;
+          this.processingAction = null;
           this.errorMessage =
             'Error al rechazar pedido.';
 
@@ -283,6 +328,18 @@ export class ProviderRequestsComponent implements OnInit {
 
       });
 
+  }
+
+  private updateRequestState(requestId: number, estado: string): void {
+    const update = (request: any) =>
+      request?.idSolicitud === requestId ? { ...request, estado } : request;
+
+    this.requests = this.requests.map(update);
+    this.filteredRequests = this.filteredRequests.map(update);
+
+    if (this.selectedRequest?.idSolicitud === requestId) {
+      this.selectedRequest = { ...this.selectedRequest, estado };
+    }
   }
 
   private notifyProviderCountsRefresh(): void {

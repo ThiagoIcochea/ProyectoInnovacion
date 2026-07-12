@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
@@ -28,7 +28,8 @@ export class MfaComponent implements OnInit, OnDestroy {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -225,6 +226,8 @@ export class MfaComponent implements OnInit, OnDestroy {
       if (this.resendSeconds <= 0 && this.expiresSeconds <= 0) {
         this.clearTimer();
       }
+
+      this.cdr.detectChanges();
     }, 1000);
   }
 

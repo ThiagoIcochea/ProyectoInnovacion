@@ -186,7 +186,7 @@
       <h2 id="claim-modal-title">Reclamo por demora</h2>
     </div>
 
-    <button type="button" (click)="cerrarReclamoDemora()" aria-label="Cerrar reclamo">x</button>
+    <button type="button" (click)="cerrarReclamoDemora()" [disabled]="claimSubmitting" aria-label="Cerrar reclamo">x</button>
   </header>
 
   <div class="claim-modal__summary">
@@ -209,7 +209,7 @@
   <form class="claim-form" (ngSubmit)="guardarReclamoDemora()">
     <label>
       Tipo de reclamo
-      <select name="claimType" [(ngModel)]="claimType">
+      <select name="claimType" [(ngModel)]="claimType" [disabled]="claimSubmitting">
         <option value="DEMORA">Demora</option>
         <option value="CANCELACION">Cancelación</option>
         <option value="ENTREGA_INCOMPLETA">Entrega incompleta</option>
@@ -218,7 +218,7 @@
 
     <label *ngIf="claimType === 'DEMORA'">
       Fecha prometida por el proveedor
-      <input type="date" name="claimPromisedDate" [(ngModel)]="claimPromisedDate" required>
+      <input type="date" name="claimPromisedDate" [(ngModel)]="claimPromisedDate" [disabled]="claimSubmitting" required>
     </label>
 
     <label>
@@ -228,13 +228,14 @@
         [(ngModel)]="claimDescription"
         rows="5"
         maxlength="600"
+        [disabled]="claimSubmitting"
         required>
       </textarea>
     </label>
 
     <label>
       Evidencia (imagen o PDF)
-      <input type="file" accept=".pdf,image/*" (change)="onEvidenceSelected($event)">
+      <input type="file" accept=".pdf,image/*" (change)="onEvidenceSelected($event)" [disabled]="claimSubmitting">
     </label>
 
     <small *ngIf="selectedEvidence">{{ selectedEvidence.name }}</small>
@@ -242,8 +243,10 @@
     <p class="claim-error" *ngIf="claimError">{{ claimError }}</p>
 
     <div class="claim-actions">
-      <button type="button" class="btn-secondary" (click)="cerrarReclamoDemora()">Cancelar</button>
-      <button type="submit" class="btn-primary">Enviar solicitud de reclamo</button>
+      <button type="button" class="btn-secondary" (click)="cerrarReclamoDemora()" [disabled]="claimSubmitting">Cancelar</button>
+      <button type="submit" class="btn-primary" [disabled]="claimSubmitting">
+        {{ claimSubmitting ? 'Enviando reclamo...' : 'Enviar solicitud de reclamo' }}
+      </button>
     </div>
   </form>
 </section>

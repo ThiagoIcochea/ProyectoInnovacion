@@ -3,6 +3,7 @@
 import { CommonModule } from '@angular/common';
 
 import {
+  ChangeDetectorRef,
   Component,
   OnInit
 } from '@angular/core';
@@ -87,7 +88,8 @@ export class RfqQuotationComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -147,6 +149,8 @@ export class RfqQuotationComponent implements OnInit {
       lng: this.selectedLocation.lng,
       address: this.selectedLocation.address || this.direccionEntrega
     };
+    this.resolvingLocationAddress = false;
+    this.cdr.detectChanges();
 
     setTimeout(() => {
 
@@ -159,6 +163,7 @@ export class RfqQuotationComponent implements OnInit {
   cerrarMapaModal(): void {
 
     this.mostrarMapaModal = false;
+    this.resolvingLocationAddress = false;
 
     if (this.map) {
 
@@ -168,6 +173,7 @@ export class RfqQuotationComponent implements OnInit {
     }
 
     this.marker = null;
+    this.cdr.detectChanges();
   }
 
   confirmarUbicacion(): void {
@@ -182,6 +188,7 @@ export class RfqQuotationComponent implements OnInit {
       this.getLocationCoordinatesLabel(this.selectedLocation);
 
     this.cerrarMapaModal();
+    this.cdr.detectChanges();
   }
 
   refreshMapSize(): void {
@@ -359,6 +366,8 @@ export class RfqQuotationComponent implements OnInit {
     this.tempLocation.lat = lat;
     this.tempLocation.lng = lng;
     this.tempLocation.address = '';
+    this.resolvingLocationAddress = true;
+    this.cdr.detectChanges();
   }
 
   obtenerDireccion(
@@ -370,6 +379,7 @@ export class RfqQuotationComponent implements OnInit {
       `https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18&accept-language=es&lat=${lat}&lon=${lng}`;
 
     this.resolvingLocationAddress = true;
+    this.cdr.detectChanges();
 
     this.http.get<any>(url)
     .subscribe({
@@ -380,6 +390,7 @@ export class RfqQuotationComponent implements OnInit {
       if (resolvedAddress) {
         this.tempLocation.address = resolvedAddress;
         this.resolvingLocationAddress = false;
+        this.cdr.detectChanges();
         return;
       }
 
@@ -393,6 +404,7 @@ export class RfqQuotationComponent implements OnInit {
           'Ubicación no encontrada';
 
         this.resolvingLocationAddress = false;
+        this.cdr.detectChanges();
 
         return;
       }
@@ -438,6 +450,7 @@ export class RfqQuotationComponent implements OnInit {
       }
 
       this.resolvingLocationAddress = false;
+      this.cdr.detectChanges();
       },
       error: () => {
         this.obtenerDireccionPhoton(lat, lng);
@@ -457,10 +470,12 @@ export class RfqQuotationComponent implements OnInit {
           'Direccion no disponible';
 
         this.resolvingLocationAddress = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.tempLocation.address = 'Direccion no disponible';
         this.resolvingLocationAddress = false;
+        this.cdr.detectChanges();
       }
     });
   }

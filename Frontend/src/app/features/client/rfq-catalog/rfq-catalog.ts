@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 
 @Component({
@@ -30,6 +31,7 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
   loadingFilters = true;
   searchingProviders = false;
   loadingTopProviders = false;
+  topProvidersLoaded = false;
 
   searchTerm = '';
 
@@ -55,6 +57,7 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
   pageSize: number = 8;
 
   private readonly API_BASE = APP_API_BASE_URL;
+  private productsRequest?: Subscription;
   private voiceCartUpdatedHandler = (event: Event) => {
     const cart = (event as CustomEvent<any[]>).detail;
     this.requestItems = Array.isArray(cart) ? cart : [];
@@ -80,7 +83,7 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
 
       if (tab === 'proveedores') {
         this.activeTab = 'proveedores';
-        this.actualizarTopProviders();
+        this.ensureTopProvidersLoaded();
       }
 
       this.currentPage = 1;
@@ -93,11 +96,11 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
 
     this.aplicarFiltrosRefinado();
 
-    this.actualizarTopProviders();
   }
 
   ngOnDestroy(): void {
     window.removeEventListener('voiceCartUpdated', this.voiceCartUpdatedHandler);
+    this.productsRequest?.unsubscribe();
   }
 
   private getHeaders(): HttpHeaders {
@@ -178,7 +181,8 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
       especificaciones: listaSpecs
     };
 
-    this.http.post<any[]>(
+    this.productsRequest?.unsubscribe();
+    this.productsRequest = this.http.post<any[]>(
       `${this.API_BASE}/productos/catalogo/filtrado`,
       body,
       {
@@ -188,7 +192,7 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
 
       next: (res) => {
 
-        this.productsOriginal = res || [];
+        this.productsOriginal = Array.isArray(res) ? res : [];
 
         this.aplicarBusquedaLocal();
 
@@ -496,7 +500,7 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
     this.activeTab = tab;
 
     if (tab === 'proveedores') {
-      this.actualizarTopProviders();
+      this.ensureTopProvidersLoaded();
     }
 
     this.cdr.detectChanges();
@@ -512,6 +516,18 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
         }
       }
     );
+  }
+
+  private ensureTopProvidersLoaded(): void {
+
+    if (this.topProvidersLoaded || this.loadingTopProviders) {
+
+      return;
+
+    }
+
+    this.actualizarTopProviders();
+
   }
 
   private actualizarTopProviders(): void {
@@ -633,6 +649,7 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
         });
 
         this.loadingTopProviders = false;
+        this.topProvidersLoaded = true;
 
         this.cdr.detectChanges();
       },
@@ -644,6 +661,7 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
         this.topProviders = [];
 
         this.loadingTopProviders = false;
+        this.topProvidersLoaded = false;
 
         this.cdr.detectChanges();
       }
