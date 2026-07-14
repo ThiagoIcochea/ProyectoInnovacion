@@ -1,4 +1,4 @@
-.btn,
+﻿.btn,
 .btn-primary,
 .btn-secondary,
 .btn-outline,
@@ -48,12 +48,12 @@
 }
 
 .btn-secondary {
-	background: rgba(255, 255, 255, 0.03);
+	background: var(--theme-glass);
 	color: $text-primary;
 	border-color: $border;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.06);
+		background: var(--theme-glass-hover);
 		transform: translateY(-1px);
 	}
 }
@@ -79,14 +79,14 @@
 	border-color: transparent;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.04);
+		background: var(--theme-glass);
 		color: $text-primary;
 	}
 }
 
 .btn-danger {
 	background: rgba(244, 63, 94, 0.12);
-	color: #ffb6c2;
+	color: var(--theme-danger-text);
 	border-color: rgba(244, 63, 94, 0.2);
 
 	&:hover {
@@ -97,7 +97,7 @@
 
 .btn-success {
 	background: rgba(34, 197, 94, 0.14);
-	color: #86efac;
+	color: var(--theme-success-text);
 	border-color: rgba(34, 197, 94, 0.24);
 
 	&:hover {
@@ -121,7 +121,7 @@
 	justify-content: center;
 	border-radius: $radius-md;
 	border-color: $border;
-	background: rgba(255, 255, 255, 0.03);
+	background: var(--theme-glass);
 	color: $text-primary;
 
 	svg {
@@ -131,7 +131,7 @@
 
 	&:hover {
 		transform: translateY(-1px);
-		background: rgba(255, 255, 255, 0.06);
+		background: var(--theme-glass-hover);
 	}
 
 	&:focus-visible {
@@ -147,16 +147,18 @@
 	align-items: center;
 	justify-content: center;
 	border: 1px solid $border;
-	background: rgba(255, 255, 255, 0.03);
+	background: var(--theme-glass);
 	color: $text-primary;
 	transition: transform $transition-base, background-color $transition-base, border-color $transition-base;
 
 	&:hover {
 		transform: translateY(-1px);
-		background: rgba(255, 255, 255, 0.06);
+		background: var(--theme-glass-hover);
 	}
 
 	&:focus-visible {
 		@include focus-ring;
 	}
 }
+
+

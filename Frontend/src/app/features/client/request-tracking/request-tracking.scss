@@ -1,4 +1,4 @@
-/* Backend touchpoint: tracking timeline, summary column and CTA state styling. */
+﻿/* Backend touchpoint: tracking timeline, summary column and CTA state styling. */
 .tracking-page {
   display: flex;
   flex-direction: column;
@@ -7,7 +7,7 @@
 }
 
 .loading-box {
-  color: #e5e7eb;
+  color: var(--theme-text);
   padding: 2rem;
   font-size: 1.1rem;
 }
@@ -32,7 +32,7 @@
   }
 
   h1 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0 0 0.35rem;
     font-size: clamp(2rem, 3vw, 2.6rem);
     line-height: 1.08;
@@ -48,7 +48,7 @@
     border: 1px solid rgba(148, 163, 184, 0.16);
     border-radius: 10px;
     background: rgba(15, 23, 42, 0.72);
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0.15rem 0 0;
     font-size: 1rem;
     line-height: 1.5;
@@ -62,13 +62,13 @@
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: #1e293b;
-  border: 1px solid #374151;
-  color: #e5e7eb;
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
+  color: var(--theme-text);
   text-decoration: none;
 
   &:hover {
-    background: #273449;
+    background: var(--theme-surface-hover);
   }
 }
 
@@ -81,7 +81,7 @@
 
 .tracking-card,
 .order-summary {
-  background: #1e293b;
+  background: var(--theme-surface-raised);
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 16px;
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
@@ -98,7 +98,7 @@
   border-radius: 14px;
   background: rgba(59, 130, 246, 0.12);
   border: 1px solid rgba(96, 165, 250, 0.18);
-  color: #bfdbfe;
+  color: var(--theme-accent-text);
   font-weight: 700;
 }
 
@@ -115,7 +115,7 @@
 
   span {
     display: inline-flex;
-    color: #fecaca;
+    color: var(--theme-danger-text);
     font-size: 0.78rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -123,14 +123,14 @@
   }
 
   h2 {
-    color: #f8fafc;
+    color: var(--theme-text-bright);
     margin: 0 0 0.35rem;
     font-size: 1.1rem;
     line-height: 1.35;
   }
 
   p {
-    color: #94a3b8;
+    color: var(--theme-text-muted-blue);
     margin: 0;
     line-height: 1.5;
   }
@@ -140,12 +140,12 @@
   margin-bottom: 1.5rem;
 
   h2 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0 0 0.35rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 }
@@ -170,7 +170,7 @@
     left: 21px;
     bottom: 0;
     width: 2px;
-    background: #334155;
+    background: var(--theme-border-soft);
   }
 
   &:last-child {
@@ -188,9 +188,9 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  border: 2px solid #334155;
-  background: #111827;
-  color: #9ca3af;
+  border: 2px solid var(--theme-border-soft);
+  background: var(--theme-surface);
+  color: var(--theme-text-secondary);
   font-weight: 900;
   z-index: 1;
 }
@@ -204,24 +204,24 @@
 .timeline-item.active .timeline-marker {
   background: rgba(59, 130, 246, 0.18);
   border-color: rgba(59, 130, 246, 0.3);
-  color: #60a5fa;
+  color: var(--theme-accent);
   box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.08);
 }
 
 .timeline-content {
   h3 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0 0 0.35rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0 0 0.35rem;
     line-height: 1.5;
   }
 
   small {
-    color: #60a5fa;
+    color: var(--theme-accent);
   }
 }
 
@@ -231,7 +231,7 @@
   top: 96px;
 
   h2 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 1rem 0;
   }
 }
@@ -263,12 +263,12 @@
   }
 
   span {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     line-height: 1.45;
   }
 
   strong {
-    color: #e5e7eb;
+    color: var(--theme-text);
     text-align: right;
     line-height: 1.45;
     overflow-wrap: anywhere;
@@ -288,7 +288,7 @@
   border-radius: 14px;
   background: rgba(59, 130, 246, 0.12);
   border: 1px solid rgba(96, 165, 250, 0.18);
-  color: #bfdbfe;
+  color: var(--theme-accent-text);
   line-height: 1.6;
 }
 
@@ -310,21 +310,21 @@
 
   span {
     display: block;
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     font-size: 0.85rem;
     margin-bottom: 0.45rem;
   }
 
   strong {
     display: block;
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-size: 1.7rem;
     letter-spacing: 0.08em;
     margin-bottom: 0.5rem;
   }
 
   p {
-    color: #bfdbfe;
+    color: var(--theme-accent-text);
     margin: 0;
     font-size: 0.9rem;
     line-height: 1.5;
@@ -383,7 +383,7 @@
 .btn-danger {
   background: rgba(239, 68, 68, 0.12);
   border-color: rgba(248, 113, 113, 0.32);
-  color: #fecaca;
+  color: var(--theme-danger-text);
 
   &:hover {
     background: rgba(239, 68, 68, 0.2);
@@ -394,10 +394,42 @@
   flex: 0 0 auto;
   background: rgba(59, 130, 246, 0.16);
   border-color: rgba(96, 165, 250, 0.28);
-  color: #bfdbfe;
+  color: var(--theme-accent-text);
 
   &:hover {
     background: rgba(59, 130, 246, 0.24);
+  }
+}
+
+:host-context(body.light-theme) {
+  .page-title p,
+  .claim-modal__summary div,
+  .claim-form input,
+  .claim-form textarea {
+    background: var(--theme-surface);
+  }
+
+  .tracking-error {
+    background: #fff7f7;
+    border-color: rgba(220, 38, 38, 0.18);
+  }
+
+  .btn-secondary {
+    border-color: rgba(37, 99, 235, 0.28);
+    background: #eff6ff;
+    color: #1d4ed8;
+
+    &:hover {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+  }
+
+  .delay-claim-card--warning {
+    span,
+    small {
+      color: var(--theme-warning-text);
+    }
   }
 }
 
@@ -407,12 +439,12 @@
   border-radius: 14px;
   border: 1px solid rgba(96, 165, 250, 0.24);
   background: rgba(59, 130, 246, 0.1);
-  color: #bfdbfe;
+  color: var(--theme-accent-text);
 
   span {
     display: inline-flex;
     margin-bottom: 0.35rem;
-    color: #93c5fd;
+    color: var(--theme-accent-soft);
     font-size: 0.76rem;
     font-weight: 900;
     letter-spacing: 0.06em;
@@ -421,18 +453,18 @@
 
   strong {
     display: block;
-    color: #f8fafc;
+    color: var(--theme-text-bright);
     margin-bottom: 0.35rem;
   }
 
   p {
     margin: 0 0 0.55rem;
-    color: #cbd5e1;
+    color: var(--theme-text-soft);
     line-height: 1.45;
   }
 
   small {
-    color: #93c5fd;
+    color: var(--theme-accent-soft);
     line-height: 1.4;
   }
 }
@@ -453,7 +485,7 @@
   border: 1px solid rgba(245, 158, 11, 0.32);
   border-radius: 10px;
   background: rgba(245, 158, 11, 0.18);
-  color: #fde68a;
+  color: var(--theme-warning-text);
   font-weight: 900;
   cursor: pointer;
 
@@ -481,7 +513,7 @@
   transform: translate(-50%, -50%);
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 16px;
-  background: #0f172a;
+  background: var(--theme-app-start);
   box-shadow: 0 24px 70px rgba(2, 6, 23, 0.45);
   padding: 1.1rem;
   display: grid;
@@ -497,7 +529,7 @@
   border-bottom: 1px solid rgba(148, 163, 184, 0.16);
 
   span {
-    color: #93c5fd;
+    color: var(--theme-accent-soft);
     font-size: 0.76rem;
     font-weight: 900;
     letter-spacing: 0.08em;
@@ -506,7 +538,7 @@
 
   h2 {
     margin: 0.2rem 0 0;
-    color: #f8fafc;
+    color: var(--theme-text-bright);
     font-size: 1.35rem;
   }
 
@@ -515,8 +547,8 @@
     height: 38px;
     border: 1px solid rgba(148, 163, 184, 0.2);
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.04);
-    color: #cbd5e1;
+    background: var(--theme-glass);
+    color: var(--theme-text-soft);
     cursor: pointer;
     font-weight: 900;
   }
@@ -536,13 +568,13 @@
 
   span {
     display: block;
-    color: #94a3b8;
+    color: var(--theme-text-muted-blue);
     font-size: 0.78rem;
     margin-bottom: 0.35rem;
   }
 
   strong {
-    color: #f8fafc;
+    color: var(--theme-text-bright);
     overflow-wrap: anywhere;
   }
 }
@@ -554,7 +586,7 @@
   label {
     display: grid;
     gap: 0.4rem;
-    color: #bfdbfe;
+    color: var(--theme-accent-text);
     font-weight: 800;
   }
 
@@ -564,7 +596,7 @@
     border: 1px solid rgba(148, 163, 184, 0.2);
     border-radius: 12px;
     background: #020617;
-    color: #f8fafc;
+    color: var(--theme-text-bright);
     padding: 0.8rem;
     outline: none;
 
@@ -581,7 +613,7 @@
 
 .claim-error {
   margin: 0;
-  color: #fecaca;
+  color: var(--theme-danger-text);
   font-weight: 800;
 }
 
@@ -602,3 +634,5 @@
     grid-template-columns: 1fr;
   }
 }
+
+

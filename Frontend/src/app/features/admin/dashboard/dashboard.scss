@@ -1,4 +1,4 @@
-/* Backend touchpoint: admin dashboard metrics, chart and activity cards. */
+﻿/* Backend touchpoint: admin dashboard metrics, chart and activity cards. */
 .admin-dashboard {
   display: flex;
   flex-direction: column;
@@ -7,20 +7,20 @@
 
 .page-header {
   span {
-    color: #f87171;
+    color: var(--theme-danger-text);
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.8rem;
   }
 
   h1 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.35rem 0;
     font-size: 2rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 }
@@ -34,8 +34,8 @@
 .metric-card,
 .chart-card,
 .activity-card {
-  background: #1e293b;
-  border: 1px solid #374151;
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
   border-radius: 16px;
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
 }
@@ -44,12 +44,12 @@
   padding: 1.25rem;
 
   span {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
   }
 
   strong {
     display: block;
-    color: #e5e7eb;
+    color: var(--theme-text);
     font-size: 2rem;
     margin: 1.2rem 0 0.35rem;
   }
@@ -82,19 +82,19 @@
 
 .card-header {
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid var(--theme-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
 
   h2 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0;
     font-size: 1.15rem;
   }
 
   a {
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-weight: 800;
     text-decoration: none;
   }
@@ -121,15 +121,15 @@
     width: 42px;
     height: var(--h);
     border-radius: 12px 12px 0 0;
-    background: linear-gradient(180deg, #60a5fa, #2563eb);
+    background: linear-gradient(180deg, var(--theme-accent), #2563eb);
   }
 
   span {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
   }
 
   &.active div {
-    background: linear-gradient(180deg, #93c5fd, #3b82f6);
+    background: linear-gradient(180deg, var(--theme-accent-soft), #3b82f6);
   }
 }
 
@@ -171,21 +171,21 @@
   grid-template-columns: auto 1fr auto;
   gap: 0.8rem;
   padding: 1rem 1.25rem;
-  border-top: 1px solid rgba(55, 65, 81, 0.6);
+  border-top: 1px solid var(--theme-control);
   align-items: center;
 
   strong {
-    color: #e5e7eb;
+    color: var(--theme-text);
     display: block;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0.25rem 0 0;
   }
 
   span {
-    color: #60a5fa;
+    color: var(--theme-accent);
     background: rgba(59, 130, 246, 0.14);
     padding: 0.35rem 0.6rem;
     border-radius: 999px;
@@ -208,3 +208,4 @@
     grid-template-columns: 1fr;
   }
 }
+

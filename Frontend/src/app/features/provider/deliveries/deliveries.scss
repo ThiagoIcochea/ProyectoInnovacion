@@ -1,4 +1,4 @@
-/* Backend touchpoint: delivery workflow cards, timelines and shipment tables. */
+﻿/* Backend touchpoint: delivery workflow cards, timelines and shipment tables. */
 .provider-deliveries-page {
   display: flex;
   flex-direction: column;
@@ -7,20 +7,20 @@
 
 .page-header {
   span {
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.8rem;
   }
 
   h1 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.35rem 0;
     font-size: 2rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 }
@@ -34,8 +34,8 @@
 .orders-card,
 .delivery-detail-card,
 .delivery-progress-card {
-  background: #1e293b;
-  border: 1px solid #374151;
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
   border-radius: 16px;
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
 }
@@ -47,13 +47,13 @@
 
 .list-header {
   padding: 1.25rem;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid var(--theme-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
 
   h2 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0;
     font-size: 1.1rem;
   }
@@ -73,9 +73,9 @@
   margin: 1rem;
   height: 42px;
   border-radius: 12px;
-  border: 1px solid #374151;
-  background: #111827;
-  color: #9ca3af;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+  color: var(--theme-text-secondary);
   width: calc(100% - 2rem);
   padding: 0 1rem;
 
@@ -109,16 +109,16 @@
   }
 
   strong {
-    color: #e5e7eb;
+    color: var(--theme-text);
   }
 
   p {
-    color: #60a5fa;
+    color: var(--theme-accent);
     margin: 0.45rem 0;
   }
 
   small {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
   }
 }
 
@@ -127,7 +127,7 @@
 
   span {
     display: block;
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     font-size: 0.82rem;
     margin-bottom: 0.75rem;
   }
@@ -157,7 +157,7 @@
 .claim-mini-badge {
   display: inline-flex !important;
   margin-top: 0.5rem;
-  color: #fde68a !important;
+  color: var(--theme-warning-text) !important;
   background: rgba(245, 158, 11, 0.16);
   border: 1px solid rgba(245, 158, 11, 0.26);
   border-radius: 999px;
@@ -173,16 +173,16 @@
 
 .detail-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid var(--theme-border);
 
   h2 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.75rem 0 0.35rem;
     font-size: 1.8rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 }
@@ -207,7 +207,7 @@
   }
 
   h3 {
-    color: #f8fafc;
+    color: var(--theme-text-bright);
     margin: 0.3rem 0 0.4rem;
   }
 
@@ -226,13 +226,30 @@
   color: #fcd34d;
 
   strong {
-    color: #fde68a;
+    color: var(--theme-warning-text);
     font-size: 1.25rem;
   }
 
   small {
     color: #fef3c7;
     text-align: right;
+  }
+}
+
+:host-context(body.light-theme) {
+  .provider-claim-alert {
+    span,
+    p {
+      color: var(--theme-warning-text);
+    }
+  }
+
+  .provider-claim-alert__meta {
+    color: var(--theme-warning-text);
+
+    small {
+      color: var(--theme-text-secondary);
+    }
   }
 }
 
@@ -253,10 +270,10 @@
 
 .shipment-info {
   padding: 1.5rem;
-  border-right: 1px solid #374151;
+  border-right: 1px solid var(--theme-border);
 
   h3 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0 0 1rem;
   }
 }
@@ -269,8 +286,8 @@
   div {
     padding: 1rem;
     border-radius: 14px;
-    background: #111827;
-    border: 1px solid #374151;
+    background: var(--theme-surface);
+    border: 1px solid var(--theme-border);
   }
 
   .full {
@@ -278,18 +295,18 @@
   }
 
   span {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     display: block;
     margin-bottom: 0.4rem;
   }
 
   strong {
-    color: #e5e7eb;
+    color: var(--theme-text);
     display: block;
   }
 
   small {
-    color: #60a5fa;
+    color: var(--theme-accent);
   }
 }
 
@@ -299,12 +316,12 @@
   border-radius: 14px;
   background: rgba(245, 158, 11, 0.12);
   border: 1px solid rgba(245, 158, 11, 0.22);
-  color: #fde68a;
+  color: var(--theme-warning-text);
   line-height: 1.6;
 }
 
 .shipment-table {
-  border: 1px solid #374151;
+  border: 1px solid var(--theme-border);
   border-radius: 14px;
   overflow: hidden;
 }
@@ -318,16 +335,16 @@
 }
 
 .shipment-table__head {
-  background: #162033;
-  color: #9ca3af;
+  background: var(--theme-surface-soft);
+  color: var(--theme-text-secondary);
   text-transform: uppercase;
   font-size: 0.78rem;
   font-weight: 800;
 }
 
 .shipment-table__row {
-  color: #e5e7eb;
-  border-top: 1px solid rgba(55, 65, 81, 0.6);
+  color: var(--theme-text);
+  border-top: 1px solid var(--theme-control);
 }
 
 .delivery-progress-card {
@@ -336,7 +353,7 @@
   align-self: start;
 
   h3 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0 0 1rem;
   }
 }
@@ -359,7 +376,7 @@
     left: 17px;
     bottom: 0;
     width: 2px;
-    background: #334155;
+    background: var(--theme-border-soft);
   }
 
   &:last-child::before {
@@ -367,11 +384,11 @@
   }
 
   strong {
-    color: #e5e7eb;
+    color: var(--theme-text);
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0.25rem 0 0;
     font-size: 0.88rem;
   }
@@ -383,9 +400,9 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  border: 2px solid #334155;
-  background: #111827;
-  color: #9ca3af;
+  border: 2px solid var(--theme-border-soft);
+  background: var(--theme-surface);
+  color: var(--theme-text-secondary);
   font-weight: 900;
   z-index: 1;
 }
@@ -397,20 +414,20 @@
 }
 
 .timeline-item.active .marker {
-  color: #60a5fa;
+  color: var(--theme-accent);
   border-color: rgba(96, 165, 250, 0.35);
   background: rgba(59, 130, 246, 0.14);
 }
 
 .update-box {
-  background: #111827;
-  border: 1px solid #374151;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
   border-radius: 14px;
   padding: 1rem;
 
   label {
     display: block;
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0.8rem 0 0.4rem;
     font-size: 0.9rem;
   }
@@ -420,9 +437,9 @@
     width: 100%;
     height: 42px;
     border-radius: 10px;
-    border: 1px solid #374151;
-    background: #0f172a;
-    color: #e5e7eb;
+    border: 1px solid var(--theme-border);
+    background: var(--theme-app-start);
+    color: var(--theme-text);
     padding: 0 0.8rem;
   }
 
@@ -446,11 +463,11 @@
 
 .empty-state {
   padding: 1rem 1.5rem;
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
 }
 
 .error-message {
-  color: #f87171;
+  color: var(--theme-danger-text);
   margin: 0.75rem 0 0;
 }
 
@@ -480,3 +497,5 @@
     }
   }
 }
+
+

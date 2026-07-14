@@ -1,4 +1,4 @@
-.badge,
+﻿.badge,
 .pill,
 .status-badge {
 	display: inline-flex;
@@ -22,13 +22,13 @@
 .badge--success {
 	background: rgba(34, 197, 94, 0.14);
 	border-color: rgba(34, 197, 94, 0.2);
-	color: #86efac;
+	color: var(--theme-success-text);
 }
 
 .badge--warning {
 	background: rgba(245, 158, 11, 0.14);
 	border-color: rgba(245, 158, 11, 0.2);
-	color: #fbbf24;
+	color: var(--theme-warning-text);
 }
 
 .badge--danger {
@@ -36,3 +36,4 @@
 	border-color: rgba(244, 63, 94, 0.2);
 	color: #fda4af;
 }
+

@@ -22,6 +22,7 @@ import {
 import { forkJoin } from 'rxjs';
 import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../core/constants/app.constants';
 import { ProviderShellDataService } from '../../core/services/provider-shell-data.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { VoiceAssistantComponent } from '../../shared/voice-assistant/voice-assistant';
 
 @Component({
@@ -133,6 +134,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     public router: Router,
     private http: HttpClient,
     private providerShellData: ProviderShellDataService,
+    private themeService: ThemeService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -145,6 +147,14 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       this.cargarEstadoApi();
       this.cargarIndicadoresProveedor();
     }
+  }
+
+  get isDarkTheme(): boolean {
+    return this.themeService.theme() === 'dark';
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggle();
   }
 
   get currentProviderPlan(): any {

@@ -1,4 +1,4 @@
-.admin-rfqs-page {
+﻿.admin-rfqs-page {
 
   display: flex;
   flex-direction: column;
@@ -7,27 +7,27 @@
 
 .page-header {
   span {
-    color: #f87171;
+    color: var(--theme-danger-text);
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.8rem;
   }
 
   h1 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.35rem 0;
     font-size: 2rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 }
 
 .rfqs-card {
 
-  background: #0f172a;
+  background: var(--theme-app-start);
 
   border: 1px solid rgba(148, 163, 184, 0.12);
 
@@ -52,8 +52,8 @@
     height: 44px;
     border: 1px solid rgba(148, 163, 184, 0.22);
     border-radius: 12px;
-    background: #111827;
-    color: #e5e7eb;
+    background: var(--theme-surface);
+    color: var(--theme-text);
     padding: 0 1rem;
     font-size: 0.95rem;
     outline: none;
@@ -72,7 +72,7 @@
     }
 
     &:focus {
-      border-color: #60a5fa;
+      border-color: var(--theme-accent);
       box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.16);
       background: #0f1a2d;
     }
@@ -91,7 +91,7 @@
   padding: 1.2rem 1.25rem;
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 16px;
-  background: #111827;
+  background: var(--theme-surface);
   box-shadow: 0 16px 36px rgba(2, 6, 23, 0.22);
   overflow: hidden;
 
@@ -117,7 +117,7 @@
   span {
     position: relative;
     display: block;
-    color: #94a3b8;
+    color: var(--theme-text-muted-blue);
     font-size: 0.82rem;
     font-weight: 800;
     letter-spacing: 0;
@@ -128,7 +128,7 @@
     position: relative;
     display: block;
     margin-top: 1rem;
-    color: #f8fafc;
+    color: var(--theme-text-bright);
     font-size: 2.2rem;
     line-height: 1;
     font-weight: 900;
@@ -136,7 +136,7 @@
 }
 
 .summary-card--total {
-  --summary-accent: #60a5fa;
+  --summary-accent: var(--theme-accent);
 }
 
 .summary-card--success {
@@ -148,7 +148,7 @@
 }
 
 .summary-card--danger {
-  --summary-accent: #f87171;
+  --summary-accent: var(--theme-danger-text);
 }
 
 .rfqs-table__head,
@@ -212,3 +212,5 @@
     }
   }
 }
+
+

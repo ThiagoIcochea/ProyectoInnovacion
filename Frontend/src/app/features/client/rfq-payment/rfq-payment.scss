@@ -1,4 +1,4 @@
-/* Backend touchpoint: payment confirmation layout, map area and voucher upload state. */
+﻿/* Backend touchpoint: payment confirmation layout, map area and voucher upload state. */
 .payment-page {
   display: flex;
   flex-direction: column;
@@ -8,19 +8,19 @@
 
 .page-title {
   span {
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.8rem;
   }
 
   h1 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.3rem 0;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 }
@@ -35,8 +35,8 @@
 
 .payment-main,
 .payment-summary {
-  background: #1e293b;
-  border: 1px solid #374151;
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
@@ -46,7 +46,7 @@
   margin-bottom: 1.5rem;
 
   h3 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0 0 0.75rem;
   }
 }
@@ -59,8 +59,8 @@
   min-height: 220px;
   max-height: 360px;
   border-radius: 12px;
-  border: 1px solid #374151;
-  background: #0f172a;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-app-start);
   margin-bottom: 0.75rem;
   overflow: hidden;
 }
@@ -70,9 +70,9 @@
   height: 42px;
   padding: 0 0.9rem;
   border-radius: 10px;
-  border: 1px solid #374151;
-  background: #0f172a;
-  color: #e5e7eb;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-app-start);
+  color: var(--theme-text);
 }
 
 .methods-list {
@@ -97,7 +97,7 @@
 .step-section h3,
 .upload-section h3,
 .payment-summary h3 {
-  color: #e5e7eb;
+  color: var(--theme-text);
   margin: 0;
 }
 
@@ -109,27 +109,27 @@
 .method-card {
   position: relative;
   padding: 1rem;
-  border: 1px solid #374151;
+  border: 1px solid var(--theme-border);
   border-radius: 12px;
   cursor: pointer;
   transition: 0.2s;
-  background: #111827;
+  background: var(--theme-surface);
 
   strong {
-    color: #e5e7eb;
+    color: var(--theme-text);
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0.25rem 0 0;
   }
 
   small {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
   }
 
   &:hover {
-    background: #273449;
+    background: var(--theme-surface-hover);
   }
 
   &.active {
@@ -154,16 +154,16 @@
 }
 
 .no-data {
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
   font-size: 0.9rem;
 }
 
 .upload-section {
   margin-top: 1rem;
   padding: 1rem;
-  border: 1px dashed #374151;
+  border: 1px dashed var(--theme-border);
   border-radius: 12px;
-  background: #111827;
+  background: var(--theme-surface);
 }
 
 .form-row {
@@ -173,16 +173,16 @@
   margin-bottom: 0.75rem;
 
   label {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     font-size: 0.9rem;
   }
 
   input {
     height: 42px;
     border-radius: 10px;
-    border: 1px solid #374151;
-    background: #0f172a;
-    color: #e5e7eb;
+    border: 1px solid var(--theme-border);
+    background: var(--theme-app-start);
+    color: var(--theme-text);
     padding: 0 0.9rem;
     outline: none;
   }
@@ -195,9 +195,9 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem;
-  border: 1px solid #374151;
+  border: 1px solid var(--theme-border);
   border-radius: 12px;
-  background: #0f172a;
+  background: var(--theme-app-start);
 
   input {
     position: absolute;
@@ -217,7 +217,7 @@
   border-radius: 10px;
   border: 1px solid rgba(96, 165, 250, 0.3);
   background: rgba(59, 130, 246, 0.18);
-  color: #dbeafe;
+  color: var(--theme-info-text);
   font-weight: 800;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
@@ -231,7 +231,7 @@
 
 .file-upload__name {
   min-width: 0;
-  color: #cbd5e1;
+  color: var(--theme-text-soft);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -239,12 +239,12 @@
 
 .preview-box {
   overflow: hidden;
-  border: 1px solid #374151;
+  border: 1px solid var(--theme-border);
   border-radius: 12px;
-  background: #0f172a;
+  background: var(--theme-app-start);
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0 0 0.5rem;
   }
 }
@@ -254,7 +254,7 @@
   max-height: 360px;
   object-fit: contain;
   display: block;
-  background: #0f172a;
+  background: var(--theme-app-start);
 }
 
 .payment-summary {
@@ -263,7 +263,7 @@
   align-self: start;
 
   h3 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0 0 1rem;
   }
 }
@@ -273,10 +273,10 @@
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 0.8rem;
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
 
   strong {
-    color: #e5e7eb;
+    color: var(--theme-text);
     word-break: break-word;
   }
 }
@@ -286,7 +286,7 @@
   border-top: 1px solid rgba(55, 65, 81, 0.72);
 
   strong {
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-size: 1.3rem;
   }
 }
@@ -295,8 +295,8 @@
   margin-top: 1rem;
   padding: 1rem;
   border-radius: 14px;
-  border: 1px solid #374151;
-  background: #111827;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
 }
 
 .summary-preview__header {
@@ -307,11 +307,11 @@
   margin-bottom: 0.75rem;
 
   span {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
   }
 
   strong {
-    color: #93c5fd;
+    color: var(--theme-accent-soft);
     font-size: 0.88rem;
     text-align: right;
   }
@@ -325,7 +325,7 @@
   border: 1px dashed #475569;
   border-radius: 12px;
   background: rgba(15, 23, 42, 0.74);
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
   text-align: center;
   line-height: 1.45;
 }
@@ -352,7 +352,7 @@
 }
 
 .terms-note {
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
   font-size: 0.9rem;
   line-height: 1.6;
   margin-top: 0.8rem;
@@ -393,3 +393,5 @@
 :host ::ng-deep .map-box .leaflet-bottom {
   z-index: 0;
 }
+
+

@@ -1,4 +1,4 @@
-/* Backend touchpoint: provider dashboard metrics and recent request table styles. */
+﻿/* Backend touchpoint: provider dashboard metrics and recent request table styles. */
 .provider-dashboard {
   display: flex;
   flex-direction: column;
@@ -12,20 +12,20 @@
   gap: 1rem;
 
   span {
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.8rem;
   }
 
   h1 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.35rem 0;
     font-size: 2rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 }
@@ -67,8 +67,8 @@
 .requests-card,
 .chart-panel,
 .insights-panel {
-  background: #1e293b;
-  border: 1px solid #374151;
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
   border-radius: 16px;
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
 }
@@ -89,12 +89,12 @@
 
   h2 {
     margin: 0 0 0.35rem;
-    color: #e5e7eb;
+    color: var(--theme-text);
   }
 
   p {
     margin: 0;
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
   }
 }
 
@@ -108,7 +108,7 @@
   grid-template-columns: 90px 1fr 42px;
   gap: 0.8rem;
   align-items: center;
-  color: #cbd5e1;
+  color: var(--theme-text-soft);
 
   span,
   strong {
@@ -121,7 +121,7 @@
 .bar-track {
   height: 12px;
   border-radius: 999px;
-  background: #111827;
+  background: var(--theme-surface);
   overflow: hidden;
 }
 
@@ -137,7 +137,7 @@
   gap: 0.75rem;
 
   span {
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.78rem;
@@ -145,11 +145,11 @@
 
   h2 {
     margin: 0.25rem 0 0;
-    color: #e5e7eb;
+    color: var(--theme-text);
   }
 
   p {
-    color: #cbd5e1;
+    color: var(--theme-text-soft);
     line-height: 1.65;
     margin: 0;
   }
@@ -159,12 +159,12 @@
     gap: 0.7rem;
     margin: 0;
     padding-left: 1.2rem;
-    color: #cbd5e1;
+    color: var(--theme-text-soft);
     line-height: 1.55;
   }
 
   .insights-list li::marker {
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-weight: 800;
   }
 }
@@ -174,7 +174,7 @@
 
   strong {
     display: block;
-    color: #e5e7eb;
+    color: var(--theme-text);
     font-size: 2rem;
     margin: 1.25rem 0 0.4rem;
   }
@@ -192,7 +192,7 @@
   align-items: center;
 
   span {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
   }
 }
 
@@ -203,7 +203,7 @@
   display: grid;
   place-items: center;
   background: rgba(59, 130, 246, 0.14);
-  color: #60a5fa;
+  color: var(--theme-accent);
   font-weight: 900;
 }
 
@@ -213,23 +213,23 @@
 
 .requests-card__header {
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid var(--theme-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
 
   h2 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0 0 0.35rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 
   a {
-    color: #60a5fa;
+    color: var(--theme-accent);
     text-decoration: none;
     font-weight: 800;
   }
@@ -245,16 +245,16 @@
 }
 
 .requests-table__head {
-  background: #162033;
-  color: #9ca3af;
+  background: var(--theme-surface-soft);
+  color: var(--theme-text-secondary);
   text-transform: uppercase;
   font-size: 0.78rem;
   font-weight: 800;
 }
 
 .requests-table__row {
-  border-top: 1px solid rgba(55, 65, 81, 0.6);
-  color: #e5e7eb;
+  border-top: 1px solid var(--theme-control);
+  color: var(--theme-text);
 
   &:hover {
     background: rgba(39, 52, 73, 0.45);
@@ -262,18 +262,18 @@
 
   strong {
     display: block;
-    color: #e5e7eb;
+    color: var(--theme-text);
   }
 
   span {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     font-size: 0.85rem;
   }
 }
 
 .request-id,
 .action-link {
-  color: #60a5fa;
+  color: var(--theme-accent);
   font-weight: 800;
   text-decoration: none;
 }
@@ -283,7 +283,7 @@
   padding: 0.4rem 0.65rem;
   border-radius: 999px;
   background: rgba(59, 130, 246, 0.14);
-  color: #60a5fa;
+  color: var(--theme-accent);
   font-size: 0.78rem;
   font-weight: 800;
 
@@ -315,5 +315,6 @@
 
 .empty-state {
   padding: 1rem 1.5rem;
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
 }
+

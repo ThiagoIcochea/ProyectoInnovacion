@@ -1,4 +1,4 @@
-.table-wrap {
+﻿.table-wrap {
 	width: 100%;
 	overflow-x: auto;
 	border-radius: $radius-lg;
@@ -36,7 +36,7 @@
 		transition: background-color $transition-fast, transform $transition-fast;
 
 		&:hover {
-			background: rgba(255, 255, 255, 0.03);
+			background: var(--theme-glass);
 		}
 	}
 }
@@ -46,3 +46,4 @@
 	text-align: center;
 	color: $text-muted;
 }
+

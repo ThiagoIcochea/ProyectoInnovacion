@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    1. RESETEOS DE CONTROLES NATIVOS (Para corregir desbordes y dar fluidez)
    ========================================================================== */
 input[type="number"], 
@@ -6,10 +6,10 @@ select {
   width: 100%;
   height: 42px;
   padding: 0 0.75rem;
-  background: #111827;
-  border: 1px solid #374151;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
   border-radius: 10px;
-  color: #e5e7eb;
+  color: var(--theme-text);
   font-size: 0.9rem;
   outline: none;
   box-sizing: border-box;
@@ -17,7 +17,7 @@ select {
 
   &:focus {
     border-color: #3b82f6;
-    background: #111827;
+    background: var(--theme-surface);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     transform: translateY(-1px);
   }
@@ -36,8 +36,8 @@ select {
   color-scheme: dark; 
 
   option {
-    background-color: #111827;
-    color: #e5e7eb;
+    background-color: var(--theme-surface);
+    color: var(--theme-text);
     padding: 10px;
   }
 }
@@ -59,7 +59,7 @@ input[type="number"] {
 }
 
 /* ==========================================================================
-   2. BOTÓN HAMBURGUESA FLOTANTE (Móviles)
+   2. BOTÃ“N HAMBURGUESA FLOTANTE (MÃ³viles)
    ========================================================================== */
 .floating-cart-trigger {
   position: fixed;
@@ -92,7 +92,7 @@ input[type="number"] {
     display: none; /* Desaparece por completo en escritorio */
   }
 
-  /* Animación interna del icono hamburguesa a X */
+  /* AnimaciÃ³n interna del icono hamburguesa a X */
   .hamburger-box {
     width: 24px;
     height: 18px;
@@ -135,7 +135,7 @@ input[type="number"] {
     }
   }
 
-  /* Contador flotante de productos en el botón */
+  /* Contador flotante de productos en el botÃ³n */
   .badge-count {
     position: absolute;
     top: -2px;
@@ -146,7 +146,7 @@ input[type="number"] {
     padding: 0.2rem 0.45rem;
     font-size: 0.75rem;
     font-weight: 700;
-    border: 2px solid #1e293b;
+    border: 2px solid var(--theme-surface-raised);
   }
 }
 
@@ -217,8 +217,8 @@ input[type="number"] {
 .promo-card,
 .product-card,
 .request-panel {
-  background: #1e293b;
-  border: 1px solid #374151;
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
   border-radius: 16px;
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
 }
@@ -227,7 +227,7 @@ input[type="number"] {
   padding: 1.5rem;
   background:
     radial-gradient(circle at top right, rgba(96, 165, 250, 0.18), transparent 32%),
-    linear-gradient(135deg, #1e3a8a 0%, #1e293b 70%);
+    linear-gradient(135deg, #1e3a8a 0%, var(--theme-surface-raised) 70%);
 
   @media (min-width: 768px) {
     padding: 2rem;
@@ -235,7 +235,7 @@ input[type="number"] {
 
   h1 {
     font-size: 1.8rem;
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0 0 1rem;
 
     @media (min-width: 768px) {
@@ -245,7 +245,7 @@ input[type="number"] {
 
   p {
     max-width: 560px;
-    color: #cbd5e1;
+    color: var(--theme-text-soft);
     line-height: 1.7;
     margin-bottom: 1.5rem;
   }
@@ -253,7 +253,7 @@ input[type="number"] {
 
 .hero-card__badge {
   display: inline-flex;
-  color: #93c5fd;
+  color: var(--theme-accent-soft);
   background: rgba(59, 130, 246, 0.16);
   border: 1px solid rgba(96, 165, 250, 0.2);
   padding: 0.4rem 0.75rem;
@@ -296,34 +296,34 @@ input[type="number"] {
   align-items: center;
 
   span {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     text-transform: uppercase;
     font-size: 0.75rem;
     font-weight: 700;
   }
 
   h3 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.75rem 0 0.4rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     font-size: 0.9rem;
   }
 
   button {
     margin-top: 0.8rem;
-    background: #273449;
-    color: #e5e7eb;
-    border: 1px solid #374151;
+    background: var(--theme-surface-hover);
+    color: var(--theme-text);
+    border: 1px solid var(--theme-border);
     border-radius: 10px;
     padding: 0.65rem 1rem;
     cursor: pointer;
     transition: background 0.2s;
 
     &:hover {
-      background: #334155;
+      background: var(--theme-border-soft);
     }
   }
 }
@@ -337,7 +337,7 @@ input[type="number"] {
 }
 
 .promo-card__icon {
-  color: #60a5fa;
+  color: var(--theme-accent);
   font-size: 2rem;
   margin-top: 0.5rem;
 }
@@ -456,20 +456,20 @@ input[type="number"] {
   }
 
   h2 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0;
     font-size: 1.6rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
     max-width: 760px;
     line-height: 1.6;
   }
 
   span {
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-size: 0.9rem;
     white-space: nowrap;
     font-weight: 600;
@@ -487,7 +487,7 @@ input[type="number"] {
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    background: #273449;
+    background: var(--theme-surface-hover);
     border-color: rgba(96, 165, 250, 0.38);
     box-shadow: 0 20px 52px rgba(2, 6, 23, 0.34);
     transform: translateY(-2px);
@@ -499,14 +499,14 @@ input[type="number"] {
   }
 
   h3 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0;
     font-size: 1.02rem;
     line-height: 1.32;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     font-size: 0.9rem;
     line-height: 1.5;
     margin: 0;
@@ -522,7 +522,7 @@ input[type="number"] {
   min-height: 420px;
 
   &:hover {
-    background: #1e293b;
+    background: var(--theme-surface-raised);
     transform: none;
   }
 }
@@ -533,7 +533,7 @@ input[type="number"] {
   background:
     linear-gradient(45deg, rgba(148, 163, 184, 0.12) 25%, transparent 25%),
     linear-gradient(-45deg, rgba(148, 163, 184, 0.12) 25%, transparent 25%),
-    #162033;
+    var(--theme-surface-soft);
   background-size: 22px 22px;
   position: relative;
   overflow: hidden;
@@ -544,7 +544,7 @@ input[type="number"] {
     top: 0.75rem;
     right: 0.75rem;
     background: rgba(59, 130, 246, 0.16);
-    color: #60a5fa;
+    color: var(--theme-accent);
     border-radius: 999px;
     padding: 0.3rem 0.6rem;
     font-size: 0.75rem;
@@ -570,8 +570,8 @@ input[type="number"] {
   justify-content: center;
   background:
     radial-gradient(circle at 40% 25%, rgba(96, 165, 250, 0.16), transparent 34%),
-    #111827;
-  color: #9ca3af;
+    var(--theme-surface);
+  color: var(--theme-text-secondary);
 
   span {
     position: static;
@@ -582,7 +582,7 @@ input[type="number"] {
     border: 1px solid rgba(96, 165, 250, 0.2);
     border-radius: 18px;
     background: rgba(59, 130, 246, 0.14);
-    color: #bfdbfe;
+    color: var(--theme-accent-text);
     font-size: 1rem;
     font-weight: 900;
     text-transform: uppercase;
@@ -595,7 +595,7 @@ input[type="number"] {
   gap: 0.5rem;
 
   span {
-    color: #60a5fa;
+    color: var(--theme-accent);
     background: rgba(59, 130, 246, 0.14);
     border: 1px solid rgba(96, 165, 250, 0.12);
     border-radius: 999px;
@@ -617,13 +617,13 @@ input[type="number"] {
   background: rgba(15, 23, 42, 0.42);
 
   span {
-    color: #94a3b8;
+    color: var(--theme-text-muted-blue);
     font-size: 0.78rem;
     font-weight: 700;
   }
 
   strong {
-    color: #e5e7eb;
+    color: var(--theme-text);
     font-size: 0.86rem;
     text-align: right;
     overflow-wrap: anywhere;
@@ -635,11 +635,11 @@ input[type="number"] {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  color: #94a3b8;
+  color: var(--theme-text-muted-blue);
   font-size: 0.82rem;
 
   strong {
-    color: #bfdbfe;
+    color: var(--theme-accent-text);
     font-weight: 900;
   }
 
@@ -692,8 +692,8 @@ input[type="number"] {
 
 .product-card__button--secondary {
   border-color: rgba(148, 163, 184, 0.22);
-  background: #111827;
-  color: #dbeafe;
+  background: var(--theme-surface);
+  color: var(--theme-info-text);
 
   &:hover {
     background: #1f2937;
@@ -702,14 +702,14 @@ input[type="number"] {
 }
 
 /* ==========================================================================
-   5. PANEL DEL CARRITO / SOLICITUD RFQ (Request Panel - Con Drawer Móvil)
+   5. PANEL DEL CARRITO / SOLICITUD RFQ (Request Panel - Con Drawer MÃ³vil)
    ========================================================================== */
 .request-panel {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   
-  /* --- COMPORTAMIENTO EN MÓVILES (Menú lateral oculto) --- */
+  /* --- COMPORTAMIENTO EN MÃ“VILES (MenÃº lateral oculto) --- */
   position: fixed;
   top: auto;
   right: 18px;
@@ -731,7 +731,7 @@ input[type="number"] {
     transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.25s ease;
 
-  /* Estado abierto activado por el botón hamburguesa */
+  /* Estado abierto activado por el botÃ³n hamburguesa */
   &.is-open {
     transform: translateY(0) scale(1);
     opacity: 1;
@@ -755,12 +755,12 @@ input[type="number"] {
   }
 
   h2 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.5rem 0 0.25rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0 0 0.5rem;
   }
 }
@@ -785,8 +785,8 @@ input[type="number"] {
   height: 36px;
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  color: #e5e7eb;
+  background: var(--theme-glass);
+  color: var(--theme-text);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -806,7 +806,7 @@ input[type="number"] {
     gap: 0.4rem;
 
     label {
-      color: #9ca3af;
+      color: var(--theme-text-secondary);
       font-size: 0.8rem;
       font-weight: 600;
     }
@@ -822,7 +822,7 @@ input[type="number"] {
 .request-panel__step {
   width: fit-content;
   background: rgba(59, 130, 246, 0.16);
-  color: #60a5fa;
+  color: var(--theme-accent);
   border-radius: 999px;
   padding: 0.4rem 0.7rem;
   font-size: 0.78rem;
@@ -835,7 +835,7 @@ input[type="number"] {
   border-radius: 12px;
   background: rgba(245, 158, 11, 0.12);
   border: 1px solid rgba(245, 158, 11, 0.22);
-  color: #fbbf24;
+  color: var(--theme-warning-text);
   font-size: 0.9rem;
   line-height: 1.6;
 }
@@ -855,8 +855,8 @@ input[type="number"] {
 .request-item {
   display: flex;
   gap: 0.85rem;
-  background: #111827;
-  border: 1px solid #374151;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
   border-radius: 12px;
   padding: 0.8rem;
   transition: transform 0.2s ease, border-color 0.2s ease;
@@ -878,7 +878,7 @@ input[type="number"] {
     transition: color 0.2s ease;
 
     &:hover {
-      color: #f87171;
+      color: var(--theme-danger-text);
       text-decoration: underline;
     }
   }
@@ -890,14 +890,14 @@ input[type="number"] {
   border-radius: 10px;
   background:
     linear-gradient(45deg, rgba(148, 163, 184, 0.15) 25%, transparent 25%),
-    #1e293b;
+    var(--theme-surface-raised);
   background-size: 14px 14px;
   flex-shrink: 0;
 }
 
 .request-item__content {
   strong {
-    color: #e5e7eb;
+    color: var(--theme-text);
     font-size: 0.9rem;
   }
 }
@@ -911,9 +911,9 @@ input[type="number"] {
   button {
     width: 28px;
     height: 28px;
-    border: 1px solid #374151;
-    background: #1e293b;
-    color: #e5e7eb;
+    border: 1px solid var(--theme-border);
+    background: var(--theme-surface-raised);
+    color: var(--theme-text);
     border-radius: 8px;
     cursor: pointer;
     display: inline-flex;
@@ -922,7 +922,7 @@ input[type="number"] {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover {
-      background: #273449;
+      background: var(--theme-surface-hover);
       border-color: #4b5563;
     }
 
@@ -932,7 +932,7 @@ input[type="number"] {
   }
 
   span {
-    color: #e5e7eb;
+    color: var(--theme-text);
     min-width: 24px;
     text-align: center;
     font-size: 0.9rem;
@@ -948,8 +948,8 @@ input[type="number"] {
   padding: 1.25rem 1.5rem;
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 16px;
-  background: #1e293b;
-  color: #9ca3af;
+  background: var(--theme-surface-raised);
+  color: var(--theme-text-secondary);
 }
 
 @media (max-width: 1199px) {
@@ -1001,3 +1001,5 @@ input[type="number"] {
     grid-template-columns: 1fr;
   }
 }
+
+

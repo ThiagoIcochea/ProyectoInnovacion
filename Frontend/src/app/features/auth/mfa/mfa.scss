@@ -1,11 +1,11 @@
-.mfa-page {
+﻿.mfa-page {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   background:
     radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 28%),
     radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.08), transparent 24%),
-    linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    linear-gradient(180deg, var(--theme-app-start) 0%, var(--theme-surface) 100%);
 }
 
 .mfa-page__left,
@@ -28,7 +28,7 @@
   border-radius: 999px;
   background: rgba(59, 130, 246, 0.14);
   border: 1px solid rgba(59, 130, 246, 0.18);
-  color: #60a5fa;
+  color: var(--theme-accent);
   font-size: 0.9rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
@@ -38,11 +38,11 @@
   font-size: 3rem;
   line-height: 1.15;
   margin: 0 0 1rem;
-  color: #e5e7eb;
+  color: var(--theme-text);
 }
 
 .brand-block p {
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
   font-size: 1.05rem;
   line-height: 1.7;
   margin-bottom: 2rem;
@@ -58,7 +58,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.9rem;
-  color: #cbd5e1;
+  color: var(--theme-text-soft);
   font-size: 0.98rem;
 }
 
@@ -79,7 +79,7 @@
   width: 100%;
   max-width: 460px;
   background: rgba(30, 41, 59, 0.9);
-  border: 1px solid #374151;
+  border: 1px solid var(--theme-border);
   border-radius: 18px;
   padding: 2rem;
   box-shadow: 0 18px 50px rgba(2, 6, 23, 0.3);
@@ -91,7 +91,7 @@
 .mfa-resend {
   border: 0;
   background: transparent;
-  color: #60a5fa;
+  color: var(--theme-accent);
   cursor: pointer;
 }
 
@@ -113,12 +113,12 @@ p {
 }
 
 h1 {
-  color: #e5e7eb;
+  color: var(--theme-text);
   margin-bottom: 0.5rem;
 }
 
 p {
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
 }
 
 .mfa-methods {
@@ -130,17 +130,17 @@ p {
 
 .mfa-methods button {
   min-height: 42px;
-  border: 1px solid #374151;
+  border: 1px solid var(--theme-border);
   border-radius: 12px;
-  background: #111827;
-  color: #e5e7eb;
+  background: var(--theme-surface);
+  color: var(--theme-text);
   cursor: pointer;
 }
 
 .mfa-methods .active {
   border-color: #3b82f6;
   background: rgba(59, 130, 246, 0.16);
-  color: #bfdbfe;
+  color: var(--theme-accent-text);
   font-weight: 700;
 }
 
@@ -150,7 +150,7 @@ p {
   border-radius: 12px;
   background: rgba(59, 130, 246, 0.14);
   border: 1px solid rgba(59, 130, 246, 0.18);
-  color: #bfdbfe;
+  color: var(--theme-accent-text);
   text-align: center;
 }
 
@@ -165,11 +165,11 @@ p {
   width: 100%;
   aspect-ratio: 1;
   text-align: center;
-  border: 1px solid #374151;
+  border: 1px solid var(--theme-border);
   border-radius: 12px;
   font-size: 22px;
-  background: #111827;
-  color: #e5e7eb;
+  background: var(--theme-surface);
+  color: var(--theme-text);
   outline: none;
 }
 
@@ -180,10 +180,10 @@ p {
   select {
     width: 100%;
     height: 46px;
-    border: 1px solid #374151;
+    border: 1px solid var(--theme-border);
     border-radius: 12px;
-    background: #111827;
-    color: #e5e7eb;
+    background: var(--theme-surface);
+    color: var(--theme-text);
     padding: 0 0.9rem;
     outline: none;
   }
@@ -216,14 +216,14 @@ p {
   border-radius: 12px;
   border: 1px solid rgba(239, 68, 68, 0.28);
   background: rgba(239, 68, 68, 0.12);
-  color: #fecaca;
+  color: var(--theme-danger-text);
   font-size: 14px;
 }
 
 .mfa-countdown {
   margin-top: -10px;
   font-size: 0.9rem;
-  color: #bfdbfe;
+  color: var(--theme-accent-text);
 }
 
 @media (max-width: 1100px) {
@@ -239,3 +239,5 @@ p {
     font-size: 2.3rem;
   }
 }
+
+

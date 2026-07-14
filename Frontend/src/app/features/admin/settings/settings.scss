@@ -1,4 +1,4 @@
-.admin-settings-page {
+﻿.admin-settings-page {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -32,7 +32,7 @@
   border: 1px solid rgba(148, 163, 184, 0.18);
   padding: 0 0.95rem;
   border-radius: 12px;
-  color: #edf2ff;
+  color: var(--theme-text);
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, background-color 180ms ease;
 
   &:focus {
@@ -60,7 +60,7 @@
   gap: 0.45rem;
 
   strong {
-    color: #edf2ff;
+    color: var(--theme-text);
     overflow-wrap: anywhere;
   }
 
@@ -69,7 +69,7 @@
     border-radius: 999px;
     padding: 0.32rem 0.58rem;
     background: rgba(79, 140, 255, 0.14);
-    color: #bfdbfe;
+    color: var(--theme-accent-text);
     font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -85,7 +85,7 @@
 
   small {
     flex-basis: 100%;
-    color: #bfdbfe;
+    color: var(--theme-accent-text);
     text-align: right;
   }
 }
@@ -132,7 +132,32 @@
 .btn-secondary {
   border: 1px solid rgba(148, 163, 184, 0.18);
   background: rgba(17, 24, 39, 0.92);
-  color: #edf2ff;
+  color: var(--theme-text);
+}
+
+:host-context(body.light-theme) {
+  .settings-card {
+    background: var(--theme-surface-raised);
+    border-color: var(--theme-border);
+  }
+
+  .form-group input,
+  .form-group select,
+  .config-row {
+    background: var(--theme-surface);
+    border-color: var(--theme-border);
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    background: var(--theme-surface);
+  }
+
+  .btn-secondary {
+    background: var(--theme-surface);
+    color: var(--theme-text);
+    border-color: var(--theme-border);
+  }
 }
 
 .status {
@@ -147,12 +172,12 @@
 
 .status--inactive {
   background: rgba(239, 68, 68, 0.14);
-  color: #f87171;
+  color: var(--theme-danger-text);
 }
 
 .empty-state {
   padding: 1rem;
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
 }
 
 .config-row--skeleton {
@@ -190,3 +215,5 @@
     width: 100%;
   }
 }
+
+

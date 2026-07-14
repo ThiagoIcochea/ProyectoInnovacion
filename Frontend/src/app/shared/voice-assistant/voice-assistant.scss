@@ -1,4 +1,4 @@
-.voice-fab {
+﻿.voice-fab {
   position: fixed;
   right: 22px;
   bottom: 22px;
@@ -7,7 +7,7 @@
   height: 58px;
   border: 0;
   border-radius: 50%;
-  background: #0f172a;
+  background: var(--theme-app-start);
   color: #fff;
   display: grid;
   place-items: center;
@@ -103,3 +103,4 @@
     transform: scale(1.35);
   }
 }
+

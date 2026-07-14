@@ -1,4 +1,4 @@
-/* Backend touchpoint: admin users table, status chips and summary cards. */
+﻿/* Backend touchpoint: admin users table, status chips and summary cards. */
 .admin-users-page {
   display: flex;
   flex-direction: column;
@@ -11,20 +11,20 @@
   gap: 1rem;
 
   span {
-    color: #f87171;
+    color: var(--theme-danger-text);
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.8rem;
   }
 
   h1 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.35rem 0;
     font-size: 2rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 }
@@ -45,9 +45,9 @@
 }
 
 .btn-secondary {
-  background: #111827;
-  color: #e5e7eb;
-  border: 1px solid #374151;
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  border: 1px solid var(--theme-border);
 }
 
 .summary-grid {
@@ -58,8 +58,8 @@
 
 .summary-card,
 .users-card {
-  background: #1e293b;
-  border: 1px solid #374151;
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
   border-radius: 16px;
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
 }
@@ -68,12 +68,12 @@
   padding: 1.25rem;
 
   span {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
   }
 
   strong {
     display: block;
-    color: #e5e7eb;
+    color: var(--theme-text);
     font-size: 2rem;
     margin-top: 0.7rem;
   }
@@ -85,13 +85,13 @@
 
 .users-card__header {
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid var(--theme-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
 
   h2 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0;
   }
 }
@@ -100,9 +100,9 @@
   width: 360px;
   height: 42px;
   border-radius: 12px;
-  border: 1px solid #374151;
-  background: #111827;
-  color: #9ca3af;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+  color: var(--theme-text-secondary);
   display: flex;
   align-items: center;
   padding: 0 1rem;
@@ -118,16 +118,16 @@
 }
 
 .users-table__head {
-  background: #162033;
-  color: #9ca3af;
+  background: var(--theme-surface-soft);
+  color: var(--theme-text-secondary);
   text-transform: uppercase;
   font-size: 0.78rem;
   font-weight: 800;
 }
 
 .users-table__row {
-  color: #e5e7eb;
-  border-top: 1px solid rgba(55, 65, 81, 0.6);
+  color: var(--theme-text);
+  border-top: 1px solid var(--theme-control);
 
   &:hover {
     background: rgba(39, 52, 73, 0.45);
@@ -149,7 +149,7 @@
   height: 38px;
   border-radius: 11px;
   background: rgba(59, 130, 246, 0.16);
-  color: #60a5fa;
+  color: var(--theme-accent);
   display: grid;
   place-items: center;
   font-weight: 900;
@@ -189,8 +189,8 @@
   width: min(760px, 100%);
   max-height: 90vh;
   overflow: auto;
-  background: #1e293b;
-  border: 1px solid #374151;
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
   border-radius: 16px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
 }
@@ -200,10 +200,10 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid var(--theme-border);
 
   span {
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.78rem;
@@ -211,7 +211,7 @@
 
   h2 {
     margin: 0.25rem 0 0;
-    color: #e5e7eb;
+    color: var(--theme-text);
   }
 }
 
@@ -224,7 +224,7 @@
   label {
     display: grid;
     gap: 0.45rem;
-    color: #cbd5e1;
+    color: var(--theme-text-soft);
     font-weight: 700;
   }
 
@@ -233,9 +233,9 @@
     width: 100%;
     min-height: 42px;
     border-radius: 10px;
-    border: 1px solid #374151;
-    background: #111827;
-    color: #e5e7eb;
+    border: 1px solid var(--theme-border);
+    background: var(--theme-surface);
+    color: var(--theme-text);
     padding: 0 0.8rem;
   }
 }
@@ -252,7 +252,7 @@
 }
 
 .manage-error {
-  color: #fecaca;
+  color: var(--theme-danger-text);
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.28);
   border-radius: 10px;
@@ -288,5 +288,7 @@
 
 .empty-state {
   padding: 1.25rem 1.5rem;
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
 }
+
+

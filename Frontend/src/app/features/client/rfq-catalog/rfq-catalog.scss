@@ -1,16 +1,32 @@
-$bg: #0b1120;
-$surface: #111827;
-$surface-2: #172033;
-$surface-3: #202b3d;
-$border: #2f3b52;
-$text: #f3f4f6;
-$muted: #9ca3af;
-$muted-2: #6b7280;
+﻿$bg: var(--c-bg);
+$surface: var(--c-surface);
+$surface-2: var(--c-ss);
+$surface-3: var(--c-sh);
+$border: var(--c-border);
+$text: var(--c-text);
+$muted: var(--c-muted);
+$muted-2: var(--theme-text-muted);
 $primary: #3b82f6;
 $primary-2: #2563eb;
 $success: #22c55e;
 $warning: #f59e0b;
 $danger: #ef4444;
+
+:host {
+  --c-bg: var(--theme-app);
+  --c-ar: var(--theme-app-rgb);
+  --c-surface: var(--theme-surface);
+  --c-sr: var(--theme-surface-rgb);
+  --c-ss: var(--theme-surface-soft);
+  --c-sh: var(--theme-surface-hover);
+  --c-border: var(--theme-border);
+  --c-br: var(--theme-border-rgb);
+  --c-text: var(--theme-text);
+  --c-muted: var(--theme-text-secondary);
+  --c-mr: var(--theme-text-secondary-rgb);
+  --c-accent: var(--theme-accent);
+  --c-accent-text: var(--theme-accent-text);
+}
 
 .catalog-page {
   display: grid;
@@ -96,7 +112,7 @@ $danger: #ef4444;
   border-radius: 8px;
   border: 1px solid rgba($primary, 0.35);
   background: rgba($primary, 0.13);
-  color: #bfdbfe;
+  color: var(--c-accent-text);
   padding: 0 0.9rem;
   font-weight: 800;
   cursor: pointer;
@@ -134,9 +150,9 @@ $danger: #ef4444;
   gap: 0.35rem;
   padding: 0.35rem;
   margin: 0.35rem 0 1rem;
-  border: 1px solid rgba($border, 0.9);
+  border: 1px solid rgba(var(--c-br), 0.9);
   border-radius: 8px;
-  background: rgba($surface, 0.76);
+  background: rgba(var(--c-sr), 0.76);
 }
 
 .catalog-tab {
@@ -150,7 +166,7 @@ $danger: #ef4444;
   cursor: pointer;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--theme-glass-hover);
   }
 
   &.active {
@@ -168,7 +184,7 @@ $danger: #ef4444;
   border-radius: 8px;
 
   span {
-    color: #93c5fd;
+    color: var(--c-accent);
     font-size: 0.76rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -232,7 +248,7 @@ $danger: #ef4444;
   place-items: center;
   background: rgba($primary, 0.16);
   border: 1px solid rgba($primary, 0.24);
-  color: #93c5fd;
+  color: var(--c-accent);
   font-size: 1.2rem;
   font-weight: 1000;
 }
@@ -279,7 +295,7 @@ $danger: #ef4444;
   border: 1px solid rgba($success, 0.28);
   border-radius: 999px;
   background: rgba($success, 0.12);
-  color: #86efac;
+  color: var(--theme-success-text);
   padding: 0.26rem 0.6rem;
   font-size: 0.76rem;
   font-weight: 900;
@@ -308,9 +324,9 @@ $danger: #ef4444;
   align-content: center;
   gap: 0.25rem;
   padding: 0.65rem;
-  border: 1px solid rgba($border, 0.82);
+  border: 1px solid rgba(var(--c-br), 0.82);
   border-radius: 8px;
-  background: rgba($bg, 0.86);
+  background: rgba(var(--c-ar), 0.86);
 
   span {
     color: $muted;
@@ -358,14 +374,14 @@ $danger: #ef4444;
 .ranking-progress__track {
   height: 8px;
   border-radius: 999px;
-  background: rgba($border, 0.75);
+  background: rgba(var(--c-br), 0.75);
   overflow: hidden;
 
   span {
     display: block;
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, $success, #60a5fa);
+    background: linear-gradient(90deg, $success, var(--c-accent));
   }
 }
 
@@ -374,7 +390,7 @@ $danger: #ef4444;
   border: 1px solid rgba($primary, 0.38);
   border-radius: 8px;
   background: rgba($primary, 0.14);
-  color: #bfdbfe;
+  color: var(--c-accent-text);
   font-weight: 900;
   cursor: pointer;
 
@@ -494,7 +510,7 @@ $danger: #ef4444;
   border-radius: 999px;
   border: 1px solid rgba($primary, 0.28);
   background: rgba($primary, 0.12);
-  color: #bfdbfe;
+  color: var(--c-accent-text);
   padding: 0.28rem 0.6rem;
   font-size: 0.78rem;
   font-weight: 700;
@@ -505,7 +521,7 @@ $danger: #ef4444;
   &--soft {
     border-color: rgba($warning, 0.3);
     background: rgba($warning, 0.1);
-    color: #fde68a;
+    color: var(--theme-warning-text);
   }
 }
 
@@ -518,7 +534,7 @@ $danger: #ef4444;
 .filter-section {
   padding-bottom: 1.2rem;
   margin-bottom: 1.2rem;
-  border-bottom: 1px solid rgba($border, 0.75);
+  border-bottom: 1px solid rgba(var(--c-br), 0.75);
 
   &:last-child {
     margin-bottom: 0;
@@ -589,7 +605,7 @@ $danger: #ef4444;
   gap: 0.65rem;
   padding: 1rem 1.15rem;
   border-top: 1px solid $border;
-  background: rgba($surface, 0.98);
+  background: rgba(var(--c-sr), 0.98);
 }
 
 .filter-button {
@@ -675,7 +691,7 @@ $danger: #ef4444;
 .image-placeholder {
   width: calc(100% - 1.5rem);
   height: calc(100% - 1.5rem);
-  border: 1px dashed rgba($muted, 0.28);
+  border: 1px dashed rgba(var(--c-mr), 0.28);
   border-radius: 8px;
   display: grid;
   place-items: center;
@@ -689,7 +705,7 @@ $danger: #ef4444;
     display: grid;
     place-items: center;
     background: rgba($primary, 0.12);
-    color: #bfdbfe;
+    color: var(--c-accent-text);
     font-weight: 900;
     letter-spacing: 0.04em;
   }
@@ -724,7 +740,7 @@ $danger: #ef4444;
 
 .category-badge {
   max-width: 52%;
-  color: #bbf7d0;
+  color: var(--theme-success-text);
   background: rgba($success, 0.12);
   border: 1px solid rgba($success, 0.25);
   padding: 0.24rem 0.5rem;
@@ -757,7 +773,7 @@ $danger: #ef4444;
   padding: 0.62rem 0.7rem;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba($border, 0.78);
+  border: 1px solid rgba(var(--c-br), 0.78);
 
   span {
     color: $muted;
@@ -889,7 +905,7 @@ $danger: #ef4444;
 .request-panel__step {
   width: fit-content;
   background: rgba($primary, 0.16);
-  color: #93c5fd;
+  color: var(--c-accent);
   border-radius: 999px;
   padding: 0.35rem 0.65rem;
   font-size: 0.74rem;
@@ -927,7 +943,7 @@ $danger: #ef4444;
   padding: 0 0.45rem;
   border-radius: 999px;
   background: rgba($primary, 0.15);
-  color: #93c5fd;
+  color: var(--c-accent);
   font-weight: 900;
   box-sizing: border-box;
 }
@@ -967,7 +983,7 @@ $danger: #ef4444;
   border-radius: 8px;
   border: 1px solid rgba($danger, 0.35);
   background: rgba($danger, 0.12);
-  color: #fca5a5;
+  color: var(--theme-danger-text);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -1211,3 +1227,7 @@ $danger: #ef4444;
     flex: 1;
   }
 }
+
+
+
+

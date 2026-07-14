@@ -1,4 +1,4 @@
-/* Backend touchpoint: profile form layout; role-dependent fields are rendered in profile.html. */
+﻿/* Backend touchpoint: profile form layout; role-dependent fields are rendered in profile.html. */
 .profile-page {
   display: flex;
   flex-direction: column;
@@ -7,20 +7,20 @@
 
 .page-header {
   span {
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.8rem;
   }
 
   h1 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.35rem 0;
     font-size: 2rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 }
@@ -37,8 +37,8 @@
 
 .profile-card,
 .settings-card {
-  background: #1e293b;
-  border: 1px solid #374151;
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
@@ -52,12 +52,12 @@
 
   h2 {
     margin: 0 0 0.3rem;
-    color: #e5e7eb;
+    color: var(--theme-text);
   }
 
   p {
     margin: 0;
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
   }
 }
 
@@ -66,8 +66,8 @@
   height: 120px;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid #374151;
-  background: #1e293b;
+  border: 3px solid var(--theme-border);
+  background: var(--theme-surface-raised);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -85,8 +85,8 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #273449;
-  color: #60a5fa;
+  background: var(--theme-surface-hover);
+  color: var(--theme-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -111,7 +111,7 @@
   }
 
   label {
-    color: #e5e7eb;
+    color: var(--theme-text);
     font-size: 0.9rem;
     font-weight: 700;
   }
@@ -122,9 +122,9 @@
     height: 46px;
     width: 100%;
     border-radius: 8px;
-    border: 1px solid #374151;
-    background: #0f172a;
-    color: #e5e7eb;
+    border: 1px solid var(--theme-border);
+    background: var(--theme-app-start);
+    color: var(--theme-text);
     padding: 0 1rem;
     outline: none;
     font: inherit;
@@ -139,8 +139,8 @@
   select {
     appearance: none;
     background-image:
-      linear-gradient(45deg, transparent 50%, #93c5fd 50%),
-      linear-gradient(135deg, #93c5fd 50%, transparent 50%);
+      linear-gradient(45deg, transparent 50%, var(--theme-accent-soft) 50%),
+      linear-gradient(135deg, var(--theme-accent-soft) 50%, transparent 50%);
     background-position:
       calc(100% - 18px) 19px,
       calc(100% - 12px) 19px;
@@ -182,7 +182,7 @@
 
   span {
     min-width: 0;
-    color: #cbd5e1;
+    color: var(--theme-text-soft);
     font-size: 0.9rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -228,7 +228,7 @@
 
 .settings-card {
   h2 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0 0 1rem;
   }
 }
@@ -238,16 +238,16 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 0;
-  border-bottom: 1px solid rgba(55, 65, 81, 0.6);
+  border-bottom: 1px solid var(--theme-control);
 
   strong {
     display: block;
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin-bottom: 0.3rem;
   }
 
   span {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     font-size: 0.9rem;
   }
 
@@ -286,3 +286,4 @@
     width: 100%;
   }
 }
+

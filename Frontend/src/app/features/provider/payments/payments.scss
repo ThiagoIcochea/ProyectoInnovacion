@@ -1,4 +1,4 @@
-/* Backend touchpoint: provider payment list and payment detail workflow. */
+﻿/* Backend touchpoint: provider payment list and payment detail workflow. */
 .provider-payments-page {
   display: flex;
   flex-direction: column;
@@ -7,20 +7,20 @@
 
 .page-header {
   span {
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.8rem;
   }
 
   h1 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.35rem 0;
     font-size: 2rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 }
@@ -34,8 +34,8 @@
 .payment-list-card,
 .payment-detail-card,
 .voucher-card {
-  background: #1e293b;
-  border: 1px solid #374151;
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
   border-radius: 16px;
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
 }
@@ -47,13 +47,13 @@
 
 .list-header {
   padding: 1.25rem;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid var(--theme-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
 
   h2 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0;
     font-size: 1.1rem;
   }
@@ -73,9 +73,9 @@
   margin: 1rem;
   height: 42px;
   border-radius: 12px;
-  border: 1px solid #374151;
-  background: #111827;
-  color: #9ca3af;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+  color: var(--theme-text-secondary);
   width: calc(100% - 2rem);
   padding: 0 1rem;
 
@@ -109,16 +109,16 @@
   }
 
   strong {
-    color: #e5e7eb;
+    color: var(--theme-text);
   }
 
   p {
-    color: #60a5fa;
+    color: var(--theme-accent);
     margin: 0.45rem 0;
   }
 
   b {
-    color: #e5e7eb;
+    color: var(--theme-text);
   }
 }
 
@@ -135,7 +135,7 @@
 
   span {
     display: block;
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     font-size: 0.82rem;
     margin-bottom: 0.75rem;
   }
@@ -163,16 +163,16 @@
 
 .detail-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid var(--theme-border);
 
   h2 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.75rem 0 0.35rem;
     font-size: 1.8rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 }
@@ -194,10 +194,10 @@
 
 .payment-info {
   padding: 1.5rem;
-  border-right: 1px solid #374151;
+  border-right: 1px solid var(--theme-border);
 
   h3 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0 0 1rem;
   }
 }
@@ -215,11 +215,11 @@
   }
 
   span {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
   }
 
   strong {
-    color: #e5e7eb;
+    color: var(--theme-text);
     text-align: right;
     min-width: 0;
     overflow-wrap: anywhere;
@@ -236,23 +236,23 @@
   justify-content: space-between;
 
   span {
-    color: #bfdbfe;
+    color: var(--theme-accent-text);
   }
 
   strong {
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-size: 1.3rem;
   }
 }
 
 .validation-box {
-  background: #111827;
-  border: 1px solid #374151;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
   border-radius: 14px;
   padding: 1rem;
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
   }
 }
 
@@ -295,12 +295,12 @@
 }
 
 .btn-secondary {
-  background: #111827;
-  border: 1px solid #374151;
-  color: #e5e7eb;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  color: var(--theme-text);
 
   &:hover:not(:disabled) {
-    background: #273449;
+    background: var(--theme-surface-hover);
   }
 }
 
@@ -310,7 +310,7 @@
   align-self: start;
 
   h3 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0 0 1rem;
   }
 }
@@ -321,9 +321,9 @@
   background:
     linear-gradient(45deg, rgba(148, 163, 184, 0.15) 25%, transparent 25%),
     linear-gradient(-45deg, rgba(148, 163, 184, 0.15) 25%, transparent 25%),
-    #111827;
+    var(--theme-surface);
   background-size: 22px 22px;
-  border: 1px solid #374151;
+  border: 1px solid var(--theme-border);
   overflow: auto;
   display: grid;
   place-items: start center;
@@ -345,7 +345,7 @@
   min-height: 100%;
   display: grid;
   place-items: center;
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
   text-align: center;
 }
 
@@ -368,7 +368,7 @@
 
 .empty-state {
   padding: 1rem;
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
 }
 
 @media (max-width: 1200px) {
@@ -422,3 +422,4 @@
 
   
 }
+

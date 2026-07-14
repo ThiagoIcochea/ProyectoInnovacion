@@ -1,4 +1,4 @@
-:host {
+﻿:host {
 /* Backend touchpoint: single-role selector and its responsive choice cards. */
   display: block;
   min-height: 100vh;
@@ -14,7 +14,7 @@
   padding: 2rem;
   background:
     radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 30%),
-    linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    linear-gradient(180deg, var(--theme-app-start) 0%, var(--theme-surface) 100%);
 }
 
 .role-header {
@@ -24,7 +24,7 @@
   .brand {
     margin-bottom: 1rem;
     font-weight: 600;
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-size: 1.05rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -32,12 +32,12 @@
 
   h1 {
     font-size: 2.8rem;
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin-bottom: 0.5rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     font-size: 1rem;
   }
 }
@@ -52,8 +52,8 @@
 
 .role-card {
   appearance: none;
-  background: #1e293b;
-  border: 1px solid #374151;
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
   border-radius: 16px;
   padding: 1.8rem;
   cursor: pointer;
@@ -65,31 +65,31 @@
   text-align: left;
 
   &:focus-visible {
-    outline: 2px solid #60a5fa;
+    outline: 2px solid var(--theme-accent);
     outline-offset: 3px;
   }
 
   &:hover {
-    background: #273449;
+    background: var(--theme-surface-hover);
     transform: translateY(-4px);
     border-color: #3b82f6;
     box-shadow: 0 10px 30px rgba(2, 6, 23, 0.4);
   }
 
   &.is-selected {
-    border-color: #60a5fa;
+    border-color: var(--theme-accent);
     background: rgba(59, 130, 246, 0.16);
     box-shadow: 0 10px 30px rgba(2, 6, 23, 0.35);
   }
 
   h3 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0;
     font-size: 1.5rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     font-size: 0.98rem;
     line-height: 1.6;
     margin: 0;
@@ -102,7 +102,7 @@
 
 .role-card__action {
   margin-top: auto;
-  color: #60a5fa;
+  color: var(--theme-accent);
   font-weight: 600;
 }
 
@@ -133,3 +133,4 @@
     font-size: 2.2rem;
   }
 }
+

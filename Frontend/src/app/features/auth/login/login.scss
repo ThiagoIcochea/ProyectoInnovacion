@@ -1,4 +1,4 @@
-/* Backend touchpoint: visual shell for the auth entry page; adjust if login fields change. */
+﻿/* Backend touchpoint: visual shell for the auth entry page; adjust if login fields change. */
 :host {
   display: block;
   min-height: 100vh;
@@ -11,7 +11,7 @@
   background:
     radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 28%),
     radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.08), transparent 24%),
-    linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    linear-gradient(180deg, var(--theme-app-start) 0%, var(--theme-surface) 100%);
 }
 
 .login-page__left,
@@ -34,7 +34,7 @@
   border-radius: 999px;
   background: rgba(59, 130, 246, 0.14);
   border: 1px solid rgba(59, 130, 246, 0.18);
-  color: #60a5fa;
+  color: var(--theme-accent);
   font-size: 0.9rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
@@ -44,11 +44,11 @@
   font-size: 3rem;
   line-height: 1.15;
   margin: 0 0 1rem;
-  color: #e5e7eb;
+  color: var(--theme-text);
 }
 
 .brand-block p {
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
   font-size: 1.05rem;
   line-height: 1.7;
   margin-bottom: 2rem;
@@ -64,7 +64,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.9rem;
-  color: #cbd5e1;
+  color: var(--theme-text-soft);
   font-size: 0.98rem;
 }
 
@@ -85,7 +85,7 @@
   width: 100%;
   max-width: 460px;
   background: rgba(30, 41, 59, 0.9);
-  border: 1px solid #374151;
+  border: 1px solid var(--theme-border);
   border-radius: 18px;
   padding: 2rem;
   box-shadow: 0 18px 50px rgba(2, 6, 23, 0.3);
@@ -98,13 +98,13 @@
 
   h2 {
     margin: 0 0 0.4rem;
-    color: #e5e7eb;
+    color: var(--theme-text);
     font-size: 2rem;
   }
 
   p {
     margin: 0;
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
   }
 }
 
@@ -120,7 +120,7 @@
   gap: 0.5rem;
 
   label {
-    color: #e5e7eb;
+    color: var(--theme-text);
     font-size: 0.95rem;
     font-weight: 500;
   }
@@ -130,9 +130,9 @@
     height: 48px;
     padding: 0 1rem;
     border-radius: 12px;
-    border: 1px solid #374151;
-    background: #111827;
-    color: #e5e7eb;
+    border: 1px solid var(--theme-border);
+    background: var(--theme-surface);
+    color: var(--theme-text);
     outline: none;
     transition: all 0.2s ease;
 
@@ -155,7 +155,7 @@
   margin-bottom: 0.5rem;
 
   a {
-    color: #60a5fa;
+    color: var(--theme-accent);
     text-decoration: none;
     font-size: 0.92rem;
   }
@@ -165,7 +165,7 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
   font-size: 0.92rem;
 
   input {
@@ -179,7 +179,7 @@
   border-radius: 12px;
   border: 1px solid rgba(239, 68, 68, 0.28);
   background: rgba(239, 68, 68, 0.12);
-  color: #fecaca;
+  color: var(--theme-danger-text);
   font-size: 0.92rem;
 }
 
@@ -214,11 +214,11 @@
   display: flex;
   gap: 0.4rem;
   justify-content: center;
-  color: #9ca3af;
+  color: var(--theme-text-secondary);
   font-size: 0.95rem;
 
   a {
-    color: #60a5fa;
+    color: var(--theme-accent);
     text-decoration: none;
     font-weight: 500;
   }

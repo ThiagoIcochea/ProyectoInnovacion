@@ -1,4 +1,4 @@
-/* Backend touchpoint: integration grid and status badges. */
+﻿/* Backend touchpoint: integration grid and status badges. */
 .admin-integrations-page {
   display: flex;
   flex-direction: column;
@@ -7,20 +7,20 @@
 
 .page-header {
   span {
-    color: #f87171;
+    color: var(--theme-danger-text);
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.8rem;
   }
 
   h1 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.35rem 0;
     font-size: 2rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 }
@@ -32,8 +32,8 @@
 }
 
 .integration-card {
-  background: #1e293b;
-  border: 1px solid #374151;
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
   border-radius: 16px;
   padding: 1.5rem;
   min-width: 0;
@@ -105,22 +105,22 @@
 }
 
 .btn-secondary {
-  border: 1px solid #374151;
-  background: #111827;
-  color: #e5e7eb;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+  color: var(--theme-text);
 
   &:hover:not(:disabled) {
-    background: #273449;
+    background: var(--theme-surface-hover);
   }
 }
 
 .empty-state {
   grid-column: 1 / -1;
   padding: 1.25rem;
-  border: 1px solid #374151;
+  border: 1px solid var(--theme-border);
   border-radius: 14px;
-  background: #1e293b;
-  color: #9ca3af;
+  background: var(--theme-surface-raised);
+  color: var(--theme-text-secondary);
 }
 
 @media (max-width: 1100px) {
@@ -138,3 +138,5 @@
     flex-direction: column;
   }
 }
+
+

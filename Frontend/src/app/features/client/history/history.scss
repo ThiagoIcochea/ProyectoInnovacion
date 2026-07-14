@@ -1,4 +1,4 @@
-/* Backend touchpoint: history table and filter states fed by the historial endpoint. */
+﻿/* Backend touchpoint: history table and filter states fed by the historial endpoint. */
 .history-page {
   display: flex;
   flex-direction: column;
@@ -7,27 +7,27 @@
 
 .page-header {
   span {
-    color: #60a5fa;
+    color: var(--theme-accent);
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.8rem;
   }
 
   h1 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0.35rem 0;
     font-size: 2rem;
   }
 
   p {
-    color: #9ca3af;
+    color: var(--theme-text-secondary);
     margin: 0;
   }
 }
 
 .history-card {
-  background: #1e293b;
-  border: 1px solid #374151;
+  background: var(--theme-surface-raised);
+  border: 1px solid var(--theme-border);
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 16px 40px rgba(2, 6, 23, 0.22);
@@ -35,13 +35,13 @@
 
 .history-card__header {
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid var(--theme-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
 
   h2 {
-    color: #e5e7eb;
+    color: var(--theme-text);
     margin: 0;
   }
 }
@@ -54,13 +54,13 @@
     height: 36px;
     padding: 0 0.8rem;
     border-radius: 10px;
-    border: 1px solid #374151;
-    background: #111827;
-    color: #e5e7eb;
+    border: 1px solid var(--theme-border);
+    background: var(--theme-surface);
+    color: var(--theme-text);
     cursor: pointer;
 
     &:hover {
-      background: #273449;
+      background: var(--theme-surface-hover);
     }
   }
 }
@@ -75,16 +75,16 @@
 }
 
 .history-table__head {
-  background: #162033;
-  color: #9ca3af;
+  background: var(--theme-surface-soft);
+  color: var(--theme-text-secondary);
   text-transform: uppercase;
   font-size: 0.78rem;
   font-weight: 800;
 }
 
 .history-table__row {
-  color: #e5e7eb;
-  border-top: 1px solid rgba(55, 65, 81, 0.6);
+  color: var(--theme-text);
+  border-top: 1px solid var(--theme-control);
 
   &:hover {
     background: rgba(39, 52, 73, 0.45);
@@ -102,7 +102,7 @@
     border-radius: 8px;
     border: 1px solid rgba(96, 165, 250, 0.55);
     background: rgba(37, 99, 235, 0.14);
-    color: #bfdbfe;
+    color: var(--theme-accent-text);
     font-weight: 800;
     cursor: pointer;
 
@@ -122,8 +122,28 @@
   }
 }
 
+:host-context(body.light-theme) .row-actions button {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: #eff6ff;
+  color: #1d4ed8;
+
+  &:hover {
+    background: #dbeafe;
+  }
+
+  &.claim {
+    border-color: rgba(217, 119, 6, 0.28);
+    background: #fff7ed;
+    color: #b45309;
+
+    &:hover {
+      background: #ffedd5;
+    }
+  }
+}
+
 .code {
-  color: #60a5fa;
+  color: var(--theme-accent);
   font-weight: 800;
 }
 
@@ -161,3 +181,4 @@
     justify-content: flex-start;
   }
 }
+

@@ -1,4 +1,4 @@
-.topbar-shell {
+﻿.topbar-shell {
 	height: $topbar-height;
 }
 
@@ -8,5 +8,6 @@
 	padding: 0.45rem 0.8rem;
 	border-radius: $radius-pill;
 	border: 1px solid $border;
-	background: rgba(255, 255, 255, 0.03);
+	background: var(--theme-glass);
 }
+

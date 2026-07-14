@@ -1,4 +1,4 @@
-.form-group {
+﻿.form-group {
 	display: flex;
 	flex-direction: column;
 	gap: 0.45rem;
@@ -28,7 +28,7 @@
 	}
 
 	.form-error {
-		color: #ff93a7;
+		color: var(--theme-danger-text);
 		font-size: 0.82rem;
 	}
 }
@@ -67,3 +67,4 @@
 		box-shadow: none;
 	}
 }
+
