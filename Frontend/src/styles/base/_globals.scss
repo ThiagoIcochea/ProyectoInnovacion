@@ -45,3 +45,12 @@ strong {
 .app-shell-page {
   padding: clamp(1rem, 2vw, 1.5rem);
 }
+
+@media (max-width: 768px) {
+  button,
+  input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+  select,
+  textarea {
+    min-height: 44px;
+  }
+}

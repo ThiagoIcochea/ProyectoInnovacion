@@ -270,7 +270,7 @@
 
   <div class="app-content">
 
-    <header class="topbar">
+    <header class="topbar" [class.topbar--provider]="isProvider">
 
       <button
         type="button"
@@ -306,13 +306,13 @@
 
       <div class="topbar__actions" *ngIf="isProvider">
         <span
-  class="api-pill"
-  [class.api-pill--ok]="estadoApi === 'OK'"
-  [class.api-pill--error]="estadoApi !== 'OK'">
-
-  API {{ estadoApi }}
-
-</span>
+          class="api-pill"
+          [class.api-pill--ok]="estadoApi === 'OK'"
+          [class.api-pill--error]="estadoApi !== 'OK'"
+          [attr.aria-label]="'Estado de API: ' + estadoApi"
+          [title]="'Estado de API: ' + estadoApi">
+          API {{ estadoApi }}
+        </span>
       </div>
 
       <div class="topbar__user">

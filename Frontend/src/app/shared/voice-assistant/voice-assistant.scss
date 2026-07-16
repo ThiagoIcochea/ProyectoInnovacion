@@ -2,7 +2,7 @@
   position: fixed;
   right: 22px;
   bottom: 22px;
-  z-index: 1200;
+  z-index: 850;
   width: 58px;
   height: 58px;
   border: 0;
@@ -13,6 +13,13 @@
   place-items: center;
   cursor: pointer;
   box-shadow: 0 16px 34px rgba(15, 23, 42, 0.28);
+}
+
+:host-context(body.light-theme) .voice-fab {
+  background: #fff;
+  color: var(--theme-accent);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.18);
 }
 
 .voice-fab__icon {
@@ -56,6 +63,12 @@
   background: #2563eb;
 }
 
+:host-context(body.light-theme) .voice-fab.is-listening,
+:host-context(body.light-theme) .voice-fab.is-thinking {
+  color: #fff;
+  border-color: transparent;
+}
+
 .voice-fab__pulse {
   position: absolute;
   inset: -7px;
@@ -73,7 +86,7 @@
   position: fixed;
   right: 22px;
   bottom: 92px;
-  z-index: 1199;
+  z-index: 849;
   width: min(320px, calc(100vw - 44px));
   padding: 12px 14px;
   border: 1px solid #dbe3ef;

@@ -237,3 +237,26 @@
     font-size: 2.3rem;
   }
 }
+
+@media (max-width: 720px) {
+  .login-page__left {
+    display: none;
+  }
+
+  .login-page__right {
+    min-height: 100vh;
+    padding: 1rem;
+  }
+
+  .login-card {
+    padding: clamp(1.25rem, 6vw, 2rem);
+  }
+}
+
+@media (max-width: 360px) {
+  .login-form__options {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

@@ -948,6 +948,22 @@ $danger: #ef4444;
   box-sizing: border-box;
 }
 
+.request-panel__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.request-panel__close {
+  width: 44px;
+  height: 44px;
+  border: 1px solid $border;
+  border-radius: 8px;
+  background: $surface-2;
+  color: $text;
+  cursor: pointer;
+}
+
 .request-list {
   display: grid;
   gap: 0.7rem;
@@ -978,8 +994,8 @@ $danger: #ef4444;
 }
 
 .btn-remove {
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   border-radius: 8px;
   border: 1px solid rgba($danger, 0.35);
   background: rgba($danger, 0.12);
@@ -995,8 +1011,8 @@ $danger: #ef4444;
   gap: 0.45rem;
 
   button {
-    width: 28px;
-    height: 28px;
+    width: 44px;
+    height: 44px;
     border-radius: 8px;
     border: 1px solid $border;
     background: $surface-2;
@@ -1147,6 +1163,12 @@ $danger: #ef4444;
     cursor: pointer;
   }
 
+  .request-panel__fab[aria-expanded='true'] {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+  }
+
   .request-panel__fab-count {
     background: rgba(255, 255, 255, 0.18);
     color: #fff;
@@ -1205,6 +1227,11 @@ $danger: #ef4444;
     min-width: 54px;
   }
 
+  .request-panel__fab {
+    right: auto;
+    left: 16px;
+  }
+
   .top-provider-title h3,
   .top-provider-title p {
     white-space: normal;
@@ -1225,6 +1252,12 @@ $danger: #ef4444;
 
   .catalog-tab {
     flex: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .catalog-tab {
+    min-height: 44px;
   }
 }
 

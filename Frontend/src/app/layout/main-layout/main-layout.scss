@@ -200,6 +200,7 @@
   display: none;
   width: 46px;
   height: 46px;
+  flex: 0 0 46px;
   border-radius: $radius-md;
   border: 1px solid $border;
   background: var(--theme-glass);
@@ -230,9 +231,9 @@
 }
 
 .theme-toggle {
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -764,13 +765,20 @@
     position: fixed;
     left: 0;
     top: 0;
+    z-index: 1300;
     width: min(100vw, 320px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     transform: translateX(-102%);
     transition: transform $transition-slow;
   }
 
   .sidebar.is-open {
     transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    z-index: 1290;
   }
 
   .topbar {
@@ -820,6 +828,70 @@
   .sidebar {
     width: min(100vw, 88vw);
     padding: 1rem;
+  }
+
+  .app-main {
+    padding: 1rem 1rem calc(6rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar--provider {
+    gap: 0.45rem;
+  }
+
+  .topbar--provider .topbar__actions {
+    margin-left: auto;
+  }
+
+  .topbar--provider .api-pill {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    padding: 0;
+    justify-content: center;
+    font-size: 0;
+  }
+
+  .topbar--provider .api-pill::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 18%, transparent);
+  }
+
+  .topbar--provider .topbar__user {
+    gap: 0.45rem;
+  }
+
+  .topbar--provider .provider-plan-trigger {
+    width: 96px;
+    min-width: 96px;
+    max-width: 96px;
+    min-height: 44px;
+    place-content: center;
+    text-align: center;
+  }
+
+  .topbar--provider .provider-plan-trigger span,
+  .topbar--provider .provider-plan-trigger small,
+  .topbar--provider .topbar__avatar {
+    display: none;
+  }
+
+  .topbar--provider .provider-plan-trigger strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 360px) {
+  .topbar {
+    gap: 0.4rem;
+    padding-inline: 0.75rem;
   }
 }
 

@@ -42,8 +42,9 @@
 }
 
 .back-button {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   border-radius: 12px;
   display: grid;
   place-items: center;

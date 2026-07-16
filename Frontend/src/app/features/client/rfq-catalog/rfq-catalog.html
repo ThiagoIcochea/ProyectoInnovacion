@@ -418,7 +418,16 @@
             <p>{{ requestItems.length }} items seleccionados</p>
           </div>
 
-          <span class="request-panel__counter">{{ requestItems.length }}</span>
+          <div class="request-panel__header-actions">
+            <span class="request-panel__counter">{{ requestItems.length }}</span>
+            <button
+              type="button"
+              class="request-panel__close"
+              (click)="cerrarSolicitudMovil()"
+              aria-label="Cerrar Mi Solicitud">
+              &times;
+            </button>
+          </div>
         </div>
       </div>
     </div>

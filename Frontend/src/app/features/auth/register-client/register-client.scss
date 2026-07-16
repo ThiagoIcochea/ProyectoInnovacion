@@ -345,12 +345,21 @@
 
 @media (max-width: 640px) {
   .auth-page {
-    padding: 1rem;
+    padding: 0;
   }
 
-  .auth-side,
+  .auth-shell {
+    min-height: 100vh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .auth-side {
+    display: none;
+  }
+
   .auth-form-panel {
-    padding: 1.5rem;
+    padding: 1.25rem;
   }
 
   .form-grid--2 {

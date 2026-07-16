@@ -204,12 +204,17 @@
 
   </section>
 
-  <section class="manage-modal" *ngIf="selectedUser">
+  <section
+    class="manage-modal"
+    *ngIf="selectedUser"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="admin-user-modal-title">
     <div class="manage-panel">
       <div class="manage-panel__header">
         <div>
           <span>Gestionar usuario</span>
-          <h2>{{ selectedUser?.nombreCompleto }}</h2>
+          <h2 id="admin-user-modal-title">{{ selectedUser?.nombreCompleto }}</h2>
         </div>
         <button type="button" class="btn-secondary" (click)="cerrarGestion()">Cerrar</button>
       </div>

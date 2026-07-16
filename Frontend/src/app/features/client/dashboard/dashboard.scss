@@ -781,8 +781,8 @@ input[type="number"] {
 }
 
 .request-panel__close {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 12px;
   background: var(--theme-glass);
@@ -909,8 +909,8 @@ input[type="number"] {
   gap: 0.4rem;
 
   button {
-    width: 28px;
-    height: 28px;
+    width: 44px;
+    height: 44px;
     border: 1px solid var(--theme-border);
     background: var(--theme-surface-raised);
     color: var(--theme-text);
@@ -965,6 +965,12 @@ input[type="number"] {
     padding: 0 0.9rem;
   }
 
+  .floating-cart-trigger.is-active {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+  }
+
   .request-panel {
     right: 12px;
     bottom: 80px;
@@ -976,6 +982,8 @@ input[type="number"] {
 
 @media (max-width: 640px) {
   .floating-cart-trigger {
+    right: auto;
+    left: 16px;
     min-width: 116px;
     padding: 0 0.8rem;
   }
@@ -989,8 +997,12 @@ input[type="number"] {
     left: 10px;
     width: auto;
     max-width: none;
-    bottom: 78px;
+    bottom: 12px;
+    max-height: calc(100dvh - 88px);
     padding: 1.25rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .request-panel__header-row {

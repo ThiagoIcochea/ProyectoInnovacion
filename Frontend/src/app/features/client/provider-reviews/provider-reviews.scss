@@ -1082,5 +1082,18 @@ $danger: #ef4444;
   }
 }
 
+@media (max-width: 768px) {
+  .pr-back,
+  .qty-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .pr-cart-indicator,
+  .refresh-btn {
+    min-height: 44px;
+  }
+}
+
 
 

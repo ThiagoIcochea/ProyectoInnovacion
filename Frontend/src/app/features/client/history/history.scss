@@ -48,10 +48,11 @@
 
 .filters {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
 
   button {
-    height: 36px;
+    min-height: 44px;
     padding: 0 0.8rem;
     border-radius: 10px;
     border: 1px solid var(--theme-border);
@@ -122,6 +123,14 @@
   }
 }
 
+:host-context(body.light-theme) .history-table__row {
+  border-top-color: #cbd5e1;
+
+  &:hover {
+    background: #f8fafc;
+  }
+}
+
 :host-context(body.light-theme) .row-actions button {
   border-color: rgba(37, 99, 235, 0.28);
   background: #eff6ff;
@@ -179,6 +188,22 @@
 
   .row-actions {
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .history-card__header {
+    padding: 1rem;
+  }
+
+  .filters {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .filters button {
+    width: 100%;
   }
 }
 

@@ -89,6 +89,7 @@
 
 .mfa-back,
 .mfa-resend {
+  min-height: 44px;
   border: 0;
   background: transparent;
   color: var(--theme-accent);
@@ -129,7 +130,7 @@ p {
 }
 
 .mfa-methods button {
-  min-height: 42px;
+  min-height: 44px;
   border: 1px solid var(--theme-border);
   border-radius: 12px;
   background: var(--theme-surface);
@@ -237,6 +238,41 @@ p {
 
   .brand-block h1 {
     font-size: 2.3rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .mfa-page__left {
+    display: none;
+  }
+
+  .mfa-page__right {
+    min-height: 100vh;
+    padding: 1rem;
+  }
+
+  .mfa-card {
+    padding: clamp(1.25rem, 6vw, 2rem);
+  }
+}
+
+@media (max-width: 360px) {
+  .mfa-page__right {
+    padding: 0.75rem;
+  }
+
+  .mfa-card {
+    padding: 1rem;
+  }
+
+  .mfa-digits {
+    grid-template-columns: repeat(3, minmax(44px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .mfa-digits input {
+    min-height: 48px;
+    aspect-ratio: auto;
   }
 }
 

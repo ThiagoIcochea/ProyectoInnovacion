@@ -178,7 +178,7 @@
 .manage-modal {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 1500;
   display: grid;
   place-items: center;
   padding: 1.5rem;
@@ -187,8 +187,9 @@
 
 .manage-panel {
   width: min(760px, 100%);
-  max-height: 90vh;
-  overflow: auto;
+  max-height: calc(100dvh - 3rem);
+  overflow-y: auto;
+  overflow-x: hidden;
   background: var(--theme-surface-raised);
   border: 1px solid var(--theme-border);
   border-radius: 16px;
@@ -196,11 +197,15 @@
 }
 
 .manage-panel__header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex;
   justify-content: space-between;
   gap: 1rem;
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--theme-border);
+  background: var(--theme-surface-raised);
 
   span {
     color: var(--theme-accent);
@@ -283,6 +288,38 @@
 
   .manage-form {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .manage-modal {
+    padding: 0.75rem;
+  }
+
+  .manage-panel {
+    max-height: calc(100dvh - 1.5rem);
+  }
+
+  .manage-panel__header {
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .manage-panel__header h2 {
+    overflow-wrap: anywhere;
+  }
+
+  .manage-form {
+    padding: 1rem;
+  }
+
+  .manage-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .manage-actions button {
+    width: 100%;
   }
 }
 

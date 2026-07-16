@@ -221,9 +221,13 @@
 
 <div class="modal" *ngIf="mostrarModal">
 
-  <div class="modal-content">
+  <div
+    class="modal-content"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="provider-payment-modal-title">
 
-    <h3>
+    <h3 id="provider-payment-modal-title">
       {{ accionModal === 'APROBAR'
           ? 'Confirmar aprobación'
           : 'Confirmar rechazo' }}
@@ -239,12 +243,12 @@
 
     <div class="modal-actions">
 
-      <button class="btn-primary"
+      <button type="button" class="btn-primary"
               (click)="confirmarAccion()">
         Sí, confirmar
       </button>
 
-      <button class="btn-secondary"
+      <button type="button" class="btn-secondary"
               (click)="cerrarModal()">
         Cancelar
       </button>
