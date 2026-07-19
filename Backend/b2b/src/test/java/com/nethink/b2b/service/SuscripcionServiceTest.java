@@ -101,4 +101,24 @@ class SuscripcionServiceTest {
         assertThat(response.getIdPrecio()).isEqualTo(5);
         verify(suscripcionRepo, never()).save(any(Suscripcion.class));
     }
+
+    @Test
+    void debeCancelarLaSuscripcionPendienteCuandoSeCancelaElPago() {
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(1);
+
+        Suscripcion pendiente = new Suscripcion();
+        pendiente.setIdSuscripcion(20);
+        pendiente.setUsuario(usuario);
+        pendiente.setEstado(Suscripcion.EstadoSuscripcion.PENDIENTE);
+        pendiente.setFechaCreacion(LocalDateTime.now());
+
+        when(suscripcionRepo.findByUsuario_IdUsuarioAndEstadoOrderByFechaCreacionDesc(1, Suscripcion.EstadoSuscripcion.PENDIENTE)).thenReturn(List.of(pendiente));
+
+        suscripcionService.cancelarSuscripcionPendiente(null, 1, "Cancelado por el usuario");
+
+        assertThat(pendiente.getEstado()).isEqualTo(Suscripcion.EstadoSuscripcion.CANCELADA);
+        assertThat(pendiente.getMotivoCancelacion()).isEqualTo("Cancelado por el usuario");
+        verify(suscripcionRepo).save(pendiente);
+    }
 }

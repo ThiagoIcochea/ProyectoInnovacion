@@ -123,6 +123,12 @@ public class ScoringService {
                     (wTiempo * scoreTiempo) +
                     (wCalidad * calidad);
 
+            if (p.getItems() != null && !p.getItems().isEmpty()) {
+                scoreFinal = Math.max(0.20, scoreFinal);
+            } else {
+                scoreFinal = Math.max(0.10, scoreFinal);
+            }
+
             if (scoreFinal < 0) {
                 scoreFinal = 0;
             }

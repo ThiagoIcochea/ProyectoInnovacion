@@ -46,19 +46,22 @@ public class RFQService {
                 .toList();
 
         List<Integer> proveedoresIds = provProdRepo.findProveedoresConTodosLosProductos(
-                idsProductos, 
+                idsProductos,
                 idsProductos.size()
         );
 
+        if (proveedoresIds.isEmpty() && idsProductos != null && !idsProductos.isEmpty()) {
+            proveedoresIds = provProdRepo.findProveedoresConAlgunProducto(idsProductos);
+        }
+
         if (proveedoresIds.isEmpty()) {
-            
             logsSistemaService.registrarLog(
-   idUsuario,
-    "RFQ_SIN_RESULTADOS",
-    "RFQ",
-    "No se encontraron proveedores para RFQ",
-    req
-);
+                    idUsuario,
+                    "RFQ_SIN_RESULTADOS",
+                    "RFQ",
+                    "No se encontraron proveedores para RFQ",
+                    req
+            );
             return new ArrayList<>();
         }
 
@@ -213,7 +216,7 @@ itemsDetalle.add(itemDetalle);
 );
         return candidatos.stream()
                 .sorted(Comparator.comparingDouble(RFQProveedorResponse::getScoreFinal).reversed())
-                .limit(10)
+                .limit(20)
                 .toList();
     }
 }

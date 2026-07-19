@@ -16,4 +16,9 @@ public interface SuscripcionRepository extends JpaRepository<Suscripcion, Intege
     Optional<Suscripcion> findByPaypalOrderId(String paypalOrderId);
 
     List<Suscripcion> findByUsuario_IdUsuarioOrderByFechaCreacionDesc(Integer idUsuario);
+
+    List<Suscripcion> findByUsuario_IdUsuarioAndEstadoOrderByFechaCreacionDesc(
+            Integer idUsuario,
+            Suscripcion.EstadoSuscripcion estado
+    );
 }

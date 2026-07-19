@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -200,6 +201,37 @@ public class SuscripcionService {
                         otra.setFechaActualizacion(ahora);
                         suscripcionRepo.save(otra);
                     });
+        }
+    }
+
+    @Transactional
+    public void cancelarSuscripcionPendiente(Integer idSuscripcion, Integer idUsuario, String motivo) {
+        String motivoFinal = (motivo == null || motivo.isBlank())
+                ? "Cancelado por el usuario"
+                : motivo.trim();
+
+        List<Suscripcion> pendientes = new ArrayList<>();
+
+        if (idSuscripcion != null) {
+            suscripcionRepo.findById(idSuscripcion).ifPresent(s -> {
+                if (s.getEstado() == Suscripcion.EstadoSuscripcion.PENDIENTE) {
+                    pendientes.add(s);
+                }
+            });
+        }
+
+        if (pendientes.isEmpty() && idUsuario != null) {
+            pendientes.addAll(suscripcionRepo.findByUsuario_IdUsuarioAndEstadoOrderByFechaCreacionDesc(
+                    idUsuario,
+                    Suscripcion.EstadoSuscripcion.PENDIENTE
+            ));
+        }
+
+        for (Suscripcion s : pendientes) {
+            s.setEstado(Suscripcion.EstadoSuscripcion.CANCELADA);
+            s.setMotivoCancelacion(motivoFinal);
+            s.setFechaActualizacion(LocalDateTime.now());
+            suscripcionRepo.save(s);
         }
     }
 

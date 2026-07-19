@@ -50,6 +50,23 @@ public interface ProveedorProductoRepository
             @Param("total") Integer total
     );
 
+    @Query(value = """
+        SELECT DISTINCT pp.id_proveedor
+        FROM proveedor_producto pp
+        JOIN proveedores pr
+            ON pp.id_proveedor = pr.id_proveedor
+        JOIN usuarios u
+            ON pr.id_usuario = u.id_usuario
+        WHERE pp.id_producto IN :productos
+        AND pp.stock > 0
+        AND pp.estado = 'ACTIVO'
+        AND pr.estado = 'ACTIVO'
+        AND u.estado = 'ACTIVO'
+    """, nativeQuery = true)
+    List<Integer> findProveedoresConAlgunProducto(
+            @Param("productos") List<Integer> productos
+    );
+
     @Query("""
         SELECT pp
         FROM ProveedorProducto pp

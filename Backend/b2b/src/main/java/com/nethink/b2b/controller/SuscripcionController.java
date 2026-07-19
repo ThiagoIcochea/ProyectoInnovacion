@@ -46,8 +46,13 @@ public class SuscripcionController {
     }
 
     @GetMapping("/cancel")
-    public void cancel(HttpServletResponse response) throws IOException {
-       
+    public void cancel(
+            @RequestParam(required = false) Integer subscriptionId,
+            HttpServletResponse response) throws IOException {
+        if (subscriptionId != null) {
+            suscripcionService.cancelarSuscripcionPendiente(subscriptionId, null, "Cancelado por el usuario");
+        }
+
         response.sendRedirect("https://proyectoinnovacion-1.onrender.com/app/provider/dashboard?payment=cancel");
     }
 
