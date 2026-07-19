@@ -18,10 +18,11 @@ public interface PagoRepository extends JpaRepository<Pago, Integer> {
     SELECT DISTINCT p
     FROM Pago p
     JOIN FETCH p.solicitud s
-    JOIN FETCH s.proveedor pr
-    JOIN FETCH s.usuario u
-    JOIN FETCH s.empresaCompradora ec
+    LEFT JOIN FETCH s.proveedor pr
+    LEFT JOIN FETCH s.usuario u
+    LEFT JOIN FETCH s.empresaCompradora ec
     WHERE pr.idProveedor = :idProveedor
+    ORDER BY p.fechaPago DESC
 """)
 List<Pago> listarPagosProveedor(
         @Param("idProveedor") Integer idProveedor);

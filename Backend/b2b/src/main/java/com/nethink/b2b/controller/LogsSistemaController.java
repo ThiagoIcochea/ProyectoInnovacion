@@ -16,11 +16,6 @@ public class LogsSistemaController {
     @GetMapping("/admin")
     public List<LogsSistema> listarLogs() {
 
-        return logsRepository.findAll()
-                .stream()
-                .sorted((a, b) ->
-                        b.getFecha().compareTo(a.getFecha())
-                )
-                .toList();
+        return logsRepository.findAllByOrderByFechaDesc();
     }
 }

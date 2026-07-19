@@ -282,7 +282,7 @@ private LogsApiRepository logsApiRepository;
     request
 );
     List<Proveedor> providers =
-            proveedorRepository.findAll();
+            proveedorRepository.findAllForAdmin();
 
     List<AdminProviderResponse> response =
             new ArrayList<>();

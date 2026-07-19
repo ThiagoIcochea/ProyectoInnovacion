@@ -135,7 +135,7 @@ public class ProductoService {
     public List<ProductoAdminResponse> obtenerProductosAdmin() {
 
     List<Object[]> rows = productoRepository.obtenerProductosAdmin();
-    
+
     List<CategoriaResponse> categories = categoriaRepository.findAll()
         .stream()
         .map(c -> new CategoriaResponse(
@@ -143,88 +143,55 @@ public class ProductoService {
                 c.getNombre()))
         .toList();
 
-List<MarcaResponse> marks = marcaRepository.findAll()
+    List<MarcaResponse> marks = marcaRepository.findAll()
         .stream()
         .map(m -> new MarcaResponse(
                 m.getIdMarca(),
                 m.getNombre()))
         .toList();
 
+    List<Integer> idsProductos = rows.stream()
+        .map(row -> ((Number) row[0]).intValue())
+        .distinct()
+        .toList();
+
+    Map<Integer, List<ProductoImagen>> imagenesPorProducto = productoImagenRepository.findByProducto_IdProductoIn(idsProductos)
+        .stream()
+        .collect(Collectors.groupingBy(img -> img.getProducto().getIdProducto()));
+
     return rows.stream().map(row -> {
-        
         Integer idProducto = ((Number) row[0]).intValue();
+        ProductoAdminResponse dto = new ProductoAdminResponse();
 
-        ProductoAdminResponse dto =
-                new ProductoAdminResponse();
+        Integer stock = ((Number) row[5]).intValue();
+        String status = row[6] != null ? String.valueOf(row[6]) : "ACTIVO";
+        status = status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase();
 
-        Integer stock =
-               ((Number) row[5]).intValue();
-        String status = ((String)row[6]);
-        
-        status = status.substring(0, 1).toUpperCase()
-        + status.substring(1).toLowerCase();
-        
         dto.setStatus(status);
-
-        dto.setIdProducto(
-                ((Number) row[0]).intValue()
-        );
-
-        dto.setName(
-                (String) row[1]
-        );
-
-        dto.setBrand(
-                (String) row[2]
-        );
-
-        dto.setCategory(
-                (String) row[3]
-        );
-
-        dto.setProvidersCount(
-                ((Number) row[4]).intValue()
-        );
-
+        dto.setIdProducto(((Number) row[0]).intValue());
+        dto.setName((String) row[1]);
+        dto.setBrand((String) row[2]);
+        dto.setCategory((String) row[3]);
+        dto.setProvidersCount(((Number) row[4]).intValue());
         dto.setTotalStock(stock);
 
         if (stock <= 10) {
             dto.setStatus("Bajo stock");
-        }
-
-        else if (stock <= 25) {
+        } else if (stock <= 25) {
             dto.setStatus("Stock medio");
-        }
-
-        else {
+        } else {
             dto.setStatus("Stock alto");
         }
-        
-        
-        List<ProductoImagen> imgs =
-        productoImagenRepository.findByProducto_IdProducto(idProducto);
 
-List<ImagenResponse> images =
-        imgs.stream()
-            .map(img -> new ImagenResponse(
-                    img.getUrl(),
-                    img.getPrincipal()
-            ))
+        List<ProductoImagen> imgs = imagenesPorProducto.getOrDefault(idProducto, List.of());
+        List<ImagenResponse> images = imgs.stream()
+            .map(img -> new ImagenResponse(img.getUrl(), img.getPrincipal()))
             .toList();
         dto.setImages(images);
-
-       
-        
-        
         dto.setCategorias(categories);
         dto.setMarcas(marks);
-        
         return dto;
-
     }).toList();
-    
-    
-   
 }
     
  private String subirACloudinary(MultipartFile archivo) throws IOException {

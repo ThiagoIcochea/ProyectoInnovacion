@@ -7,6 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ReclamoRepository extends JpaRepository<Reclamo, Integer> {
 
+    @Query("""
+        SELECT r
+        FROM Reclamo r
+        WHERE r.idProveedor = :idProveedor
+        ORDER BY r.fechaCreacion DESC
+    """)
     List<Reclamo> findByIdProveedorOrderByFechaCreacionDesc(Integer idProveedor);
 
     List<Reclamo> findByIdSolicitudAndTipoOrderByFechaCreacionDesc(Integer idSolicitud, String tipo);

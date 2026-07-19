@@ -856,6 +856,25 @@ System.err.println("ID PROVEEDOR = " + idProveedor);
     List<Solicitud> solicitudes =
             solicitudRepo.listarSolicitudes(idProveedor);
 
+    List<Integer> idsSolicitudes = solicitudes.stream()
+            .map(Solicitud::getIdSolicitud)
+            .filter(java.util.Objects::nonNull)
+            .toList();
+
+    Map<Integer, List<DetalleSolicitud>> detallesPorSolicitud = detalleRepo.listarDetallesPorSolicitudes(idsSolicitudes)
+            .stream()
+            .collect(Collectors.groupingBy(detalle -> detalle.getSolicitud().getIdSolicitud()));
+
+    List<Integer> idsProductos = detalleRepo.listarDetallesPorSolicitudes(idsSolicitudes).stream()
+            .map(detalle -> detalle.getProveedorProducto().getProducto().getIdProducto())
+            .filter(java.util.Objects::nonNull)
+            .distinct()
+            .toList();
+
+    Map<Integer, List<ProductoEspecificacion>> specsPorProducto = especificacionRepo.listarPorProductos(idsProductos)
+            .stream()
+            .collect(Collectors.groupingBy(spec -> spec.getProducto().getIdProducto()));
+
     List<SolicitudResponse> response =
             new ArrayList<>();
 
@@ -923,9 +942,7 @@ System.err.println("ID PROVEEDOR = " + idProveedor);
         // DETALLES
         // =====================================
 
-        List<DetalleSolicitud> detalles =
-                detalleRepo.listarDetalles(
-                        s.getIdSolicitud());
+        List<DetalleSolicitud> detalles = detallesPorSolicitud.getOrDefault(s.getIdSolicitud(), List.of());
 
         List<DetalleSolicitudResponse> detalleDTOs =
                 new ArrayList<>();
@@ -963,8 +980,7 @@ System.err.println("ID PROVEEDOR = " + idProveedor);
             Integer idProducto =
         d.getProveedorProducto().getProducto().getIdProducto();
 
-    List<ProductoEspecificacion> specs =
-        especificacionRepo.listarPorProducto(idProducto);
+    List<ProductoEspecificacion> specs = specsPorProducto.getOrDefault(idProducto, List.of());
 
     List<EspecificacionResponse> specsResponse = new ArrayList<>();
 

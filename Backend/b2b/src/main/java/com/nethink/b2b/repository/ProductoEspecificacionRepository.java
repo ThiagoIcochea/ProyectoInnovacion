@@ -21,7 +21,15 @@ public interface ProductoEspecificacionRepository extends JpaRepository<Producto
 List<ProductoEspecificacion> listarPorProducto(
     @Param("idProducto") Integer idProducto
 );
-    
+
+    @Query("""
+    SELECT pe
+    FROM ProductoEspecificacion pe
+    WHERE pe.producto.idProducto IN :idProductos
+""")
+List<ProductoEspecificacion> listarPorProductos(
+    @Param("idProductos") List<Integer> idProductos
+);
     
     
     

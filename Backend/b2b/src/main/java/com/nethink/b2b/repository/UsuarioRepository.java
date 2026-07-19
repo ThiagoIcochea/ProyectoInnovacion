@@ -17,4 +17,12 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
         WHERE UPPER(u.rol.nombre) IN ('ADMIN', 'ROLE_ADMIN')
     """)
     List<Usuario> findAdministradores();
+
+    @Query("""
+        SELECT DISTINCT u
+        FROM Usuario u
+        LEFT JOIN FETCH u.rol r
+        ORDER BY u.fechaRegistro DESC
+    """)
+    List<Usuario> findAllForAdmin();
 }

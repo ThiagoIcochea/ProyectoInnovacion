@@ -47,6 +47,7 @@ public class SuscripcionController {
 
     @GetMapping("/cancel")
     public void cancel(HttpServletResponse response) throws IOException {
+       
         response.sendRedirect("https://proyectoinnovacion-1.onrender.com/app/provider/dashboard?payment=cancel");
     }
 

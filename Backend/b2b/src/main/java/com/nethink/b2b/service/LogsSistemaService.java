@@ -3,6 +3,7 @@ package com.nethink.b2b.service;
 import com.nethink.b2b.entity.LogsSistema;
 import com.nethink.b2b.repository.LogsSistemaRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,6 +17,7 @@ public class LogsSistemaService {
         this.logsRepository = logsRepository;
     }
 
+    @Async
     public void registrarLog(
             Integer idUsuario,
             String accion,

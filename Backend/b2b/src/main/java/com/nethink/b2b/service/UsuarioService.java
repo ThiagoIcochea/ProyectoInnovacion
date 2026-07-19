@@ -284,7 +284,7 @@ public class UsuarioService {
     request
 );
     List<Usuario> usuarios =
-            usuarioRepo.findAll();
+            usuarioRepo.findAllForAdmin();
 
     List<AdminUserResponse> response =
             new ArrayList<>();

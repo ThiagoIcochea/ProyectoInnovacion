@@ -56,10 +56,11 @@ void actualizarPago(
 @Query("""
 SELECT DISTINCT s
 FROM Solicitud s
-JOIN FETCH s.usuario
-JOIN FETCH s.proveedor
-JOIN FETCH s.empresaCompradora
+LEFT JOIN FETCH s.usuario u
+LEFT JOIN FETCH s.proveedor p
+LEFT JOIN FETCH s.empresaCompradora ec
 WHERE s.proveedor.idProveedor = :idProveedor
+ORDER BY s.fechaCreacion DESC
 """)
 List<Solicitud> listarSolicitudes(@Param("idProveedor") Integer idProveedor);
 

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -432,9 +433,18 @@ public class ReclamoService {
 
     @Transactional(readOnly = true)
     public List<ReclamoProveedorResponse> listarReclamosProveedor(Integer idProveedor) {
-        return reclamoRepository.findByIdProveedorOrderByFechaCreacionDesc(idProveedor)
+        List<Reclamo> reclamos = reclamoRepository.findByIdProveedorOrderByFechaCreacionDesc(idProveedor);
+        List<Integer> idsSolicitudes = reclamos.stream()
+                .map(Reclamo::getIdSolicitud)
+                .filter(id -> id != null)
+                .distinct()
+                .toList();
+        Map<Integer, Solicitud> solicitudesPorId = solicitudRepository.findAllById(idsSolicitudes)
                 .stream()
-                .map(this::toProveedorResponse)
+                .collect(Collectors.toMap(Solicitud::getIdSolicitud, solicitud -> solicitud));
+
+        return reclamos.stream()
+                .map(reclamo -> toProveedorResponse(reclamo, solicitudesPorId.get(reclamo.getIdSolicitud())))
                 .toList();
     }
 
@@ -549,6 +559,10 @@ public class ReclamoService {
     }
 
     private ReclamoProveedorResponse toProveedorResponse(Reclamo reclamo) {
+        return toProveedorResponse(reclamo, null);
+    }
+
+    private ReclamoProveedorResponse toProveedorResponse(Reclamo reclamo, Solicitud solicitud) {
         ReclamoProveedorResponse response = new ReclamoProveedorResponse();
         response.setIdReclamo(reclamo.getIdReclamo());
         response.setIdSolicitud(reclamo.getIdSolicitud());
@@ -562,7 +576,7 @@ public class ReclamoService {
         response.setFechaCreacion(reclamo.getFechaCreacion());
         response.setFechaResolucion(reclamo.getFechaResolucion());
 
-        solicitudRepository.findById(reclamo.getIdSolicitud()).ifPresent(solicitud -> {
+        if (solicitud != null) {
             response.setDireccionEnvio(solicitud.getDireccionEnvio());
             response.setTotalSolicitud(solicitud.getTotal());
             response.setEstadoSolicitud(solicitud.getEstado() != null ? solicitud.getEstado().name() : null);
@@ -588,7 +602,7 @@ public class ReclamoService {
                             item.getFecha()
                     ))
                     .toList());
-        });
+        }
 
         return response;
     }

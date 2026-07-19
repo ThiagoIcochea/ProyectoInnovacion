@@ -188,18 +188,26 @@ public class SuscripcionService {
         s.setFechaActualizacion(ahora);
 
         suscripcionRepo.save(s);
+
+        if (s.getUsuario() != null && s.getUsuario().getIdUsuario() != null) {
+            suscripcionRepo.findByUsuario_IdUsuarioOrderByFechaCreacionDesc(s.getUsuario().getIdUsuario())
+                    .stream()
+                    .filter(otra -> !s.getIdSuscripcion().equals(otra.getIdSuscripcion()))
+                    .filter(otra -> otra.getEstado() == Suscripcion.EstadoSuscripcion.ACTIVA)
+                    .forEach(otra -> {
+                        otra.setEstado(Suscripcion.EstadoSuscripcion.CANCELADA);
+                        otra.setMotivoCancelacion("Reemplazada por una nueva suscripción activa");
+                        otra.setFechaActualizacion(ahora);
+                        suscripcionRepo.save(otra);
+                    });
+        }
     }
 
     public SuscripcionStatusResponse obtenerEstadoSuscripcion(Integer idUsuario) {
         Usuario usuario = usuarioRepo.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        List<Suscripcion> suscripciones = suscripcionRepo.findAll()
-                .stream()
-                .filter(s -> s.getUsuario() != null && idUsuario.equals(s.getUsuario().getIdUsuario()) && s.getEstado()== Suscripcion.EstadoSuscripcion.PENDIENTE)
-                .sorted(Comparator.comparing(Suscripcion::getFechaCreacion, Comparator.nullsLast(LocalDateTime::compareTo)).reversed())
-                .toList();
-
+        List<Suscripcion> suscripciones = suscripcionRepo.findByUsuario_IdUsuarioOrderByFechaCreacionDesc(idUsuario);
         if (suscripciones.isEmpty()) {
             return crearEstadoFreemium(usuario);
         }

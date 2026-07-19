@@ -38,6 +38,17 @@ public interface DetalleSolicitudRepository extends JpaRepository<DetalleSolicit
 """)
 List<DetalleSolicitud> listarDetalles(@Param("idSolicitud") Integer idSolicitud);
 
+@Query("""
+    SELECT d
+    FROM DetalleSolicitud d
+    JOIN FETCH d.proveedorProducto pp
+    JOIN FETCH pp.producto p
+    LEFT JOIN FETCH p.marca m
+    LEFT JOIN FETCH p.categoria c
+    WHERE d.solicitud.idSolicitud IN :idSolicitudes
+""")
+List<DetalleSolicitud> listarDetallesPorSolicitudes(@Param("idSolicitudes") List<Integer> idSolicitudes);
+
 @Query(value = """
 SELECT *
 FROM (
