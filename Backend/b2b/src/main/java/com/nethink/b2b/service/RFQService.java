@@ -102,8 +102,7 @@ public class RFQService {
                             + pp.getProducto().getNombre(),
                         req
                     );
-                    cumpleStock = false;
-                    break;
+                    continue;
                 }
 
                 double precioBase = pp.getPrecio().doubleValue();
@@ -186,7 +185,7 @@ if (mejor != null) {
 itemsDetalle.add(itemDetalle);
                 }
 
-            if (cumpleStock && tieneCoincidencia) {
+            if (tieneCoincidencia && !itemsDetalle.isEmpty()) {
                 if (request.getFiltro() != null) {
                     if (request.getFiltro().getPrecioMin() != null && totalCotizacion < request.getFiltro().getPrecioMin()) continue;
                     if (request.getFiltro().getPrecioMax() != null && totalCotizacion > request.getFiltro().getPrecioMax()) continue;

@@ -95,6 +95,53 @@ class RFQServiceTest {
         verify(scoringService).calcularScore(anyList(), eq(PrioridadRFQ.BALANCEADO));
     }
 
+    @Test
+    void shouldReturnProviderWithPartialCoverageWhenOneItemIsMissing() {
+        RFQRequest request = new RFQRequest();
+        request.setItems(List.of(
+                item(1, 2),
+                item(2, 1)
+        ));
+        FiltroRFQRequest filtro = new FiltroRFQRequest();
+        request.setFiltro(filtro);
+        request.setPrioridad(PrioridadRFQ.BALANCEADO);
+
+        when(provProdRepo.findProveedoresConTodosLosProductos(anyList(), eq(2)))
+                .thenReturn(List.of());
+        when(provProdRepo.findProveedoresConAlgunProducto(anyList()))
+                .thenReturn(List.of(10));
+
+        Proveedor proveedor = new Proveedor();
+        proveedor.setIdProveedor(10);
+        proveedor.setRazonSocial("Proveedor Demo");
+
+        Producto producto = new Producto();
+        producto.setIdProducto(1);
+        producto.setNombre("Producto A");
+
+        ProveedorProducto pp = new ProveedorProducto();
+        pp.setIdProvProd(100);
+        pp.setProveedor(proveedor);
+        pp.setProducto(producto);
+        pp.setPrecio(new BigDecimal("100.00"));
+        pp.setStock(2);
+        pp.setTiempoEntregaDias(3);
+        pp.setPorcentajeDescuento(0.0);
+
+        when(provProdRepo.findDetallesParaScoring(List.of(10), List.of(1, 2)))
+                .thenReturn(List.of(pp));
+        when(inventarioReSer.calcularStockDisponible(pp)).thenReturn(2);
+        when(descuentoVolumenRepo.findByProveedorProducto_IdProvProd(100))
+                .thenReturn(List.of());
+
+        List<RFQProveedorResponse> resultados = rfqService.buscarYCalificarProveedores(request, 99, null);
+
+        assertFalse(resultados.isEmpty(), "Se esperaba que el proveedor parcial apareciera en los resultados");
+        assertEquals(1, resultados.size());
+        assertEquals(10, resultados.get(0).getIdProveedor());
+        assertEquals(1, resultados.get(0).getItems().size());
+    }
+
     private ItemRFQRequest item(Integer idProducto, Integer cantidad) {
         ItemRFQRequest item = new ItemRFQRequest();
         item.setIdProducto(idProducto);
