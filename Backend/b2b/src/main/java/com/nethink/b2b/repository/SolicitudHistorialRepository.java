@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.nethink.b2b.dto.response.TrackingStepEntregaResponse;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
+import com.nethink.b2b.dto.response.ClienteSolicitudesMensualesResponse; 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 public interface SolicitudHistorialRepository
         extends JpaRepository<SolicitudHistorial, Integer> {
@@ -172,6 +174,139 @@ List<Object[]> obtenerSolicitudesAprobadasDashboard(
 );    
     
     
-    
+
+// dashboard de cliente
+
+// cantidad de solicitudes actual
+
+@Query("""
+SELECT COUNT(sh)
+FROM SolicitudHistorial sh
+WHERE sh.solicitud.usuario.idUsuario = :idUsuario
+AND sh.estado = 'CREADA'
+AND sh.fecha >= :inicio
+AND sh.fecha < :fin
+""")
+Long clienteContarSolicitudesMesActual(
+        Integer idUsuario,
+        LocalDateTime inicio,
+        LocalDateTime fin
+);
+
+
+
+@Query("""
+SELECT COUNT(sh)
+FROM SolicitudHistorial sh
+WHERE sh.solicitud.usuario.idUsuario = :idUsuario
+AND sh.estado = 'CREADA'
+AND sh.fecha >= :inicio
+AND sh.fecha < :fin
+""")
+Long clienteContarSolicitudesMesAnterior(
+        Integer idUsuario,
+        LocalDateTime inicio,
+        LocalDateTime fin
+);
+
+
+
+
+
+@Query("""
+SELECT COUNT(sh)
+FROM SolicitudHistorial sh
+WHERE sh.solicitud.usuario.idUsuario = :idUsuario
+AND sh.estado = 'PEDIDO_APROBADO'
+AND sh.fecha >= :inicio
+AND sh.fecha < :fin
+""")
+Long clienteContarSolicitudesAprobadasMesActual(
+        Integer idUsuario,
+        LocalDateTime inicio,
+        LocalDateTime fin
+);
+
+
+
+
+@Query("""
+SELECT COUNT(sh)
+FROM SolicitudHistorial sh
+WHERE sh.solicitud.usuario.idUsuario = :idUsuario
+AND sh.estado = 'PEDIDO_APROBADO'
+AND sh.fecha >= :inicio
+AND sh.fecha < :fin
+""")
+Long clienteContarSolicitudesAprobadasMesAnterior(
+        Integer idUsuario,
+        LocalDateTime inicio,
+        LocalDateTime fin
+);
+
+
+@Query("""
+SELECT COALESCE(SUM(sh.solicitud.total),0)
+FROM SolicitudHistorial sh
+WHERE sh.solicitud.usuario.idUsuario = :idUsuario
+AND sh.estado = 'PEDIDO_APROBADO'
+AND sh.fecha >= :inicio
+AND sh.fecha < :fin
+""")
+BigDecimal clienteObtenerMontoAprobadoMesActual(
+        Integer idUsuario,
+        LocalDateTime inicio,
+        LocalDateTime fin
+);
+
+
+@Query("""
+SELECT COALESCE(SUM(sh.solicitud.total),0)
+FROM SolicitudHistorial sh
+WHERE sh.solicitud.usuario.idUsuario = :idUsuario
+AND sh.estado = 'PEDIDO_APROBADO'
+AND sh.fecha >= :inicio
+AND sh.fecha < :fin
+""")
+BigDecimal clienteObtenerMontoAprobadoMesAnterior(
+        Integer idUsuario,
+        LocalDateTime inicio,
+        LocalDateTime fin
+);
+
+
+@Query("""
+SELECT new com.nethink.b2b.dto.response.ClienteSolicitudesMensualesResponse(
+    FUNCTION('DATE_FORMAT', h.fecha, '%Y-%m'),
+    COUNT(DISTINCT h.solicitud.idSolicitud)
+)
+FROM SolicitudHistorial h
+WHERE h.idUsuario = :idUsuario
+AND h.estado = 'CREADA'
+AND h.fecha >= :inicio
+AND NOT EXISTS (
+    SELECT 1
+    FROM SolicitudHistorial h2
+    WHERE h2.solicitud.idSolicitud = h.solicitud.idSolicitud
+    AND h2.estado = 'CANCELADA'
+)
+GROUP BY FUNCTION('DATE_FORMAT', h.fecha, '%Y-%m')
+ORDER BY FUNCTION('DATE_FORMAT', h.fecha, '%Y-%m')
+""")
+List<ClienteSolicitudesMensualesResponse> clienteObtenerEvolucionSolicitudes(
+        Integer idUsuario,
+        LocalDateTime inicio)  ;
+
+
+
+
+
+
+
+
+
+
+
+
     
 }

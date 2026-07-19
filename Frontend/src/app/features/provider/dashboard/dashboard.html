@@ -3,18 +3,18 @@
   <div class="page-header">
     <div>
       <span>Resumen general</span>
-      <h1>Hola, Nombreproveedor</h1>
+      <h1>Hola, proveedor {{dashboard?.nombreProveedor}}   </h1>
       <p>Aqui tienes el resumen de tu actividad y solicitudes en la plataforma.</p>
     </div>
 
     
 
-    <button type="button" class="export-btn" >
+    <button type="button" class="export-btn"  (click)="exportarInforme()" >
       Exportar informe
     </button>
   </div>
 
-<div *ngIf="dashboard">
+
 
   <div class="metrics-grid" *ngIf="dashboard">
 
@@ -69,12 +69,75 @@
 
   </div>
 
-  </div>
+  
 
 
 </div>
 
-<!-- 2. Panel del Gráfico Real (Chart.js) -->
+
+<!-- 2. Panel Analítico de Dos Columnas (Gráfico a la Izquierda, Tabla a la Derecha) -->
+  <section class="analytics-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 2rem;">
+    
+    <!-- Columna Izquierda: Gráfico de Ingresos (Chart.js) -->
+    <div class="chart-panel" style="background: #ffffff; border-radius: 8px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+      <div class="chart-panel__header" style="margin-bottom: 1rem;">
+        <h2 style="margin: 0; font-size: 1.2rem; color: #333;">Histórico de ingresos</h2>
+        <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #666;">Evolución económica de los últimos meses.</p>
+      </div>
+
+      <div class="chart-container" style="position: relative; height: 320px; width: 100%;">
+        <canvas id="graficoIngresos"></canvas>
+      </div>
+    </div>
+
+    <!-- Columna Derecha: Tabla de Productos Más Vendidos (Alineada al gráfico) -->
+    <div class="requests-card" style="background: #ffffff; border-radius: 8px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+      <div class="requests-card__header" style="margin-bottom: 1.5rem;">
+        <h2 style="margin: 0; font-size: 1.2rem; color: #333;">Productos más vendidos</h2>
+        <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #666;">Top de artículos con mayor demanda comercial.</p>
+      </div>
+
+      <!-- Validamos que la respuesta del backend exista antes de pintar las filas -->
+      <div class="requests-table" *ngIf="dashboard" style="flex: 1;">
+        <div class="requests-table__head" style="display: grid; grid-template-columns: 0.5fr 2fr 1fr; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid #eee; font-size: 0.85rem; color: #555;">
+          <div>Top</div>
+          <div>Producto</div>
+          <div style="text-align: right;">Cantidad</div>
+        </div>
+
+        <div class="requests-table__body" style="overflow-y: auto; max-height: 260px;">
+          <div class="requests-table__row" *ngFor="let prod of dashboard.productosMasVendidos; let i = index" 
+               style="display: grid; grid-template-columns: 0.5fr 2fr 1fr; padding: 12px 0; border-bottom: 1px solid #f9f9f9; align-items: center; font-size: 0.875rem;">
+            
+            <div class="request-id" style="font-weight: bold; color: #ff9f1c;">#0{{ i + 1 }}</div>
+            
+            <div style="white-space: nowrap; overflow: hidden; text-transform: capitalize; text-overflow: ellipsis; padding-right: 8px;">
+              <strong style="color: #222; display: block;">{{ prod.nombreProducto }}</strong>
+            </div>
+            
+            <div style="text-align: right; font-weight: 600; color: #444;">{{ prod.cantidadVendida | number:'1.0-0' }} u.</div>
+          </div>
+        </div>
+
+        <!-- Estado vacío si el arreglo llega en blanco -->
+        <div class="empty-state" *ngIf="!dashboard.productosMasVendidos || dashboard.productosMasVendidos.length === 0" 
+             style="padding: 2rem; text-align: center; color: #999; font-size: 0.875rem;">
+          No hay registros en este mes.
+        </div>
+      </div>
+
+      <!-- Mensaje temporal mientras carga la data de la derecha -->
+      <div *ngIf="!dashboard" style="padding: 2rem; text-align: center; color: #999; font-size: 0.875rem;">
+        Cargando listado...
+      </div>
+    </div>
+
+  </section>
+
+
+
+
+<!-- 2. Panel del Gráfico Real (Chart.js) 
   <section class="analytics-grid">
     <div class="chart-panel" style="width: 100%;">
       <div class="chart-panel__header">
@@ -82,12 +145,12 @@
         <p>Evolución económica de los últimos meses.</p>
       </div>
 
-      <!-- Contenedor del Canvas requerido por Chart.js -->
+      Contenedor del Canvas requerido por Chart.js 
       <div class="chart-container" style="position: relative; height: 320px; width: 100%;">
         <canvas id="graficoIngresos"></canvas>
       </div>
     </div>
-  </section>
+  </section>  -->
 
 
 

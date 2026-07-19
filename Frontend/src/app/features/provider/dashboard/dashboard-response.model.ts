@@ -28,6 +28,10 @@ export interface DashboardResponse {
 
   // productos más vendidos
   productosMasVendidos: ProductoMasVendido[];
+
+   nombreProveedor: string; 
+
+
 }
 
 

@@ -30,7 +30,7 @@ public class ProveedorDashboardResponse {
     private List<IngresoMensualResponse> graficoIngresos;
     private List<ProductoMasVendidoResponse> productosMasVendidos;
     
-    
+    private String nombreProveedor; 
     
     
     
@@ -134,8 +134,18 @@ public void setProductosMasVendidos(List<ProductoMasVendidoResponse> productosMa
 }   
     
     
+ public String getNombreProveedor(){
+ 
+   return nombreProveedor;  
+ }   
     
-    
-    
+ public void setNombreProveedor(String nombreProveedor){
+   
+     this.nombreProveedor=nombreProveedor; 
+     
+ }
+ 
+ 
+ 
     
 }

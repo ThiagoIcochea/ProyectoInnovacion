@@ -11,12 +11,14 @@ import com.nethink.b2b.repository.SolicitudRepository;
 import com.nethink.b2b.repository.SolicitudHistorialRepository; 
 import com.nethink.b2b.dto.response.ProveedorDashboardResponse;
 import com.nethink.b2b.dto.response.ProductoMasVendidoResponse;
-import com.nethink.b2b.repository.DetalleSolicitudRepository; 
+import com.nethink.b2b.repository.DetalleSolicitudRepository;
+import com.nethink.b2b.entity.Proveedor; 
 
 import com.nethink.b2b.repository.PagoRepository;
 import com.nethink.b2b.dto.response.IngresoMensualResponse;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import com.nethink.b2b.repository.ProveedorRepository; 
 
 
 
@@ -52,18 +54,26 @@ public class DashboardService {
     private final SolicitudHistorialRepository historialRepo                   ;
    private final SolicitudRepository solicitudRepo               ;
    private final PagoRepository pagoRepository                ;
-   private final DetalleSolicitudRepository detalleSolicitudRepository;  
+   private final DetalleSolicitudRepository detalleSolicitudRepository;
+   private final ProveedorRepository proveedorRepo; 
    
 
-    public DashboardService(SolicitudHistorialRepository historialRepo,SolicitudRepository solicitudRepo, PagoRepository pagoRepository, DetalleSolicitudRepository detalleSolicitudRepository   ) {
+    public DashboardService(SolicitudHistorialRepository historialRepo,SolicitudRepository solicitudRepo, PagoRepository pagoRepository, DetalleSolicitudRepository detalleSolicitudRepository, ProveedorRepository proveedorRepo   ) {
         this.historialRepo = historialRepo;
         this.solicitudRepo = solicitudRepo;
         this.pagoRepository= pagoRepository         ; 
-        this.detalleSolicitudRepository=detalleSolicitudRepository; 
+        this.detalleSolicitudRepository=detalleSolicitudRepository;
+        this.proveedorRepo=proveedorRepo; 
     }
 
     public ProveedorDashboardResponse obtenerDashboard(Integer idProveedor) {
 
+        Proveedor proveedor =
+        proveedorRepo.findById(idProveedor).orElseThrow(() ->
+                new RuntimeException("Proveedor no encontrado"));
+        
+        
+        
         // =========================
         // FECHAS
         // =========================
@@ -278,6 +288,9 @@ List<ProductoMasVendidoResponse> productosMasVendidos =
 ProveedorDashboardResponse response =
         new ProveedorDashboardResponse();
 
+
+
+
 response.setSolicitudesMesActual(solicitudesMesActual);
 response.setSolicitudesMesAnterior(solicitudesMesAnterior);
 response.setPorcentajeSolicitudes(porcentajeSolicitudes);
@@ -299,7 +312,9 @@ response.setGraficoIngresos(
         graficoIngresos);
 response.setProductosMasVendidos(productosMasVendidos);
 
-
+response.setNombreProveedor(
+        proveedor.getRazonSocial()
+);
 
 
 
@@ -436,7 +451,7 @@ private Double calcularPorcentaje(
         LocalDateTime finMesActual
 ) {
 
-    org.springframework.data.domain.Page<Object[]> paginaDatos =
+    List<Object[]> datos =
             detalleSolicitudRepository.obtenerProductosMasVendidosMesActual(
                     idProveedor,
                     inicioMesActual,
@@ -447,9 +462,8 @@ private Double calcularPorcentaje(
     List<ProductoMasVendidoResponse> productos = new ArrayList<>();
     
     
-    // 2. Extraemos la lista de filas reales usando .getContent() y validamos que no esté vacía
-    if (paginaDatos != null && paginaDatos.hasContent()) {
-        List<Object[]> datos = paginaDatos.getContent();
+    // 2. Validamos la lista directa sin usar .hasContent() ni .getContent()
+    if (datos != null && !datos.isEmpty()) {
 
         for (Object[] fila : datos) {
             // Verificación por si la fila viene corrupta o vacía
@@ -457,10 +471,10 @@ private Double calcularPorcentaje(
                 continue;
             }
 
-            // Extraemos el nombre (Columna 0)
+            // Extraemos el nombre (Columna 0) de forma segura
             String nombre = fila[0] != null ? fila[0].toString() : "Producto sin nombre";
 
-            // Extraemos la cantidad de forma segura (Columna 1)
+            // Extraemos la cantidad (Columna 1) evitando ClassCastException
             Long cantidad = fila[1] != null ? ((Number) fila[1]).longValue() : 0L;
 
             productos.add(
