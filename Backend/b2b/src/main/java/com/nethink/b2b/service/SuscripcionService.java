@@ -244,7 +244,16 @@ public class SuscripcionService {
             return crearEstadoFreemium(usuario);
         }
 
-        Suscripcion suscripcion = suscripciones.get(0);
+        Suscripcion suscripcion = suscripciones.stream()
+                .filter(s -> s.getEstado() == Suscripcion.EstadoSuscripcion.ACTIVA)
+                .filter(s -> s.getFechaFin() == null || !s.getFechaFin().isBefore(LocalDateTime.now()))
+                .findFirst()
+                .orElseGet(() -> suscripciones.stream().findFirst().orElse(null));
+
+        if (suscripcion == null) {
+            return crearEstadoFreemium(usuario);
+        }
+
         boolean activa = suscripcion.getEstado() == Suscripcion.EstadoSuscripcion.ACTIVA &&
                 (suscripcion.getFechaFin() == null || !suscripcion.getFechaFin().isBefore(LocalDateTime.now()));
         Integer idPlanActual = suscripcion.getPrecio() != null && suscripcion.getPrecio().getPlan() != null

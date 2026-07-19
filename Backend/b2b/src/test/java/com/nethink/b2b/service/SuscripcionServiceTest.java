@@ -103,6 +103,47 @@ class SuscripcionServiceTest {
     }
 
     @Test
+    void debeMantenerElPlanActivoCuandoLaSuscripcionMasRecienteFueCancelada() {
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(1);
+
+        Suscripcion cancelada = new Suscripcion();
+        cancelada.setIdSuscripcion(30);
+        cancelada.setUsuario(usuario);
+        cancelada.setEstado(Suscripcion.EstadoSuscripcion.CANCELADA);
+        cancelada.setFechaCreacion(LocalDateTime.now().minusDays(1));
+        cancelada.setFechaActualizacion(LocalDateTime.now().minusDays(1));
+
+        Suscripcion activa = new Suscripcion();
+        activa.setIdSuscripcion(31);
+        activa.setUsuario(usuario);
+        activa.setEstado(Suscripcion.EstadoSuscripcion.ACTIVA);
+        activa.setFechaCreacion(LocalDateTime.now().minusDays(5));
+        activa.setFechaFin(LocalDateTime.now().plusDays(15));
+        activa.setFechaActualizacion(LocalDateTime.now().minusDays(2));
+
+        Plan plan = new Plan();
+        plan.setIdPlan(2);
+        plan.setNombre("Estándar");
+
+        PlanPrecio precio = new PlanPrecio();
+        precio.setIdPrecio(7);
+        precio.setPlan(plan);
+        precio.setPrecio(new BigDecimal("249.00"));
+        activa.setPrecio(precio);
+
+        when(usuarioRepo.findById(1)).thenReturn(Optional.of(usuario));
+        when(suscripcionRepo.findByUsuario_IdUsuarioOrderByFechaCreacionDesc(1)).thenReturn(List.of(cancelada, activa));
+
+        SuscripcionStatusResponse response = suscripcionService.obtenerEstadoSuscripcion(1);
+
+        assertThat(response.getEstado()).isEqualTo("ACTIVA");
+        assertThat(response.getPlan()).isEqualTo("Estándar");
+        assertThat(response.getBloqueado()).isFalse();
+        assertThat(response.getIdPlan()).isEqualTo(2);
+    }
+
+    @Test
     void debeCancelarLaSuscripcionPendienteCuandoSeCancelaElPago() {
         Usuario usuario = new Usuario();
         usuario.setIdUsuario(1);
