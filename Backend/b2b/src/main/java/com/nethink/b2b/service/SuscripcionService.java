@@ -196,7 +196,7 @@ public class SuscripcionService {
 
         List<Suscripcion> suscripciones = suscripcionRepo.findAll()
                 .stream()
-                .filter(s -> s.getUsuario() != null && idUsuario.equals(s.getUsuario().getIdUsuario()))
+                .filter(s -> s.getUsuario() != null && idUsuario.equals(s.getUsuario().getIdUsuario()) && s.getEstado()== Suscripcion.EstadoSuscripcion.PENDIENTE)
                 .sorted(Comparator.comparing(Suscripcion::getFechaCreacion, Comparator.nullsLast(LocalDateTime::compareTo)).reversed())
                 .toList();
 
