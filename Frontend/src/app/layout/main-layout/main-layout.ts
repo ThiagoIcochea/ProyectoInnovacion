@@ -323,11 +323,13 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: (res) => {
         const planId = Number(res?.idPlan || this.selectedProviderPlanId || 1);
-        const isActive = String(res?.estado || '').toUpperCase() === 'ACTIVA' && res?.bloqueado !== true;
+        const estado = String(res?.estado || '').toUpperCase();
+        const isActive = estado === 'ACTIVA' && res?.bloqueado !== true;
+        const effectivePlanId = Number.isFinite(planId) && planId > 0 ? planId : 1;
 
         this.providerAccessBlocked = !isActive;
         this.providerAccessMessage = res?.mensaje || 'Tu suscripción necesita actualización.';
-        this.selectedProviderPlanId = planId;
+        this.selectedProviderPlanId = effectivePlanId;
         localStorage.setItem('provider_current_plan', String(this.selectedProviderPlanId));
 
         if (this.providerAccessBlocked) {

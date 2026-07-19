@@ -244,11 +244,7 @@ public class SuscripcionService {
             return crearEstadoFreemium(usuario);
         }
 
-        Suscripcion suscripcion = suscripciones.stream()
-                .filter(s -> s.getEstado() == Suscripcion.EstadoSuscripcion.ACTIVA)
-                .filter(s -> s.getFechaFin() == null || !s.getFechaFin().isBefore(LocalDateTime.now()))
-                .findFirst()
-                .orElseGet(() -> suscripciones.stream().findFirst().orElse(null));
+        Suscripcion suscripcion = encontrarSuscripcionActual(suscripciones);
 
         if (suscripcion == null) {
             return crearEstadoFreemium(usuario);
@@ -306,6 +302,24 @@ public class SuscripcionService {
         response.setDiasRestantes(calcularDiasRestantes(freemium));
         response.setMensaje("Acceso activo");
         return response;
+    }
+
+    private Suscripcion encontrarSuscripcionActual(List<Suscripcion> suscripciones) {
+        if (suscripciones == null || suscripciones.isEmpty()) {
+            return null;
+        }
+
+        return suscripciones.stream()
+                .filter(s -> s.getEstado() == Suscripcion.EstadoSuscripcion.ACTIVA)
+                .filter(s -> s.getFechaFin() == null || !s.getFechaFin().isBefore(LocalDateTime.now()))
+                .findFirst()
+                .orElseGet(() -> suscripciones.stream()
+                        .filter(s -> s.getEstado() == Suscripcion.EstadoSuscripcion.ACTIVA)
+                        .findFirst()
+                        .orElseGet(() -> suscripciones.stream()
+                                .filter(s -> s.getEstado() != Suscripcion.EstadoSuscripcion.CANCELADA)
+                                .findFirst()
+                                .orElse(suscripciones.stream().findFirst().orElse(null))));
     }
 
     private Suscripcion obtenerSuscripcionPendiente(Integer idUsuario) {
