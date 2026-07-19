@@ -76,6 +76,7 @@ public class RFQService {
             double totalCotizacion = 0;
             int tiempoMaximo = 0;
             boolean cumpleStock = true;
+            boolean tieneCoincidencia = false;
             
             List<ItemCotizadoResponse> itemsDetalle = new ArrayList<>();
 
@@ -84,9 +85,28 @@ public class RFQService {
                         .filter(p -> p.getProducto().getIdProducto().equals(itemReq.getIdProducto()))
                         .findFirst().orElse(null);
 
-                if (pp != null && inventarioReSer.calcularStockDisponible(pp) >= itemReq.getCantidad()) {
-                    
-                    double precioBase = pp.getPrecio().doubleValue();
+                if (pp == null) {
+                    continue;
+                }
+
+                tieneCoincidencia = true;
+
+                if (inventarioReSer.calcularStockDisponible(pp) < itemReq.getCantidad()) {
+                    logsSistemaService.registrarLog(
+                        idUsuario,
+                        "RFQ_STOCK_INSUFICIENTE",
+                        "RFQ",
+                        "Proveedor "
+                            + pp.getProveedor().getRazonSocial()
+                            + " sin stock suficiente para producto "
+                            + pp.getProducto().getNombre(),
+                        req
+                    );
+                    cumpleStock = false;
+                    break;
+                }
+
+                double precioBase = pp.getPrecio().doubleValue();
 double precioFinal = precioBase;
 
 /* =========================
@@ -164,25 +184,13 @@ if (mejor != null) {
     itemDetalle.setValorDescuento(0.0);
 }
 itemsDetalle.add(itemDetalle);
-                } else {
-                    logsSistemaService.registrarLog(
-    idUsuario,
-    "RFQ_STOCK_INSUFICIENTE",
-    "RFQ",
-    "Proveedor "
-        + pp.getProveedor().getRazonSocial()
-        + " sin stock suficiente para producto "
-        + pp.getProducto().getNombre(),
-    req
-);
-                    cumpleStock = false;
-                    break;
                 }
-            }
 
-            if (cumpleStock) {
-                if (request.getFiltro().getPrecioMin() != null && totalCotizacion < request.getFiltro().getPrecioMin()) continue;
-                if (request.getFiltro().getPrecioMax() != null && totalCotizacion > request.getFiltro().getPrecioMax()) continue;
+            if (cumpleStock && tieneCoincidencia) {
+                if (request.getFiltro() != null) {
+                    if (request.getFiltro().getPrecioMin() != null && totalCotizacion < request.getFiltro().getPrecioMin()) continue;
+                    if (request.getFiltro().getPrecioMax() != null && totalCotizacion > request.getFiltro().getPrecioMax()) continue;
+                }
 
                 RFQProveedorResponse resp = new RFQProveedorResponse();
                 resp.setIdProveedor(entry.getKey());
