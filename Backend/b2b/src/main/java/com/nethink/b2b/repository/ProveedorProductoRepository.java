@@ -31,9 +31,15 @@ public interface ProveedorProductoRepository
     @Query(value = """
         SELECT pp.id_proveedor
         FROM proveedor_producto pp
+        JOIN proveedores pr
+            ON pp.id_proveedor = pr.id_proveedor
+        JOIN usuarios u
+            ON pr.id_usuario = u.id_usuario
         WHERE pp.id_producto IN :productos
         AND pp.stock > 0
         AND pp.estado = 'ACTIVO'
+        AND pr.estado = 'ACTIVO'
+        AND u.estado = 'ACTIVO'
         GROUP BY pp.id_proveedor
         HAVING COUNT(DISTINCT pp.id_producto) = :total
     """, nativeQuery = true)
@@ -45,9 +51,15 @@ public interface ProveedorProductoRepository
     @Query(value = """
         SELECT DISTINCT pp.id_proveedor
         FROM proveedor_producto pp
+        JOIN proveedores pr
+            ON pp.id_proveedor = pr.id_proveedor
+        JOIN usuarios u
+            ON pr.id_usuario = u.id_usuario
         WHERE pp.id_producto IN :productos
         AND pp.stock > 0
         AND pp.estado = 'ACTIVO'
+        AND pr.estado = 'ACTIVO'
+        AND u.estado = 'ACTIVO'
     """, nativeQuery = true)
     List<Integer> findProveedoresConAlgunProducto(
             @Param("productos") List<Integer> productos

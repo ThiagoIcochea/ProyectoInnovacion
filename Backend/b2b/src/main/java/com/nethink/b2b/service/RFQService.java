@@ -75,10 +75,17 @@ public class RFQService {
             List<ProveedorProducto> stockProv = entry.getValue();
             double totalCotizacion = 0;
             int tiempoMaximo = 0;
-            boolean cumpleStock = true;
             boolean tieneCoincidencia = false;
             
             List<ItemCotizadoResponse> itemsDetalle = new ArrayList<>();
+
+            logsSistemaService.registrarLog(
+                    idUsuario,
+                    "RFQ_PROVEEDOR_CANDIDATO",
+                    "RFQ",
+                    "Revisando proveedor id=" + entry.getKey() + " con " + stockProv.size() + " registros",
+                    req
+            );
 
             for (ItemRFQRequest itemReq : request.getItems()) {
                 ProveedorProducto pp = stockProv.stream()
@@ -99,7 +106,8 @@ public class RFQService {
                         "Proveedor "
                             + pp.getProveedor().getRazonSocial()
                             + " sin stock suficiente para producto "
-                            + pp.getProducto().getNombre(),
+                            + pp.getProducto().getNombre()
+                            + " (requerido=" + itemReq.getCantidad() + ", disponible=" + inventarioReSer.calcularStockDisponible(pp) + ")",
                         req
                     );
                     continue;
@@ -190,6 +198,14 @@ itemsDetalle.add(itemDetalle);
                     if (request.getFiltro().getPrecioMin() != null && totalCotizacion < request.getFiltro().getPrecioMin()) continue;
                     if (request.getFiltro().getPrecioMax() != null && totalCotizacion > request.getFiltro().getPrecioMax()) continue;
                 }
+
+                logsSistemaService.registrarLog(
+                        idUsuario,
+                        "RFQ_PROVEEDOR_OK",
+                        "RFQ",
+                        "Proveedor id=" + entry.getKey() + " agregado con " + itemsDetalle.size() + " items",
+                        req
+                );
 
                 RFQProveedorResponse resp = new RFQProveedorResponse();
                 resp.setIdProveedor(entry.getKey());
