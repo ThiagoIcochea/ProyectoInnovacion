@@ -6,6 +6,7 @@ public class ProductoAdminResponse {
 
     private Integer idProducto;
     private String name;
+    private String skuGlobal;
     private String brand;
     private String category;
 
@@ -37,6 +38,14 @@ public class ProductoAdminResponse {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSkuGlobal() {
+        return skuGlobal;
+    }
+
+    public void setSkuGlobal(String skuGlobal) {
+        this.skuGlobal = skuGlobal;
     }
 
     public String getBrand() {

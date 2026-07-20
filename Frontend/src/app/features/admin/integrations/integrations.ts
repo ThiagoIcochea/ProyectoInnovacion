@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
 import {
   HttpClient,
@@ -117,17 +118,20 @@ implements OnInit {
     });
   }
 
-  configurar(item: any): void {
+  async configurar(item: any): Promise<void> {
+    const { isConfirmed, value } = await Swal.fire({
+      title: `Editar ${item.clave}`,
+      input: 'text',
+      inputValue: item.valor,
+      showCancelButton: true,
+      confirmButtonText: 'Guardar',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false
+    });
 
-    const nuevoValor = prompt(
-      `Editar valor para ${item.clave}`,
-      item.valor
-    );
+    const nuevoValor = String(value || '').trim();
 
-    if (
-      nuevoValor === null ||
-      nuevoValor.trim() === ''
-    ) {
+    if (!isConfirmed || nuevoValor === '') {
       return;
     }
 
@@ -142,24 +146,28 @@ implements OnInit {
     )
     .subscribe({
 
-      next: () => {
+      next: async () => {
 
         item.valor = nuevoValor;
 
         this.cdr.detectChanges();
 
-        alert(
-          'Configuración actualizada'
-        );
+        await Swal.fire({
+          icon: 'success',
+          title: 'Configuración actualizada',
+          text: 'El valor quedó guardado correctamente.'
+        });
       },
 
-      error: (err) => {
+      error: async (err) => {
 
         console.error(err);
 
-        alert(
-          'No se pudo actualizar'
-        );
+        await Swal.fire({
+          icon: 'error',
+          title: 'No se pudo actualizar',
+          text: 'No se pudo guardar la configuración.'
+        });
       }
     });
   }

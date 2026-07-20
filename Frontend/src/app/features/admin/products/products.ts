@@ -4,6 +4,7 @@ import {
   HttpClientModule,
   HttpHeaders
 } from '@angular/common/http';
+import Swal from 'sweetalert2';
 import {
   ChangeDetectorRef,
   Component,
@@ -39,6 +40,7 @@ export class AdminProductsComponent implements OnInit {
   searchText = '';
 
   showManageModal = false;
+  loading = true;
 
   productImages: any[] = [];
 
@@ -131,9 +133,13 @@ export class AdminProductsComponent implements OnInit {
     }
   ).subscribe({
 
-    next: () => {
+    next: async () => {
 
-      alert('Producto actualizado correctamente');
+      await Swal.fire({
+        icon: 'success',
+        title: 'Producto actualizado',
+        text: 'Los cambios del producto se guardaron correctamente.'
+      });
 
       this.showManageModal = false;
 
@@ -141,22 +147,32 @@ export class AdminProductsComponent implements OnInit {
 
     },
 
-    error: err => {
+    error: async err => {
 
       console.error(err);
 
-      alert(err?.error?.message || 'Error al actualizar');
+      await Swal.fire({
+        icon: 'error',
+        title: 'No se pudo actualizar',
+        text: err?.error?.message || 'Error al actualizar'
+      });
 
     }
 
   });
   } catch (error: any) {
-    alert(error?.message || 'MFA cancelado.');
+    await Swal.fire({
+      icon: 'error',
+      title: 'Acción cancelada',
+      text: error?.message || 'MFA cancelado.'
+    });
   }
 
 }
 
   obtenerProductos(): void {
+
+    this.loading = true;
 
     this.http.get<any[]>(this.API_URL, {
       headers: this.headers()
@@ -166,6 +182,7 @@ export class AdminProductsComponent implements OnInit {
 
         this.products = res;
         this.filteredProducts = [...res];
+        this.loading = false;
 
         if (this.filteredProducts.length > 0) {
 
@@ -184,6 +201,7 @@ export class AdminProductsComponent implements OnInit {
 
       error: (err) => {
         console.error(err);
+        this.loading = false;
       }
 
     });

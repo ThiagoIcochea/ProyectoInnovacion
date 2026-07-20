@@ -170,9 +170,10 @@ public class ProductoService {
         dto.setStatus(status);
         dto.setIdProducto(((Number) row[0]).intValue());
         dto.setName((String) row[1]);
-        dto.setBrand((String) row[2]);
-        dto.setCategory((String) row[3]);
-        dto.setProvidersCount(((Number) row[4]).intValue());
+        dto.setSkuGlobal(row[2] != null ? String.valueOf(row[2]) : null);
+        dto.setBrand((String) row[3]);
+        dto.setCategory((String) row[4]);
+        dto.setProvidersCount(((Number) row[5]).intValue());
         dto.setTotalStock(stock);
 
         if (stock <= 10) {

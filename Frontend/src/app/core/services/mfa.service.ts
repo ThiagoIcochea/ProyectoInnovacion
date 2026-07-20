@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import Swal from 'sweetalert2';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../constants/app.constants';
 
 export type MfaPurpose =
@@ -37,7 +38,7 @@ export class MfaService {
   }
 
   async requestActionToken(email: string, purpose: MfaPurpose, method?: MfaMethod | string): Promise<string> {
-    let selectedMethod = this.resolveMethod(method);
+    let selectedMethod = await this.resolveMethod(method);
     let start: any;
 
     try {
@@ -52,7 +53,7 @@ export class MfaService {
     }
 
     const channel = this.methodLabel(selectedMethod);
-    const code = window.prompt(`Ingresa el codigo multifactor enviado por ${channel}.`);
+    const code = await this.promptForCode(channel);
 
     if (!code) {
       throw new Error('Verificacion multifactor cancelada.');
@@ -67,19 +68,70 @@ export class MfaService {
     return verified.mfaActionToken;
   }
 
-  private resolveMethod(method?: MfaMethod | string): MfaMethod {
+  private async resolveMethod(method?: MfaMethod | string): Promise<MfaMethod> {
     const normalized = String(method || '').trim().toLowerCase();
 
     if (this.isMethod(normalized)) {
       return normalized;
     }
 
-    const selected = window.prompt(
-      'Elige el medio MFA: correo, sms, whatsapp o llamada.',
-      'whatsapp'
-    );
-
+    const selected = await this.promptForMethodSelection();
     return this.normalizeMethod(selected);
+  }
+
+  private async promptForMethodSelection(): Promise<string | null> {
+    const { isConfirmed, value } = await Swal.fire({
+      title: 'Verificación multifactor',
+      text: 'Elige el canal MFA para confirmar esta acción.',
+      input: 'select',
+      inputOptions: {
+        email: 'Correo',
+        sms: 'SMS',
+        whatsapp: 'WhatsApp',
+        call: 'Llamada'
+      },
+      inputValue: 'whatsapp',
+      showCancelButton: true,
+      confirmButtonText: 'Continuar',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false
+    });
+
+    if (!isConfirmed) {
+      return null;
+    }
+
+    return String(value || 'email');
+  }
+
+  private async promptForCode(channel: string): Promise<string> {
+    const { isConfirmed, value } = await Swal.fire({
+      title: 'Código MFA',
+      text: `Ingresa el código multifactor enviado por ${channel}.`,
+      input: 'text',
+      inputAttributes: {
+        autocomplete: 'one-time-code',
+        inputmode: 'numeric'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Confirmar',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false,
+      inputValidator: (candidate) => {
+        const normalized = String(candidate || '').trim();
+        if (normalized.length < 4) {
+          return 'Ingresa el código completo.';
+        }
+
+        return null;
+      }
+    });
+
+    if (!isConfirmed) {
+      return '';
+    }
+
+    return String(value || '').trim();
   }
 
   private normalizeMethod(value: string | null | undefined): MfaMethod {

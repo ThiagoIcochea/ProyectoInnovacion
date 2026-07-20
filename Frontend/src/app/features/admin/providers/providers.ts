@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
 import {
   HttpClient,
@@ -212,7 +213,7 @@ implements OnInit {
           headers: this.headers().set('X-MFA-Authorization', token)
         }
       ).subscribe({
-        next: () => {
+        next: async () => {
           this.selectedProvider.estado = nuevoEstado === 'INACTIVO' ? 'INACTIVO' : 'ACTIVO';
           this.selectedProvider.apiUrl = this.apiUrl;
           this.selectedProvider.apiTipo = this.apiTipo;
@@ -220,15 +221,28 @@ implements OnInit {
           this.showManageModal = false;
           this.selectedProvider = null;
           this.cdr.detectChanges();
-          alert('Proveedor actualizado correctamente');
+          await Swal.fire({
+            icon: 'success',
+            title: 'Proveedor actualizado',
+            text: 'Los cambios del proveedor se guardaron correctamente.'
+          });
+          this.listarProviders();
         },
-        error: (err) => {
+        error: async (err) => {
           console.error(err);
-          alert(err?.error?.message || 'No fue posible actualizar el proveedor');
+          await Swal.fire({
+            icon: 'error',
+            title: 'No se pudo actualizar',
+            text: err?.error?.message || 'No fue posible actualizar el proveedor'
+          });
         }
       });
     } catch (error: any) {
-      alert(error?.message || 'MFA cancelado.');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Acción cancelada',
+        text: error?.message || 'MFA cancelado.'
+      });
     }
   }
 

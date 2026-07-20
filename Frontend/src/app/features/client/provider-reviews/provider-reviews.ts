@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
+import Swal from 'sweetalert2';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 
 @Component({
@@ -1313,6 +1314,12 @@ getReviewLikes(review: any): number {
       return;
     }
 
+    const previousReaction = comentario?.userReaction ?? null;
+    const previousLikes = this.getReviewLikes(comentario);
+    const previousDislikes = this.getReviewDislikes(comentario);
+
+    this.applyOptimisticReaction(comentario, tipo);
+
     const request = {
       idComentario: comentario.idComentario,
       tipo
@@ -1324,18 +1331,65 @@ getReviewLikes(review: any): number {
       { headers: this.getHeaders() }
     ).subscribe({
       next: () => {
-        comentario.userReaction = tipo;
-
         if (provider) {
           this.cargarComentariosProveedor(provider, true);
+        } else {
+          this.cdr.detectChanges();
         }
-
-        this.cdr.detectChanges();
       },
       error: (err) => {
+        this.rollbackOptimisticReaction(comentario, {
+          previousReaction,
+          previousLikes,
+          previousDislikes
+        });
         console.error('Error reaccionando comentario', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo registrar la reacción',
+          text: 'Se restauró el estado anterior.'
+        });
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  private applyOptimisticReaction(comentario: any, tipo: 'LIKE' | 'DISLIKE'): void {
+    const previousReaction = comentario?.userReaction ?? null;
+    const likes = this.getReviewLikes(comentario);
+    const dislikes = this.getReviewDislikes(comentario);
+
+    comentario.userReaction = tipo;
+
+    if (previousReaction === tipo) {
+      return;
+    }
+
+    if (previousReaction === 'LIKE' && tipo === 'DISLIKE') {
+      comentario.likes = Math.max(0, likes - 1);
+      comentario.dislikes = dislikes + 1;
+    } else if (previousReaction === 'DISLIKE' && tipo === 'LIKE') {
+      comentario.dislikes = Math.max(0, dislikes - 1);
+      comentario.likes = likes + 1;
+    } else if (!previousReaction && tipo === 'LIKE') {
+      comentario.likes = likes + 1;
+    } else if (!previousReaction && tipo === 'DISLIKE') {
+      comentario.dislikes = dislikes + 1;
+    }
+
+    comentario.likesCount = Number(comentario.likes ?? 0);
+    comentario.dislikesCount = Number(comentario.dislikes ?? 0);
+  }
+
+  private rollbackOptimisticReaction(
+    comentario: any,
+    snapshot: { previousReaction: any; previousLikes: number; previousDislikes: number }
+  ): void {
+    comentario.userReaction = snapshot.previousReaction;
+    comentario.likes = snapshot.previousLikes;
+    comentario.dislikes = snapshot.previousDislikes;
+    comentario.likesCount = snapshot.previousLikes;
+    comentario.dislikesCount = snapshot.previousDislikes;
   }
 
   getTotalReactions(provider: any): number {

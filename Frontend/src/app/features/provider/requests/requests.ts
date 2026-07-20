@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 import { ProviderRequestsService } from './provider-requests.service';
 
 @Component({
@@ -277,7 +278,7 @@ export class ProviderRequestsComponent implements OnInit {
 
   }
 
-  rechazarPedido(): void {
+  async rechazarPedido(): Promise<void> {
 
     if (!this.canProcessSelectedRequest() || this.processingRequestId) {
 
@@ -285,11 +286,22 @@ export class ProviderRequestsComponent implements OnInit {
 
     }
 
-    const motivo = prompt(
-      'Ingrese el motivo por el cual rechaza la orden.'
-    );
+    const result = await Swal.fire({
+      title: 'Rechazar pedido',
+      text: 'Ingrese el motivo por el cual rechaza la orden.',
+      input: 'textarea',
+      inputAttributes: {
+        maxlength: '240'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Confirmar rechazo',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false
+    } as any);
 
-    if (!motivo?.trim()) {
+    const motivo = String(result?.value || '').trim();
+
+    if (!result?.isConfirmed || !motivo) {
 
       return;
 
@@ -304,15 +316,20 @@ export class ProviderRequestsComponent implements OnInit {
     this.requestService
       .rechazarPedido(
         requestId,
-        motivo.trim()
+        motivo
       )
       .subscribe({
 
-        next: () => {
+        next: async () => {
 
           this.updateRequestState(requestId, 'CANCELADA');
           this.processingRequestId = null;
           this.processingAction = null;
+          await Swal.fire({
+            icon: 'success',
+            title: 'Pedido rechazado',
+            text: 'La orden quedó cancelada correctamente.'
+          });
           this.loadRequests();
 
         },

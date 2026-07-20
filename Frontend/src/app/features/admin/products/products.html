@@ -42,34 +42,37 @@
           <div>Estado</div>
         </div>
 
-        <div
-          class="products-table__row"
-          *ngFor="let product of filteredProducts"
-          [class.active]="selectedProduct?.idProducto === product.idProducto"
-          (click)="seleccionarProducto(product)"
-        >
-
-          <div class="product-name">
-            {{ product.name }}
-          </div>
-
-          <div>{{ product.brand }}</div>
-          <div>{{ product.category }}</div>
-          <div>{{ product.providersCount }}</div>
-          <div>{{ product.totalStock }} und.</div>
-
-          <div>
-            <span
-              class="status"
-              [class.warning]="product.status === 'Stock medio'"
-              [class.danger]="product.status === 'Bajo stock'"
-            >
-              {{ product.status }}
-            </span>
-          </div>
-
+        <div class="products-table__row products-table__row--skeleton" *ngIf="loading">
+          <div class="skeleton-line" *ngFor="let item of [1, 2, 3, 4, 5, 6]"></div>
         </div>
 
+        <ng-container *ngIf="!loading">
+          <div
+            class="products-table__row"
+            *ngFor="let product of filteredProducts"
+            [class.active]="selectedProduct?.idProducto === product.idProducto"
+            (click)="seleccionarProducto(product)"
+          >
+            <div class="product-name">
+              {{ product.name }}
+            </div>
+
+            <div>{{ product.brand }}</div>
+            <div>{{ product.category }}</div>
+            <div>{{ product.providersCount }}</div>
+            <div>{{ product.totalStock }} und.</div>
+
+            <div>
+              <span
+                class="status"
+                [class.warning]="product.status === 'Stock medio'"
+                [class.danger]="product.status === 'Bajo stock'"
+              >
+                {{ product.status }}
+              </span>
+            </div>
+          </div>
+        </ng-container>
       </div>
 
     </section>

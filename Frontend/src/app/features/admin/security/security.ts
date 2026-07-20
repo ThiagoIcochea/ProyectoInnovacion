@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import Swal from 'sweetalert2';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 import { MfaService } from '../../../core/services/mfa.service';
 
@@ -55,16 +56,26 @@ export class AdminSecurityComponent implements OnInit {
         `${APP_API_BASE_URL}/seguridad/admin/${tipo}/desbloquear`, null,
         { headers: this.headers().set('X-MFA-Authorization', token), params: { identificador: item.identificador } }
       ).subscribe({ next: () => resolve(), error: reject }));
+      await Swal.fire({ icon: 'success', title: 'Registro desbloqueado', text: 'El bloqueo se retiró correctamente.' });
       this.cargar();
     } catch (error: any) {
-      alert(error?.message || 'No se pudo desbloquear el registro.');
+      await Swal.fire({ icon: 'error', title: 'No se pudo desbloquear', text: error?.message || 'No se pudo desbloquear el registro.' });
     } finally { this.actionLoading = ''; }
   }
 
   async bloquearManual(tipo: 'USUARIO' | 'IP'): Promise<void> {
     const etiqueta = tipo === 'IP' ? 'IP' : 'correo del usuario';
-    const identificador = prompt(`Ingresa la ${etiqueta} que deseas bloquear:`)?.trim();
-    if (!identificador) return;
+    const { isConfirmed, value } = await Swal.fire({
+      title: 'Bloquear registro',
+      text: `Ingresa la ${etiqueta} que deseas bloquear:`,
+      input: 'text',
+      showCancelButton: true,
+      confirmButtonText: 'Bloquear',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false
+    });
+    const identificador = String(value || '').trim();
+    if (!isConfirmed || !identificador) return;
     this.actionLoading = `manual-${tipo}`;
     try {
       const email = localStorage.getItem('auth_user_email') || '';
@@ -73,9 +84,10 @@ export class AdminSecurityComponent implements OnInit {
         `${APP_API_BASE_URL}/seguridad/admin/${tipo}/bloquear`, null,
         { headers: this.headers().set('X-MFA-Authorization', token), params: { identificador } }
       ).subscribe({ next: () => resolve(), error: reject }));
+      await Swal.fire({ icon: 'success', title: 'Registro bloqueado', text: 'El bloqueo quedó registrado correctamente.' });
       this.cargar();
     } catch (error: any) {
-      alert(error?.message || 'No se pudo bloquear el registro.');
+      await Swal.fire({ icon: 'error', title: 'No se pudo bloquear', text: error?.message || 'No se pudo bloquear el registro.' });
     } finally { this.actionLoading = ''; }
   }
 
