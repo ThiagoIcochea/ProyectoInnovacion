@@ -317,11 +317,7 @@ export class RequestTrackingComponent implements OnInit {
 
     const estado = this.normalizarEstado(this.tracking?.estado);
     const estadosReclamo = [
-      'PAGO_PENDIENTE',
-      'PAGO_VALIDANDO',
-      'PEDIDO_APROBADO',
-      'EN_PREPARACION',
-      'EN_CAMINO',
+      'CANCELADA',
       'ENTREGADA',
       'COMPLETADA'
     ];
@@ -332,18 +328,13 @@ export class RequestTrackingComponent implements OnInit {
   getDelayClaimHint(): string {
     const estado = this.normalizarEstado(this.tracking?.estado);
     switch (estado) {
-      case 'PAGO_PENDIENTE':
-      case 'PAGO_VALIDANDO':
-        return 'Puedes registrar un reclamo de cancelación y decidir si mantener el estado o moverlo a PAGO PENDIENTE/PAGO VALIDANDO.';
-      case 'PEDIDO_APROBADO':
-      case 'EN_PREPARACION':
-      case 'EN_CAMINO':
-        return 'Puedes reportar demora, cancelación o una entrega incompleta según lo que haya ocurrido con tu pedido.';
+      case 'CANCELADA':
+        return 'Puedes registrar un reclamo por la cancelación de la orden y dejar constancia del motivo.';
       case 'ENTREGADA':
       case 'COMPLETADA':
         return 'Puedes reportar que la entrega no se realizó como esperabas y decidir si se mantiene el estado o se devuelve a EN PREPARACION.';
       default:
-        return 'Puedes abrir un reclamo para este pedido.';
+        return 'Solo se permite generar reclamos cuando la orden está cancelada, completada o con demora en la entrega.';
     }
   }
 

@@ -68,6 +68,7 @@ public class InventarioReservaService {
     public void liberarReserva(Integer idSolicitud) {
         List<InventarioReserva> reservas =
                 reservaRepo.findBySolicitud_IdSolicitud(idSolicitud);
+        List<ProveedorProducto> productosActualizados = new ArrayList<>();
 
         for (InventarioReserva r : reservas) {
             if (!esReservaActiva(r)) {
@@ -76,7 +77,16 @@ public class InventarioReservaService {
             r.setEstado("LIBERADO");
             r.setFechaActualizacion(LocalDateTime.now());
             reservaRepo.save(r);
+
+            ProveedorProducto pp = r.getProveedorProducto();
+            if (pp != null) {
+                pp.setUltimaActualizacionStock(LocalDateTime.now());
+                proveedorProductoRepo.save(pp);
+                productosActualizados.add(pp);
+            }
         }
+
+        sincronizarInventarioProveedor(productosActualizados);
     }
 
     @Transactional
@@ -108,9 +118,42 @@ public class InventarioReservaService {
     }
 
     @Transactional
+    public void devolverStock(Integer idSolicitud) {
+        List<InventarioReserva> reservas =
+                reservaRepo.findBySolicitud_IdSolicitud(idSolicitud);
+        List<ProveedorProducto> productosActualizados = new ArrayList<>();
+
+        for (InventarioReserva r : reservas) {
+            if (r == null || r.getProveedorProducto() == null) {
+                continue;
+            }
+
+            ProveedorProducto pp = r.getProveedorProducto();
+            int stockActual = pp.getStock() != null ? pp.getStock() : 0;
+            int cantidad = r.getCantidad() != null ? r.getCantidad() : 0;
+
+            pp.setStock(stockActual + cantidad);
+            pp.setUltimaActualizacionStock(LocalDateTime.now());
+            proveedorProductoRepo.save(pp);
+            productosActualizados.add(pp);
+
+            if ("CANCELADO".equals(r.getEstado()) || "LIBERADO".equals(r.getEstado())) {
+                continue;
+            }
+
+            r.setEstado("LIBERADO");
+            r.setFechaActualizacion(LocalDateTime.now());
+            reservaRepo.save(r);
+        }
+
+        sincronizarInventarioProveedor(productosActualizados);
+    }
+
+    @Transactional
     public void cancelarReserva(Integer idSolicitud) {
         List<InventarioReserva> reservas =
                 reservaRepo.findBySolicitud_IdSolicitud(idSolicitud);
+        List<ProveedorProducto> productosActualizados = new ArrayList<>();
 
         for (InventarioReserva r : reservas) {
             if (r == null || r.getProveedorProducto() == null) {
@@ -122,7 +165,16 @@ public class InventarioReservaService {
             r.setEstado("CANCELADO");
             r.setFechaActualizacion(LocalDateTime.now());
             reservaRepo.save(r);
+
+            ProveedorProducto pp = r.getProveedorProducto();
+            if (pp != null) {
+                pp.setUltimaActualizacionStock(LocalDateTime.now());
+                proveedorProductoRepo.save(pp);
+                productosActualizados.add(pp);
+            }
         }
+
+        sincronizarInventarioProveedor(productosActualizados);
     }
     
     public Integer calcularStockDisponible(ProveedorProducto pp) {
@@ -195,6 +247,7 @@ private void enviarInventario(
     body.put("razonSocial", proveedor.getRazonSocial());
     body.put("fechaActualizacion", LocalDateTime.now().toString());
     body.put("productos", productos.stream().map(this::mapProductoInventario).toList());
+    body.put("productoAfectado", productos.stream().findFirst().map(this::mapProductoInventario).orElse(null));
 
     HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
     ResponseEntity<String> response = restTemplate.exchange(
