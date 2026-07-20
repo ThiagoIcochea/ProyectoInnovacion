@@ -98,7 +98,9 @@ public class RFQService {
 
                 tieneCoincidencia = true;
 
-                if (inventarioReSer.calcularStockDisponible(pp) < itemReq.getCantidad()) {
+                int stockDisponible = inventarioReSer.calcularStockDisponible(pp);
+                boolean stockSuficiente = stockDisponible >= itemReq.getCantidad();
+                if (!stockSuficiente) {
                     logsSistemaService.registrarLog(
                         idUsuario,
                         "RFQ_STOCK_INSUFICIENTE",
@@ -107,10 +109,9 @@ public class RFQService {
                             + pp.getProveedor().getRazonSocial()
                             + " sin stock suficiente para producto "
                             + pp.getProducto().getNombre()
-                            + " (requerido=" + itemReq.getCantidad() + ", disponible=" + inventarioReSer.calcularStockDisponible(pp) + ")",
+                            + " (requerido=" + itemReq.getCantidad() + ", disponible=" + stockDisponible + ")",
                         req
                     );
-                    continue;
                 }
 
                 double precioBase = pp.getPrecio().doubleValue();

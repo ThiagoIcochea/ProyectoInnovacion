@@ -142,6 +142,49 @@ class RFQServiceTest {
         assertEquals(1, resultados.get(0).getItems().size());
     }
 
+    @Test
+    void shouldKeepProviderCandidateWhenMatchingProductHasNoAvailableStock() {
+        RFQRequest request = new RFQRequest();
+        request.setItems(List.of(item(1, 1)));
+        FiltroRFQRequest filtro = new FiltroRFQRequest();
+        request.setFiltro(filtro);
+        request.setPrioridad(PrioridadRFQ.BALANCEADO);
+
+        when(provProdRepo.findProveedoresConTodosLosProductos(anyList(), eq(1)))
+                .thenReturn(List.of());
+        when(provProdRepo.findProveedoresConAlgunProducto(anyList()))
+                .thenReturn(List.of(10));
+
+        Proveedor proveedor = new Proveedor();
+        proveedor.setIdProveedor(10);
+        proveedor.setRazonSocial("Proveedor Demo");
+
+        Producto producto = new Producto();
+        producto.setIdProducto(1);
+        producto.setNombre("Producto A");
+
+        ProveedorProducto pp = new ProveedorProducto();
+        pp.setIdProvProd(100);
+        pp.setProveedor(proveedor);
+        pp.setProducto(producto);
+        pp.setPrecio(new BigDecimal("100.00"));
+        pp.setStock(0);
+        pp.setTiempoEntregaDias(3);
+        pp.setPorcentajeDescuento(0.0);
+
+        when(provProdRepo.findDetallesParaScoring(List.of(10), List.of(1)))
+                .thenReturn(List.of(pp));
+        when(inventarioReSer.calcularStockDisponible(pp)).thenReturn(0);
+        when(descuentoVolumenRepo.findByProveedorProducto_IdProvProd(100))
+                .thenReturn(List.of());
+
+        List<RFQProveedorResponse> resultados = rfqService.buscarYCalificarProveedores(request, 99, null);
+
+        assertFalse(resultados.isEmpty(), "Se esperaba conservar el proveedor aunque no haya stock disponible");
+        assertEquals(10, resultados.get(0).getIdProveedor());
+        assertEquals(1, resultados.get(0).getItems().size());
+    }
+
     private ItemRFQRequest item(Integer idProducto, Integer cantidad) {
         ItemRFQRequest item = new ItemRFQRequest();
         item.setIdProducto(idProducto);
