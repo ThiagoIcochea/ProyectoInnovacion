@@ -163,16 +163,19 @@ public class InventarioReservaService {
             if ("CANCELADO".equals(r.getEstado()) || "LIBERADO".equals(r.getEstado())) {
                 continue;
             }
+
+            ProveedorProducto pp = r.getProveedorProducto();
+            int stockActual = pp.getStock() != null ? pp.getStock() : 0;
+            int cantidad = r.getCantidad() != null ? r.getCantidad() : 0;
+
+            pp.setStock(stockActual + cantidad);
+            pp.setUltimaActualizacionStock(LocalDateTime.now());
+            proveedorProductoRepo.save(pp);
+            productosActualizados.add(pp);
+
             r.setEstado("CANCELADO");
             r.setFechaActualizacion(LocalDateTime.now());
             reservaRepo.save(r);
-
-            ProveedorProducto pp = r.getProveedorProducto();
-            if (pp != null) {
-                pp.setUltimaActualizacionStock(LocalDateTime.now());
-                proveedorProductoRepo.save(pp);
-                productosActualizados.add(pp);
-            }
         }
 
         sincronizarInventarioProveedor(productosActualizados);
@@ -258,11 +261,7 @@ private void enviarInventario(
             .toList();
 
     Map<String, Object> body = new HashMap<>();
-    body.put("idProveedor", proveedor.getIdProveedor());
-    body.put("razonSocial", proveedor.getRazonSocial());
-    body.put("fechaActualizacion", LocalDateTime.now().toString());
     body.put("catalogo", productosPayload);
-    body.put("productoAfectado", productosPayload.isEmpty() ? null : productosPayload.get(0));
 
     HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
     ResponseEntity<String> response = restTemplate.exchange(

@@ -217,12 +217,11 @@ BigDecimal totalItem =
 
             total = total.add(totalItem);
 
-            if (
-                    pp.getTiempoEntregaDias() != null &&
-                    pp.getTiempoEntregaDias() > maxDiasEntrega
-            ) {
-                maxDiasEntrega =
-                        pp.getTiempoEntregaDias();
+            Integer diasEntregaProducto = pp.getTiempoEntregaDias();
+            if (diasEntregaProducto != null && diasEntregaProducto > maxDiasEntrega) {
+                maxDiasEntrega = diasEntregaProducto;
+            } else if (diasEntregaProducto == null && maxDiasEntrega == 0) {
+                maxDiasEntrega = 1;
             }
 
             DetalleSolicitud detalle =
@@ -266,7 +265,7 @@ BigDecimal totalItem =
         guardada.setTotal(total);
 
         LocalDateTime fechaEntrega =
-                ahora.plusDays(maxDiasEntrega);
+                ahora.plusDays(Math.max(1, maxDiasEntrega));
 
         guardada.setFechaLimiteEntrega(
                 fechaEntrega
