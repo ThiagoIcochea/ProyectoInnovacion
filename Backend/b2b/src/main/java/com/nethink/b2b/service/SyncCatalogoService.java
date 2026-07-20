@@ -432,7 +432,15 @@ public class SyncCatalogoService {
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
-            restTemplate.exchange(proveedor.getApiUrl(), HttpMethod.PUT, entity, String.class);
+            try {
+                restTemplate.exchange(proveedor.getApiUrl(), HttpMethod.PUT, entity, String.class);
+            } catch (Exception putError) {
+                try {
+                    restTemplate.exchange(proveedor.getApiUrl(), HttpMethod.POST, entity, String.class);
+                } catch (Exception postError) {
+                    throw postError;
+                }
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

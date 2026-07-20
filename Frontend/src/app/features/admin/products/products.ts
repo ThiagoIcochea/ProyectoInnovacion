@@ -170,6 +170,10 @@ export class AdminProductsComponent implements OnInit {
         if (this.filteredProducts.length > 0) {
 
           this.selectedProduct = this.filteredProducts[0];
+          this.estadoSeleccionado = this.normalizeEstadoValue(
+            this.selectedProduct?.status ??
+            this.selectedProduct?.estado
+          );
           this.cargarImagenes();
 
         }
@@ -189,6 +193,10 @@ export class AdminProductsComponent implements OnInit {
   seleccionarProducto(product: any): void {
 
     this.selectedProduct = product;
+    this.estadoSeleccionado = this.normalizeEstadoValue(
+      product?.status ??
+      product?.estado
+    );
     this.cargarImagenes();
 
   }

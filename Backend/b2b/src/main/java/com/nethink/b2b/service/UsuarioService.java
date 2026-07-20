@@ -394,6 +394,11 @@ public AdminUserResponse actualizarUsuarioAdmin(Integer idUsuario, AdminUserUpda
     if (req.getWhatsapp() != null) usuario.setWhatsapp(req.getWhatsapp().trim());
     if (req.getDireccion() != null) usuario.setDireccion(req.getDireccion().trim());
     if (req.getPassword() != null && !req.getPassword().isBlank()) usuario.setPassword(req.getPassword());
+    if (req.getRol() != null && !req.getRol().isBlank()) {
+        Rol rol = rolRepository.findById(resolveRolId(req.getRol()))
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        usuario.setRol(rol);
+    }
 
     EstadoUsuario estadoAnterior = usuario.getEstado();
     if (req.getEstado() != null && !req.getEstado().isBlank()) {

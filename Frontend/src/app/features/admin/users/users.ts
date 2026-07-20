@@ -223,6 +223,7 @@ implements OnInit {
   gestionar(user: any): void {
     this.selectedUser = user;
     this.errorMessage = '';
+    const rolActual = this.normalizarRol(user?.rol || user?.rolNombre || 'CLIENTE');
     this.editForm = {
       nombres: user?.nombres || this.splitName(user?.nombreCompleto).nombres,
       apellidos: user?.apellidos || this.splitName(user?.nombreCompleto).apellidos,
@@ -231,7 +232,8 @@ implements OnInit {
       whatsapp: user?.whatsapp || '',
       direccion: user?.direccion || '',
       password: '',
-      estado: user?.estado || 'ACTIVO'
+      estado: this.normalizarEstado(user?.estado),
+      rol: rolActual
     };
   }
 
@@ -337,6 +339,25 @@ implements OnInit {
 
   activarUsuario(): void {
     this.editForm.estado = 'ACTIVO';
+  }
+
+  private normalizarRol(rol: unknown): string {
+    const raw = String(rol ?? '').trim().toUpperCase();
+    if (raw.includes('ADMIN')) {
+      return 'ADMIN';
+    }
+    if (raw.includes('PROVEEDOR')) {
+      return 'PROVEEDOR';
+    }
+    return 'CLIENTE';
+  }
+
+  private normalizarEstado(estado: unknown): string {
+    const raw = String(estado ?? '').trim().toUpperCase();
+    if (['INACTIVO', 'SUSPENDIDO', 'BLOQUEADO'].includes(raw)) {
+      return 'INACTIVO';
+    }
+    return 'ACTIVO';
   }
 
   private splitName(value: string): { nombres: string; apellidos: string } {

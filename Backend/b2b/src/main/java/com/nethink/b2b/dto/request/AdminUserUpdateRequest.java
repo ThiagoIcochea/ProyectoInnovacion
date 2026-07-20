@@ -10,6 +10,7 @@ public class AdminUserUpdateRequest {
     private String direccion;
     private String password;
     private String estado;
+    private String rol;
 
     public String getNombres() {
         return nombres;
@@ -73,5 +74,13 @@ public class AdminUserUpdateRequest {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
     }
 }
