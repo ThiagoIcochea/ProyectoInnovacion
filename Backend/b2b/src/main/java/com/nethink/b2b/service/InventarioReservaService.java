@@ -55,6 +55,9 @@ public class InventarioReservaService {
                 reservaRepo.findBySolicitud_IdSolicitud(idSolicitud);
 
         for (InventarioReserva r : reservas) {
+            if (!esReservaActiva(r)) {
+                continue;
+            }
             r.setEstado("CONFIRMADO");
             r.setFechaActualizacion(LocalDateTime.now());
             reservaRepo.save(r);
@@ -67,6 +70,9 @@ public class InventarioReservaService {
                 reservaRepo.findBySolicitud_IdSolicitud(idSolicitud);
 
         for (InventarioReserva r : reservas) {
+            if (!esReservaActiva(r)) {
+                continue;
+            }
             r.setEstado("LIBERADO");
             r.setFechaActualizacion(LocalDateTime.now());
             reservaRepo.save(r);
@@ -106,19 +112,28 @@ public class InventarioReservaService {
         List<InventarioReserva> reservas =
                 reservaRepo.findBySolicitud_IdSolicitud(idSolicitud);
 
-        reservaRepo.deleteAll(reservas);
+        for (InventarioReserva r : reservas) {
+            if (r == null || r.getProveedorProducto() == null) {
+                continue;
+            }
+            if ("CANCELADO".equals(r.getEstado()) || "LIBERADO".equals(r.getEstado())) {
+                continue;
+            }
+            r.setEstado("CANCELADO");
+            r.setFechaActualizacion(LocalDateTime.now());
+            reservaRepo.save(r);
+        }
     }
     
     public Integer calcularStockDisponible(ProveedorProducto pp) {
+        if (pp == null) {
+            return 0;
+        }
 
-    int stockApi = pp.getStock(); 
-
-    int reservado = reservaRepo.sumarReservasActivas(
-            pp.getIdProvProd()
-    );
-
-    return stockApi - reservado;
-}
+        int stockBase = pp.getStock() != null ? pp.getStock() : 0;
+        int reservado = reservaRepo.sumarReservasActivas(pp.getIdProvProd());
+        return Math.max(0, stockBase - reservado);
+    }
 
 private boolean esReservaActiva(InventarioReserva reserva) {
     if (reserva == null || reserva.getEstado() == null) {
@@ -127,6 +142,16 @@ private boolean esReservaActiva(InventarioReserva reserva) {
 
     return "RESERVADO".equals(reserva.getEstado())
             || "CONFIRMADO".equals(reserva.getEstado());
+}
+
+private boolean esReservaBloqueante(InventarioReserva reserva) {
+    if (reserva == null || reserva.getEstado() == null) {
+        return false;
+    }
+
+    return "RESERVADO".equals(reserva.getEstado())
+            || "CONFIRMADO".equals(reserva.getEstado())
+            || "PENDIENTE".equals(reserva.getEstado());
 }
 
 private void sincronizarInventarioProveedor(List<ProveedorProducto> productosActualizados) {

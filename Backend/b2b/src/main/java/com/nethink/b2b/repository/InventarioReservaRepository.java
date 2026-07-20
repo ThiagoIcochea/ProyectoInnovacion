@@ -16,7 +16,7 @@ public interface InventarioReservaRepository extends JpaRepository<InventarioRes
 SELECT COALESCE(SUM(r.cantidad), 0)
 FROM InventarioReserva r
 WHERE r.proveedorProducto.idProvProd = :id
-AND r.estado IN ('RESERVADO', 'CONFIRMADO')
+AND r.estado IN ('RESERVADO', 'CONFIRMADO', 'PENDIENTE')
 """)
 Integer sumarReservasActivas(@Param("id") Integer id);
 }

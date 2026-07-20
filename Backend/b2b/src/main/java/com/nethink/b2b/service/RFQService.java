@@ -87,6 +87,7 @@ public class RFQService {
                     req
             );
 
+            boolean proveedorAceptable = true;
             for (ItemRFQRequest itemReq : request.getItems()) {
                 ProveedorProducto pp = stockProv.stream()
                         .filter(p -> p.getProducto().getIdProducto().equals(itemReq.getIdProducto()))
@@ -101,6 +102,7 @@ public class RFQService {
                 int stockDisponible = inventarioReSer.calcularStockDisponible(pp);
                 boolean stockSuficiente = stockDisponible >= itemReq.getCantidad();
                 if (!stockSuficiente) {
+                    proveedorAceptable = false;
                     logsSistemaService.registrarLog(
                         idUsuario,
                         "RFQ_STOCK_INSUFICIENTE",
@@ -112,6 +114,7 @@ public class RFQService {
                             + " (requerido=" + itemReq.getCantidad() + ", disponible=" + stockDisponible + ")",
                         req
                     );
+                    break;
                 }
 
                 double precioBase = pp.getPrecio().doubleValue();
@@ -194,7 +197,7 @@ if (mejor != null) {
 itemsDetalle.add(itemDetalle);
                 }
 
-            if (tieneCoincidencia && !itemsDetalle.isEmpty()) {
+            if (proveedorAceptable && tieneCoincidencia && !itemsDetalle.isEmpty()) {
                 if (request.getFiltro() != null) {
                     if (request.getFiltro().getPrecioMin() != null && totalCotizacion < request.getFiltro().getPrecioMin()) continue;
                     if (request.getFiltro().getPrecioMax() != null && totalCotizacion > request.getFiltro().getPrecioMax()) continue;

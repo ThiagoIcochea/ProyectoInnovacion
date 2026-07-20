@@ -21,6 +21,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -143,7 +144,7 @@ class RFQServiceTest {
     }
 
     @Test
-    void shouldKeepProviderCandidateWhenMatchingProductHasNoAvailableStock() {
+    void shouldExcludeProviderWhenMatchingProductHasNoAvailableStock() {
         RFQRequest request = new RFQRequest();
         request.setItems(List.of(item(1, 1)));
         FiltroRFQRequest filtro = new FiltroRFQRequest();
@@ -175,14 +176,10 @@ class RFQServiceTest {
         when(provProdRepo.findDetallesParaScoring(List.of(10), List.of(1)))
                 .thenReturn(List.of(pp));
         when(inventarioReSer.calcularStockDisponible(pp)).thenReturn(0);
-        when(descuentoVolumenRepo.findByProveedorProducto_IdProvProd(100))
-                .thenReturn(List.of());
 
         List<RFQProveedorResponse> resultados = rfqService.buscarYCalificarProveedores(request, 99, null);
 
-        assertFalse(resultados.isEmpty(), "Se esperaba conservar el proveedor aunque no haya stock disponible");
-        assertEquals(10, resultados.get(0).getIdProveedor());
-        assertEquals(1, resultados.get(0).getItems().size());
+        assertTrue(resultados.isEmpty(), "Se esperaba excluir al proveedor sin stock disponible");
     }
 
     private ItemRFQRequest item(Integer idProducto, Integer cantidad) {
