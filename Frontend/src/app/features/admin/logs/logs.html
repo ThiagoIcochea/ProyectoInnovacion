@@ -26,13 +26,16 @@
           Eventos registrados
         </h2>
 
-        <input
-          type="text"
-          class="search-box"
-          placeholder="Buscar por acción, módulo, descripción o IP..."
-          [(ngModel)]="searchText"
-          (input)="filtrarLogs()"
-        />
+        <div style="display:flex; gap:0.75rem; align-items:center;">
+          <input
+            type="text"
+            class="search-box"
+            placeholder="Buscar por acción, módulo, descripción o IP..."
+            [(ngModel)]="searchText"
+            (input)="filtrarLogs()"
+          />
+          <button type="button" class="btn-secondary" (click)="exportarLogs()">Exportar logs</button>
+        </div>
 
       </div>
 

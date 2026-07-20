@@ -13,6 +13,7 @@ import {
 
 import { FormsModule } from '@angular/forms';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
+import { MfaService } from '../../../core/services/mfa.service';
 
 @Component({
   selector: 'app-admin-providers',
@@ -41,10 +42,14 @@ implements OnInit {
   selectedProvider: any = null;
   showManageModal = false;
   estadoSeleccionado = 'Activo';
+  apiUrl = '';
+  apiTipo = 'REST';
+  apiToken = '';
 
   constructor(
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private mfaService: MfaService
   ) {}
 
   ngOnInit(): void {
@@ -170,6 +175,9 @@ implements OnInit {
   abrirGestion(provider: any): void {
     this.selectedProvider = provider;
     this.estadoSeleccionado = this.normalizarEstado(provider?.estado);
+    this.apiUrl = provider?.apiUrl || '';
+    this.apiTipo = provider?.apiTipo || 'REST';
+    this.apiToken = provider?.apiToken || '';
     this.showManageModal = true;
     this.cdr.detectChanges();
   }
@@ -180,36 +188,48 @@ implements OnInit {
     this.cdr.detectChanges();
   }
 
-  guardarGestion(): void {
+  async guardarGestion(): Promise<void> {
     if (!this.selectedProvider) {
       return;
     }
 
-    const nuevoEstado = this.estadoSeleccionado.toUpperCase();
-    const payload = {
-      idProveedor: this.selectedProvider.idProveedor,
-      estado: nuevoEstado
-    };
+    try {
+      const adminEmail = localStorage.getItem('auth_user_email') || '';
+      const token = await this.mfaService.requestActionToken(adminEmail, 'ADMIN_ACTION');
+      const nuevoEstado = this.estadoSeleccionado.toUpperCase();
+      const payload = {
+        idProveedor: this.selectedProvider.idProveedor,
+        estado: nuevoEstado,
+        apiUrl: this.apiUrl,
+        apiTipo: this.apiTipo,
+        apiToken: this.apiToken
+      };
 
-    this.http.post(
-      `${APP_API_BASE_URL}/provider/admin/estado`,
-      payload,
-      {
-        headers: this.headers()
-      }
-    ).subscribe({
-      next: () => {
-        this.selectedProvider.estado = nuevoEstado === 'INACTIVO' ? 'INACTIVO' : 'ACTIVO';
-        this.showManageModal = false;
-        this.selectedProvider = null;
-        this.cdr.detectChanges();
-        alert('Estado actualizado correctamente');
-      },
-      error: (err) => {
-        console.error(err);
-        alert('No fue posible actualizar el estado del proveedor');
-      }
-    });
+      this.http.post(
+        `${APP_API_BASE_URL}/provider/admin/estado`,
+        payload,
+        {
+          headers: this.headers().set('X-MFA-Authorization', token)
+        }
+      ).subscribe({
+        next: () => {
+          this.selectedProvider.estado = nuevoEstado === 'INACTIVO' ? 'INACTIVO' : 'ACTIVO';
+          this.selectedProvider.apiUrl = this.apiUrl;
+          this.selectedProvider.apiTipo = this.apiTipo;
+          this.selectedProvider.apiToken = this.apiToken;
+          this.showManageModal = false;
+          this.selectedProvider = null;
+          this.cdr.detectChanges();
+          alert('Proveedor actualizado correctamente');
+        },
+        error: (err) => {
+          console.error(err);
+          alert(err?.error?.message || 'No fue posible actualizar el proveedor');
+        }
+      });
+    } catch (error: any) {
+      alert(error?.message || 'MFA cancelado.');
+    }
   }
 
   private normalizarEstado(value: unknown): string {

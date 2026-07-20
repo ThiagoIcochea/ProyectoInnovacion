@@ -242,6 +242,18 @@
             <option>Activo</option>
             <option>Inactivo</option>
           </select>
+
+          <label>URL API</label>
+          <input [(ngModel)]="apiUrl" placeholder="https://...">
+
+          <label>Tipo API</label>
+          <select [(ngModel)]="apiTipo">
+            <option value="REST">REST</option>
+            <option value="GRAPHQL">GRAPHQL</option>
+          </select>
+
+          <label>Token API</label>
+          <input [(ngModel)]="apiToken" type="password" placeholder="Token de integración">
         </div>
       </div>
 

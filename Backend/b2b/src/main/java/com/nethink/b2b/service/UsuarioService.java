@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.nethink.b2b.dto.request.ProfileUpdateRequest;
 import com.nethink.b2b.dto.request.AdminUserUpdateRequest;
+import com.nethink.b2b.dto.request.AdminCreateUserRequest;
 import com.nethink.b2b.dto.request.PasswordResetCompleteRequest;
 import com.nethink.b2b.dto.request.RegisterClientRequest;
 import com.nethink.b2b.dto.response.ProfileResponse;
@@ -335,6 +336,41 @@ public class UsuarioService {
     return response;
 }
 
+public AdminUserResponse crearUsuarioAdmin(AdminCreateUserRequest req, HttpServletRequest request) {
+    validarAdminUsuarioCreacion(req);
+
+    if (usuarioRepo.findByCorreo(req.getCorreo()).isPresent()) {
+        throw new RuntimeException("El correo ya está registrado por otro usuario");
+    }
+
+    Rol rol = rolRepository.findById(resolveRolId(req.getRol()))
+            .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+    Usuario usuario = new Usuario();
+    usuario.setNombres(req.getNombres() != null ? req.getNombres().trim() : null);
+    usuario.setApellidos(req.getApellidos() != null ? req.getApellidos().trim() : null);
+    usuario.setCorreo(req.getCorreo().trim());
+    usuario.setTelefono(req.getTelefono());
+    usuario.setWhatsapp(req.getWhatsapp());
+    usuario.setDireccion(req.getDireccion());
+    usuario.setPassword(req.getPassword());
+    usuario.setRol(rol);
+    usuario.setEstado(EstadoUsuario.ACTIVO);
+    usuario.setFechaRegistro(LocalDateTime.now());
+
+    usuario = usuarioRepo.save(usuario);
+
+    logsSistemaService.registrarLog(
+            usuario.getIdUsuario(),
+            "ADMIN_USUARIO_CREADO",
+            "ADMIN",
+            "Usuario creado por administrador",
+            request
+    );
+
+    return toAdminUserResponse(usuario);
+}
+
 public AdminUserResponse actualizarUsuarioAdmin(Integer idUsuario, AdminUserUpdateRequest req, HttpServletRequest request) {
     validarAdminUsuario(req);
 
@@ -462,6 +498,22 @@ private void validarPerfil(ProfileUpdateRequest req) {
     }
 }
 
+private void validarAdminUsuarioCreacion(AdminCreateUserRequest req) {
+    validarTexto(req.getNombres(), "Nombres invalidos", "^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$");
+    validarTexto(req.getApellidos(), "Apellidos invalidos", "^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$");
+    validarTexto(req.getCorreo(), "Correo invalido", "^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$");
+    validarTexto(req.getPassword(), "Contrasena invalida", "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$");
+    if (req.getTelefono() != null && !req.getTelefono().isBlank()) {
+        validarTexto(soloDigitos(req.getTelefono()), "Telefono invalido", "^9\\d{8}$");
+    }
+    if (req.getWhatsapp() != null && !req.getWhatsapp().isBlank()) {
+        validarTexto(soloDigitos(req.getWhatsapp()), "WhatsApp invalido", "^9\\d{8}$");
+    }
+    if (req.getDireccion() != null && !req.getDireccion().isBlank()) {
+        validarTexto(req.getDireccion(), "Direccion invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/-]{4,149}$");
+    }
+}
+
 private void validarAdminUsuario(AdminUserUpdateRequest req) {
     if (req.getNombres() != null && !req.getNombres().isBlank()) {
         validarTexto(req.getNombres(), "Nombres invalidos", "^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$");
@@ -481,6 +533,18 @@ private void validarAdminUsuario(AdminUserUpdateRequest req) {
     if (req.getDireccion() != null && !req.getDireccion().isBlank()) {
         validarTexto(req.getDireccion(), "Direccion invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/-]{4,149}$");
     }
+}
+
+private Integer resolveRolId(String rol) {
+    if (rol == null || rol.isBlank()) {
+        return 2;
+    }
+    String normalized = rol.trim().toUpperCase();
+    return switch (normalized) {
+        case "ADMIN" -> 1;
+        case "PROVEEDOR" -> 3;
+        default -> 2;
+    };
 }
 
 private void validarTexto(String valor, String mensaje, String regex) {

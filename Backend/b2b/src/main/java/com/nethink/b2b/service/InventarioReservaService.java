@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class InventarioReservaService {
@@ -211,13 +212,22 @@ private void sincronizarInventarioProveedor(List<ProveedorProducto> productosAct
         return;
     }
 
-    Proveedor proveedor = productosActualizados.get(0).getProveedor();
+    Proveedor proveedor = productosActualizados.stream()
+            .map(ProveedorProducto::getProveedor)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null);
+
     if (proveedor == null || proveedor.getApiUrl() == null || proveedor.getApiUrl().isBlank()) {
         return;
     }
 
+    List<ProveedorProducto> productosFiltrados = productosActualizados.stream()
+            .filter(Objects::nonNull)
+            .toList();
+
     try {
-        enviarInventario(proveedor, HttpMethod.PATCH, productosActualizados);
+        enviarInventario(proveedor, HttpMethod.PATCH, productosFiltrados);
     } catch (Exception patchError) {
         try {
             List<ProveedorProducto> catalogoActual =
@@ -242,12 +252,17 @@ private void enviarInventario(
         headers.setBearerAuth(proveedor.getApiToken());
     }
 
+    List<Map<String, Object>> productosPayload = productos == null ? List.of() : productos.stream()
+            .filter(Objects::nonNull)
+            .map(this::mapProductoInventario)
+            .toList();
+
     Map<String, Object> body = new HashMap<>();
     body.put("idProveedor", proveedor.getIdProveedor());
     body.put("razonSocial", proveedor.getRazonSocial());
     body.put("fechaActualizacion", LocalDateTime.now().toString());
-    body.put("productos", productos.stream().map(this::mapProductoInventario).toList());
-    body.put("productoAfectado", productos.stream().findFirst().map(this::mapProductoInventario).orElse(null));
+    body.put("productos", productosPayload);
+    body.put("productoAfectado", productosPayload.isEmpty() ? null : productosPayload.get(0));
 
     HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
     ResponseEntity<String> response = restTemplate.exchange(

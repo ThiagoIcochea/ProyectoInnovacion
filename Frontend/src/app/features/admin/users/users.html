@@ -17,8 +17,7 @@
     <button
       class="btn-primary"
       type="button"
-      disabled
-      title="Creacion de usuarios no disponible desde esta vista">
+      (click)="gestionar({ idUsuario: 0, nombreCompleto: 'Nuevo usuario', correo: '', rol: 'CLIENTE', estado: 'ACTIVO' })">
       + Nuevo usuario
     </button>
 
@@ -249,6 +248,14 @@
           <input name="password" type="password" [(ngModel)]="editForm.password" placeholder="Dejar vacio para conservar" />
         </label>
         <label>
+          Rol
+          <select name="rol" [(ngModel)]="editForm.rol">
+            <option value="CLIENTE">CLIENTE</option>
+            <option value="PROVEEDOR">PROVEEDOR</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </label>
+        <label>
           Estado
           <select name="estado" [(ngModel)]="editForm.estado">
             <option value="ACTIVO">ACTIVO</option>
@@ -263,7 +270,10 @@
           <button type="button" class="btn-secondary" *ngIf="editForm.estado !== 'ACTIVO'" (click)="activarUsuario()">
             Quitar de lista negra
           </button>
-          <button type="submit" class="btn-primary" [disabled]="saving">
+          <button type="button" class="btn-secondary" *ngIf="selectedUser?.idUsuario === 0" (click)="crearNuevoUsuario()" [disabled]="saving">
+            {{ saving ? 'Creando...' : 'Crear usuario con MFA' }}
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="saving" *ngIf="selectedUser?.idUsuario !== 0">
             {{ saving ? 'Guardando...' : 'Guardar con MFA' }}
           </button>
         </div>

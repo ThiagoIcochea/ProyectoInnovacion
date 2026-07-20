@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
+import { MfaService } from '../../../core/services/mfa.service';
 
 @Component({
   selector: 'app-admin-products',
@@ -45,7 +46,8 @@ export class AdminProductsComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private mfaService: MfaService
   ) {}
 
   ngOnInit(): void {
@@ -58,11 +60,15 @@ export class AdminProductsComponent implements OnInit {
     });
   }
 
-  guardarCambios(): void {
+  async guardarCambios(): Promise<void> {
 
   if (!this.selectedProduct) return;
 
-  const formData = new FormData();
+  try {
+    const adminEmail = localStorage.getItem('auth_user_email') || '';
+    const token = await this.mfaService.requestActionToken(adminEmail, 'ADMIN_ACTION');
+
+    const formData = new FormData();
 
   formData.append(
     'idProducto',
@@ -119,7 +125,8 @@ export class AdminProductsComponent implements OnInit {
     formData,
     {
       headers: new HttpHeaders({
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'X-MFA-Authorization': token
       })
     }
   ).subscribe({
@@ -138,11 +145,14 @@ export class AdminProductsComponent implements OnInit {
 
       console.error(err);
 
-      alert('Error al actualizar');
+      alert(err?.error?.message || 'Error al actualizar');
 
     }
 
   });
+  } catch (error: any) {
+    alert(error?.message || 'MFA cancelado.');
+  }
 
 }
 

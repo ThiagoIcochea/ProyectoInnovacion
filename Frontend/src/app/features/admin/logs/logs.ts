@@ -207,4 +207,27 @@ implements OnInit {
       this.actualizarPaginacion();
     }
   }
+
+  exportarLogs(): void {
+    const rows = this.filteredLogs.map(log => [
+      log?.accion || '',
+      log?.modulo || '',
+      log?.descripcion || '',
+      log?.ip || '',
+      log?.fecha || ''
+    ]);
+
+    const csv = [
+      ['Acción', 'Módulo', 'Descripción', 'IP', 'Fecha'],
+      ...rows
+    ].map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'logs-sistema.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 }

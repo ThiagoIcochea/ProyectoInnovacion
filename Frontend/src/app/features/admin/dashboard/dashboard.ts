@@ -194,6 +194,21 @@ export class AdminDashboardComponent implements OnInit {
     })}`;
   }
 
+  exportarDashboard(): void {
+    const rows = [
+      ['Métrica', 'Valor', 'Detalle'],
+      ...this.metrics.map(metric => [metric.title, metric.value, metric.change])
+    ];
+    const csv = rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'dashboard-admin.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   private formatDate(date?: string): string {
     if (!date) {
       return '';
