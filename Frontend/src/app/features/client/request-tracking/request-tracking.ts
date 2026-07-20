@@ -6,6 +6,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 import { DelayClaim, DelayClaimsService } from '../../../core/services/delay-claims.service';
+import { ClaimType, getAvailableClaimTypes, normalizeClaimState } from './claim-type-utils';
 
 @Component({
   selector: 'app-request-tracking',
@@ -27,7 +28,8 @@ export class RequestTrackingComponent implements OnInit {
   currentClaim: DelayClaim | null = null;
   selectedEvidence?: File;
   claimSubmitting = false;
-  claimType: 'DEMORA' | 'CANCELACION' | 'ENTREGA_INCOMPLETA' = 'DEMORA';
+  claimType: ClaimType = 'DEMORA';
+  availableClaimTypes: ClaimType[] = ['DEMORA'];
 
   constructor(
     private route: ActivatedRoute,
@@ -98,6 +100,11 @@ export class RequestTrackingComponent implements OnInit {
             ? 'active'
             : 'done'
         }));
+
+        this.availableClaimTypes = getAvailableClaimTypes(res);
+        if (!this.availableClaimTypes.includes(this.claimType)) {
+          this.claimType = this.availableClaimTypes[0] || 'DEMORA';
+        }
 
         this.loading = false;
 
@@ -175,7 +182,10 @@ export class RequestTrackingComponent implements OnInit {
       return;
     }
 
-    this.claimType = this.getClaimTypeByState();
+    this.availableClaimTypes = getAvailableClaimTypes(this.tracking);
+    this.claimType = this.availableClaimTypes.includes(this.claimType)
+      ? this.claimType
+      : (this.availableClaimTypes[0] || 'DEMORA');
     this.claimError = '';
     this.claimDescription = this.getDefaultClaimDescription();
     this.claimPromisedDate = this.getDefaultPromisedDateInput();
@@ -315,18 +325,26 @@ export class RequestTrackingComponent implements OnInit {
       return false;
     }
 
-    const estado = this.normalizarEstado(this.tracking?.estado);
-    const estadosReclamo = [
-      'CANCELADA',
-      'ENTREGADA',
-      'COMPLETADA'
-    ];
-
-    return estadosReclamo.includes(estado);
+    const available = getAvailableClaimTypes(this.tracking);
+    return available.length > 0;
   }
 
   getDelayClaimHint(): string {
-    const estado = this.normalizarEstado(this.tracking?.estado);
+    const estado = normalizeClaimState(this.tracking?.estado);
+    const available = getAvailableClaimTypes(this.tracking);
+
+    if (available.includes('CANCELACION')) {
+      return 'Puedes registrar un reclamo por la cancelación de la orden y dejar constancia del motivo.';
+    }
+
+    if (available.includes('ENTREGA_INCOMPLETA')) {
+      return 'Puedes reportar que la entrega no se realizó como esperabas y decidir si se mantiene el estado o se devuelve a EN PREPARACION.';
+    }
+
+    if (available.includes('DEMORA')) {
+      return 'Se puede abrir un reclamo por demora cuando la entrega supera el tiempo prometido.';
+    }
+
     switch (estado) {
       case 'CANCELADA':
         return 'Puedes registrar un reclamo por la cancelación de la orden y dejar constancia del motivo.';
@@ -379,30 +397,13 @@ export class RequestTrackingComponent implements OnInit {
     return estado === 'ENTREGADA' || estado === 'COMPLETADA';
   }
 
-  private getClaimTypeByState(): 'DEMORA' | 'CANCELACION' | 'ENTREGA_INCOMPLETA' {
-    const estado = this.normalizarEstado(this.tracking?.estado);
-    if (estado === 'PAGO_PENDIENTE' || estado === 'PAGO_VALIDANDO') {
-      return 'CANCELACION';
-    }
-
-    if (estado === 'ENTREGADA' || estado === 'COMPLETADA') {
-      return 'ENTREGA_INCOMPLETA';
-    }
-
-    return 'DEMORA';
-  }
-
   private isFinalStatus(): boolean {
     const estado = this.normalizarEstado(this.tracking?.estado);
     return ['ENTREGADA', 'COMPLETADA', 'CANCELADA', 'RECHAZADA'].includes(estado);
   }
 
   private normalizarEstado(estado: string): string {
-    return (estado || '')
-      .toString()
-      .trim()
-      .toUpperCase()
-      .replace(/\s+/g, '_');
+    return normalizeClaimState(estado);
   }
 
   mapEstado(estado: string): string {

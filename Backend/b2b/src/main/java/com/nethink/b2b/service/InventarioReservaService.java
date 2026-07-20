@@ -261,7 +261,7 @@ private void enviarInventario(
     body.put("idProveedor", proveedor.getIdProveedor());
     body.put("razonSocial", proveedor.getRazonSocial());
     body.put("fechaActualizacion", LocalDateTime.now().toString());
-    body.put("productos", productosPayload);
+    body.put("catalogo", productosPayload);
     body.put("productoAfectado", productosPayload.isEmpty() ? null : productosPayload.get(0));
 
     HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
@@ -287,13 +287,18 @@ private Map<String, Object> mapProductoInventario(ProveedorProducto pp) {
     item.put("producto", producto != null ? producto.getNombre() : null);
     item.put("marca", producto != null && producto.getMarca() != null ? producto.getMarca().getNombre() : null);
     item.put("categoria", producto != null && producto.getCategoria() != null ? producto.getCategoria().getNombre() : null);
+    item.put("descripcion", producto != null ? producto.getDescripcion() : null);
     item.put("precioUnitario", pp.getPrecio());
     item.put("stock", pp.getStock());
+    item.put("garantiaMeses", pp.getGarantiaMeses());
+    item.put("tiempoEntregaDias", pp.getTiempoEntregaDias());
+    item.put("enOferta", pp.getEnOferta());
+    item.put("porcentajeDescuento", pp.getPorcentajeDescuento());
     item.put("estado", pp.getEstado());
-    item.put(
-            "ultimaActualizacionStock",
-            pp.getUltimaActualizacionStock() != null ? pp.getUltimaActualizacionStock().toString() : null
-    );
+    item.put("imagenes", List.of());
+    item.put("especificaciones", List.of());
+    item.put("descuentosVolumen", List.of());
+    item.put("ultimaActualizacionStock", pp.getUltimaActualizacionStock() != null ? pp.getUltimaActualizacionStock().toString() : null);
     return item;
 }
 }

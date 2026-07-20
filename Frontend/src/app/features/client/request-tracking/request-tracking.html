@@ -210,9 +210,9 @@
     <label>
       Tipo de reclamo
       <select name="claimType" [(ngModel)]="claimType" [disabled]="claimSubmitting">
-        <option value="DEMORA">Demora</option>
-        <option value="CANCELACION">Cancelación</option>
-        <option value="ENTREGA_INCOMPLETA">Entrega incompleta</option>
+        <option *ngFor="let option of availableClaimTypes" [value]="option">
+          {{ option === 'DEMORA' ? 'Demora' : option === 'CANCELACION' ? 'Cancelación' : 'Entrega incompleta' }}
+        </option>
       </select>
     </label>
 
