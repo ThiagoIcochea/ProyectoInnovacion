@@ -8,8 +8,10 @@ import {
   OnInit
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
 import { MfaService } from '../../../core/services/mfa.service';
+import { extractValidationMessage } from '../../../core/utils/form-validation';
 
 @Component({
   selector: 'app-profile',
@@ -219,7 +221,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   async guardarPerfil(): Promise<void> {
     const validationError = this.validateProfile();
     if (validationError) {
-      alert(validationError);
+      await Swal.fire({ icon: 'warning', title: 'Datos incompletos', text: validationError });
       return;
     }
 
@@ -278,7 +280,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.preferredMfaMethod()
       );
     } catch (error: any) {
-      alert(error?.message || 'No se completo la verificacion multifactor.');
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Verificación cancelada',
+        text: error?.message || 'No se completo la verificacion multifactor.'
+      });
       return;
     }
 
@@ -290,18 +296,22 @@ export class ProfileComponent implements OnInit, OnDestroy {
       }
     ).subscribe({
 
-      next: () => {
-
+      next: async () => {
         this.archivoFoto = null;
         this.nombreArchivoFoto = '';
         this.fotoUrl = '';
 
+        await Swal.fire({ icon: 'success', title: 'Perfil actualizado', text: 'Tu información se guardó correctamente.' });
         this.cargarPerfil(true);
       },
 
-      error: (err) => {
+      error: async (err) => {
         console.error(err);
-        alert(err?.error?.message || 'No se pudo actualizar el perfil.');
+        await Swal.fire({
+          icon: 'error',
+          title: 'No se pudo actualizar',
+          text: extractValidationMessage(err, 'No se pudo actualizar el perfil.')
+        });
       }
     });
   }

@@ -2,7 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
+import { extractValidationMessage } from '../../../core/utils/form-validation';
 
 @Component({
   selector: 'app-provider-products',
@@ -27,6 +29,8 @@ export class ProviderProductsComponent implements OnInit {
   saving = false;
   createError = '';
   newProduct = this.emptyProduct();
+  categorias: Array<{idCategoria:number; nombre:string}> = [];
+  marcas: Array<{idMarca:number; nombre:string}> = [];
 
   private API_URL = `${APP_API_BASE_URL}/proveedor-productos`;
 
@@ -37,6 +41,7 @@ export class ProviderProductsComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarProductos();
+    this.cargarCatalogoBase();
   }
 
   private headers(): HttpHeaders {
@@ -119,12 +124,41 @@ export class ProviderProductsComponent implements OnInit {
     this.showCreateModal = true;
   }
 
+  private cargarCatalogoBase(): void {
+    this.http.get<any[]>(`${APP_API_BASE_URL}/catalogo/categorias`, { headers: this.headers() }).subscribe({
+      next: (data) => {
+        this.categorias = data || [];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.categorias = [];
+      }
+    });
+
+    this.http.get<any[]>(`${APP_API_BASE_URL}/catalogo/marcas`, { headers: this.headers() }).subscribe({
+      next: (data) => {
+        this.marcas = data || [];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.marcas = [];
+      }
+    });
+  }
+
   cerrarNuevoProducto(): void {
     if (!this.saving) this.showCreateModal = false;
   }
 
-  crearProducto(): void {
+  async crearProducto(): Promise<void> {
     this.createError = '';
+    const validationError = this.validarProducto();
+    if (validationError) {
+      this.createError = validationError;
+      await Swal.fire({ icon: 'warning', title: 'Datos incompletos', text: validationError });
+      return;
+    }
+
     this.saving = true;
     const payload = {
       sku: this.newProduct.sku || null,
@@ -142,9 +176,36 @@ export class ProviderProductsComponent implements OnInit {
       imagenes: [], especificaciones: [], descuentosVolumen: []
     };
     this.http.post<any>(`${this.API_URL}/mis-productos`, payload, { headers: this.headers() }).subscribe({
-      next: () => { this.showCreateModal = false; this.saving = false; this.cargarProductos(); },
-      error: error => { this.createError = error?.error?.message || 'No se pudo crear el producto.'; this.saving = false; }
+      next: async () => {
+        this.showCreateModal = false;
+        this.saving = false;
+        await Swal.fire({ icon: 'success', title: 'Producto creado', text: 'El producto se publicó correctamente.' });
+        this.cargarProductos();
+      },
+      error: async error => {
+        const mensaje = extractValidationMessage(error, 'No se pudo crear el producto.');
+        this.createError = mensaje;
+        this.saving = false;
+        await Swal.fire({ icon: 'error', title: 'No se pudo crear el producto', text: mensaje });
+      }
     });
+  }
+
+  private validarProducto(): string | null {
+    const producto = String(this.newProduct.producto || '').trim();
+    const marca = String(this.newProduct.marca || '').trim();
+    const categoria = String(this.newProduct.categoria || '').trim();
+    const precio = Number(this.newProduct.precioUnitario);
+    const stock = Number(this.newProduct.stock);
+    const descuento = Number(this.newProduct.porcentajeDescuento || 0);
+
+    if (!producto) return 'Debe indicar el nombre del producto.';
+    if (!marca) return 'Debe seleccionar una marca válida.';
+    if (!categoria) return 'Debe seleccionar una categoría válida.';
+    if (!Number.isFinite(precio) || precio < 0) return 'El precio unitario debe ser un número mayor o igual a cero.';
+    if (!Number.isFinite(stock) || stock < 0) return 'El stock debe ser un número mayor o igual a cero.';
+    if (!Number.isFinite(descuento) || descuento < 0 || descuento > 100) return 'El descuento debe estar entre 0 y 100.';
+    return null;
   }
 
   private emptyProduct() {

@@ -4,6 +4,20 @@ import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../constants/app.constants';
 
+const swalBaseOptions = {
+  background: '#ffffff',
+  color: '#0f172a',
+  iconColor: '#2563eb',
+  confirmButtonColor: '#2563eb',
+  cancelButtonColor: '#64748b',
+  customClass: {
+    popup: 'mfa-swal-popup',
+    confirmButton: 'btn-primary',
+    cancelButton: 'btn-secondary',
+    denyButton: 'btn-secondary'
+  }
+};
+
 export type MfaPurpose =
   'LOGIN' |
   'REGISTER_CLIENT' |
@@ -53,7 +67,11 @@ export class MfaService {
     }
 
     const channel = this.methodLabel(selectedMethod);
-    const code = await this.promptForCode(channel);
+    const code = await this.promptForCode(channel, async () => {
+      const refreshed = await this.startChallenge(email, purpose, selectedMethod);
+      start = refreshed;
+      return refreshed;
+    });
 
     if (!code) {
       throw new Error('Verificacion multifactor cancelada.');
@@ -94,7 +112,8 @@ export class MfaService {
       showCancelButton: true,
       confirmButtonText: 'Continuar',
       cancelButtonText: 'Cancelar',
-      allowOutsideClick: false
+      allowOutsideClick: false,
+      ...swalBaseOptions
     });
 
     if (!isConfirmed) {
@@ -104,34 +123,61 @@ export class MfaService {
     return String(value || 'email');
   }
 
-  private async promptForCode(channel: string): Promise<string> {
-    const { isConfirmed, value } = await Swal.fire({
-      title: 'Código MFA',
-      text: `Ingresa el código multifactor enviado por ${channel}.`,
-      input: 'text',
-      inputAttributes: {
-        autocomplete: 'one-time-code',
-        inputmode: 'numeric'
-      },
-      showCancelButton: true,
-      confirmButtonText: 'Confirmar',
-      cancelButtonText: 'Cancelar',
-      allowOutsideClick: false,
-      inputValidator: (candidate) => {
-        const normalized = String(candidate || '').trim();
-        if (normalized.length < 4) {
-          return 'Ingresa el código completo.';
+  private async promptForCode(channel: string, resendChallenge?: () => Promise<any>): Promise<string> {
+    const prompt = async (resending = false): Promise<string> => {
+      const { isConfirmed, isDenied, value } = await Swal.fire({
+        title: resending ? 'Reenviar código MFA' : 'Código MFA',
+        text: resending
+          ? `Se reenvió el código por ${channel}. Ingresa el nuevo código.`
+          : `Ingresa el código multifactor enviado por ${channel}.`,
+        input: 'text',
+        inputAttributes: {
+          autocomplete: 'one-time-code',
+          inputmode: 'numeric'
+        },
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: 'Confirmar',
+        denyButtonText: 'Reenviar',
+        cancelButtonText: 'Cancelar',
+        allowOutsideClick: false,
+        ...swalBaseOptions,
+        inputValidator: (candidate) => {
+          const normalized = String(candidate || '').trim();
+          if (normalized.length < 4) {
+            return 'Ingresa el código completo.';
+          }
+
+          return null;
+        }
+      });
+
+      if (isDenied) {
+        if (resendChallenge) {
+          try {
+            await resendChallenge();
+            return prompt(true);
+          } catch (error: any) {
+            await Swal.fire({
+              icon: 'warning',
+              title: 'No se pudo reenviar',
+              text: error?.message || 'No se pudo reintentar el envío del código.',
+              ...swalBaseOptions
+            });
+          }
         }
 
-        return null;
+        return '';
       }
-    });
 
-    if (!isConfirmed) {
-      return '';
-    }
+      if (!isConfirmed) {
+        return '';
+      }
 
-    return String(value || '').trim();
+      return String(value || '').trim();
+    };
+
+    return prompt(false);
   }
 
   private normalizeMethod(value: string | null | undefined): MfaMethod {

@@ -5,8 +5,10 @@ import {
   HttpHeaders
 } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 import { MfaService } from '../../../core/services/mfa.service';
+import { extractValidationMessage } from '../../../core/utils/form-validation';
 
 type ConnectionState = 'idle' | 'testing' | 'success' | 'error';
 
@@ -96,6 +98,12 @@ export class ProviderApiSettingsComponent implements OnInit {
   }
 
   async guardarConfiguracion(): Promise<void> {
+    const validationError = this.validarConfiguracion();
+    if (validationError) {
+      await Swal.fire({ icon: 'warning', title: 'Datos incompletos', text: validationError });
+      return;
+    }
+
     const body = {
       apiUrl: this.config.apiUrl,
       apiTipo: this.config.apiTipo,
@@ -110,7 +118,7 @@ export class ProviderApiSettingsComponent implements OnInit {
         'PROVIDER_API_UPDATE'
       );
     } catch (error: any) {
-      alert(error?.message || 'No se completo la verificacion multifactor.');
+      await Swal.fire({ icon: 'warning', title: 'Verificación cancelada', text: error?.message || 'No se completo la verificacion multifactor.' });
       return;
     }
 
@@ -123,19 +131,18 @@ export class ProviderApiSettingsComponent implements OnInit {
     )
     .subscribe({
 
-      next: () => {
-        alert('Configuracion guardada');
-
+      next: async () => {
+        await Swal.fire({ icon: 'success', title: 'Configuración guardada', text: 'Los datos de integración quedaron guardados.' });
         this.cargarConfiguracion();
       },
 
-      error: (err) => {
+      error: async (err) => {
         console.error(
           'Error guardando configuracion',
           err
         );
 
-        alert('No se pudo guardar');
+        await Swal.fire({ icon: 'error', title: 'No se pudo guardar', text: extractValidationMessage(err, 'No se pudo guardar la configuración.') });
       }
     });
   }
@@ -158,19 +165,18 @@ export class ProviderApiSettingsComponent implements OnInit {
     )
     .subscribe({
 
-      next: (res) => {
+      next: async (res) => {
         this.config = {
           ...this.config,
           ...res
         };
         this.testingConnection = false;
 
-        alert('Conexion realizada');
-
+        await Swal.fire({ icon: 'success', title: 'Conexión realizada', text: 'El endpoint respondió correctamente.' });
         this.cdr.detectChanges();
       },
 
-      error: (err) => {
+      error: async (err) => {
         console.error(
           'Error probando conexion',
           err
@@ -185,10 +191,38 @@ export class ProviderApiSettingsComponent implements OnInit {
         this.testingConnection = false;
         this.connectionMessage = 'No se pudo conectar con el endpoint configurado.';
 
-        alert('Error de conexion');
+        await Swal.fire({ icon: 'error', title: 'Error de conexión', text: extractValidationMessage(err, 'No se pudo conectar con el endpoint configurado.') });
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private validarConfiguracion(): string | null {
+    const apiUrl = String(this.config.apiUrl || '').trim();
+    const apiTipo = String(this.config.apiTipo || '').trim();
+    const apiToken = String(this.config.apiToken || '').trim();
+
+    if (!apiUrl) {
+      return 'El endpoint API es obligatorio.';
+    }
+
+    if (!/^https?:\/\/\S+\.\S+$/.test(apiUrl)) {
+      return 'El endpoint API debe iniciar con http:// o https:// y contener un dominio válido.';
+    }
+
+    if (!apiTipo) {
+      return 'El tipo de API es obligatorio.';
+    }
+
+    if (!['REST', 'GRAPHQL', 'WEBHOOK'].includes(apiTipo.toUpperCase())) {
+      return 'El tipo de API debe ser REST, GRAPHQL o WEBHOOK.';
+    }
+
+    if (!apiToken) {
+      return 'El token API es obligatorio.';
+    }
+
+    return null;
   }
 
   get connectionState(): ConnectionState {

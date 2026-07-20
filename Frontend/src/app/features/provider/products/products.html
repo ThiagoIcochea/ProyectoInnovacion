@@ -115,8 +115,14 @@
       <div class="product-form">
         <label>Producto *<input name="producto" [(ngModel)]="newProduct.producto" required maxlength="150"></label>
         <label>SKU <input name="sku" [(ngModel)]="newProduct.sku" placeholder="NTK-000001"></label>
-        <label>Marca *<input name="marca" [(ngModel)]="newProduct.marca" required maxlength="100"></label>
-        <label>Categoría *<input name="categoria" [(ngModel)]="newProduct.categoria" required maxlength="100"></label>
+        <label>Marca *<select name="marca" [(ngModel)]="newProduct.marca" required>
+          <option value="">Selecciona una marca</option>
+          <option *ngFor="let marca of marcas" [value]="marca.nombre">{{ marca.nombre }}</option>
+        </select></label>
+        <label>Categoría *<select name="categoria" [(ngModel)]="newProduct.categoria" required>
+          <option value="">Selecciona una categoría</option>
+          <option *ngFor="let categoria of categorias" [value]="categoria.nombre">{{ categoria.nombre }}</option>
+        </select></label>
         <label>Precio unitario (S/) *<input name="precio" type="number" min="0" step="0.01" [(ngModel)]="newProduct.precioUnitario" required></label>
         <label>Stock *<input name="stock" type="number" min="0" step="1" [(ngModel)]="newProduct.stock" required></label>
         <label>Garantía (meses)<input name="garantia" type="number" min="0" [(ngModel)]="newProduct.garantiaMeses"></label>

@@ -12,6 +12,7 @@ import {
   OnInit
 } from '@angular/core';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
+import { extractValidationMessage } from '../../../core/utils/form-validation';
 
 @Component({
   selector: 'app-admin-integrations',
@@ -166,7 +167,7 @@ implements OnInit {
         await Swal.fire({
           icon: 'error',
           title: 'No se pudo actualizar',
-          text: 'No se pudo guardar la configuración.'
+          text: extractValidationMessage(err, 'No se pudo guardar la configuración.')
         });
       }
     });
