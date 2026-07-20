@@ -195,6 +195,12 @@
 
         </div>
 
+        <div>
+          <button type="button" class="btn-secondary" (click)="abrirGestion(provider)">
+            Gestionar
+          </button>
+        </div>
+
         </div>
       </ng-container>
 
@@ -210,5 +216,40 @@
     </div>
 
   </section>
+
+  <div class="modal-overlay" *ngIf="showManageModal">
+    <div class="product-modal" role="dialog" aria-modal="true" aria-labelledby="admin-provider-modal-title">
+      <div class="modal-header">
+        <div>
+          <span>Configuración</span>
+          <h2 id="admin-provider-modal-title">{{ selectedProvider?.razonSocial || 'Gestionar proveedor' }}</h2>
+        </div>
+        <button type="button" class="btn-secondary" (click)="cerrarGestion()" aria-label="Cerrar modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="config-section">
+          <h3>Información general</h3>
+
+          <label>Proveedor</label>
+          <input [value]="selectedProvider?.razonSocial" disabled>
+
+          <label>Correo</label>
+          <input [value]="selectedProvider?.correo" disabled>
+
+          <label>Estado</label>
+          <select [(ngModel)]="estadoSeleccionado">
+            <option>Activo</option>
+            <option>Inactivo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="cerrarGestion()">Cancelar</button>
+        <button class="btn-secondary" (click)="guardarGestion()">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
 
 </div>

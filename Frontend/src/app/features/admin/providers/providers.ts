@@ -38,6 +38,10 @@ implements OnInit {
   loading = true;
   readonly skeletonRows = Array.from({ length: 5 });
 
+  selectedProvider: any = null;
+  showManageModal = false;
+  estadoSeleccionado = 'Activo';
+
   constructor(
     private http: HttpClient,
     private cdr: ChangeDetectorRef
@@ -161,5 +165,60 @@ implements OnInit {
       p =>
         p.estado?.toUpperCase() === 'SUSPENDIDO'
     ).length;
+  }
+
+  abrirGestion(provider: any): void {
+    this.selectedProvider = provider;
+    this.estadoSeleccionado = this.normalizarEstado(provider?.estado);
+    this.showManageModal = true;
+    this.cdr.detectChanges();
+  }
+
+  cerrarGestion(): void {
+    this.showManageModal = false;
+    this.selectedProvider = null;
+    this.cdr.detectChanges();
+  }
+
+  guardarGestion(): void {
+    if (!this.selectedProvider) {
+      return;
+    }
+
+    const nuevoEstado = this.estadoSeleccionado.toUpperCase();
+    const payload = {
+      idProveedor: this.selectedProvider.idProveedor,
+      estado: nuevoEstado
+    };
+
+    this.http.post(
+      `${APP_API_BASE_URL}/provider/admin/estado`,
+      payload,
+      {
+        headers: this.headers()
+      }
+    ).subscribe({
+      next: () => {
+        this.selectedProvider.estado = nuevoEstado === 'INACTIVO' ? 'INACTIVO' : 'ACTIVO';
+        this.showManageModal = false;
+        this.selectedProvider = null;
+        this.cdr.detectChanges();
+        alert('Estado actualizado correctamente');
+      },
+      error: (err) => {
+        console.error(err);
+        alert('No fue posible actualizar el estado del proveedor');
+      }
+    });
+  }
+
+  private normalizarEstado(value: unknown): string {
+    const raw = String(value ?? '').trim().toLowerCase();
+
+    if (raw === 'inactivo' || raw === 'inactive' || raw === 'suspendido' || raw === 'suspendido') {
+      return 'Inactivo';
+    }
+
+    return 'Activo';
   }
 }

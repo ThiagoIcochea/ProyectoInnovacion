@@ -197,15 +197,25 @@ export class AdminProductsComponent implements OnInit {
 
   openManageModal(): void {
 
-    this.estadoSeleccionado =
+    this.estadoSeleccionado = this.normalizeEstadoValue(
       this.selectedProduct?.status ??
-      this.selectedProduct?.estado ??
-      'Activo';
+      this.selectedProduct?.estado
+    );
 
     this.showManageModal = true;
 
     this.cargarImagenes();
 
+  }
+
+  private normalizeEstadoValue(value: unknown): string {
+    const raw = String(value ?? '').trim().toLowerCase();
+
+    if (raw === 'inactivo' || raw === 'inactive' || raw === 'suspendido') {
+      return 'Inactivo';
+    }
+
+    return 'Activo';
   }
 
   closeManageModal(): void {

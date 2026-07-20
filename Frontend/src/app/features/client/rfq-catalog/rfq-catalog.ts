@@ -689,6 +689,12 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
     return `${this.getTopProviderProgress(value)}%`;
   }
 
+  getScorePercent(value: number | null | undefined): string {
+    const normalized = Number(value ?? 0);
+    const percentage = Math.max(0, Math.min(100, Math.round(normalized * 100)));
+    return `${percentage}%`;
+  }
+
   formatDays(value: number | null | undefined): string {
 
     if (value === null || value === undefined) {

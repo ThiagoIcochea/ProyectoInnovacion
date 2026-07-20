@@ -4,6 +4,7 @@ import com.nethink.b2b.dto.request.RegisterProviderRequest;
 import com.nethink.b2b.dto.response.AdminProviderResponse;
 import com.nethink.b2b.dto.response.IndicadorProveedorResponse;
 import com.nethink.b2b.dto.response.RFQProveedorResponse;
+import java.util.HashMap;
 import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.entity.enums.PrioridadRFQ;
 import com.nethink.b2b.repository.UsuarioRepository;
@@ -42,6 +43,27 @@ public List<AdminProviderResponse> listarProviders(Principal principal, HttpServ
     Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     return proveedorService.listarProviders( usuario.getIdUsuario(),  httpRequest);
+}
+
+@PostMapping("/admin/estado")
+public Map<String, Object> actualizarEstadoProveedor(@RequestBody Map<String, Object> payload, Principal principal) {
+    Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    Integer idProveedor = payload.containsKey("idProveedor") ? Integer.valueOf(String.valueOf(payload.get("idProveedor"))) : null;
+    String estado = payload.containsKey("estado") ? String.valueOf(payload.get("estado")) : null;
+
+    if (idProveedor == null || estado == null || estado.isBlank()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parametros invalidos");
+    }
+
+    proveedorService.actualizarEstadoProveedor(idProveedor, estado.toUpperCase());
+
+    Map<String, Object> response = new HashMap<>();
+    response.put("success", true);
+    response.put("idProveedor", idProveedor);
+    response.put("estado", estado.toUpperCase());
+    return response;
 }
 
 @GetMapping("/{idProveedor}/indicadores")

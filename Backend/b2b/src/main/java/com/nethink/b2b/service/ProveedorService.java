@@ -272,6 +272,20 @@ private LogsApiRepository logsApiRepository;
         suscripcionRepository.save(suscripcion);
     }
     
+   @Transactional
+   public void actualizarEstadoProveedor(Integer idProveedor, String estado) {
+       Proveedor proveedor = proveedorRepository.findById(idProveedor)
+               .orElseThrow(() -> new RuntimeException("Proveedor no existe"));
+
+       String normalized = estado == null ? "ACTIVO" : estado.trim().toUpperCase();
+       if (!List.of("ACTIVO", "INACTIVO", "SUSPENDIDO").contains(normalized)) {
+           throw new RuntimeException("Estado inválido");
+       }
+
+       proveedor.setEstado(normalized);
+       proveedorRepository.save(proveedor);
+   }
+
    public List<AdminProviderResponse> listarProviders(Integer idUsuario,  HttpServletRequest request) {
 
        logsSistemaService.registrarLog(

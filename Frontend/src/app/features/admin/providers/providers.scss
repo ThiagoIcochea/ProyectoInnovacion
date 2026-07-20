@@ -86,7 +86,7 @@
 .providers-table__head,
 .providers-table__row {
   display: grid;
-  grid-template-columns: 1.4fr 1.5fr 0.7fr 0.9fr 0.7fr 1fr;
+  grid-template-columns: 1.4fr 1.5fr 0.7fr 0.9fr 0.7fr 0.9fr 0.8fr;
   gap: 1rem;
   padding: 1rem 1.5rem;
   align-items: center;
@@ -145,6 +145,74 @@
   color: #22c55e;
   font-size: 0.78rem;
   font-weight: 800;
+}
+
+.btn-secondary {
+  height: 42px;
+  border-radius: 11px;
+  padding: 0 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  border: 1px solid var(--theme-border);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.product-modal {
+  width: 560px;
+  max-width: calc(100vw - 2rem);
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--theme-surface-raised);
+  border-radius: 18px;
+  border: 1px solid var(--theme-border);
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--theme-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.config-section input,
+.config-section select {
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  padding: 0 12px;
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid var(--theme-border);
 }
 
 .status.pending,
