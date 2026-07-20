@@ -181,6 +181,11 @@ export const routes: Routes = [
           import('./features/admin/integrations/integrations').then(m => m.AdminIntegrationsComponent)
       },
       {
+        path: 'admin/security',
+        loadComponent: () =>
+          import('./features/admin/security/security').then(m => m.AdminSecurityComponent)
+      },
+      {
         path: 'admin/logs',
         loadComponent: () =>
           import('./features/admin/logs/logs').then(m => m.AdminLogsComponent)

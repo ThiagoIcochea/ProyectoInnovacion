@@ -23,6 +23,9 @@ public class Reclamo {
     @Column(name = "evidencia_url")
 private String evidenciaUrl;
 
+    // La base de datos anterior tenia un tipo demasiado corto/enum y rechazaba
+    // reclamos de cancelacion. Se almacenan codigos breves (DEM, CAN, ENT).
+    @Column(name = "tipo", length = 16)
     private String tipo;
 
     private String descripcion;

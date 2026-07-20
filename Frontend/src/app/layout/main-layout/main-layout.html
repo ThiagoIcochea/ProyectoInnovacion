@@ -238,12 +238,30 @@
         </a>
 
         <a
+          [routerLink]="['/app/admin/security']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
+          Seguridad
+        </a>
+
+        <a
           [routerLink]="['/app/admin/logs']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
           class="sidebar__link"
           (click)="cerrarMenuMovil()">
           Logs del Sistema
+        </a>
+
+        <a
+          [routerLink]="['/app/admin/settings']"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="sidebar__link"
+          (click)="cerrarMenuMovil()">
+          Configuración General
         </a>
 
       </nav>

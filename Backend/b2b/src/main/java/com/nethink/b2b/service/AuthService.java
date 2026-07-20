@@ -25,10 +25,21 @@ public class AuthService {
     @Autowired
     private MfaService mfaService;
 
+    @Autowired
+    private LoginSecurityService loginSecurityService;
+
     public MfaStartResponse login(String correo, String password, HttpServletRequest request) {
 
-        Usuario user = repo.findByCorreo(correo)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        String ip = loginSecurityService.obtenerIp(request);
+        loginSecurityService.validarIp(ip);
+
+        Usuario user = repo.findByCorreo(correo).orElse(null);
+        if (user == null) {
+            loginSecurityService.registrarFallo(correo, null, ip);
+            throw new RuntimeException("Credenciales incorrectas");
+        }
+
+        loginSecurityService.validarUsuario(user.getCorreo());
 
         if (user.getEstado() != EstadoUsuario.ACTIVO) {
             logsSistemaService.registrarLog(
@@ -45,6 +56,7 @@ public class AuthService {
         }
 
         if (!user.getPassword().equals(password)) {
+            loginSecurityService.registrarFallo(user.getCorreo(), user, ip);
             logsSistemaService.registrarLog(
                     user.getIdUsuario(),
                     "LOGIN",
@@ -52,8 +64,10 @@ public class AuthService {
                     "Login no exitoso por password erroneo",
                     request
             );
-            throw new RuntimeException("Password incorrecto");
+            throw new RuntimeException("Credenciales incorrectas");
         }
+
+        loginSecurityService.registrarExito(user.getCorreo(), ip);
 
         return mfaService.start(
                 user.getCorreo(),
