@@ -1,6 +1,7 @@
 package com.nethink.b2b.controller;
 
 import com.nethink.b2b.dto.response.ProveedorProductoResponse;
+import com.nethink.b2b.dto.response.CatalogoResponse;
 import com.nethink.b2b.service.ProveedorProductoService;
 import java.security.Principal;
 import org.springframework.web.bind.annotation.*;
@@ -22,5 +23,10 @@ public class ProveedorProductoController {
             Principal principal
     ) {
         return service.listarProductosPorProveedor(principal.getName());
+    }
+
+    @PostMapping("/mis-productos")
+    public ProveedorProductoResponse crear(@RequestBody CatalogoResponse producto, Principal principal) {
+        return service.crearProductoProveedor(principal.getName(), producto);
     }
 }

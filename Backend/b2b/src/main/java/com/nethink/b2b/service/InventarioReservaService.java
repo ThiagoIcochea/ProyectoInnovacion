@@ -249,6 +249,37 @@ private void sincronizarInventarioProveedor(List<ProveedorProducto> productosAct
     }
 }
 
+/** Publica un producto nuevo en la API del proveedor respetando sus variantes REST.
+ * Algunos proveedores usan PUT, otros PATCH o solo POST; se intenta en ese orden. */
+public void publicarNuevoProducto(ProveedorProducto producto) {
+    if (producto == null || producto.getProveedor() == null) {
+        return;
+    }
+
+    Proveedor proveedor = producto.getProveedor();
+    if (proveedor.getApiUrl() == null || proveedor.getApiUrl().isBlank()) {
+        return;
+    }
+
+    List<ProveedorProducto> catalogo = List.of(producto);
+    try {
+        enviarInventario(proveedor, HttpMethod.PUT, catalogo);
+        return;
+    } catch (Exception putError) {
+        try {
+            enviarInventario(proveedor, HttpMethod.PATCH, catalogo);
+            return;
+        } catch (Exception patchError) {
+            try {
+                enviarInventario(proveedor, HttpMethod.POST, catalogo);
+            } catch (Exception postError) {
+                System.out.println("No se pudo publicar el producto " + producto.getIdProvProd()
+                        + " en la API del proveedor: " + postError.getMessage());
+            }
+        }
+    }
+}
+
 private void enviarInventario(
         Proveedor proveedor,
         HttpMethod metodo,

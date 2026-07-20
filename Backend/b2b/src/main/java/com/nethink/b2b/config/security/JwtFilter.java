@@ -72,9 +72,13 @@ protected void doFilterInternal(HttpServletRequest request,
 
             String correo = jwtUtil.extractCorreo(token);
             String rol = jwtUtil.extractRol(token);
+            String rolNormalizado = String.valueOf(rol == null ? "" : rol)
+                    .trim()
+                    .toUpperCase()
+                    .replaceFirst("^ROLE_", "");
 
             List<GrantedAuthority> authorities =
-                    List.of(new SimpleGrantedAuthority("ROLE_" + rol));
+                    List.of(new SimpleGrantedAuthority("ROLE_" + rolNormalizado));
             
             
             System.out.println("AUTHORITIES: " + authorities);

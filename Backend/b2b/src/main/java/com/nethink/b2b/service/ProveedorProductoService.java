@@ -5,6 +5,8 @@ import com.nethink.b2b.dto.response.EspecificacionResponse;
 import com.nethink.b2b.dto.response.ImagenResponse;
 import com.nethink.b2b.dto.response.ProveedorProductoResponse;
 import com.nethink.b2b.entity.Producto;
+import com.nethink.b2b.entity.Marca;
+import com.nethink.b2b.entity.Categoria;
 import com.nethink.b2b.entity.Proveedor;
 import com.nethink.b2b.entity.ProveedorProducto;
 import com.nethink.b2b.repository.DescuentoVolumenRepository;
@@ -13,6 +15,15 @@ import com.nethink.b2b.repository.ProductoImagenRepository;
 
 import com.nethink.b2b.repository.ProveedorProductoRepository;
 import com.nethink.b2b.repository.ProveedorRepository;
+import com.nethink.b2b.repository.ProductoRepository;
+import com.nethink.b2b.repository.MarcaRepository;
+import com.nethink.b2b.repository.CategoriaRepository;
+import com.nethink.b2b.dto.response.CatalogoResponse;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,6 +40,9 @@ public class ProveedorProductoService {
     private final ProductoImagenRepository imagenRepo;
     private final DescuentoVolumenRepository descuentoRepo;
     private final ProveedorRepository  proveedorRepo;
+    private final ProductoRepository productoRepo;
+    private final MarcaRepository marcaRepo;
+    private final CategoriaRepository categoriaRepo;
 
     public ProveedorProductoService(
             ProveedorProductoRepository proveedorProductoRepo,
@@ -36,7 +50,10 @@ public class ProveedorProductoService {
             ProductoEspecificacionRepository specRepo,
             ProductoImagenRepository imagenRepo,
             DescuentoVolumenRepository descuentoRepo,
-            ProveedorRepository proveedorRepo
+            ProveedorRepository proveedorRepo,
+            ProductoRepository productoRepo,
+            MarcaRepository marcaRepo,
+            CategoriaRepository categoriaRepo
     ) {
         this.proveedorProductoRepo = proveedorProductoRepo;
         this.reservaService = reservaService;
@@ -44,6 +61,9 @@ public class ProveedorProductoService {
         this.imagenRepo = imagenRepo;
         this.descuentoRepo = descuentoRepo;
         this.proveedorRepo = proveedorRepo;
+        this.productoRepo = productoRepo;
+        this.marcaRepo = marcaRepo;
+        this.categoriaRepo = categoriaRepo;
     }
 
   public List<ProveedorProductoResponse> listarProductosPorProveedor(String correo) {
@@ -190,4 +210,67 @@ public class ProveedorProductoService {
 
     return response;
 }
+
+    @Transactional
+    public ProveedorProductoResponse crearProductoProveedor(String correo, CatalogoResponse entrada) {
+        if (entrada == null || esVacio(entrada.getProducto()) || esVacio(entrada.getMarca())
+                || esVacio(entrada.getCategoria()) || entrada.getPrecioUnitario() == null
+                || entrada.getPrecioUnitario().signum() < 0 || entrada.getStock() == null || entrada.getStock() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Producto, marca, categoria, precio y stock son obligatorios.");
+        }
+
+        Proveedor proveedor = proveedorRepo.findByUsuario_Correo(correo)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proveedor no encontrado."));
+        Marca marca = buscarOCrearMarca(entrada.getMarca());
+        Categoria categoria = buscarOCrearCategoria(entrada.getCategoria());
+        Producto producto = resolverProducto(entrada, marca, categoria);
+
+        ProveedorProducto proveedorProducto = proveedorProductoRepo
+                .findByProveedor_IdProveedorAndProducto_IdProducto(proveedor.getIdProveedor(), producto.getIdProducto())
+                .orElseGet(ProveedorProducto::new);
+        proveedorProducto.setProveedor(proveedor);
+        proveedorProducto.setProducto(producto);
+        proveedorProducto.setPrecio(entrada.getPrecioUnitario());
+        proveedorProducto.setStock(entrada.getStock());
+        proveedorProducto.setGarantiaMeses(valorNoNegativo(entrada.getGarantiaMeses()));
+        proveedorProducto.setTiempoEntregaDias(valorNoNegativo(entrada.getTiempoEntregaDias()));
+        proveedorProducto.setEnOferta(Boolean.TRUE.equals(entrada.getEnOferta()));
+        proveedorProducto.setPorcentajeDescuento(entrada.getPorcentajeDescuento() == null ? 0d : Math.max(0d, entrada.getPorcentajeDescuento()));
+        proveedorProducto.setEstado(esVacio(entrada.getEstado()) ? "ACTIVO" : entrada.getEstado().trim().toUpperCase());
+        proveedorProducto.setUltimaActualizacionStock(LocalDateTime.now());
+        proveedorProducto = proveedorProductoRepo.save(proveedorProducto);
+
+        reservaService.publicarNuevoProducto(proveedorProducto);
+        final Integer idProvProd = proveedorProducto.getIdProvProd();
+        return listarProductosPorProveedor(correo).stream()
+                .filter(item -> idProvProd.equals(item.getIdProvProd()))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private Producto resolverProducto(CatalogoResponse entrada, Marca marca, Categoria categoria) {
+        Producto producto = !esVacio(entrada.getSku())
+                ? productoRepo.findBySkuGlobal(entrada.getSku().trim()).orElse(null)
+                : null;
+        if (producto == null) {
+            producto = productoRepo.buscarProductoSimilar(entrada.getProducto().trim(), marca.getIdMarca(), categoria.getIdCategoria())
+                    .orElseGet(Producto::new);
+        }
+        producto.setNombre(entrada.getProducto().trim());
+        producto.setMarca(marca);
+        producto.setCategoria(categoria);
+        producto.setSkuGlobal(esVacio(entrada.getSku()) ? generarSku() : entrada.getSku().trim());
+        producto.setDescripcion(esVacio(entrada.getDescripcion()) ? null : entrada.getDescripcion().trim());
+        producto.setEstado(esVacio(entrada.getEstado()) ? "ACTIVO" : entrada.getEstado().trim().toUpperCase());
+        producto.setFuente("PROVEEDOR_MANUAL");
+        producto.setFechaActualizacion(LocalDateTime.now());
+        return productoRepo.save(producto);
+    }
+
+    private Marca buscarOCrearMarca(String nombre) { return marcaRepo.findByNombre(nombre.trim()).orElseGet(() -> { Marca m = new Marca(); m.setNombre(nombre.trim()); return marcaRepo.save(m); }); }
+    private Categoria buscarOCrearCategoria(String nombre) { return categoriaRepo.findByNombre(nombre.trim()).orElseGet(() -> { Categoria c = new Categoria(); c.setNombre(nombre.trim()); return categoriaRepo.save(c); }); }
+    private String generarSku() { return "NTK-" + String.format("%06d", productoRepo.count() + 1); }
+    private boolean esVacio(String valor) { return valor == null || valor.isBlank(); }
+    private Integer valorNoNegativo(Integer valor) { return valor == null ? 0 : Math.max(0, valor); }
 }

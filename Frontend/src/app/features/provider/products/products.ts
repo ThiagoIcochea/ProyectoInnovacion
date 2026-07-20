@@ -23,6 +23,10 @@ export class ProviderProductsComponent implements OnInit {
   activos = 0;
   stockDisponibleCount = 0;
   bajoStockCount = 0;
+  showCreateModal = false;
+  saving = false;
+  createError = '';
+  newProduct = this.emptyProduct();
 
   private API_URL = `${APP_API_BASE_URL}/proveedor-productos`;
 
@@ -107,5 +111,44 @@ export class ProviderProductsComponent implements OnInit {
         this.bajoStockCount++;
       }
     }
+  }
+
+  abrirNuevoProducto(): void {
+    this.newProduct = this.emptyProduct();
+    this.createError = '';
+    this.showCreateModal = true;
+  }
+
+  cerrarNuevoProducto(): void {
+    if (!this.saving) this.showCreateModal = false;
+  }
+
+  crearProducto(): void {
+    this.createError = '';
+    this.saving = true;
+    const payload = {
+      sku: this.newProduct.sku || null,
+      producto: this.newProduct.producto,
+      marca: this.newProduct.marca,
+      categoria: this.newProduct.categoria,
+      descripcion: this.newProduct.descripcion || null,
+      precioUnitario: Number(this.newProduct.precioUnitario),
+      stock: Number(this.newProduct.stock),
+      garantiaMeses: Number(this.newProduct.garantiaMeses || 0),
+      tiempoEntregaDias: Number(this.newProduct.tiempoEntregaDias || 0),
+      enOferta: this.newProduct.enOferta,
+      porcentajeDescuento: Number(this.newProduct.porcentajeDescuento || 0),
+      estado: 'ACTIVO',
+      imagenes: [], especificaciones: [], descuentosVolumen: []
+    };
+    this.http.post<any>(`${this.API_URL}/mis-productos`, payload, { headers: this.headers() }).subscribe({
+      next: () => { this.showCreateModal = false; this.saving = false; this.cargarProductos(); },
+      error: error => { this.createError = error?.error?.message || 'No se pudo crear el producto.'; this.saving = false; }
+    });
+  }
+
+  private emptyProduct() {
+    return { sku: '', producto: '', marca: '', categoria: '', descripcion: '', precioUnitario: null as number | null,
+      stock: null as number | null, garantiaMeses: 0, tiempoEntregaDias: 0, enOferta: false, porcentajeDescuento: 0 };
   }
 }

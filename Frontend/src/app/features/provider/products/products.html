@@ -9,8 +9,7 @@
     <button
       class="btn-primary"
       type="button"
-      disabled
-      title="Creacion de productos no disponible desde esta vista">
+      (click)="abrirNuevoProducto()">
       + Nuevo producto
     </button>
   </div>
@@ -106,4 +105,28 @@
       </div>
     </div>
   </section>
+
+  <div class="modal-overlay" *ngIf="showCreateModal" (click)="cerrarNuevoProducto()">
+    <form class="product-modal" (ngSubmit)="crearProducto()" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div><span>Catálogo conectado</span><h2>Agregar producto</h2><p>Se publicará en la API usando PUT, PATCH y finalmente POST si es necesario.</p></div>
+        <button type="button" class="btn-secondary" (click)="cerrarNuevoProducto()" aria-label="Cerrar">×</button>
+      </div>
+      <div class="product-form">
+        <label>Producto *<input name="producto" [(ngModel)]="newProduct.producto" required maxlength="150"></label>
+        <label>SKU <input name="sku" [(ngModel)]="newProduct.sku" placeholder="NTK-000001"></label>
+        <label>Marca *<input name="marca" [(ngModel)]="newProduct.marca" required maxlength="100"></label>
+        <label>Categoría *<input name="categoria" [(ngModel)]="newProduct.categoria" required maxlength="100"></label>
+        <label>Precio unitario (S/) *<input name="precio" type="number" min="0" step="0.01" [(ngModel)]="newProduct.precioUnitario" required></label>
+        <label>Stock *<input name="stock" type="number" min="0" step="1" [(ngModel)]="newProduct.stock" required></label>
+        <label>Garantía (meses)<input name="garantia" type="number" min="0" [(ngModel)]="newProduct.garantiaMeses"></label>
+        <label>Entrega (días)<input name="entrega" type="number" min="0" [(ngModel)]="newProduct.tiempoEntregaDias"></label>
+        <label>Descuento (%)<input name="descuento" type="number" min="0" max="100" step="0.01" [(ngModel)]="newProduct.porcentajeDescuento"></label>
+        <label class="offer-toggle"><input name="oferta" type="checkbox" [(ngModel)]="newProduct.enOferta"> En oferta</label>
+        <label class="full-width">Descripción<textarea name="descripcion" [(ngModel)]="newProduct.descripcion" rows="3" maxlength="500"></textarea></label>
+      </div>
+      <p class="form-error" *ngIf="createError">{{ createError }}</p>
+      <div class="modal-actions"><button type="button" class="btn-secondary" (click)="cerrarNuevoProducto()">Cancelar</button><button class="btn-primary" type="submit" [disabled]="saving">{{ saving ? 'Agregando...' : 'Agregar producto' }}</button></div>
+    </form>
+  </div>
 </div>
