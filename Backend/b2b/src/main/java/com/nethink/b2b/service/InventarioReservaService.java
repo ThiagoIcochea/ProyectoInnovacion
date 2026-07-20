@@ -227,18 +227,24 @@ private void sincronizarInventarioProveedor(List<ProveedorProducto> productosAct
 
     List<ProveedorProducto> productosFiltrados = productosActualizados.stream()
             .filter(Objects::nonNull)
+            .collect(java.util.stream.Collectors.toMap(
+                    pp -> pp.getIdProvProd() != null ? pp.getIdProvProd() : System.identityHashCode(pp),
+                    pp -> pp,
+                    (existing, replacement) -> existing,
+                    java.util.LinkedHashMap::new
+            ))
+            .values()
+            .stream()
             .toList();
 
     try {
-        enviarInventario(proveedor, HttpMethod.PATCH, productosFiltrados);
-    } catch (Exception patchError) {
+        enviarInventario(proveedor, HttpMethod.POST, productosFiltrados);
+    } catch (Exception postError) {
         try {
-            List<ProveedorProducto> catalogoActual =
-                    proveedorProductoRepo.findByProveedor_IdProveedor(proveedor.getIdProveedor());
-            enviarInventario(proveedor, HttpMethod.POST, catalogoActual);
-        } catch (Exception postError) {
+            enviarInventario(proveedor, HttpMethod.PATCH, productosFiltrados);
+        } catch (Exception patchError) {
             System.out.println("Error sincronizando inventario proveedor "
-                    + proveedor.getIdProveedor() + ": " + postError.getMessage());
+                    + proveedor.getIdProveedor() + ": " + patchError.getMessage());
         }
     }
 }
