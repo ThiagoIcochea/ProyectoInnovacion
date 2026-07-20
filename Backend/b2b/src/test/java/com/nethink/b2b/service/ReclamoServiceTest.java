@@ -20,6 +20,7 @@ import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -81,11 +82,18 @@ class ReclamoServiceTest {
         solicitud.setEstado(Solicitud.EstadoSolicitud.EN_CAMINO);
         solicitud.setProveedor(proveedor);
 
+        IAComentarioResponse evaluacion = new IAComentarioResponse();
+        evaluacion.setEstado("OK");
+        evaluacion.setEsReclamo(true);
+        evaluacion.setTipo("RECLAMO");
+
         when(usuarioRepository.findByCorreo("cliente@test.com")).thenReturn(Optional.of(usuario));
         when(solicitudRepository.findById(10)).thenReturn(Optional.of(solicitud));
         when(reclamoRepository.save(any(Reclamo.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(solicitudRepository.save(any(Solicitud.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(historialRepository.save(any(SolicitudHistorial.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(moderacionService.moderarReclamo("Demora en entrega")).thenReturn(evaluacion);
+        when(reclamoRepository.findByIdSolicitudAndTipoOrderByFechaCreacionDesc(10, "DEM")).thenReturn(List.of());
 
         reclamoService.registrarReclamo(request, "cliente@test.com");
 
@@ -123,6 +131,50 @@ class ReclamoServiceTest {
         when(reclamoRepository.findByIdSolicitudAndTipoOrderByFechaCreacionDesc(10, "DEMORA")).thenReturn(List.of(activo));
 
         assertThrows(org.springframework.web.server.ResponseStatusException.class, () -> reclamoService.registrarReclamo(request, "cliente@test.com"));
+    }
+
+    @Test
+    void registrarReclamoConTipoLargoSeGuardaEnCodigoCorto() throws Exception {
+        ReclamoRequest request = new ReclamoRequest();
+        request.setIdSolicitud(11);
+        request.setTipo("CANCELACION");
+        request.setDescripcion("Solicito cancelación");
+        request.setAccion("CANCELAR");
+
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(8);
+        usuario.setCorreo("cliente2@test.com");
+
+        Proveedor proveedor = new Proveedor();
+        proveedor.setIdProveedor(33);
+
+        Solicitud solicitud = new Solicitud();
+        solicitud.setIdSolicitud(11);
+        solicitud.setEstado(Solicitud.EstadoSolicitud.EN_CAMINO);
+        solicitud.setProveedor(proveedor);
+
+        AtomicReference<Reclamo> reclamoGuardado = new AtomicReference<>();
+
+        IAComentarioResponse evaluacion = new IAComentarioResponse();
+        evaluacion.setEstado("OK");
+        evaluacion.setEsReclamo(true);
+        evaluacion.setTipo("RECLAMO");
+
+        when(usuarioRepository.findByCorreo("cliente2@test.com")).thenReturn(Optional.of(usuario));
+        when(solicitudRepository.findById(11)).thenReturn(Optional.of(solicitud));
+        when(reclamoRepository.save(any(Reclamo.class))).thenAnswer(invocation -> {
+            Reclamo reclamo = invocation.getArgument(0);
+            reclamoGuardado.set(reclamo);
+            return reclamo;
+        });
+        when(solicitudRepository.save(any(Solicitud.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(historialRepository.save(any(SolicitudHistorial.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(moderacionService.moderarReclamo("Solicito cancelación")).thenReturn(evaluacion);
+        when(reclamoRepository.findByIdSolicitudAndTipoOrderByFechaCreacionDesc(11, "CAN")).thenReturn(List.of());
+
+        reclamoService.registrarReclamo(request, "cliente2@test.com");
+
+        assertEquals("CAN", reclamoGuardado.get().getTipo());
     }
 
     @Test

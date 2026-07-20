@@ -486,7 +486,7 @@ public class EmailServiceImpl implements EmailService {
             if (solicitud == null) return;
 
             String asunto = "Estado de solicitud actualizado - NETHINK B2B";
-            String html = """
+            String htmlCliente = """
                     <div style='font-family:Arial,sans-serif;background:#f8fafc;padding:32px'>
                         <div style='max-width:640px;margin:auto;background:#fff;border-radius:12px;padding:28px'>
                             <h2 style='margin-top:0;color:#0f172a'>Solicitud %s</h2>
@@ -501,6 +501,19 @@ public class EmailServiceImpl implements EmailService {
                     descripcion == null || descripcion.isBlank() ? "Tu solicitud tiene una actualizacion." : descripcion,
                     solicitud.getCodigoRecepcion()
             );
+            String htmlProveedor = """
+                    <div style='font-family:Arial,sans-serif;background:#f8fafc;padding:32px'>
+                        <div style='max-width:640px;margin:auto;background:#fff;border-radius:12px;padding:28px'>
+                            <h2 style='margin-top:0;color:#0f172a'>Solicitud %s</h2>
+                            <p><b>Estado:</b> %s</p>
+                            <p>%s</p>
+                        </div>
+                    </div>
+                    """.formatted(
+                    "RFQ-2026" + solicitud.getIdSolicitud(),
+                    estado,
+                    descripcion == null || descripcion.isBlank() ? "Tu solicitud tiene una actualizacion." : descripcion
+            );
 
             Resend resend = getResendClient();
             if (solicitud.getUsuario() != null && solicitud.getUsuario().getCorreo() != null) {
@@ -508,7 +521,7 @@ public class EmailServiceImpl implements EmailService {
                         .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
                         .to(solicitud.getUsuario().getCorreo())
                         .subject(asunto)
-                        .html(html)
+                        .html(htmlCliente)
                         .build());
             }
 
@@ -519,7 +532,7 @@ public class EmailServiceImpl implements EmailService {
                         .from("NETHINK B2B <notificaciones@freecodingvibes.shop>")
                         .to(solicitud.getProveedor().getUsuario().getCorreo())
                         .subject(asunto)
-                        .html(html)
+                        .html(htmlProveedor)
                         .build());
             }
         } catch (Exception e) {

@@ -125,7 +125,8 @@ public class ReclamoService {
                 .orElseThrow();
 
         String tipo = normalizarTipo(request.getTipo());
-        String accion = normalizarAccion(request.getAccion(), tipo);
+        String tipoNegocio = normalizarTipoNegocio(request.getTipo());
+        String accion = normalizarAccion(request.getAccion(), tipoNegocio);
 
         IAComentarioResponse evaluacion = moderacionService.moderarReclamo(request.getDescripcion());
         if (evaluacion == null || !"OK".equalsIgnoreCase(evaluacion.getEstado()) || Boolean.FALSE.equals(evaluacion.getEsReclamo())) {
@@ -169,13 +170,13 @@ public class ReclamoService {
         );
         evaluarSuspensionProveedor(reclamo.getIdProveedor());
 
-        aplicarAccionSolicitud(solicitud, tipo, accion, request.getNuevoEstado(), request.getMotivoCancelacion(), null);
+        aplicarAccionSolicitud(solicitud, tipoNegocio, accion, request.getNuevoEstado(), request.getMotivoCancelacion(), null);
         solicitudRepository.save(solicitud);
         guardarHistorialReclamo(
                 solicitud,
                 usuario.getIdUsuario(),
                 "ABIERTO",
-                construirDescripcionReclamo(tipo, accion, request.getMotivoCancelacion(), solicitud.getEstado())
+                construirDescripcionReclamo(tipoNegocio, accion, request.getMotivoCancelacion(), solicitud.getEstado())
         );
 
         emailService.enviarCorreoReclamoDemora(solicitud, request.getDescripcion(), "");
@@ -235,7 +236,7 @@ public class ReclamoService {
             return;
         }
 
-        String tipoNormalizado = normalizarTipo(tipo);
+        String tipoNormalizado = normalizarTipoNegocio(tipo);
         String accionNormalizada = normalizarAccion(accion, tipoNormalizado);
 
         if ("CANCELAR".equals(accionNormalizada)) {
@@ -375,7 +376,31 @@ public class ReclamoService {
     }
 
     private String normalizarTipo(String tipo) {
-        return tipo == null || tipo.isBlank() ? "DEMORA" : tipo.trim().toUpperCase();
+        if (tipo == null || tipo.isBlank()) {
+            return "DEM";
+        }
+
+        String normalizado = tipo.trim().toUpperCase().replace(' ', '_');
+        return switch (normalizado) {
+            case "CANCELACION", "CANCELAR", "CANCEL", "CANCELADO", "CANCELADA" -> "CAN";
+            case "ENTREGA_INCOMPLETA", "ENTREGA_INCOMPLETO", "ENTREGA_INCOMP", "ENTREGA" -> "ENT";
+            case "DEMORA", "DEMORADO", "RETRASO", "ATRASO" -> "DEM";
+            default -> normalizado.length() > 10 ? normalizado.substring(0, 10) : normalizado;
+        };
+    }
+
+    private String normalizarTipoNegocio(String tipo) {
+        if (tipo == null || tipo.isBlank()) {
+            return "DEMORA";
+        }
+
+        String normalizado = tipo.trim().toUpperCase().replace(' ', '_');
+        return switch (normalizado) {
+            case "CAN", "CANCELACION", "CANCELAR", "CANCEL", "CANCELADO", "CANCELADA" -> "CANCELACION";
+            case "ENT", "ENTREGA_INCOMPLETA", "ENTREGA_INCOMPLETO", "ENTREGA_INCOMP", "ENTREGA" -> "ENTREGA_INCOMPLETA";
+            case "DEM", "DEMORA", "DEMORADO", "RETRASO", "ATRASO" -> "DEMORA";
+            default -> normalizado;
+        };
     }
 
     private String normalizarAccion(String accion, String tipo) {
@@ -490,7 +515,7 @@ public class ReclamoService {
         solicitudRepository.findById(reclamo.getIdSolicitud())
                 .ifPresent(solicitud -> {
                     if ("RESUELTO".equals(nuevoEstado) || "RECHAZADO".equals(nuevoEstado)) {
-                        aplicarAccionSolicitud(solicitud, reclamo.getTipo(), request.getAccion(), null, request.getResolucion(), request.getCodigoEntrega());
+                        aplicarAccionSolicitud(solicitud, normalizarTipoNegocio(reclamo.getTipo()), request.getAccion(), null, request.getResolucion(), request.getCodigoEntrega());
                         solicitudRepository.save(solicitud);
                     }
                     guardarHistorialReclamo(
