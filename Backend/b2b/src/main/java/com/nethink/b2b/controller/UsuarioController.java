@@ -109,4 +109,8 @@ public ResponseEntity<AdminUserResponse> actualizarUsuarioAdmin(
     mfaService.consumeActionToken(mfaActionToken, principal.getName(), MfaService.PURPOSE_ADMIN_ACTION);
     return ResponseEntity.ok(usuarioService.actualizarUsuarioAdmin(idUsuario, request, httpRequest));
 }
-}
+
+    @GetMapping("/roles")
+    public ResponseEntity<List<String>> listarRoles() {
+        return ResponseEntity.ok(usuarioService.listarRoles());
+    }

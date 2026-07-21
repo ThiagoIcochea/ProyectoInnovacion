@@ -162,6 +162,7 @@ export class ProviderProductsComponent implements OnInit {
     this.saving = true;
     const payload = {
       producto: this.newProduct.producto,
+      sku: this.newProduct.sku && String(this.newProduct.sku).trim() ? this.newProduct.sku.trim() : null,
       marca: this.newProduct.marca,
       categoria: this.newProduct.categoria,
       descripcion: this.newProduct.descripcion || null,
@@ -172,7 +173,15 @@ export class ProviderProductsComponent implements OnInit {
       enOferta: this.newProduct.enOferta,
       porcentajeDescuento: Number(this.newProduct.porcentajeDescuento || 0),
       estado: 'ACTIVO',
-      imagenes: [], especificaciones: [], descuentosVolumen: []
+      imagenes: [],
+      especificaciones: [],
+      descuentosVolumen: (this.newProduct.descuentosVolumen || [])
+        .filter((item: any) => item && Number.isFinite(Number(item.cantidadMin)) && Number(item.cantidadMin) > 0
+          && Number.isFinite(Number(item.precioUnitario)) && Number(item.precioUnitario) >= 0)
+        .map((item: any) => ({
+          cantidadMin: Number(item.cantidadMin),
+          precioUnitario: Number(item.precioUnitario)
+        }))
     };
     this.http.post<any>(`${this.API_URL}/mis-productos`, payload, { headers: this.headers() }).subscribe({
       next: async () => {
@@ -204,11 +213,44 @@ export class ProviderProductsComponent implements OnInit {
     if (!Number.isFinite(precio) || precio < 0) return 'El precio unitario debe ser un número mayor o igual a cero.';
     if (!Number.isFinite(stock) || stock < 0) return 'El stock debe ser un número mayor o igual a cero.';
     if (!Number.isFinite(descuento) || descuento < 0 || descuento > 100) return 'El descuento debe estar entre 0 y 100.';
+
+    for (const d of this.newProduct.descuentosVolumen || []) {
+      if (!Number.isFinite(Number(d.cantidadMin)) || Number(d.cantidadMin) <= 0) {
+        return 'Cada descuento por volumen debe tener una cantidad mínima válida.';
+      }
+      if (!Number.isFinite(Number(d.precioUnitario)) || Number(d.precioUnitario) < 0) {
+        return 'Cada descuento por volumen debe tener un precio unitario válido.';
+      }
+    }
+
     return null;
   }
 
+  public agregarDescuento(): void {
+    (this.newProduct.descuentosVolumen || []).push({ cantidadMin: null, precioUnitario: null });
+  }
+
+  public eliminarDescuento(index: number): void {
+    if (!Array.isArray(this.newProduct.descuentosVolumen)) {
+      return;
+    }
+    this.newProduct.descuentosVolumen.splice(index, 1);
+  }
+
   private emptyProduct() {
-    return { producto: '', marca: '', categoria: '', descripcion: '', precioUnitario: null as number | null,
-      stock: null as number | null, garantiaMeses: 0, tiempoEntregaDias: 0, enOferta: false, porcentajeDescuento: 0 };
+    return {
+      producto: '',
+      sku: '',
+      marca: '',
+      categoria: '',
+      descripcion: '',
+      precioUnitario: null as number | null,
+      stock: null as number | null,
+      garantiaMeses: 0,
+      tiempoEntregaDias: 0,
+      enOferta: false,
+      porcentajeDescuento: 0,
+      descuentosVolumen: [] as Array<{ cantidadMin: number | null; precioUnitario: number | null; }>
+    };
   }
 }

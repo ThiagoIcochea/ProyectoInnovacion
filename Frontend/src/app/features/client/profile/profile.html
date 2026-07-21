@@ -201,6 +201,27 @@
         >
       </div>
 
+      <div class="setting-row">
+        <div>
+          <strong>Método MFA</strong>
+          <span>Selecciona cómo recibir el código para guardar cambios.</span>
+        </div>
+
+        <select
+          [(ngModel)]="mfaMethod"
+          aria-label="Método MFA"
+          title="Método MFA"
+        >
+          <option
+            *ngFor="let method of mfaMethods"
+            [value]="method.value"
+            [disabled]="!isMfaMethodAvailable(method.value)"
+          >
+            {{ method.label }}
+          </option>
+        </select>
+      </div>
+
     </aside>
 
   </div>

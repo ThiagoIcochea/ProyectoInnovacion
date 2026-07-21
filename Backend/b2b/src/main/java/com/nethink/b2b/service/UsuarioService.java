@@ -343,19 +343,29 @@ public AdminUserResponse crearUsuarioAdmin(AdminCreateUserRequest req, HttpServl
         throw new RuntimeException("El correo ya está registrado por otro usuario");
     }
 
-    Rol rol = rolRepository.findById(2)
-            .orElseThrow(() -> new RuntimeException("Rol CLIENTE no encontrado"));
+    String rolNombre = req.getRol() != null
+            ? req.getRol().trim().toUpperCase().replaceFirst("^ROLE_", "")
+            : "CLIENTE";
+
+    Rol rol = rolRepository.findByNombreIgnoreCase(rolNombre)
+            .orElseThrow(() -> new RuntimeException("Rol " + rolNombre + " no encontrado"));
 
     Usuario usuario = new Usuario();
-    usuario.setNombres(req.getNombres() != null ? req.getNombres().trim() : null);
-    usuario.setApellidos(req.getApellidos() != null ? req.getApellidos().trim() : null);
-    usuario.setCorreo(req.getCorreo().trim());
+    usuario.setNombres(req.getNombres());
+    usuario.setApellidos(req.getApellidos());
+    usuario.setCorreo(req.getCorreo());
     usuario.setTelefono(req.getTelefono());
     usuario.setWhatsapp(req.getWhatsapp());
     usuario.setDireccion(req.getDireccion());
     usuario.setPassword(req.getPassword());
     usuario.setRol(rol);
-    usuario.setEstado(EstadoUsuario.ACTIVO);
+
+    if (req.getEstado() != null && !req.getEstado().isBlank()) {
+        usuario.setEstado(EstadoUsuario.valueOf(req.getEstado().trim().toUpperCase()));
+    } else {
+        usuario.setEstado(EstadoUsuario.ACTIVO);
+    }
+
     usuario.setFechaRegistro(LocalDateTime.now());
 
     usuario = usuarioRepo.save(usuario);
@@ -499,7 +509,13 @@ private void validarPerfil(ProfileUpdateRequest req) {
     }
 }
 
-private void validarAdminUsuarioCreacion(AdminCreateUserRequest req) {
+public List<String> listarRoles() {
+        return rolRepository.findAll().stream()
+                .map(Rol::getNombre)
+                .toList();
+    }
+
+    private void validarAdminUsuarioCreacion(AdminCreateUserRequest req) {
     validarTexto(req.getNombres(), "Nombres invalidos", "^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$");
     validarTexto(req.getApellidos(), "Apellidos invalidos", "^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$");
     validarTexto(req.getCorreo(), "Correo invalido", "^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$");

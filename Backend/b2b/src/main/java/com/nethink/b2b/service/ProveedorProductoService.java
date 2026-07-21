@@ -4,6 +4,7 @@ import com.nethink.b2b.dto.response.DescuentoVolumenResponse;
 import com.nethink.b2b.dto.response.EspecificacionResponse;
 import com.nethink.b2b.dto.response.ImagenResponse;
 import com.nethink.b2b.dto.response.ProveedorProductoResponse;
+import com.nethink.b2b.entity.DescuentoVolumen;
 import com.nethink.b2b.entity.Producto;
 import com.nethink.b2b.entity.Marca;
 import com.nethink.b2b.entity.Categoria;
@@ -241,12 +242,47 @@ public class ProveedorProductoService {
         proveedorProducto.setUltimaActualizacionStock(LocalDateTime.now());
         proveedorProducto = proveedorProductoRepo.save(proveedorProducto);
 
+        actualizarDescuentosVolumen(proveedorProducto, entrada.getDescuentosVolumen());
         reservaService.publicarNuevoProducto(proveedorProducto);
         final Integer idProvProd = proveedorProducto.getIdProvProd();
         return listarProductosPorProveedor(correo).stream()
                 .filter(item -> idProvProd.equals(item.getIdProvProd()))
                 .findFirst()
                 .orElseThrow();
+    }
+
+    @Transactional
+    private void actualizarDescuentosVolumen(ProveedorProducto proveedorProducto, List<DescuentoVolumenResponse> descuentos) {
+        if (proveedorProducto == null || proveedorProducto.getIdProvProd() == null) {
+            return;
+        }
+
+        descuentoRepo.deleteByProveedorProducto_IdProvProd(proveedorProducto.getIdProvProd());
+
+        if (descuentos == null || descuentos.isEmpty()) {
+            return;
+        }
+
+        List<DescuentoVolumen> entidades = new ArrayList<>();
+        for (DescuentoVolumenResponse dto : descuentos) {
+            if (dto == null
+                    || dto.getCantidadMin() == null
+                    || dto.getCantidadMin() <= 0
+                    || dto.getPrecioUnitario() == null
+                    || dto.getPrecioUnitario() < 0) {
+                continue;
+            }
+
+            DescuentoVolumen entidad = new DescuentoVolumen();
+            entidad.setProveedorProducto(proveedorProducto);
+            entidad.setCantidadMin(dto.getCantidadMin());
+            entidad.setPrecioUnitario(dto.getPrecioUnitario());
+            entidades.add(entidad);
+        }
+
+        if (!entidades.isEmpty()) {
+            descuentoRepo.saveAll(entidades);
+        }
     }
 
     private Producto resolverProducto(CatalogoResponse entrada, Marca marca, Categoria categoria) {

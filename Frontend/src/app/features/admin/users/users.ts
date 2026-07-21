@@ -36,6 +36,8 @@ implements OnInit {
 
   filteredUsers: any[] = [];
 
+  roles: string[] = [];
+
   searchTerm: string = '';
 
   loading: boolean = false;
@@ -55,6 +57,7 @@ implements OnInit {
   ngOnInit(): void {
 
     this.listarUsuarios();
+    this.cargarRoles();
 
   }
 
@@ -114,6 +117,23 @@ implements OnInit {
 
         this.cdr.detectChanges();
 
+      }
+    });
+  }
+
+  private cargarRoles(): void {
+    this.http.get<string[]>(
+      `${APP_API_BASE_URL}/usuarios/roles`,
+      { headers: this.headers() }
+    ).subscribe({
+      next: (roles) => {
+        this.roles = Array.isArray(roles) ? roles : [];
+        if (this.roles.length === 0) {
+          this.roles = ['CLIENTE', 'PROVEEDOR'];
+        }
+      },
+      error: () => {
+        this.roles = ['CLIENTE', 'PROVEEDOR'];
       }
     });
   }
@@ -235,6 +255,10 @@ implements OnInit {
       estado: this.normalizarEstado(user?.estado),
       rol: rolActual
     };
+
+    if (user?.idUsuario === 0 && !this.roles.includes(rolActual)) {
+      this.editForm.rol = this.roles.length > 0 ? this.roles[0] : 'CLIENTE';
+    }
   }
 
   cerrarGestion(): void {
@@ -252,7 +276,8 @@ implements OnInit {
       whatsapp: this.editForm?.whatsapp || '',
       direccion: this.editForm?.direccion || '',
       password: this.editForm?.password || '',
-      estado: this.editForm?.estado || 'ACTIVO'
+      estado: this.editForm?.estado || 'ACTIVO',
+      rol: this.editForm?.rol || 'CLIENTE'
     };
 
     if (!form.correo || !form.password || !form.nombres || !form.apellidos) {

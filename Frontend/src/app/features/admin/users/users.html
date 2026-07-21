@@ -247,6 +247,16 @@
           Nueva contrasena
           <input name="password" type="password" [(ngModel)]="editForm.password" placeholder="Dejar vacio para conservar" />
         </label>
+        <label *ngIf="selectedUser?.idUsuario === 0">
+          Rol
+          <select name="rol" [(ngModel)]="editForm.rol">
+            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+          </select>
+        </label>
+        <label *ngIf="selectedUser?.idUsuario !== 0">
+          Rol actual
+          <input type="text" [value]="editForm.rol" disabled />
+        </label>
         <label>
           Estado
           <select name="estado" [(ngModel)]="editForm.estado">

@@ -93,6 +93,7 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
     });
 
     this.cargarFiltrosDisponibles();
+    this.cargarPreferenciasCliente();
 
     this.aplicarFiltrosRefinado();
 
@@ -128,6 +129,23 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
       APP_STORAGE_KEYS.rfqCart,
       JSON.stringify(this.requestItems)
     );
+  }
+
+  private cargarPreferenciasCliente(): void {
+    this.http.get<any>(
+      `${this.API_BASE}/usuarios/perfil`,
+      { headers: this.getHeaders() }
+    ).subscribe({
+      next: (res) => {
+        const entregaRapida = res?.entregaRapida ?? res?.preferencias?.entregaRapida ?? false;
+        if (entregaRapida && this.prioridad === 'BALANCEADO') {
+          this.prioridad = 'TIEMPO';
+        }
+      },
+      error: () => {
+        // No ocean
+      }
+    });
   }
 
   cargarFiltrosDisponibles(): void {
