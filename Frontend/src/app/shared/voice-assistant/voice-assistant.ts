@@ -153,22 +153,29 @@ export class VoiceAssistantComponent {
   }
 
   private handleAction(res: any): void {
+    const role = this.normalizeRole(localStorage.getItem(APP_STORAGE_KEYS.role));
+
     if (res?.requiresMfa) {
       this.answer = `${res.answer || ''} Por seguridad, esa accion requiere multifactor.`;
     }
 
     if (res?.action === 'NAVIGATE' && res?.route) {
-      this.router.navigate([res.route]);
+      const route = this.allowedRouteForRole(role, res.route);
+      if (route) {
+        this.router.navigate([route]);
+      } else {
+        this.say('No tienes permiso para abrir esa seccion con tu rol actual.');
+      }
       return;
     }
 
     if (res?.action === 'SEARCH' && res?.search) {
-      const role = (localStorage.getItem(APP_STORAGE_KEYS.role) || '').toUpperCase();
-      const route = role === 'PROVEEDOR'
-        ? '/app/provider/products'
-        : '/app/rfq/catalog';
-
-      this.router.navigate([route], { queryParams: { search: res.search } });
+      const route = this.allowedSearchRouteForRole(role);
+      if (route) {
+        this.router.navigate([route], { queryParams: { search: res.search } });
+      } else {
+        this.say('No tengo un panel permitido para esa busqueda con tu rol actual.');
+      }
     }
   }
 
@@ -852,6 +859,49 @@ export class VoiceAssistantComponent {
       .replace(/[^\w\s@.-]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
+  }
+
+  private allowedRouteForRole(role: string, route: string): string | null {
+    const normalizedRole = role.toUpperCase();
+    const normalizedRoute = (route || '').toLowerCase();
+
+    if (normalizedRole === 'ADMIN') {
+      return normalizedRoute.includes('/app/admin/') || normalizedRoute.includes('/app/profile') || normalizedRoute.includes('/app/dashboard')
+        ? route
+        : null;
+    }
+
+    if (normalizedRole === 'PROVEEDOR') {
+      return normalizedRoute.includes('/app/provider/') || normalizedRoute.includes('/app/profile')
+        ? route
+        : null;
+    }
+
+    return normalizedRoute.includes('/app/rfq/')
+      || normalizedRoute.includes('/app/requests')
+      || normalizedRoute.includes('/app/history')
+      || normalizedRoute.includes('/app/profile')
+      || normalizedRoute.includes('/app/dashboard')
+      ? route
+      : null;
+  }
+
+  private allowedSearchRouteForRole(role: string): string | null {
+    const normalizedRole = role.toUpperCase();
+
+    if (normalizedRole === 'PROVEEDOR') {
+      return '/app/provider/products';
+    }
+
+    if (normalizedRole === 'ADMIN') {
+      return '/app/admin/products';
+    }
+
+    return '/app/rfq/catalog';
+  }
+
+  private normalizeRole(value: string | null | undefined): string {
+    return (value || '').toUpperCase().replace(/^ROLE_/, '').trim();
   }
 
   private includesAny(value: string, terms: string[]): boolean {
