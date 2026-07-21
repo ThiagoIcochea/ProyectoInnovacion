@@ -3,6 +3,11 @@
   class="voice-fab"
   [class.is-listening]="listening"
   [class.is-thinking]="thinking"
+  [style.right.px]="fabRight"
+  [style.bottom.px]="fabBottom"
+  [style.left.px]="fabLeft"
+  [style.top.px]="fabTop"
+  (pointerdown)="onFabPointerDown($event)"
   (click)="toggle()"
   title="Asistente por voz">
   <span class="voice-fab__icon" aria-hidden="true"></span>

@@ -2,7 +2,7 @@
   position: fixed;
   right: 22px;
   bottom: 22px;
-  z-index: 850;
+  z-index: 99999;
   width: 58px;
   height: 58px;
   border: 0;
@@ -11,8 +11,14 @@
   color: #fff;
   display: grid;
   place-items: center;
-  cursor: pointer;
+  cursor: grab;
+  touch-action: none;
   box-shadow: 0 16px 34px rgba(15, 23, 42, 0.28);
+}
+
+.voice-fab.is-listening,
+.voice-fab.is-thinking {
+  cursor: grabbing;
 }
 
 :host-context(body.light-theme) .voice-fab {

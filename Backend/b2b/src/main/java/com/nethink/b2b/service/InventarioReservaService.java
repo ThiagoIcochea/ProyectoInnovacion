@@ -263,18 +263,18 @@ public void publicarNuevoProducto(ProveedorProducto producto) {
 
     List<ProveedorProducto> catalogo = List.of(producto);
     try {
-        enviarInventario(proveedor, HttpMethod.PUT, catalogo);
+        enviarInventario(proveedor, HttpMethod.POST, catalogo);
         return;
-    } catch (Exception putError) {
+    } catch (Exception postError) {
         try {
             enviarInventario(proveedor, HttpMethod.PATCH, catalogo);
             return;
         } catch (Exception patchError) {
             try {
-                enviarInventario(proveedor, HttpMethod.POST, catalogo);
-            } catch (Exception postError) {
+                enviarInventario(proveedor, HttpMethod.PUT, catalogo);
+            } catch (Exception putError) {
                 System.out.println("No se pudo publicar el producto " + producto.getIdProvProd()
-                        + " en la API del proveedor: " + postError.getMessage());
+                        + " en la API del proveedor: " + putError.getMessage());
             }
         }
     }

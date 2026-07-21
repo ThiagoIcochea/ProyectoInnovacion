@@ -26,6 +26,15 @@ export class VoiceAssistantComponent {
   thinking = false;
   transcript = '';
   answer = '';
+  fabRight: number | null = 22;
+  fabBottom: number | null = 22;
+  fabLeft: number | null = null;
+  fabTop: number | null = null;
+  private dragging = false;
+  private fabDragStartX = 0;
+  private fabDragStartY = 0;
+  private fabStartLeft = 0;
+  private fabStartTop = 0;
   private pending:
     | { type: 'TRACKING_ID' }
     | { type: 'ADD_PRODUCT'; qty: number }
@@ -42,6 +51,38 @@ export class VoiceAssistantComponent {
     private mfaService: MfaService,
     private themeService: ThemeService
   ) {}
+
+  onFabPointerDown(event: PointerEvent): void {
+    event.preventDefault();
+    this.dragging = true;
+    this.fabDragStartX = event.clientX;
+    this.fabDragStartY = event.clientY;
+    this.fabStartLeft = this.fabLeft ?? (window.innerWidth - 22 - 58);
+    this.fabStartTop = this.fabTop ?? (window.innerHeight - 22 - 58);
+    this.fabLeft = this.fabStartLeft;
+    this.fabTop = this.fabStartTop;
+    this.fabRight = null;
+    this.fabBottom = null;
+    window.addEventListener('pointermove', this.onFabPointerMove);
+    window.addEventListener('pointerup', this.onFabPointerUp, { once: true });
+  }
+
+  private onFabPointerMove = (event: PointerEvent): void => {
+    if (!this.dragging) {
+      return;
+    }
+
+    const dx = event.clientX - this.fabDragStartX;
+    const dy = event.clientY - this.fabDragStartY;
+
+    this.fabLeft = Math.min(Math.max(8, this.fabStartLeft + dx), window.innerWidth - 66);
+    this.fabTop = Math.min(Math.max(8, this.fabStartTop + dy), window.innerHeight - 66);
+  };
+
+  private onFabPointerUp = (): void => {
+    this.dragging = false;
+    window.removeEventListener('pointermove', this.onFabPointerMove);
+  };
 
   toggle(): void {
     if (this.listening || this.thinking) {

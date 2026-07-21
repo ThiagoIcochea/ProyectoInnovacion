@@ -324,7 +324,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return 'Nombres invalido: debe iniciar con mayuscula y usar solo letras. Ejemplo: Juan Carlos.';
     }
 
-    if (!this.validators.name.test(this.usuario.apellidos || '')) {
+    if (this.usuario.apellidos && this.usuario.apellidos.trim() && !this.validators.name.test(this.usuario.apellidos)) {
       return 'Apellidos invalido: debe iniciar con mayuscula y usar solo letras. Ejemplo: Perez Ramos.';
     }
 

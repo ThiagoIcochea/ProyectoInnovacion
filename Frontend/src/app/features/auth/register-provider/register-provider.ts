@@ -557,7 +557,7 @@ export class RegisterProviderComponent implements OnInit {
       return 'Nombres invalido: debe iniciar con mayuscula y usar solo letras. Ejemplo: Juan Carlos.';
     }
 
-    if (!this.validators.name.test(this.apellidos)) {
+    if (this.apellidos && this.apellidos.trim() && !this.validators.name.test(this.apellidos)) {
       return 'Apellidos invalido: debe iniciar con mayuscula y usar solo letras. Ejemplo: Perez Ramos.';
     }
 

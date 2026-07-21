@@ -93,7 +93,6 @@ export class RegisterClientComponent {
   private hasRequiredFields(): boolean {
     return Boolean(
       this.form.nombres.trim() &&
-      this.form.apellidos.trim() &&
       this.form.correo.trim() &&
       this.form.telefono.trim() &&
       this.form.whatsapp.trim() &&
@@ -156,7 +155,7 @@ export class RegisterClientComponent {
       return 'Nombres invalido: debe iniciar con mayuscula y usar solo letras. Ejemplo: Juan Carlos.';
     }
 
-    if (!this.validators.name.test(this.form.apellidos)) {
+    if (this.form.apellidos && this.form.apellidos.trim() && !this.validators.name.test(this.form.apellidos)) {
       return 'Apellidos invalido: debe iniciar con mayuscula y usar solo letras. Ejemplo: Perez Ramos.';
     }
 

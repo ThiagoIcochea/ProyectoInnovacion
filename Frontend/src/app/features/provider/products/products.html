@@ -109,12 +109,11 @@
   <div class="modal-overlay" *ngIf="showCreateModal" (click)="cerrarNuevoProducto()">
     <form class="product-modal" (ngSubmit)="crearProducto()" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <div><span>Catálogo conectado</span><h2>Agregar producto</h2><p>Se publicará en la API usando PUT, PATCH y finalmente POST si es necesario.</p></div>
+        <div><span>Catálogo conectado</span><h2>Agregar producto</h2><p>Se publicará en la API usando POST y luego PATCH/PUT según soporte del endpoint.</p></div>
         <button type="button" class="btn-secondary" (click)="cerrarNuevoProducto()" aria-label="Cerrar">×</button>
       </div>
       <div class="product-form">
         <label>Producto *<input name="producto" [(ngModel)]="newProduct.producto" required maxlength="150"></label>
-        <label>SKU<input name="sku" [(ngModel)]="newProduct.sku" maxlength="50" placeholder="Opcional"></label>
         <label>Marca *<select name="marca" [(ngModel)]="newProduct.marca" required>
           <option value="">Selecciona una marca</option>
           <option *ngFor="let marca of marcas" [value]="marca.nombre">{{ marca.nombre }}</option>
