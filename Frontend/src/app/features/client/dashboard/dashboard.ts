@@ -45,12 +45,10 @@ export class DashboardComponent implements OnInit {
     this.cargarPreferenciasCliente();
   }
 
-  getHeaders() {
-    return {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token) || ''}`
-      })
-    };
+  getHeaders(): HttpHeaders {
+    return new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem(APP_STORAGE_KEYS.token) || ''}`
+    });
   }
 
   cargarTodo(): void {
@@ -64,7 +62,7 @@ export class DashboardComponent implements OnInit {
 
     this.http.get<any[]>(
       `${this.API}/recomendados/productos`,
-      this.getHeaders()
+      { headers: this.getHeaders() }
     ).subscribe({
       next: (data) => {
         this.recommendedProducts = Array.isArray(data) ? data : [];
@@ -85,7 +83,7 @@ export class DashboardComponent implements OnInit {
 
     this.http.get<any[]>(
       `${this.API}/publicidad/activas`,
-      this.getHeaders()
+      { headers: this.getHeaders() }
     ).subscribe({
       next: (data) => {
 
@@ -169,7 +167,12 @@ export class DashboardComponent implements OnInit {
   }
 
   private cargarPreferenciasCliente(): void {
-    this.http.get<any>(`${this.API}/usuarios/perfil`, { headers: this.getHeaders() }).subscribe({
+    interface PerfilResponse {
+      entregaRapida?: boolean;
+      preferencias?: { entregaRapida?: boolean };
+    }
+
+    this.http.get<PerfilResponse>(`${this.API}/usuarios/perfil`, { headers: this.getHeaders() }).subscribe({
       next: (res) => {
         const entregaRapida = res?.entregaRapida ?? res?.preferencias?.entregaRapida ?? false;
         this.prioridad = entregaRapida ? 'TIEMPO' : 'BALANCEADO';
@@ -276,7 +279,7 @@ export class DashboardComponent implements OnInit {
     this.http.post<any>(
       `${this.API}/rfq/buscar-proveedores`,
       request,
-      this.getHeaders()
+      { headers: this.getHeaders() }
     ).subscribe({
 
       next: (res) => {
