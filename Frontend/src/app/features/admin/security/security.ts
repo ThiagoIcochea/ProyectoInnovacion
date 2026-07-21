@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import Swal from 'sweetalert2';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 import { MfaService } from '../../../core/services/mfa.service';
@@ -28,9 +28,11 @@ export class AdminSecurityComponent implements OnInit {
   loading = true;
   actionLoading = '';
 
-  constructor(private http: HttpClient, private mfa: MfaService) {}
+  constructor(private http: HttpClient, private mfa: MfaService, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit(): void { this.cargar(); }
+  ngOnInit(): void {
+    setTimeout(() => this.cargar(), 0);
+  }
 
   cargar(): void {
     this.loading = true;
@@ -38,11 +40,11 @@ export class AdminSecurityComponent implements OnInit {
       next: usuarios => {
         this.usuarios = usuarios;
         this.http.get<SecurityBlock[]>(`${APP_API_BASE_URL}/seguridad/admin/ips-bloqueadas`, { headers: this.headers() }).subscribe({
-          next: ips => { this.ips = ips; this.loading = false; },
-          error: () => { this.ips = []; this.loading = false; }
+          next: ips => { this.ips = ips; this.loading = false; this.cdr.detectChanges(); },
+          error: () => { this.ips = []; this.loading = false; this.cdr.detectChanges(); }
         });
       },
-      error: () => { this.usuarios = []; this.ips = []; this.loading = false; }
+      error: () => { this.usuarios = []; this.ips = []; this.loading = false; this.cdr.detectChanges(); }
     });
   }
 

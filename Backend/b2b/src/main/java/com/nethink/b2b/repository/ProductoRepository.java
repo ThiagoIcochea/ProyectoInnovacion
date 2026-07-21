@@ -121,16 +121,14 @@ public interface ProductoRepository
     
     @Query(value = """
     SELECT
-        p.id_producto,
-        p.nombre,
-        m.nombre AS marca,
-        c.nombre AS categoria,
-
+        p.id_producto AS idProducto,
+        p.nombre AS name,
+        p.sku_global AS skuGlobal,
+        m.nombre AS brand,
+        c.nombre AS category,
         COUNT(DISTINCT pp.id_proveedor) AS providersCount,
-
-        COALESCE(SUM(pp.stock),0) AS totalStock,
-                   
-        p.estado
+        COALESCE(SUM(pp.stock), 0) AS totalStock,
+        COALESCE(p.estado, 'ACTIVO') AS status
 
     FROM productos p
 
@@ -146,8 +144,10 @@ public interface ProductoRepository
     GROUP BY
         p.id_producto,
         p.nombre,
+        p.sku_global,
         m.nombre,
-        c.nombre
+        c.nombre,
+        p.estado
 """, nativeQuery = true)
 List<Object[]> obtenerProductosAdmin();
 }

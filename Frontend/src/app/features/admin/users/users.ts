@@ -252,8 +252,7 @@ implements OnInit {
       whatsapp: this.editForm?.whatsapp || '',
       direccion: this.editForm?.direccion || '',
       password: this.editForm?.password || '',
-      estado: this.editForm?.estado || 'ACTIVO',
-      rol: this.editForm?.rol || 'CLIENTE'
+      estado: this.editForm?.estado || 'ACTIVO'
     };
 
     if (!form.correo || !form.password || !form.nombres || !form.apellidos) {
@@ -305,6 +304,8 @@ implements OnInit {
       const adminEmail = localStorage.getItem('auth_user_email') || '';
       const token = await this.mfaService.requestActionToken(adminEmail, 'ADMIN_ACTION');
       const body = { ...this.editForm };
+
+      delete body.rol;
 
       if (!body.password) {
         delete body.password;

@@ -151,7 +151,8 @@ public class ProductoService {
         .toList();
 
     List<Integer> idsProductos = rows.stream()
-        .map(row -> ((Number) row[0]).intValue())
+        .filter(row -> row != null && row.length > 0)
+        .map(row -> safeInteger(row[0]))
         .distinct()
         .toList();
 
@@ -159,30 +160,23 @@ public class ProductoService {
         .stream()
         .collect(Collectors.groupingBy(img -> img.getProducto().getIdProducto()));
 
-    return rows.stream().map(row -> {
-        Integer idProducto = ((Number) row[0]).intValue();
+    return rows.stream().filter(row -> row != null && row.length > 0).map(row -> {
+        Integer idProducto = safeInteger(row[0]);
         ProductoAdminResponse dto = new ProductoAdminResponse();
 
-        Integer stock = ((Number) row[5]).intValue();
-        String status = row[6] != null ? String.valueOf(row[6]) : "ACTIVO";
-        status = status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase();
+        Integer providersCount = safeInteger(row[5]);
+        Integer totalStock = safeInteger(row[6]);
+        String dbStatus = safeString(row[7]);
+        String status = (dbStatus == null || dbStatus.isBlank()) ? "ACTIVO" : dbStatus.trim();
 
-        dto.setStatus(status);
-        dto.setIdProducto(((Number) row[0]).intValue());
-        dto.setName((String) row[1]);
-        dto.setSkuGlobal(row[2] != null ? String.valueOf(row[2]) : null);
-        dto.setBrand((String) row[3]);
-        dto.setCategory((String) row[4]);
-        dto.setProvidersCount(((Number) row[5]).intValue());
-        dto.setTotalStock(stock);
-
-        if (stock <= 10) {
-            dto.setStatus("Bajo stock");
-        } else if (stock <= 25) {
-            dto.setStatus("Stock medio");
-        } else {
-            dto.setStatus("Stock alto");
-        }
+        dto.setStatus(normalizarEstado(status));
+        dto.setIdProducto(idProducto);
+        dto.setName(safeString(row[1]));
+        dto.setSkuGlobal(safeString(row[2]));
+        dto.setBrand(safeString(row[3]));
+        dto.setCategory(safeString(row[4]));
+        dto.setProvidersCount(providersCount);
+        dto.setTotalStock(totalStock);
 
         List<ProductoImagen> imgs = imagenesPorProducto.getOrDefault(idProducto, List.of());
         List<ImagenResponse> images = imgs.stream()
@@ -193,6 +187,34 @@ public class ProductoService {
         dto.setMarcas(marks);
         return dto;
     }).toList();
+}
+
+private String normalizarEstado(String status) {
+    String normalized = status == null ? "ACTIVO" : status.trim().toUpperCase();
+    if (normalized.startsWith("INACT")) {
+        return "Inactivo";
+    }
+    if (normalized.startsWith("BAJO")) {
+        return "Bajo stock";
+    }
+    if (normalized.startsWith("STOCK")) {
+        return "Stock medio";
+    }
+    return "Activo";
+}
+
+private Integer safeInteger(Object value) {
+    if (value == null) return 0;
+    if (value instanceof Number number) return number.intValue();
+    try {
+        return Integer.parseInt(String.valueOf(value));
+    } catch (NumberFormatException ex) {
+        return 0;
+    }
+}
+
+private String safeString(Object value) {
+    return value == null ? null : String.valueOf(value).trim();
 }
     
  private String subirACloudinary(MultipartFile archivo) throws IOException {
