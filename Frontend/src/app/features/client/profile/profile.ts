@@ -51,15 +51,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   };
 
-  mfaMethods = [
-    { value: 'email', label: 'Correo' },
-    { value: 'sms', label: 'SMS' },
-    { value: 'whatsapp', label: 'WhatsApp' },
-    { value: 'call', label: 'Llamada' }
-  ];
-
-  mfaMethod: string = 'email';
-
   previewFoto: string | null = null;
 
   archivoFoto: File | null = null;
@@ -148,8 +139,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
           notificaciones: this.usuario.notificacionesRfq ?? this.usuario.preferencias?.notificaciones ?? true,
           entregaRapida: this.usuario.entregaRapida ?? this.usuario.preferencias?.entregaRapida ?? false
         };
-
-        this.mfaMethod = this.determineDefaultMfaMethod();
 
         this.generarIniciales();
 
@@ -287,8 +276,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     try {
       mfaToken = await this.mfaService.requestActionToken(
         localStorage.getItem('auth_user_email') || this.usuario.correo || '',
-        'PROFILE_UPDATE',
-        this.mfaMethod || 'email'
+        'PROFILE_UPDATE'
       );
     } catch (error: any) {
       await Swal.fire({
@@ -327,31 +315,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  private determineDefaultMfaMethod(): string {
-    if (this.usuario.whatsapp && this.usuario.whatsapp.trim()) {
-      return 'whatsapp';
-    }
-
-    if (this.usuario.telefono && this.usuario.telefono.trim()) {
-      return 'sms';
-    }
-
-    return 'email';
-  }
-
-  public isMfaMethodAvailable(method: string): boolean {
-    const normalized = String(method || '').toLowerCase();
-
-    if (normalized === 'email') {
-      return true;
-    }
-
-    if (normalized === 'whatsapp') {
-      return !!(this.usuario.whatsapp && this.usuario.whatsapp.trim());
-    }
-
-    return !!(this.usuario.telefono && this.usuario.telefono.trim());
-  }
 
   private validateProfile(): string {
     const phone = this.onlyDigits(this.usuario.telefono);
