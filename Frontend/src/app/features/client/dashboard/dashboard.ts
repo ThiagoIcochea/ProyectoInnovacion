@@ -544,7 +544,207 @@ private actualizarGraficoProductos(): void {
 
 
 
+exportarInforme(): void {
+  if (!this.dashboard) return;
 
+  const palette = {
+    page: '#0f172a',
+    panel: '#1e293b',
+    panelSoft: '#111827',
+    border: '#374151',
+    text: '#e5e7eb',
+    muted: '#9ca3af',
+    primary: '#3b82f6',
+    success: '#22c55e',
+    warning: '#f59e0b'
+  };
+
+  const fechaEmision = new Date().toLocaleDateString('es-PE', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  const nombreCliente = this.dashboard.nombreCliente || 'Cliente';
+  const solicitudes = this.dashboard.solicitudes;
+  const aprobadas = this.dashboard.aprobadas;
+
+  const filasProductos = (this.dashboard.graficoProductosSolicitados || []).slice(0, 5).map((prod, index) => `
+    <tr>
+      <td style="padding:6px 8px;color:${palette.primary};font-weight:700;">#${index + 1}</td>
+      <td style="padding:6px 8px;color:${palette.text};">${prod.nombreProducto}</td>
+      <td style="padding:6px 8px;text-align:right;color:${palette.text};font-weight:700;">${prod.cantidadSolicitada}</td>
+    </tr>
+  `).join('');
+
+  const filasEstados = (this.dashboard.graficoEstadosSolicitudes || []).slice(0, 5).map(item => `
+    <tr>
+      <td style="padding:6px 8px;color:${palette.text};">${item.estado}</td>
+      <td style="padding:6px 8px;text-align:right;color:${palette.success};font-weight:700;">${item.cantidad}</td>
+    </tr>
+  `).join('');
+
+  const filasMonto = (this.dashboard.graficoMontoAprobado || []).slice(0, 6).map(item => `
+    <tr>
+      <td style="padding:6px 8px;color:${palette.text};">${item.mes}</td>
+      <td style="padding:6px 8px;text-align:right;color:${palette.primary};font-weight:700;">
+        S/ ${this.decimalPipe.transform(item.monto, '1.2-2')}
+      </td>
+    </tr>
+  `).join('');
+
+  const cuerpoDocumento = `
+    <div style="
+      box-sizing:border-box;
+      width:210mm;
+      min-height:297mm;
+      padding:18mm 16mm;
+      font-family:Segoe UI,Arial,sans-serif;
+      color:${palette.text};
+      background:${palette.page};
+      font-size:11px;
+    ">
+      <div style="border-bottom:2px solid ${palette.primary};padding-bottom:10px;margin-bottom:14px;">
+        <span style="color:${palette.primary};font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">
+          Sistema B2B Comercial
+        </span>
+
+        <h1 style="margin:4px 0 0;font-size:20px;color:${palette.text};">
+          Informe de Actividad del Cliente
+        </h1>
+
+        <p style="margin:4px 0 0;color:${palette.muted};font-size:11px;">
+          Emitido: ${fechaEmision}
+        </p>
+      </div>
+
+      <div style="
+        background:${palette.panel};
+        border:1px solid ${palette.border};
+        border-radius:8px;
+        padding:10px 12px;
+        margin-bottom:14px;
+      ">
+        <p style="margin:0;color:${palette.muted};font-size:10px;text-transform:uppercase;font-weight:700;">
+          Cliente
+        </p>
+
+        <strong style="display:block;margin-top:3px;color:${palette.text};font-size:14px;">
+          ${nombreCliente}
+        </strong>
+      </div>
+
+      <table style="width:100%;border-spacing:8px;margin:0 -8px 14px;">
+        <tr>
+          <td style="
+            background:${palette.panel};
+            border:1px solid ${palette.border};
+            border-top:3px solid ${palette.primary};
+            border-radius:8px;
+            padding:10px;
+            text-align:center;
+            width:33.33%;
+          ">
+            <small style="color:${palette.muted};text-transform:uppercase;font-weight:700;font-size:9px;">
+              Solicitudes del mes
+            </small>
+            <h2 style="margin:6px 0 2px;color:${palette.text};font-size:18px;">
+              ${solicitudes?.solicitudesMesActual || 0}
+            </h2>
+            <p style="margin:0;color:${palette.muted};font-size:10px;">
+              ${solicitudes?.porcentajeSolicitudes || 0}% vs mes anterior
+            </p>
+          </td>
+
+          <td style="
+            background:${palette.panel};
+            border:1px solid ${palette.border};
+            border-top:3px solid ${palette.success};
+            border-radius:8px;
+            padding:10px;
+            text-align:center;
+            width:33.33%;
+          ">
+            <small style="color:${palette.muted};text-transform:uppercase;font-weight:700;font-size:9px;">
+              Aprobadas
+            </small>
+            <h2 style="margin:6px 0 2px;color:${palette.text};font-size:18px;">
+              ${aprobadas?.aprobadasMesActual || 0}
+            </h2>
+            <p style="margin:0;color:${palette.muted};font-size:10px;">
+              ${aprobadas?.porcentajeSolicitudesAprobadas || 0}% vs mes anterior
+            </p>
+          </td>
+
+          <td style="
+            background:${palette.panel};
+            border:1px solid ${palette.border};
+            border-top:3px solid ${palette.warning};
+            border-radius:8px;
+            padding:10px;
+            text-align:center;
+            width:33.33%;
+          ">
+            <small style="color:${palette.muted};text-transform:uppercase;font-weight:700;font-size:9px;">
+              Monto aprobado
+            </small>
+            <h2 style="margin:6px 0 2px;color:${palette.text};font-size:18px;">
+              S/ ${this.decimalPipe.transform(aprobadas?.montoMesActual || 0, '1.2-2')}
+            </h2>
+            <p style="margin:0;color:${palette.muted};font-size:10px;">
+              ${aprobadas?.porcentajeMontoAprobado || 0}% vs mes anterior
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <h3 style="margin:12px 0 6px;color:${palette.primary};font-size:12px;text-transform:uppercase;letter-spacing:0.8px;">
+        Monto aprobado mensual
+      </h3>
+      <table style="width:100%;border-collapse:collapse;background:${palette.panelSoft};border:1px solid ${palette.border};border-radius:8px;overflow:hidden;">
+        ${filasMonto}
+      </table>
+
+      <h3 style="margin:12px 0 6px;color:${palette.primary};font-size:12px;text-transform:uppercase;letter-spacing:0.8px;">
+        Estado de solicitudes
+      </h3>
+      <table style="width:100%;border-collapse:collapse;background:${palette.panelSoft};border:1px solid ${palette.border};border-radius:8px;overflow:hidden;">
+        ${filasEstados}
+      </table>
+
+      <h3 style="margin:12px 0 6px;color:${palette.primary};font-size:12px;text-transform:uppercase;letter-spacing:0.8px;">
+        Productos mas solicitados
+      </h3>
+      <table style="width:100%;border-collapse:collapse;background:${palette.panelSoft};border:1px solid ${palette.border};border-radius:8px;overflow:hidden;">
+        ${filasProductos}
+      </table>
+
+      <p style="margin:14px 0 0;color:${palette.muted};font-size:9px;text-align:center;">
+        Este informe resume los principales indicadores de actividad del cliente en la plataforma.
+      </p>
+    </div>
+  `;
+
+  html2pdf().from(cuerpoDocumento).set({
+    margin: 0,
+    filename: `Informe_Dashboard_Cliente_${nombreCliente.replace(/\s+/g, '_')}.pdf`,
+    image: { type: 'jpeg' as const, quality: 0.98 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      letterRendering: true,
+      backgroundColor: palette.page
+    },
+    
+    jsPDF: {
+      unit: 'mm',
+      format: 'a4',
+      orientation: 'portrait' as const
+    }
+  }).save();
+}
 
 
 
