@@ -307,8 +307,9 @@ public class ProveedorProductoService {
             return productoRepo.findBySkuGlobal(sku).orElseGet(Producto::new);
         }
 
-        return productoRepo.buscarProductoSimilar(nombre, marca.getIdMarca(), categoria.getIdCategoria())
-                .orElseGet(Producto::new);
+        // Para creacion de productos nuevos sin SKU, no reutilizamos un producto similar existente.
+        // Esto evita mezclar un producto anterior con un nuevo registro cuando SKU no se proporciona.
+        return new Producto();
     }
 
     private Marca buscarOCrearMarca(String nombre) { return marcaRepo.findByNombre(nombre.trim()).orElseGet(() -> { Marca m = new Marca(); m.setNombre(nombre.trim()); return marcaRepo.save(m); }); }

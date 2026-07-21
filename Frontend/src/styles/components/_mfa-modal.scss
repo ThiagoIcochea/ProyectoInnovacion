@@ -1,5 +1,8 @@
 .swal2-container.mfa-swal-container {
+  position: fixed !important;
+  inset: 0 !important;
   padding: 1rem;
+  z-index: 999999 !important;
   background: rgba(var(--theme-app-rgb), 0.72);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
@@ -13,6 +16,7 @@
   background: color-mix(in srgb, var(--theme-surface-raised) 96%, transparent);
   color: var(--theme-text);
   box-shadow: 0 28px 80px rgba(2, 6, 23, 0.42);
+  z-index: 999999 !important;
 }
 
 .mfa-swal-icon.swal2-icon {

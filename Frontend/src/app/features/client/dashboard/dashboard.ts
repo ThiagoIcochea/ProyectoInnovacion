@@ -42,6 +42,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.cargarCarrito();
     this.cargarTodo();
+    this.cargarPreferenciasCliente();
   }
 
   getHeaders() {
@@ -165,6 +166,21 @@ export class DashboardComponent implements OnInit {
 
   guardarCarrito(): void {
     localStorage.setItem(APP_STORAGE_KEYS.rfqCart, JSON.stringify(this.requestItems));
+  }
+
+  private cargarPreferenciasCliente(): void {
+    this.http.get<any>(`${this.API}/usuarios/perfil`, { headers: this.getHeaders() }).subscribe({
+      next: (res) => {
+        const entregaRapida = res?.entregaRapida ?? res?.preferencias?.entregaRapida ?? false;
+        if (entregaRapida && this.prioridad === 'BALANCEADO') {
+          this.prioridad = 'TIEMPO';
+          this.cdr.detectChanges();
+        }
+      },
+      error: () => {
+        // No cambia la prioridad si no se puede cargar el perfil.
+      }
+    });
   }
 
   agregarAlCarrito(product: any): void {

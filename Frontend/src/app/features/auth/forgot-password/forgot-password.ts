@@ -36,6 +36,41 @@ export class ForgotPasswordComponent {
     private cdr: ChangeDetectorRef
   ) {}
 
+  handleDigitKeydown(event: KeyboardEvent, index: number): void {
+    const target = event.target as HTMLInputElement;
+
+    if (event.key === 'Backspace') {
+      event.preventDefault();
+      if (this.digits[index]) {
+        this.digits[index] = '';
+        this.cdr.detectChanges();
+        return;
+      }
+      if (index > 0) {
+        this.digits[index - 1] = '';
+        this.cdr.detectChanges();
+        setTimeout(() => document.querySelector<HTMLInputElement>(`#reset-digit-${index - 1}`)?.focus());
+      }
+      return;
+    }
+
+    if (event.key === 'ArrowLeft' && index > 0) {
+      event.preventDefault();
+      setTimeout(() => document.querySelector<HTMLInputElement>(`#reset-digit-${index - 1}`)?.focus());
+      return;
+    }
+
+    if (event.key === 'ArrowRight' && index < this.digits.length - 1) {
+      event.preventDefault();
+      setTimeout(() => document.querySelector<HTMLInputElement>(`#reset-digit-${index + 1}`)?.focus());
+      return;
+    }
+
+    if (!/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
   start(): void {
     const cleanEmail = this.email.trim().toLowerCase();
 
