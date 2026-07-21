@@ -11,12 +11,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
+import com.nethink.b2b.service.LoginSecurityService;
 import io.jsonwebtoken.Claims;
 
 
@@ -30,11 +31,14 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
-  @Override
-protected void doFilterInternal(HttpServletRequest request,
-                                HttpServletResponse response,
-                                FilterChain filterChain)
-        throws ServletException, IOException {
+    @Autowired
+    private LoginSecurityService loginSecurityService;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
     
     //System.out.println("=== ENTRA JWT FILTER ===");
@@ -47,11 +51,6 @@ protected void doFilterInternal(HttpServletRequest request,
         return;
     }
 
-    if (path.startsWith("/files/")) {
-        filterChain.doFilter(request, response);
-        return;
-    }
-
     try {
         loginSecurityService.validarIp(loginSecurityService.obtenerIp(request));
     } catch (ResponseStatusException ex) {
@@ -60,6 +59,11 @@ protected void doFilterInternal(HttpServletRequest request,
         response.setCharacterEncoding("UTF-8");
         response.setHeader("X-Blocked-By", "security");
         response.getWriter().write(String.format("{\"status\":%d,\"message\":\"%s\"}", ex.getStatusCode().value(), ex.getReason()));
+        return;
+    }
+
+    if (path.startsWith("/files/")) {
+        filterChain.doFilter(request, response);
         return;
     }
 

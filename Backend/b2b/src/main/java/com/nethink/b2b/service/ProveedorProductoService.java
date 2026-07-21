@@ -250,22 +250,29 @@ public class ProveedorProductoService {
     }
 
     private Producto resolverProducto(CatalogoResponse entrada, Marca marca, Categoria categoria) {
-        Producto producto = !esVacio(entrada.getSku())
-                ? productoRepo.findBySkuGlobal(entrada.getSku().trim()).orElse(null)
-                : null;
-        if (producto == null) {
-            producto = productoRepo.buscarProductoSimilar(entrada.getProducto().trim(), marca.getIdMarca(), categoria.getIdCategoria())
-                    .orElseGet(Producto::new);
-        }
-        producto.setNombre(entrada.getProducto().trim());
+        String nombre = entrada.getProducto().trim();
+        String sku = esVacio(entrada.getSku()) ? null : entrada.getSku().trim();
+
+        Producto producto = findProductoParaEntrada(nombre, sku, marca, categoria);
+
+        producto.setNombre(nombre);
         producto.setMarca(marca);
         producto.setCategoria(categoria);
-        producto.setSkuGlobal(esVacio(entrada.getSku()) ? generarSku() : entrada.getSku().trim());
+        producto.setSkuGlobal(esVacio(sku) ? generarSku() : sku);
         producto.setDescripcion(esVacio(entrada.getDescripcion()) ? null : entrada.getDescripcion().trim());
         producto.setEstado(esVacio(entrada.getEstado()) ? "ACTIVO" : entrada.getEstado().trim().toUpperCase());
-        producto.setFuente("PROV");
+        producto.setFuente("PM");
         producto.setFechaActualizacion(LocalDateTime.now());
         return productoRepo.save(producto);
+    }
+
+    private Producto findProductoParaEntrada(String nombre, String sku, Marca marca, Categoria categoria) {
+        if (!esVacio(sku)) {
+            return productoRepo.findBySkuGlobal(sku).orElseGet(Producto::new);
+        }
+
+        return productoRepo.buscarProductoSimilar(nombre, marca.getIdMarca(), categoria.getIdCategoria())
+                .orElseGet(Producto::new);
     }
 
     private Marca buscarOCrearMarca(String nombre) { return marcaRepo.findByNombre(nombre.trim()).orElseGet(() -> { Marca m = new Marca(); m.setNombre(nombre.trim()); return marcaRepo.save(m); }); }

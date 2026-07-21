@@ -6,7 +6,9 @@ import com.nethink.b2b.dto.response.ItemCotizadoResponse;
 import com.nethink.b2b.dto.response.RFQProveedorResponse;
 import com.nethink.b2b.entity.DescuentoVolumen;
 import com.nethink.b2b.entity.ProveedorProducto;
+import com.nethink.b2b.entity.enums.PrioridadRFQ;
 import com.nethink.b2b.repository.DescuentoVolumenRepository;
+import com.nethink.b2b.repository.PreferenciaUsuarioRepository;
 import com.nethink.b2b.repository.ProveedorProductoRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
@@ -21,13 +23,15 @@ public class RFQService {
     private final ScoringService scoringService;
     private final InventarioReservaService inventarioReSer;
     private final DescuentoVolumenRepository descuentoVolumenRepo;
+    private final PreferenciaUsuarioRepository preferenciaRepo;
     private final LogsSistemaService logsSistemaService;
 
-    public RFQService(ProveedorProductoRepository provProdRepo, ScoringService scoringService,InventarioReservaService inventarioReSer, DescuentoVolumenRepository descuentoVolumenRepo,LogsSistemaService logsSistemaService) {
+    public RFQService(ProveedorProductoRepository provProdRepo, ScoringService scoringService, InventarioReservaService inventarioReSer, DescuentoVolumenRepository descuentoVolumenRepo, PreferenciaUsuarioRepository preferenciaRepo, LogsSistemaService logsSistemaService) {
         this.provProdRepo = provProdRepo;
         this.scoringService = scoringService;
         this.inventarioReSer=  inventarioReSer;
         this.descuentoVolumenRepo= descuentoVolumenRepo;
+        this.preferenciaRepo = preferenciaRepo;
         this.logsSistemaService = logsSistemaService;
     }
 
@@ -63,6 +67,15 @@ public class RFQService {
                     req
             );
             return new ArrayList<>();
+        }
+
+        boolean entregaRapida = preferenciaRepo.findByUsuario_IdUsuario(idUsuario)
+                .map(pref -> Boolean.TRUE.equals(pref.getEntregaRapida()))
+                .orElse(false);
+
+        PrioridadRFQ prioridadEscolhida = request.getPrioridad();
+        if (prioridadEscolhida == null || prioridadEscolhida == PrioridadRFQ.BALANCEADO) {
+            prioridadEscolhida = entregaRapida ? PrioridadRFQ.TIEMPO : PrioridadRFQ.BALANCEADO;
         }
 
         List<ProveedorProducto> detalles = provProdRepo.findDetallesParaScoring(proveedoresIds, idsProductos);
@@ -222,14 +235,15 @@ itemsDetalle.add(itemDetalle);
             }
         }
 
-        scoringService.calcularScore(candidatos, request.getPrioridad());
+        scoringService.calcularScore(candidatos, prioridadEscolhida);
         logsSistemaService.registrarLog(
     idUsuario,
     "RFQ_SCORING",
     "RFQ",
     "Scoring calculado para "
         + candidatos.size()
-        + " proveedores",
+        + " proveedores con prioridad "
+        + prioridadEscolhida,
     req
 );
         

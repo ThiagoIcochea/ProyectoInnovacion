@@ -20,6 +20,7 @@ import com.nethink.b2b.repository.DescuentoVolumenRepository;
 import com.nethink.b2b.repository.DetalleSolicitudRepository;
 import com.nethink.b2b.repository.EmpresaCompradoraRepository;
 import com.nethink.b2b.repository.InventarioReservaRepository;
+import com.nethink.b2b.repository.PreferenciaUsuarioRepository;
 import com.nethink.b2b.repository.ProveedorProductoRepository;
 import com.nethink.b2b.repository.ProveedorRepository;
 import com.nethink.b2b.repository.SolicitudHistorialRepository;
@@ -73,6 +74,7 @@ public class SolicitudService {
     private final InventarioReservaService reservaService;
     private final InventarioReservaRepository reservaRepo;
     private final DescuentoVolumenRepository descuentoVolumenRepo;
+    private final PreferenciaUsuarioRepository preferenciaRepo;
     private final HttpClient httpClient = HttpClient.newHttpClient();
     
     private final ProductoEspecificacionRepository especificacionRepo; 
@@ -92,6 +94,7 @@ public class SolicitudService {
             LogsSistemaService logsSistemaService,
             InventarioReservaRepository reservaRepo,
             DescuentoVolumenRepository descuentoVolumenRepo,
+            PreferenciaUsuarioRepository preferenciaRepo,
             ProductoEspecificacionRepository especificaRepo 
     ) {
         this.solicitudRepo = solicitudRepo;
@@ -106,6 +109,7 @@ public class SolicitudService {
         this.reservaService=reservaService;
         this.reservaRepo= reservaRepo;
         this.descuentoVolumenRepo= descuentoVolumenRepo;
+        this.preferenciaRepo = preferenciaRepo;
         this.especificacionRepo=especificaRepo; 
     }
 
@@ -311,21 +315,21 @@ BigDecimal totalItem =
         historialRepo.save(historial);
 
         try {
+            boolean enviarCorreoCliente = preferenciaRepo.findByUsuario_IdUsuario(cliente.getIdUsuario())
+                    .map(pref -> Boolean.TRUE.equals(pref.getNotificacionesRfq()))
+                    .orElse(true);
 
-            emailService.enviarCorreoCliente(
-                    finalizada
-            );
+            if (enviarCorreoCliente) {
+                emailService.enviarCorreoCliente(finalizada);
+                emailService.enviarCorreoActualizacionCliente(
+                        finalizada,
+                        "Solicitud creada",
+                        "Tu solicitud " + finalizada.getIdSolicitud() + " fue registrada correctamente.",
+                        "Solicitud creada - Solicitud " + finalizada.getIdSolicitud()
+                );
+            }
 
-            emailService.enviarCorreoProveedor(
-                    finalizada
-            );
-
-            emailService.enviarCorreoActualizacionCliente(
-                    finalizada,
-                    "Solicitud creada",
-                    "Tu solicitud " + finalizada.getIdSolicitud() + " fue registrada correctamente.",
-                    "Solicitud creada - Solicitud " + finalizada.getIdSolicitud()
-            );
+            emailService.enviarCorreoProveedor(finalizada);
 
         } catch (Exception e) {
 
