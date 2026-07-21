@@ -138,9 +138,7 @@ export class RfqCatalogComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (res) => {
         const entregaRapida = res?.entregaRapida ?? res?.preferencias?.entregaRapida ?? false;
-        if (entregaRapida && this.prioridad === 'BALANCEADO') {
-          this.prioridad = 'TIEMPO';
-        }
+        this.prioridad = entregaRapida ? 'TIEMPO' : 'BALANCEADO';
       },
       error: () => {
         // No ocean

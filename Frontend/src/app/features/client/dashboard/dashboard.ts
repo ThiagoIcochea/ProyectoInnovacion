@@ -172,10 +172,8 @@ export class DashboardComponent implements OnInit {
     this.http.get<any>(`${this.API}/usuarios/perfil`, { headers: this.getHeaders() }).subscribe({
       next: (res) => {
         const entregaRapida = res?.entregaRapida ?? res?.preferencias?.entregaRapida ?? false;
-        if (entregaRapida && this.prioridad === 'BALANCEADO') {
-          this.prioridad = 'TIEMPO';
-          this.cdr.detectChanges();
-        }
+        this.prioridad = entregaRapida ? 'TIEMPO' : 'BALANCEADO';
+        this.cdr.detectChanges();
       },
       error: () => {
         // No cambia la prioridad si no se puede cargar el perfil.
