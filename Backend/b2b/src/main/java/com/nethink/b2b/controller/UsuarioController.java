@@ -114,3 +114,4 @@ public ResponseEntity<AdminUserResponse> actualizarUsuarioAdmin(
     public ResponseEntity<List<String>> listarRoles() {
         return ResponseEntity.ok(usuarioService.listarRoles());
     }
+}
