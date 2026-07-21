@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../core/constants/app.constants';
 import { MfaService } from '../../core/services/mfa.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 declare global {
   interface Window {
@@ -38,7 +39,8 @@ export class VoiceAssistantComponent {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private mfaService: MfaService
+    private mfaService: MfaService,
+    private themeService: ThemeService
   ) {}
 
   toggle(): void {
@@ -325,6 +327,7 @@ export class VoiceAssistantComponent {
   }
 
   private logout(): void {
+    this.themeService.resetToDefault();
     localStorage.removeItem(APP_STORAGE_KEYS.token);
     localStorage.removeItem(APP_STORAGE_KEYS.role);
     localStorage.removeItem(APP_STORAGE_KEYS.rfqCart);

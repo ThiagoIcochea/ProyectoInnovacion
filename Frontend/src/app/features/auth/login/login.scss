@@ -5,6 +5,7 @@
 }
 
 .login-page {
+  position: relative;
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
@@ -12,6 +13,47 @@
     radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 28%),
     radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.08), transparent 24%),
     linear-gradient(180deg, var(--theme-app-start) 0%, var(--theme-surface) 100%);
+}
+
+.login-theme-toggle {
+  position: absolute;
+  z-index: 2;
+  top: 1.25rem;
+  right: 1.25rem;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--theme-surface-raised) 88%, transparent);
+  color: var(--theme-text);
+  box-shadow: 0 10px 28px var(--theme-shadow);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    color: var(--theme-accent);
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: var(--theme-accent);
+    background: var(--theme-surface-raised);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(59, 130, 246, 0.22);
+    outline-offset: 2px;
+  }
 }
 
 .login-page__left,
@@ -84,7 +126,7 @@
 .login-card {
   width: 100%;
   max-width: 460px;
-  background: rgba(30, 41, 59, 0.9);
+  background: color-mix(in srgb, var(--theme-surface-raised) 92%, transparent);
   border: 1px solid var(--theme-border);
   border-radius: 18px;
   padding: 2rem;
@@ -239,6 +281,15 @@
 }
 
 @media (max-width: 720px) {
+  .login-theme-toggle {
+    top: 0.85rem;
+    right: 0.85rem;
+
+    span {
+      display: none;
+    }
+  }
+
   .login-page__left {
     display: none;
   }

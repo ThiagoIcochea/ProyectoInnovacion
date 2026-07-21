@@ -23,6 +23,8 @@ export class ProviderRequestsComponent implements OnInit {
 
   selectedRequest: any | null = null;
   productos: any[] = [];
+  detailViewOpen = false;
+  private listScrollPosition = 0;
 
   constructor(
     private requestService: ProviderRequestsService
@@ -92,12 +94,13 @@ export class ProviderRequestsComponent implements OnInit {
             this.selectRequest(
               this.filteredRequests.find(
                 request => request.idSolicitud === currentId
-              ) || this.filteredRequests[0]
+              ) || this.filteredRequests[0],
+              false
             );
 
           } else {
 
-            this.selectRequest(null);
+            this.selectRequest(null, false);
 
           }
 
@@ -111,7 +114,7 @@ export class ProviderRequestsComponent implements OnInit {
 
           this.requests = [];
           this.filteredRequests = [];
-          this.selectRequest(null);
+          this.selectRequest(null, false);
 
           this.errorMessage =
             'No se pudieron cargar las solicitudes.';
@@ -151,11 +154,28 @@ export class ProviderRequestsComponent implements OnInit {
 
   }
 
-  selectRequest(request: any | null): void {
+  selectRequest(request: any | null, openDetail = true): void {
 
     this.selectedRequest = request;
     this.productos = request?.detalles ?? [];
 
+    if (request && openDetail) {
+      this.listScrollPosition = window.scrollY;
+      this.detailViewOpen = true;
+      this.scrollPageTo(0);
+    }
+
+  }
+
+  showRequestList(): void {
+    this.detailViewOpen = false;
+    this.scrollPageTo(this.listScrollPosition);
+  }
+
+  private scrollPageTo(top: number): void {
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top, behavior: 'auto' });
+    });
   }
 
   isProcessingSelectedRequest(): boolean {

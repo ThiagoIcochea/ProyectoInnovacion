@@ -1,11 +1,12 @@
 // Backend touchpoint: login request and role-based redirect after token issuance.
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { timeout } from 'rxjs';
 import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../../core/constants/app.constants';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-login',
@@ -14,7 +15,7 @@ import { APP_API_BASE_URL, APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../../../co
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent implements OnInit {
 
   email: string = '';
   password: string = '';
@@ -23,12 +24,20 @@ export class LoginComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
 
   private readonly rememberedEmailKey = 'rememberedEmail';
-  private loginWaitTimer: ReturnType<typeof setTimeout> | null = null;
-
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private themeService: ThemeService
   ) {}
+
+  get isDarkTheme(): boolean {
+    return this.themeService.theme() === 'dark';
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggle();
+  }
 
   ngOnInit(): void {
     const rememberedEmail = localStorage.getItem(this.rememberedEmailKey);
@@ -69,7 +78,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.syncRememberedEmail();
     this.clearLoginSession();
-    this.startLoginWaitNotice();
 
     const body = {
       correo,
@@ -80,8 +88,6 @@ export class LoginComponent implements OnInit, OnDestroy {
       .pipe(timeout({ first: 70000 }))
       .subscribe({
         next: (res: any) => {
-          this.clearLoginWaitNotice();
-
           const normalizedRole = this.normalizeRole(
             res?.rol ??
             res?.role ??
@@ -109,6 +115,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           if (!res?.token || !normalizedRole) {
             this.loading = false;
             this.errorMessage = 'Respuesta de login incompleta.';
+            this.cdr.detectChanges();
             return;
           }
 
@@ -121,15 +128,11 @@ export class LoginComponent implements OnInit, OnDestroy {
         },
 
         error: (err) => {
-          this.clearLoginWaitNotice();
           this.loading = false;
           this.errorMessage = this.getLoginErrorMessage(err);
+          this.cdr.detectChanges();
         }
       });
-  }
-
-  ngOnDestroy(): void {
-    this.clearLoginWaitNotice();
   }
 
   redirectByRole(rol: string): void {
@@ -177,23 +180,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     localStorage.removeItem(APP_STORAGE_KEYS.role);
     localStorage.removeItem(APP_STORAGE_KEYS.selectedProvider);
     localStorage.removeItem(APP_STORAGE_KEYS.currentSolicitudId);
-  }
-
-  private startLoginWaitNotice(): void {
-    this.clearLoginWaitNotice();
-
-    this.loginWaitTimer = setTimeout(() => {
-      if (this.loading) {
-        this.errorMessage = 'El servidor esta iniciando. Puede tardar unos segundos mas.';
-      }
-    }, 7000);
-  }
-
-  private clearLoginWaitNotice(): void {
-    if (this.loginWaitTimer) {
-      clearTimeout(this.loginWaitTimer);
-      this.loginWaitTimer = null;
-    }
   }
 
   private getLoginErrorMessage(err: any): string {

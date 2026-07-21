@@ -5,13 +5,17 @@ import Swal from 'sweetalert2';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../constants/app.constants';
 
 const swalBaseOptions = {
-  background: '#ffffff',
-  color: '#0f172a',
   iconColor: '#2563eb',
-  confirmButtonColor: '#2563eb',
-  cancelButtonColor: '#64748b',
+  buttonsStyling: false,
   customClass: {
+    container: 'mfa-swal-container',
     popup: 'mfa-swal-popup',
+    icon: 'mfa-swal-icon',
+    title: 'mfa-swal-title',
+    htmlContainer: 'mfa-swal-description',
+    input: 'mfa-swal-input',
+    actions: 'mfa-swal-actions',
+    validationMessage: 'mfa-swal-validation',
     confirmButton: 'btn-primary',
     cancelButton: 'btn-secondary',
     denyButton: 'btn-secondary'
@@ -94,11 +98,17 @@ export class MfaService {
     }
 
     const selected = await this.promptForMethodSelection();
+
+    if (!selected) {
+      throw new Error('Verificacion multifactor cancelada.');
+    }
+
     return this.normalizeMethod(selected);
   }
 
   private async promptForMethodSelection(): Promise<string | null> {
     const { isConfirmed, value } = await Swal.fire({
+      icon: 'info',
       title: 'Verificación multifactor',
       text: 'Elige el canal MFA para confirmar esta acción.',
       input: 'select',
@@ -126,6 +136,7 @@ export class MfaService {
   private async promptForCode(channel: string, resendChallenge?: () => Promise<any>): Promise<string> {
     const prompt = async (resending = false): Promise<string> => {
       const { isConfirmed, isDenied, value } = await Swal.fire({
+        icon: 'info',
         title: resending ? 'Reenviar código MFA' : 'Código MFA',
         text: resending
           ? `Se reenvió el código por ${channel}. Ingresa el nuevo código.`
@@ -133,7 +144,10 @@ export class MfaService {
         input: 'text',
         inputAttributes: {
           autocomplete: 'one-time-code',
-          inputmode: 'numeric'
+          inputmode: 'numeric',
+          maxlength: '6',
+          pattern: '[0-9]*',
+          'aria-label': 'Codigo MFA de 6 digitos'
         },
         showDenyButton: true,
         showCancelButton: true,
@@ -143,8 +157,8 @@ export class MfaService {
         allowOutsideClick: false,
         ...swalBaseOptions,
         inputValidator: (candidate) => {
-          const normalized = String(candidate || '').trim();
-          if (normalized.length < 4) {
+          const normalized = String(candidate || '').replace(/\D/g, '');
+          if (normalized.length !== 6) {
             return 'Ingresa el código completo.';
           }
 
@@ -174,7 +188,7 @@ export class MfaService {
         return '';
       }
 
-      return String(value || '').trim();
+      return String(value || '').replace(/\D/g, '').slice(0, 6);
     };
 
     return prompt(false);

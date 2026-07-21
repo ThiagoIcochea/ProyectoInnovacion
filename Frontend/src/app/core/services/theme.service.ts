@@ -20,7 +20,17 @@ export class ThemeService {
     this.applyTheme(this.activeTheme() === 'dark' ? 'light' : 'dark', true);
   }
 
-  private applyTheme(theme: AppTheme, animate: boolean): void {
+  resetToDefault(): void {
+    try {
+      localStorage.removeItem(this.storageKey);
+    } catch {
+      // El tema se restablece aunque el almacenamiento este bloqueado.
+    }
+
+    this.applyTheme('dark', true, false);
+  }
+
+  private applyTheme(theme: AppTheme, animate: boolean, persist = true): void {
     const body = this.document.body;
 
     if (animate) {
@@ -33,10 +43,12 @@ export class ThemeService {
     this.document.documentElement.style.colorScheme = theme;
     this.activeTheme.set(theme);
 
-    try {
-      localStorage.setItem(this.storageKey, theme);
-    } catch {
-      // El tema sigue funcionando aunque el almacenamiento esté bloqueado.
+    if (persist) {
+      try {
+        localStorage.setItem(this.storageKey, theme);
+      } catch {
+        // El tema sigue funcionando aunque el almacenamiento esté bloqueado.
+      }
     }
   }
 

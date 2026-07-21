@@ -41,6 +41,8 @@ export class AdminProductsComponent implements OnInit {
 
   showManageModal = false;
   loading = true;
+  detailViewOpen = false;
+  private listScrollPosition = 0;
 
   productImages: any[] = [];
 
@@ -216,7 +218,21 @@ export class AdminProductsComponent implements OnInit {
       product?.estado
     );
     this.cargarImagenes();
+    this.listScrollPosition = window.scrollY;
+    this.detailViewOpen = true;
+    this.scrollPageTo(0);
 
+  }
+
+  showProductList(): void {
+    this.detailViewOpen = false;
+    this.scrollPageTo(this.listScrollPosition);
+  }
+
+  private scrollPageTo(top: number): void {
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top, behavior: 'auto' });
+    });
   }
 
   filtrarProductos(): void {
