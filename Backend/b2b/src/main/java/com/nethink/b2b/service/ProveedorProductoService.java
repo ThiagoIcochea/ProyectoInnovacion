@@ -212,6 +212,73 @@ public class ProveedorProductoService {
     return response;
 }
 
+    private ProveedorProductoResponse mapProveedorProductoToResponse(ProveedorProducto pp, Integer idProveedor) {
+        Producto p = pp.getProducto();
+
+        ProveedorProductoResponse dto = new ProveedorProductoResponse();
+        dto.setIdProvProd(pp.getIdProvProd());
+        dto.setPrecio(pp.getPrecio() != null ? pp.getPrecio().doubleValue() : 0.0);
+        dto.setStock(pp.getStock());
+        dto.setGarantiaMeses(pp.getGarantiaMeses());
+        dto.setTiempoEntregaDias(pp.getTiempoEntregaDias());
+        dto.setEnOferta(pp.getEnOferta());
+        dto.setPorcentajeDescuento(pp.getPorcentajeDescuento());
+        dto.setEstado(pp.getEstado());
+
+        if (p != null) {
+            dto.setIdProducto(p.getIdProducto());
+            dto.setNombre(p.getNombre());
+            dto.setDescripcion(p.getDescripcion());
+            dto.setSkuGlobal(p.getSkuGlobal());
+            dto.setFuente(p.getFuente());
+            dto.setApiOrigen(p.getApiOrigen());
+            dto.setEstadoProducto(p.getEstado());
+
+            if (p.getMarca() != null) {
+                dto.setIdMarca(p.getMarca().getIdMarca());
+                dto.setMarca(p.getMarca().getNombre());
+            }
+            if (p.getCategoria() != null) {
+                dto.setIdCategoria(p.getCategoria().getIdCategoria());
+                dto.setCategoria(p.getCategoria().getNombre());
+            }
+        }
+
+        dto.setStockDisponible(reservaService.calcularStockDisponible(pp));
+        dto.setEspecificaciones(specRepo.findByProducto_IdProductoIn(List.of(p.getIdProducto()))
+                .stream()
+                .filter(spec -> spec.getProducto() != null && spec.getProducto().getIdProducto().equals(p.getIdProducto()))
+                .map(spec -> {
+                    EspecificacionResponse r = new EspecificacionResponse();
+                    r.setNombre(spec.getNombre());
+                    r.setValor(spec.getValor());
+                    return r;
+                })
+                .toList());
+        dto.setImagenes(imagenRepo.findByProducto_IdProductoIn(List.of(p.getIdProducto()))
+                .stream()
+                .filter(img -> img.getProducto() != null && img.getProducto().getIdProducto().equals(p.getIdProducto()))
+                .map(img -> {
+                    ImagenResponse r = new ImagenResponse();
+                    r.setUrl(img.getUrl());
+                    r.setPrincipal(img.getPrincipal());
+                    r.setOrden(img.getOrden());
+                    return r;
+                })
+                .toList());
+        dto.setDescuentosVolumen(descuentoRepo.findByProveedorProducto_IdProvProd(pp.getIdProvProd())
+                .stream()
+                .map(desc -> {
+                    DescuentoVolumenResponse r = new DescuentoVolumenResponse();
+                    r.setCantidadMin(desc.getCantidadMin());
+                    r.setPrecioUnitario(desc.getPrecioUnitario());
+                    return r;
+                })
+                .toList());
+
+        return dto;
+    }
+
     @Transactional
     public ProveedorProductoResponse crearProductoProveedor(String correo, CatalogoResponse entrada) {
         if (entrada == null || esVacio(entrada.getProducto()) || esVacio(entrada.getMarca())
