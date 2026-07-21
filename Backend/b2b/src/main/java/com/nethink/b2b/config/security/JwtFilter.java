@@ -42,8 +42,24 @@ protected void doFilterInternal(HttpServletRequest request,
     
     String path = request.getRequestURI();
 
+    if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        filterChain.doFilter(request, response);
+        return;
+    }
+
     if (path.startsWith("/files/")) {
         filterChain.doFilter(request, response);
+        return;
+    }
+
+    try {
+        loginSecurityService.validarIp(loginSecurityService.obtenerIp(request));
+    } catch (ResponseStatusException ex) {
+        response.setStatus(ex.getStatusCode().value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("X-Blocked-By", "security");
+        response.getWriter().write(String.format("{\"status\":%d,\"message\":\"%s\"}", ex.getStatusCode().value(), ex.getReason()));
         return;
     }
 

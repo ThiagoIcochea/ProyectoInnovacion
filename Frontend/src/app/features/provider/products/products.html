@@ -114,7 +114,6 @@
       </div>
       <div class="product-form">
         <label>Producto *<input name="producto" [(ngModel)]="newProduct.producto" required maxlength="150"></label>
-        <label>SKU <input name="sku" [(ngModel)]="newProduct.sku" placeholder="NTK-000001"></label>
         <label>Marca *<select name="marca" [(ngModel)]="newProduct.marca" required>
           <option value="">Selecciona una marca</option>
           <option *ngFor="let marca of marcas" [value]="marca.nombre">{{ marca.nombre }}</option>

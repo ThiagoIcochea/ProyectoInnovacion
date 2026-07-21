@@ -1,5 +1,6 @@
 -- Cambia el enum/longitud antigua que producia "Data truncated" al registrar cancelaciones.
 ALTER TABLE reclamos MODIFY COLUMN tipo VARCHAR(16) NOT NULL;
+ALTER TABLE productos MODIFY COLUMN fuente VARCHAR(32) NULL;
 
 CREATE TABLE IF NOT EXISTS bloqueos_seguridad (
     id_bloqueo BIGINT NOT NULL AUTO_INCREMENT,

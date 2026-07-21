@@ -263,7 +263,7 @@ public class ProveedorProductoService {
         producto.setSkuGlobal(esVacio(entrada.getSku()) ? generarSku() : entrada.getSku().trim());
         producto.setDescripcion(esVacio(entrada.getDescripcion()) ? null : entrada.getDescripcion().trim());
         producto.setEstado(esVacio(entrada.getEstado()) ? "ACTIVO" : entrada.getEstado().trim().toUpperCase());
-        producto.setFuente("PROVEEDOR_MANUAL");
+        producto.setFuente("PROV");
         producto.setFechaActualizacion(LocalDateTime.now());
         return productoRepo.save(producto);
     }

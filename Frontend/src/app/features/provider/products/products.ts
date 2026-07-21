@@ -161,7 +161,6 @@ export class ProviderProductsComponent implements OnInit {
 
     this.saving = true;
     const payload = {
-      sku: this.newProduct.sku || null,
       producto: this.newProduct.producto,
       marca: this.newProduct.marca,
       categoria: this.newProduct.categoria,
@@ -209,7 +208,7 @@ export class ProviderProductsComponent implements OnInit {
   }
 
   private emptyProduct() {
-    return { sku: '', producto: '', marca: '', categoria: '', descripcion: '', precioUnitario: null as number | null,
+    return { producto: '', marca: '', categoria: '', descripcion: '', precioUnitario: null as number | null,
       stock: null as number | null, garantiaMeses: 0, tiempoEntregaDias: 0, enOferta: false, porcentajeDescuento: 0 };
   }
 }
