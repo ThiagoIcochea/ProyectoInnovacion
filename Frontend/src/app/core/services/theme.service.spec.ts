@@ -35,4 +35,15 @@ describe('ThemeService', () => {
     expect(service.theme()).toBe('light');
     expect(document.body.classList.contains('light-theme')).toBe(true);
   });
+
+  it('restablece el tema oscuro y elimina la preferencia al cerrar sesion', () => {
+    service.initialize();
+    service.toggle();
+
+    service.resetToDefault();
+
+    expect(service.theme()).toBe('dark');
+    expect(document.body.classList.contains('dark-theme')).toBe(true);
+    expect(localStorage.getItem('nethink_theme')).toBeNull();
+  });
 });

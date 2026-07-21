@@ -8,7 +8,7 @@
     </div>
   </div>
 
-  <div class="requests-grid">
+  <div class="requests-grid" [class.detail-view-open]="detailViewOpen">
     <aside class="inbox-card">
       <div class="inbox-header">
         <h2>Bandeja de entrada</h2>
@@ -49,6 +49,11 @@
     </aside>
 
     <section class="request-detail-card">
+      <button type="button" class="responsive-back-button" (click)="showRequestList()">
+        <span aria-hidden="true">&larr;</span>
+        Volver a solicitudes
+      </button>
+
       <ng-container *ngIf="selectedRequest; else noSelection">
         <div class="detail-header">
           <div>

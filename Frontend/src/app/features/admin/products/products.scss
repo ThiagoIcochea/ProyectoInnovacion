@@ -50,7 +50,9 @@
 }
 
 .products-table {
-  overflow-x: auto;
+  max-height: calc(100dvh - 260px);
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .card-header {
@@ -90,6 +92,9 @@
 }
 
 .products-table__head {
+  position: sticky;
+  z-index: 2;
+  top: 0;
   background: var(--theme-surface-soft);
   color: var(--theme-text-secondary);
   text-transform: uppercase;
@@ -188,6 +193,10 @@
 .detail-card h3 {
   color: var(--theme-text);
   margin: 0 0 1rem;
+}
+
+.responsive-back-button {
+  display: none;
 }
 
 .provider-list {
@@ -429,7 +438,7 @@
 
     background:#2563eb;
 
-    color:white;
+    color:var(--theme-text);
 
     text-align:center;
 
@@ -551,11 +560,38 @@
 
 @media (max-width: 1200px) {
   .products-grid {
-    grid-template-columns: 1fr;
+    display: block;
   }
 
   .detail-card {
+    display: none;
     position: static;
+  }
+
+  .products-grid.detail-view-open {
+    .products-card {
+      display: none;
+    }
+
+    .detail-card {
+      display: block;
+    }
+  }
+
+  .responsive-back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 44px;
+    margin-bottom: 1.25rem;
+    padding: 0 0.9rem;
+    border: 1px solid var(--theme-border);
+    border-radius: 12px;
+    background: var(--theme-surface);
+    color: var(--theme-accent);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 800;
   }
 
   .card-header {
@@ -571,8 +607,38 @@
     display: none;
   }
 
+  .products-table {
+    max-height: none;
+    padding: 0.75rem;
+    overflow: visible;
+  }
+
   .products-table__row {
+    min-width: 0;
     grid-template-columns: 1fr;
+    gap: 0.7rem;
+    margin-bottom: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--theme-border);
+    border-radius: 14px;
+    background: var(--theme-surface);
+  }
+
+  .products-table__row:not(.products-table__row--skeleton) > div {
+    display: grid;
+    grid-template-columns: minmax(105px, 0.42fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .products-table__row:not(.products-table__row--skeleton) > div::before {
+    content: attr(data-label);
+    color: var(--theme-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
   }
 }
 

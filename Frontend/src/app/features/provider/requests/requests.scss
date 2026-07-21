@@ -42,6 +42,8 @@
 .inbox-card {
   overflow: hidden;
   align-self: start;
+  position: sticky;
+  top: 96px;
 }
 
 .inbox-header {
@@ -88,6 +90,9 @@
 .inbox-list {
   display: flex;
   flex-direction: column;
+  max-height: calc(100dvh - 270px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .inbox-item {
@@ -303,9 +308,52 @@
   line-height: 1.6;
 }
 
+.responsive-back-button {
+  display: none;
+}
+
 @media (max-width: 1200px) {
   .requests-grid {
-    grid-template-columns: 1fr;
+    display: block;
+  }
+
+  .inbox-card {
+    position: static;
+  }
+
+  .inbox-list {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .request-detail-card {
+    display: none;
+  }
+
+  .requests-grid.detail-view-open {
+    .inbox-card {
+      display: none;
+    }
+
+    .request-detail-card {
+      display: block;
+    }
+  }
+
+  .responsive-back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 44px;
+    margin: 1rem 1rem 0;
+    padding: 0 0.9rem;
+    border: 1px solid var(--theme-border);
+    border-radius: 12px;
+    background: var(--theme-surface);
+    color: var(--theme-accent);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 800;
   }
 
   .products-table__head {
@@ -318,6 +366,18 @@
 
   .workflow-note {
     margin-inline: 1rem;
+  }
+
+  .validation-actions {
+    position: sticky;
+    z-index: 3;
+    bottom: 0;
+    margin: 0;
+    padding: 1rem;
+    background: color-mix(in srgb, var(--theme-surface-raised) 94%, transparent);
+    border-top: 1px solid var(--theme-border);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
 }
 
@@ -357,6 +417,57 @@
 
 .error-message {
   color: var(--theme-danger-text);
+}
+
+@media (max-width: 600px) {
+  .page-header h1 {
+    font-size: 1.65rem;
+  }
+
+  .inbox-item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .inbox-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    text-align: left;
+
+    span {
+      margin-bottom: 0;
+    }
+  }
+
+  .detail-header,
+  .client-card,
+  .section-title,
+  .products-table {
+    margin-inline: 1rem;
+  }
+
+  .detail-header {
+    padding-inline: 0;
+  }
+
+  .client-card {
+    align-items: flex-start;
+  }
+
+  .client-card p,
+  .client-card span {
+    overflow-wrap: anywhere;
+  }
+
+  .validation-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .validation-actions button {
+    width: 100%;
+  }
 }
 
 

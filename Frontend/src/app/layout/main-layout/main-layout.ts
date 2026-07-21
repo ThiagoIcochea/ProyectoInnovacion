@@ -492,6 +492,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   logout(): void {
 
     this.cerrarMenuMovil();
+    this.themeService.resetToDefault();
 
     localStorage.removeItem(APP_STORAGE_KEYS.token);
     localStorage.removeItem(APP_STORAGE_KEYS.role);

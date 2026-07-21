@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
@@ -26,12 +26,14 @@ export class ForgotPasswordComponent {
   step: 'email' | 'code' | 'password' = 'email';
   loading = false;
   errorMessage = '';
+  successMessage = '';
   tempToken = '';
   actionToken = '';
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   start(): void {
@@ -39,12 +41,12 @@ export class ForgotPasswordComponent {
 
     if (!this.emailRegex.test(cleanEmail)) {
       this.errorMessage = 'Correo invalido. Usa un formato como usuario@empresa.com.';
-      alert(this.errorMessage);
       return;
     }
 
     this.loading = true;
     this.errorMessage = '';
+    this.successMessage = '';
 
     this.http.post<any>(`${APP_API_BASE_URL}/auth/forgot-password/start`, {
       email: cleanEmail,
@@ -55,18 +57,20 @@ export class ForgotPasswordComponent {
         if (!this.tempToken) {
           this.loading = false;
           this.errorMessage = 'No se recibio el flujo MFA. Intenta nuevamente.';
-          alert(this.errorMessage);
+          this.cdr.detectChanges();
           return;
         }
         this.email = cleanEmail;
         this.step = 'code';
         this.loading = false;
-        alert(`Codigo MFA enviado por ${this.methodLabel(this.method)}. Ingresa los 6 digitos para continuar.`);
+        this.successMessage = `Codigo enviado por ${this.methodLabel(this.method)}. Ingresa los 6 digitos.`;
+        this.cdr.detectChanges();
+        this.focusCodeInput();
       },
       error: err => {
         this.loading = false;
         this.errorMessage = err?.error?.message || 'No se pudo enviar el codigo.';
-        alert(this.errorMessage);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -103,6 +107,7 @@ export class ForgotPasswordComponent {
 
     this.loading = true;
     this.errorMessage = '';
+    this.successMessage = '';
 
     this.http.post<any>(`${APP_API_BASE_URL}/auth/mfa/resend`, {
       email: this.email.trim(),
@@ -113,13 +118,14 @@ export class ForgotPasswordComponent {
         this.tempToken = res?.tempToken || this.tempToken;
         this.digits = ['', '', '', '', '', ''];
         this.loading = false;
-        alert(`Codigo reenviado por ${this.methodLabel(this.method)}.`);
-        setTimeout(() => document.querySelector<HTMLInputElement>('#reset-digit-0')?.focus());
+        this.successMessage = `Codigo reenviado por ${this.methodLabel(this.method)}.`;
+        this.cdr.detectChanges();
+        this.focusCodeInput();
       },
       error: err => {
         this.loading = false;
         this.errorMessage = err?.error?.message || `No se pudo reenviar por ${this.methodLabel(this.method)}.`;
-        alert(this.errorMessage);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -144,6 +150,7 @@ export class ForgotPasswordComponent {
 
     this.loading = true;
     this.errorMessage = '';
+    this.successMessage = '';
 
     this.http.post<any>(`${APP_API_BASE_URL}/auth/mfa/verify`, {
       email: this.email.trim(),
@@ -157,16 +164,20 @@ export class ForgotPasswordComponent {
         if (!this.actionToken) {
           this.loading = false;
           this.errorMessage = 'No se recibio la autorizacion MFA. Solicita un nuevo codigo.';
-          alert(this.errorMessage);
+          this.cdr.detectChanges();
           return;
         }
         this.step = 'password';
         this.loading = false;
+        this.successMessage = 'Codigo verificado. Ahora crea tu nueva contrasena.';
+        this.cdr.detectChanges();
       },
       error: err => {
         this.loading = false;
         this.errorMessage = err?.error?.message || 'Codigo incorrecto o expirado.';
-        alert(this.errorMessage);
+        this.digits = ['', '', '', '', '', ''];
+        this.cdr.detectChanges();
+        this.focusCodeInput();
       }
     });
   }
@@ -174,18 +185,17 @@ export class ForgotPasswordComponent {
   complete(): void {
     if (!this.passwordRegex.test(this.newPassword)) {
       this.errorMessage = 'Contrasena invalida: minimo 8 caracteres, una mayuscula, una minuscula y un numero.';
-      alert(this.errorMessage);
       return;
     }
 
     if (this.newPassword !== this.confirmPassword) {
       this.errorMessage = 'Las contrasenas no coinciden.';
-      alert(this.errorMessage);
       return;
     }
 
     this.loading = true;
     this.errorMessage = '';
+    this.successMessage = '';
 
     this.http.post<any>(`${APP_API_BASE_URL}/auth/forgot-password/complete`, {
       email: this.email.trim(),
@@ -193,6 +203,7 @@ export class ForgotPasswordComponent {
       newPassword: this.newPassword
     }).subscribe({
       next: res => {
+        this.loading = false;
         const login = res?.login;
         if (login?.token) {
           const role = this.normalizeRole(login.rol);
@@ -208,7 +219,7 @@ export class ForgotPasswordComponent {
       error: err => {
         this.loading = false;
         this.errorMessage = err?.error?.message || 'No se pudo actualizar la contrasena.';
-        alert(this.errorMessage);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -232,5 +243,9 @@ export class ForgotPasswordComponent {
     };
 
     return labels[method] || method;
+  }
+
+  private focusCodeInput(): void {
+    setTimeout(() => document.querySelector<HTMLInputElement>('#reset-digit-0')?.focus());
   }
 }
