@@ -110,16 +110,28 @@ export class ForgotPasswordComponent {
     });
   }
 
-  updateDigit(index: number, value: string): void {
-    const clean = value.replace(/\D/g, '');
-    if (clean.length > 1) {
-      clean.slice(0, 6 - index).split('').forEach((char, offset) => this.digits[index + offset] = char);
-    } else {
-      this.digits[index] = clean.slice(-1);
+  handleDigitInput(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const raw = (input.value || '').replace(/\D/g, '');
+
+    if (!raw) {
+      this.digits[index] = '';
+      return;
     }
 
-    const next = Math.min(index + clean.length, 5);
-    setTimeout(() => document.querySelector<HTMLInputElement>(`#reset-digit-${next}`)?.focus());
+    let cursor = index;
+    for (const char of raw.split('')) {
+      if (cursor >= this.digits.length) {
+        break;
+      }
+      this.digits[cursor] = char;
+      cursor++;
+    }
+
+    input.value = '';
+
+    const nextIndex = Math.min(cursor, this.digits.length - 1);
+    setTimeout(() => document.querySelector<HTMLInputElement>(`#reset-digit-${nextIndex}`)?.focus());
 
     if (this.digits.every(Boolean)) {
       this.verifyCode();
@@ -166,10 +178,25 @@ export class ForgotPasswordComponent {
   }
 
   pasteCode(event: ClipboardEvent): void {
-    const clean = (event.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, 6);
-    if (!clean) return;
+    const pasted = (event.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+    if (!pasted) {
+      return;
+    }
+
     event.preventDefault();
-    clean.split('').forEach((char, index) => this.digits[index] = char);
+
+    for (let i = 0; i < pasted.length && i < this.digits.length; i++) {
+      this.digits[i] = pasted[i];
+    }
+
+    setTimeout(() => {
+      const nextIndex = Math.min(pasted.length, this.digits.length - 1);
+      document.querySelector<HTMLInputElement>(`#reset-digit-${nextIndex}`)?.focus();
+    });
+
+    if (this.digits.every(Boolean)) {
+      this.verifyCode();
+    }
   }
 
   verifyCode(): void {

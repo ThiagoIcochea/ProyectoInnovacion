@@ -225,11 +225,15 @@ public class ProveedorProductoService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proveedor no encontrado."));
         Marca marca = buscarOCrearMarca(entrada.getMarca());
         Categoria categoria = buscarOCrearCategoria(entrada.getCategoria());
-        Producto producto = resolverProducto(entrada, marca, categoria);
 
-        ProveedorProducto proveedorProducto = proveedorProductoRepo
-                .findByProveedor_IdProveedorAndProducto_IdProducto(proveedor.getIdProveedor(), producto.getIdProducto())
-                .orElseGet(ProveedorProducto::new);
+        if (productoExisteEnCatalogo(entrada, marca, categoria)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "El producto ya existe en el catalogo y no puede ser agregado de nuevo.");
+        }
+
+        Producto producto = crearProductoNuevo(entrada, marca, categoria);
+
+        ProveedorProducto proveedorProducto = new ProveedorProducto();
         proveedorProducto.setProveedor(proveedor);
         proveedorProducto.setProducto(producto);
         proveedorProducto.setPrecio(entrada.getPrecioUnitario());
@@ -244,11 +248,7 @@ public class ProveedorProductoService {
 
         actualizarDescuentosVolumen(proveedorProducto, entrada.getDescuentosVolumen());
         reservaService.publicarNuevoProducto(proveedorProducto);
-        final Integer idProvProd = proveedorProducto.getIdProvProd();
-        return listarProductosPorProveedor(correo).stream()
-                .filter(item -> idProvProd.equals(item.getIdProvProd()))
-                .findFirst()
-                .orElseThrow();
+        return mapProveedorProductoToResponse(proveedorProducto, proveedor.getIdProveedor());
     }
 
     @Transactional
@@ -285,31 +285,43 @@ public class ProveedorProductoService {
         }
     }
 
-    private Producto resolverProducto(CatalogoResponse entrada, Marca marca, Categoria categoria) {
-        String nombre = entrada.getProducto().trim();
+    private boolean productoExisteEnCatalogo(CatalogoResponse entrada, Marca marca, Categoria categoria) {
         String sku = esVacio(entrada.getSku()) ? null : entrada.getSku().trim();
 
-        Producto producto = findProductoParaEntrada(nombre, sku, marca, categoria);
+        if (!esVacio(sku)) {
+            return productoRepo.existsBySkuGlobal(sku);
+        }
 
-        producto.setNombre(nombre);
+        return productoRepo.buscarProductoSimilar(
+                entrada.getProducto().trim(),
+                marca.getIdMarca(),
+                categoria.getIdCategoria()
+        ).isPresent();
+    }
+
+    private Producto crearProductoNuevo(CatalogoResponse entrada, Marca marca, Categoria categoria) {
+        Producto producto = new Producto();
+
+        producto.setNombre(entrada.getProducto().trim());
         producto.setMarca(marca);
         producto.setCategoria(categoria);
-        producto.setSkuGlobal(esVacio(sku) ? generarSku() : sku);
         producto.setDescripcion(esVacio(entrada.getDescripcion()) ? null : entrada.getDescripcion().trim());
         producto.setEstado(esVacio(entrada.getEstado()) ? "ACTIVO" : entrada.getEstado().trim().toUpperCase());
         producto.setFuente("PM");
         producto.setFechaActualizacion(LocalDateTime.now());
-        return productoRepo.save(producto);
-    }
 
-    private Producto findProductoParaEntrada(String nombre, String sku, Marca marca, Categoria categoria) {
-        if (!esVacio(sku)) {
-            return productoRepo.findBySkuGlobal(sku).orElseGet(Producto::new);
+        if (!esVacio(entrada.getSku())) {
+            producto.setSkuGlobal(entrada.getSku().trim());
         }
 
-        // Para creacion de productos nuevos sin SKU, no reutilizamos un producto similar existente.
-        // Esto evita mezclar un producto anterior con un nuevo registro cuando SKU no se proporciona.
-        return new Producto();
+        producto = productoRepo.save(producto);
+
+        if (esVacio(producto.getSkuGlobal())) {
+            producto.setSkuGlobal("NTK-" + String.format("%06d", producto.getIdProducto()));
+            producto = productoRepo.save(producto);
+        }
+
+        return producto;
     }
 
     private Marca buscarOCrearMarca(String nombre) { return marcaRepo.findByNombre(nombre.trim()).orElseGet(() -> { Marca m = new Marca(); m.setNombre(nombre.trim()); return marcaRepo.save(m); }); }
