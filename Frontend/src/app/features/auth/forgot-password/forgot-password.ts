@@ -220,7 +220,7 @@ export class ForgotPasswordComponent {
   private redirectByRole(role: string): string {
     if (role === 'ADMIN') return APP_ROUTE_PATHS.adminDashboard;
     if (role === 'PROVEEDOR') return APP_ROUTE_PATHS.providerDashboard;
-    return APP_ROUTE_PATHS.clientDashboard;
+    return APP_ROUTE_PATHS.clientInicio;
   }
 
   methodLabel(method: string): string {

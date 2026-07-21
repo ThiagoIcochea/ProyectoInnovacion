@@ -14,6 +14,7 @@ export const APP_STORAGE_KEYS = {
 export const APP_ROUTE_PATHS = {
   login: '/login',
   appRoot: '/app',
+  clientInicio: '/app/inicio',
   clientDashboard: '/app/dashboard',
   clientRequests: '/app/requests',
   clientHistory: '/app/history',

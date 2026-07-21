@@ -13,7 +13,7 @@ import com.nethink.b2b.entity.Solicitud.EstadoSolicitud;
 import com.nethink.b2b.entity.DetalleSolicitud;
 import com.nethink.b2b.dto.response.SolicitudEntregaResponse;
 import java.time.LocalDateTime;
-
+import com.nethink.b2b.dto.response.ClienteEstadoSolicitudResponse; 
 
 
 
@@ -265,4 +265,39 @@ WHERE s.proveedor.idProveedor = :idProveedor
 AND s.fechaEntrega IS NOT NULL
 """)
 Double calcularTiempoEntregaPromedio(@Param("idProveedor") Integer idProveedor);
+
+
+
+
+
+// dashboard de cliente
+// consulta para grafico de dona de estado de  solicitudes 
+
+@Query("""
+SELECT new com.nethink.b2b.dto.response.ClienteEstadoSolicitudResponse(
+
+    CAST(s.estado AS string),
+
+    COUNT(s.idSolicitud)
+
+)
+
+FROM Solicitud s
+
+WHERE s.usuario.idUsuario = :idUsuario
+
+GROUP BY s.estado
+
+ORDER BY COUNT(s.idSolicitud) DESC
+
+""")
+List<ClienteEstadoSolicitudResponse> obtenerEstadosSolicitudesCliente(
+        Integer idUsuario
+);
+
+
+
+
+
+
 }

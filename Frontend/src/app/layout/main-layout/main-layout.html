@@ -28,7 +28,7 @@
       <nav class="sidebar__nav">
 
         <a
-          [routerLink]="['/app/dashboard']"
+          [routerLink]="['/app/inicio']"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
           class="sidebar__link"
@@ -71,6 +71,19 @@
           (click)="cerrarMenuMovil()">
           Perfil
         </a>
+
+<a
+  [routerLink]="['/app/dashboard']"
+  routerLinkActive="active"
+  [routerLinkActiveOptions]="{ exact: true }"
+  class="sidebar__link"
+  (click)="cerrarMenuMovil()">
+  Dashboard
+</a>
+
+
+
+
 
       </nav>
     </ng-container>

@@ -28,7 +28,21 @@ public class ClienteMontoAprobadoMensualResponse {
     }
 
   
-    
+   public String getMes() {
+    return mes;
+}
+
+public void setMes(String mes) {
+    this.mes = mes;
+}
+
+public BigDecimal getMonto() {
+    return monto;
+}
+
+public void setMonto(BigDecimal monto) {
+    this.monto = monto;
+} 
     
     
     

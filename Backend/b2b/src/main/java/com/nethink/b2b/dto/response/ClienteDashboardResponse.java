@@ -14,52 +14,69 @@ import java.util.List;
 public class ClienteDashboardResponse {
 
 
-
-    // ============================
-    // INDICADORES PRINCIPALES
-    // ============================
+    // =========================
+    // INFORMACIÓN CLIENTE
+    // =========================
 
     private String nombreCliente;
 
-    // Solicitudes
-    private Long solicitudesMesActual;
-    private Long solicitudesMesAnterior;
-    private Double porcentajeSolicitudes;
 
-    // Solicitudes aprobadas
-    private Long solicitudesAprobadasMesActual;
-    private Long solicitudesAprobadasMesAnterior;
-    private Double porcentajeSolicitudesAprobadas;
+    // =========================
+    // INDICADORES
+    // =========================
 
-    // Dinero aprobado
-    private BigDecimal montoAprobadoMesActual;
-    private BigDecimal montoAprobadoMesAnterior;
-    private Double porcentajeMontoAprobado;
+    private ClienteSolicitudesIndicadorResponse solicitudes;
+
+    private ClienteAprobadasIndicadorResponse aprobadas;
 
 
-    // ============================
+    // =========================
     // GRÁFICOS
-    // ============================
+    // =========================
 
-    // Línea: evolución de solicitudes
+    // Línea evolución solicitudes
     private List<ClienteSolicitudesMensualesResponse> graficoEvolucionSolicitudes;
 
 
-    // Dona: estados de solicitudes
+    // Dona estados solicitudes
     private List<ClienteEstadoSolicitudResponse> graficoEstadosSolicitudes;
 
 
-    // Barras horizontales: productos más solicitados
+    // Barras horizontales productos más solicitados
     private List<ClienteProductoSolicitadoResponse> graficoProductosSolicitados;
 
 
-    // Barras: monto aprobado por mes
+    // Barras monto aprobado mensual
     private List<ClienteMontoAprobadoMensualResponse> graficoMontoAprobado;
 
 
-    // getters y setters
-    
-   public String getNombreCliente() {
+
+    public ClienteDashboardResponse() {
+    }
+
+
+    public ClienteDashboardResponse(
+            String nombreCliente,
+            ClienteSolicitudesIndicadorResponse solicitudes,
+            ClienteAprobadasIndicadorResponse aprobadas,
+            List<ClienteSolicitudesMensualesResponse> graficoEvolucionSolicitudes,
+            List<ClienteEstadoSolicitudResponse> graficoEstadosSolicitudes,
+            List<ClienteProductoSolicitadoResponse> graficoProductosSolicitados,
+            List<ClienteMontoAprobadoMensualResponse> graficoMontoAprobado
+    ) {
+
+        this.nombreCliente = nombreCliente;
+        this.solicitudes = solicitudes;
+        this.aprobadas = aprobadas;
+        this.graficoEvolucionSolicitudes = graficoEvolucionSolicitudes;
+        this.graficoEstadosSolicitudes = graficoEstadosSolicitudes;
+        this.graficoProductosSolicitados = graficoProductosSolicitados;
+        this.graficoMontoAprobado = graficoMontoAprobado;
+    }
+
+
+
+    public String getNombreCliente() {
         return nombreCliente;
     }
 
@@ -67,109 +84,69 @@ public class ClienteDashboardResponse {
         this.nombreCliente = nombreCliente;
     }
 
-    public Long getSolicitudesMesActual() {
-        return solicitudesMesActual;
+
+    public ClienteSolicitudesIndicadorResponse getSolicitudes() {
+        return solicitudes;
     }
 
-    public void setSolicitudesMesActual(Long solicitudesMesActual) {
-        this.solicitudesMesActual = solicitudesMesActual;
+    public void setSolicitudes(ClienteSolicitudesIndicadorResponse solicitudes) {
+        this.solicitudes = solicitudes;
     }
 
-    public Long getSolicitudesMesAnterior() {
-        return solicitudesMesAnterior;
+
+    public ClienteAprobadasIndicadorResponse getAprobadas() {
+        return aprobadas;
     }
 
-    public void setSolicitudesMesAnterior(Long solicitudesMesAnterior) {
-        this.solicitudesMesAnterior = solicitudesMesAnterior;
+    public void setAprobadas(ClienteAprobadasIndicadorResponse aprobadas) {
+        this.aprobadas = aprobadas;
     }
 
-    public Double getPorcentajeSolicitudes() {
-        return porcentajeSolicitudes;
-    }
-
-    public void setPorcentajeSolicitudes(Double porcentajeSolicitudes) {
-        this.porcentajeSolicitudes = porcentajeSolicitudes;
-    }
-
-    public Long getSolicitudesAprobadasMesActual() {
-        return solicitudesAprobadasMesActual;
-    }
-
-    public void setSolicitudesAprobadasMesActual(Long solicitudesAprobadasMesActual) {
-        this.solicitudesAprobadasMesActual = solicitudesAprobadasMesActual;
-    }
-
-    public Long getSolicitudesAprobadasMesAnterior() {
-        return solicitudesAprobadasMesAnterior;
-    }
-
-    public void setSolicitudesAprobadasMesAnterior(Long solicitudesAprobadasMesAnterior) {
-        this.solicitudesAprobadasMesAnterior = solicitudesAprobadasMesAnterior;
-    }
-
-    public Double getPorcentajeSolicitudesAprobadas() {
-        return porcentajeSolicitudesAprobadas;
-    }
-
-    public void setPorcentajeSolicitudesAprobadas(Double porcentajeSolicitudesAprobadas) {
-        this.porcentajeSolicitudesAprobadas = porcentajeSolicitudesAprobadas;
-    }
-
-    public BigDecimal getMontoAprobadoMesActual() {
-        return montoAprobadoMesActual;
-    }
-
-    public void setMontoAprobadoMesActual(BigDecimal montoAprobadoMesActual) {
-        this.montoAprobadoMesActual = montoAprobadoMesActual;
-    }
-
-    public BigDecimal getMontoAprobadoMesAnterior() {
-        return montoAprobadoMesAnterior;
-    }
-
-    public void setMontoAprobadoMesAnterior(BigDecimal montoAprobadoMesAnterior) {
-        this.montoAprobadoMesAnterior = montoAprobadoMesAnterior;
-    }
-
-    public Double getPorcentajeMontoAprobado() {
-        return porcentajeMontoAprobado;
-    }
-
-    public void setPorcentajeMontoAprobado(Double porcentajeMontoAprobado) {
-        this.porcentajeMontoAprobado = porcentajeMontoAprobado;
-    }
 
     public List<ClienteSolicitudesMensualesResponse> getGraficoEvolucionSolicitudes() {
         return graficoEvolucionSolicitudes;
     }
 
-    public void setGraficoEvolucionSolicitudes(List<ClienteSolicitudesMensualesResponse> graficoEvolucionSolicitudes) {
+    public void setGraficoEvolucionSolicitudes(
+            List<ClienteSolicitudesMensualesResponse> graficoEvolucionSolicitudes
+    ) {
         this.graficoEvolucionSolicitudes = graficoEvolucionSolicitudes;
     }
+
 
     public List<ClienteEstadoSolicitudResponse> getGraficoEstadosSolicitudes() {
         return graficoEstadosSolicitudes;
     }
 
-    public void setGraficoEstadosSolicitudes(List<ClienteEstadoSolicitudResponse> graficoEstadosSolicitudes) {
+    public void setGraficoEstadosSolicitudes(
+            List<ClienteEstadoSolicitudResponse> graficoEstadosSolicitudes
+    ) {
         this.graficoEstadosSolicitudes = graficoEstadosSolicitudes;
     }
+
 
     public List<ClienteProductoSolicitadoResponse> getGraficoProductosSolicitados() {
         return graficoProductosSolicitados;
     }
 
-    public void setGraficoProductosSolicitados(List<ClienteProductoSolicitadoResponse> graficoProductosSolicitados) {
+    public void setGraficoProductosSolicitados(
+            List<ClienteProductoSolicitadoResponse> graficoProductosSolicitados
+    ) {
         this.graficoProductosSolicitados = graficoProductosSolicitados;
     }
+
 
     public List<ClienteMontoAprobadoMensualResponse> getGraficoMontoAprobado() {
         return graficoMontoAprobado;
     }
 
-    public void setGraficoMontoAprobado(List<ClienteMontoAprobadoMensualResponse> graficoMontoAprobado) {
+    public void setGraficoMontoAprobado(
+            List<ClienteMontoAprobadoMensualResponse> graficoMontoAprobado
+    ) {
         this.graficoMontoAprobado = graficoMontoAprobado;
-    } 
+    }
+
+
     
     
     

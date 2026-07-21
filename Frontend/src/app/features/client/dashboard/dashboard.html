@@ -1,244 +1,298 @@
-<!-- Backend touchpoint: dashboard cards and panels are filled from recommended products and promotions APIs. -->
-<div class="dashboard-page">
 
-  <button 
-    class="floating-cart-trigger" 
-    (click)="mostrarCarritoMovil = !mostrarCarritoMovil" 
-    [class.is-active]="mostrarCarritoMovil"
-    type="button"
-    aria-label="Abrir o cerrar carrito RFQ">
-    <span class="hamburger-box">
-      <span class="hamburger-inner"></span>
-    </span>
-    <span class="floating-cart-trigger__label">Mi RFQ</span>
-    <span class="badge-count" *ngIf="requestItems.length > 0">
-      {{ requestItems.length }}
-    </span>
-  </button>
 
-  <div
-    class="request-overlay"
-    [class.is-open]="mostrarCarritoMovil"
-    (click)="mostrarCarritoMovil = false">
+<div class="provider-dashboard">
+
+  <!-- ENCABEZADO -->
+  <div class="page-header">
+
+    <div>
+
+      <span>Resumen general</span>
+
+      <h1>
+        Hola,{{ dashboard?.nombreCliente }}
+      </h1>
+      
+
+      <p>
+        Aquí puedes visualizar el estado de tus solicitudes,
+        aprobaciones y actividad de compra.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="export-btn"
+      >
+
+      Exportar informe
+
+    </button>
+
   </div>
 
-  <section class="dashboard-main">
 
-    <div class="hero-grid">
+  <!-- TARJETAS KPI -->
 
-      <div class="hero-card">
-        <span class="hero-card__badge">Cotización inteligente</span>
-        <h1>Cotización Inteligente B2B</h1>
+  <div class="metrics-grid" *ngIf="dashboard">
+
+    <!-- Solicitudes -->
+
+    <div class="metric-card">
+
+      <div class="metric-card__top">
+
+        <span>Solicitudes del mes</span>
+
+        <div class="metric-icon">📄</div>
+
+      </div>
+
+      <strong>
+
+        {{ dashboard.solicitudes?.solicitudesMesActual }}
+
+      </strong>
+
+      <p>
+
+        {{ dashboard.solicitudes?.porcentajeSolicitudes }} %
+
+        respecto al mes anterior
+
+      </p>
+
+    </div>
+
+
+    <!-- Solicitudes aprobadas -->
+
+    <div class="metric-card">
+
+      <div class="metric-card__top">
+
+        <span>Solicitudes aprobadas</span>
+
+        <div class="metric-icon">✅</div>
+
+      </div>
+
+      <strong>
+
+        {{ dashboard.aprobadas?.aprobadasMesActual }}
+
+      </strong>
+
+      <p>
+
+        {{ dashboard.aprobadas?.porcentajeSolicitudesAprobadas }} %
+
+        respecto al mes anterior
+
+      </p>
+
+    </div>
+
+
+    <!-- Monto aprobado -->
+
+    <div class="metric-card">
+
+      <div class="metric-card__top">
+
+        <span>Monto aprobado</span>
+
+        <div class="metric-icon">💰</div>
+
+      </div>
+
+      <strong>
+
+        S/
+
+        {{ dashboard.aprobadas?.montoMesActual | number:'1.2-2' }}
+
+      </strong>
+
+      <p>
+
+        {{ dashboard.aprobadas?.porcentajeMontoAprobado }} %
+
+        respecto al mes anterior
+
+      </p>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- FILA 1 -->
+
+  <section
+    class="analytics-grid">
+
+    <!-- Evolución -->
+
+    <div class="chart-panel">
+
+      <div class="chart-panel__header">
+
+        <h2>
+
+          Evolución de solicitudes
+
+        </h2>
+
         <p>
-          Agrega los equipos de red y el sistema encontrará proveedores con mejor precio, stock y tiempo de entrega.
+
+          Cantidad de solicitudes creadas por mes.
+
         </p>
-        <a routerLink="/app/rfq/catalog" class="hero-card__action">
-          Iniciar RFQ →
-        </a>
+
       </div>
 
-      <div class="promo-card" *ngIf="!loadingPublicidad && publicidades.length > 0">
-        <span>{{ publicidades[currentPublicidadIndex]?.origen }}</span>
-        <div class="promo-card__icon">TOP</div>
-        <h3>{{ publicidades[currentPublicidadIndex]?.titulo }}</h3>
-        <p>{{ getPublicidadDetalle(publicidades[currentPublicidadIndex]) }}</p>
-        
-        <img
-          [src]="publicidades[currentPublicidadIndex]?.imagen"
-          [alt]="publicidades[currentPublicidadIndex]?.titulo || 'Publicidad destacada'"
-          title="{{ publicidades[currentPublicidadIndex]?.titulo || 'Publicidad destacada' }}"
-          class="promo-card__image"
-        >
-        
-        <button (click)="irPublicidad(publicidades[currentPublicidadIndex])">
-          Ver más
-        </button>
-      </div>
+      <div class="chart-container">
 
-      <div class="promo-card promo-card--skeleton" *ngIf="loadingPublicidad">
-        <div class="skeleton-line skeleton-line--badge"></div>
-        <div class="skeleton-block skeleton-block--icon"></div>
-        <div class="skeleton-line skeleton-line--title"></div>
-        <div class="skeleton-line"></div>
-        <div class="skeleton-block skeleton-block--image"></div>
-        <div class="skeleton-block skeleton-block--button"></div>
+        <canvas
+          id="graficoSolicitudes">
+
+        </canvas>
+
       </div>
 
     </div>
 
-    <div class="section-header">
-      <div>
-        <h2>Productos más recomendados</h2>
+
+
+    <!-- Monto -->
+
+    <div class="chart-panel">
+
+      <div class="chart-panel__header">
+
+        <h2>
+
+          Monto aprobado mensual
+
+        </h2>
+
         <p>
-          Ranking dinámico basado en pedidos reales, stock y actividad del sistema.
+
+          Total aprobado durante los últimos meses.
+
         </p>
-      </div>
-      <span>Top productos</span>
-    </div>
 
-    <div class="product-grid" *ngIf="loadingRecommended">
-
-      <div class="product-card product-card--skeleton" *ngFor="let item of productSkeletons">
-        <div class="skeleton-block skeleton-block--product-image"></div>
-        <div class="skeleton-tags">
-          <div class="skeleton-line skeleton-line--tag"></div>
-          <div class="skeleton-line skeleton-line--tag"></div>
-        </div>
-        <div class="skeleton-line skeleton-line--title"></div>
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line skeleton-line--short"></div>
-        <div class="skeleton-block skeleton-block--button-wide"></div>
       </div>
 
-    </div>
+      <div class="chart-container">
 
-    <div class="product-grid" *ngIf="!loadingRecommended && recommendedProducts.length > 0">
+        <canvas
+          id="graficoMonto">
 
-      <article
-        class="product-card"
-        *ngFor="let product of recommendedProducts"
-        (click)="verDetalle(product)"
-        role="button"
-        tabindex="0"
-        (keydown.enter)="verDetalle(product)"
-        (keydown.space)="$event.preventDefault(); verDetalle(product)">
-        <div class="product-card__image">
-          <img
-            *ngIf="getProductImage(product) as imageUrl; else productImagePlaceholder"
-            [src]="imageUrl"
-            [alt]="product.producto || 'Producto recomendado'"
-            title="{{ product.producto || 'Producto recomendado' }}"
-            class="product-card__preview"
-            loading="lazy"
-            decoding="async"
-            (error)="markImageAsFailed(product)"
-          >
+        </canvas>
 
-          <ng-template #productImagePlaceholder>
-            <div class="product-card__preview product-card__preview--empty">
-              <span>{{ product.marca?.slice(0, 2) || 'RFQ' }}</span>
-            </div>
-          </ng-template>
-        </div>
+      </div>
 
-        <div class="product-card__tags">
-          <span *ngIf="product.marca">{{ product.marca }}</span>
-          <span *ngIf="product.categoria">{{ product.categoria }}</span>
-        </div>
-
-        <h3>{{ product.producto }}</h3>
-        <p *ngIf="product.descripcion">{{ product.descripcion }}</p>
-
-        <div class="primary-spec" *ngIf="getPrimarySpec(product) as spec">
-          <span>{{ spec.nombre }}</span>
-          <strong>{{ spec.valor }}</strong>
-        </div>
-
-        <div class="product-card__meta">
-          <strong>{{ formatRecommendedCount(product.vecesPedido) }}</strong>
-          <span *ngIf="product.idProducto">ID #{{ product.idProducto }}</span>
-        </div>
-
-        <div class="product-card__actions">
-          <button
-            type="button"
-            class="product-card__button product-card__button--secondary"
-            (click)="$event.stopPropagation(); verDetalle(product)">
-            Ver detalle
-          </button>
-
-          <button
-            type="button"
-            class="product-card__button"
-            (click)="$event.stopPropagation(); agregarAlCarrito(product)">
-            Agregar al RFQ
-          </button>
-        </div>
-      </article>
-
-    </div>
-
-    <div class="empty-state" *ngIf="!loadingRecommended && recommendedProducts.length === 0">
-      No hay productos recomendados disponibles por ahora.
     </div>
 
   </section>
 
-  <aside class="request-panel" [class.is-open]="mostrarCarritoMovil">
 
-    <div class="request-panel__step">
-      RFQ Inteligente
-    </div>
 
-    <div class="request-panel__header-row">
-      <div>
-        <h2>Carrito RFQ</h2>
-        <p>{{ requestItems.length }} productos seleccionados</p>
+  <!-- FILA 2 -->
+
+  <section
+    class="analytics-grid">
+
+    <!-- Estados -->
+
+    <div class="chart-panel">
+
+      <div class="chart-panel__header">
+
+        <h2>
+
+          Estado de solicitudes
+
+        </h2>
+
+        <p>
+
+          Distribución actual de solicitudes.
+
+        </p>
+
       </div>
 
-      <button
-        type="button"
-        class="request-panel__close"
-        (click)="mostrarCarritoMovil = false"
-        aria-label="Cerrar carrito RFQ">
-        ✕
-      </button>
-    </div>
+      <div class="chart-container">
 
-    <div class="alert-box">
-      El sistema buscará proveedores que tengan stock disponible para todos los productos.
-    </div>
+        <canvas
+          id="graficoEstados">
 
-    <div class="request-list">
-      <div class="request-item" *ngFor="let item of requestItems">
-        <div class="request-item__content">
-          <strong>{{ item.name }}</strong>
-          
-          <div class="qty-control">
-            <button (click)="disminuir(item)">-</button>
-            <span>{{ item.qty }}</span>
-            <button (click)="aumentar(item)">+</button>
-          </div>
+        </canvas>
 
-          <button (click)="eliminar(item)">
-            Eliminar
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="request-panel__form">
-      
-      <div class="form-group">
-        <label>Prioridad</label>
-        <select [(ngModel)]="prioridad">
-          <option value="BALANCEADO">Balanceado</option>
-          <option value="PRECIO">Mejor Precio</option>
-          <option value="TIEMPO">Entrega Rápida</option>
-          <option value="CALIDAD">Calidad</option>
-        </select>
-      </div>
-
-      <div class="budget-group">
-        <div class="form-group">
-          <label>Presupuesto mínimo</label>
-          <input type="number" [(ngModel)]="precioMin">
-        </div>
-
-        <div class="form-group">
-          <label>Presupuesto máximo</label>
-          <input type="number" [(ngModel)]="precioMax">
-        </div>
       </div>
 
     </div>
 
-    <button class="request-panel__button"
-            (click)="buscarProveedoresRFQ(); mostrarCarritoMovil = false"
-            [disabled]="requestItems.length === 0">
-      Buscar Proveedores →
-    </button>
 
-  </aside>
+
+    <!-- Productos -->
+
+    <div class="chart-panel">
+
+      <div class="chart-panel__header">
+
+        <h2>
+
+          Productos más solicitados
+
+        </h2>
+
+        <p>
+
+          Ranking de productos con mayor demanda.
+
+        </p>
+
+      </div>
+
+      <div class="chart-container">
+
+        <canvas
+          id="graficoProductos">
+
+        </canvas>
+
+      </div>
+
+    </div>
+
+  </section>
 
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -94,7 +94,7 @@ export class LoginComponent implements OnInit, OnDestroy {
               email: res.email || res.correo || correo,
               tempToken: res.tempToken,
               purpose: res.purpose || 'LOGIN',
-              redirectTo: res.redirectTo || APP_ROUTE_PATHS.clientDashboard,
+              redirectTo: res.redirectTo || APP_ROUTE_PATHS.clientInicio,
               emailOnly: Boolean(res.emailOnly),
               expiresInSeconds: res.expiresInSeconds,
               resendInSeconds: res.resendInSeconds,
@@ -145,7 +145,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     } else if (rol === 'CLIENTE') {
 
-      this.router.navigate([APP_ROUTE_PATHS.clientDashboard], { replaceUrl: true });
+      this.router.navigate([APP_ROUTE_PATHS.clientInicio], { replaceUrl: true });
 
     } else {
 

@@ -15,19 +15,36 @@ public class ClienteProductoSolicitadoResponse {
 
     private String nombreProducto;
 
-    private Integer cantidadSolicitada;
+    private Long cantidadSolicitada;
 
 
     public ClienteProductoSolicitadoResponse(
         String nombreProducto,
-        Integer cantidadSolicitada
+        Long cantidadSolicitada
     ){
         this.nombreProducto = nombreProducto;
         this.cantidadSolicitada = cantidadSolicitada;
     }
 
  
-    
+   public String getNombreProducto() {
+        return nombreProducto;
+    }
+
+
+    public void setNombreProducto(String nombreProducto) {
+        this.nombreProducto = nombreProducto;
+    }
+
+
+    public Long getCantidadSolicitada() {
+        return cantidadSolicitada;
+    }
+
+
+    public void setCantidadSolicitada(Long cantidadSolicitada) {
+        this.cantidadSolicitada = cantidadSolicitada;
+    } 
     
     
     

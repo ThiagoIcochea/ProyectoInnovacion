@@ -27,6 +27,23 @@ public class ClienteSolicitudesMensualesResponse {
     }
 
  
+   public String getMes() {
+        return mes;
+    }
+
+    public void setMes(String mes) {
+        this.mes = mes;
+    }
+
+
+    public Long getCantidadSolicitudes() {
+        return cantidadSolicitudes;
+    }
+
+    public void setCantidadSolicitudes(Long cantidadSolicitudes) {
+        this.cantidadSolicitudes = cantidadSolicitudes;
+    }
+    
     
     
     

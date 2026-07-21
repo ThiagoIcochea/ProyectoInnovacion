@@ -47,9 +47,17 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: 'inicio',
         pathMatch: 'full'
       },
+
+{
+  path: 'inicio',
+  loadComponent: () =>
+    import('./features/client/inicio/inicio').then(m => m.InicioComponent)
+},
+
+
       {
         path: 'dashboard',
         loadComponent: () =>
