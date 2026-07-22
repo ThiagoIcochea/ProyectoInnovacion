@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../core/constants/app.constants';
 import { MfaService } from '../../core/services/mfa.service';
@@ -20,12 +20,13 @@ declare global {
   templateUrl: './voice-assistant.html',
   styleUrl: './voice-assistant.scss'
 })
-export class VoiceAssistantComponent {
+export class VoiceAssistantComponent implements OnDestroy {
 
   listening = false;
   thinking = false;
   transcript = '';
   answer = '';
+  statusVisible = false;
   fabRight: number | null = 22;
   fabBottom: number | null = 22;
   fabLeft: number | null = null;
@@ -45,12 +46,19 @@ export class VoiceAssistantComponent {
     | { type: 'ORDER_ADDRESS'; ruc: string }
     | null = null;
 
+  private voiceStatusTimer: ReturnType<typeof window.setTimeout> | null = null;
+
   constructor(
     private http: HttpClient,
     private router: Router,
     private mfaService: MfaService,
     private themeService: ThemeService
   ) {}
+
+  ngOnDestroy(): void {
+    this.clearVoiceStatusTimer();
+    window.speechSynthesis?.cancel();
+  }
 
   onFabPointerDown(event: PointerEvent): void {
     event.preventDefault();
@@ -89,6 +97,8 @@ export class VoiceAssistantComponent {
       return;
     }
 
+    this.clearVoiceStatus();
+
     const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!Recognition) {
@@ -101,12 +111,19 @@ export class VoiceAssistantComponent {
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
-    recognition.onstart = () => this.listening = true;
+    recognition.onstart = () => {
+      this.listening = true;
+      this.showVoiceStatus();
+    };
     recognition.onerror = () => {
       this.listening = false;
+      this.showVoiceStatus();
       this.speak('No pude escuchar bien. Intenta otra vez.');
     };
-    recognition.onend = () => this.listening = false;
+    recognition.onend = () => {
+      this.listening = false;
+      this.showVoiceStatus();
+    };
     recognition.onresult = (event: any) => {
       const text = event.results?.[0]?.[0]?.transcript || '';
       this.transcript = text;
@@ -130,6 +147,7 @@ export class VoiceAssistantComponent {
     }
 
     this.thinking = true;
+    this.showVoiceStatus();
 
     this.http.post<any>(`${APP_API_BASE_URL}/assistant/voice`, {
       text,
@@ -142,11 +160,13 @@ export class VoiceAssistantComponent {
       next: res => {
         this.thinking = false;
         this.answer = res?.answer || 'Listo.';
+        this.showVoiceStatus();
         this.handleAction(res);
         this.speak(this.answer);
       },
       error: () => {
         this.thinking = false;
+        this.showVoiceStatus();
         this.speak('No pude procesar la solicitud por voz en este momento.');
       }
     });
@@ -157,6 +177,7 @@ export class VoiceAssistantComponent {
 
     if (res?.requiresMfa) {
       this.answer = `${res.answer || ''} Por seguridad, esa accion requiere multifactor.`;
+      this.showVoiceStatus();
     }
 
     if (res?.action === 'NAVIGATE' && res?.route) {
@@ -848,7 +869,35 @@ export class VoiceAssistantComponent {
 
   private say(text: string): void {
     this.answer = text;
+    this.showVoiceStatus();
     this.speak(text);
+  }
+
+  private showVoiceStatus(): void {
+    this.statusVisible = true;
+
+    this.clearVoiceStatusTimer();
+    this.voiceStatusTimer = window.setTimeout(() => {
+      if (!this.listening && !this.thinking) {
+        this.statusVisible = false;
+        this.answer = '';
+        this.transcript = '';
+      }
+    }, 3600);
+  }
+
+  private clearVoiceStatusTimer(): void {
+    if (this.voiceStatusTimer) {
+      window.clearTimeout(this.voiceStatusTimer);
+      this.voiceStatusTimer = null;
+    }
+  }
+
+  private clearVoiceStatus(): void {
+    this.clearVoiceStatusTimer();
+    this.statusVisible = false;
+    this.answer = '';
+    this.transcript = '';
   }
 
   private normalize(value: string): string {

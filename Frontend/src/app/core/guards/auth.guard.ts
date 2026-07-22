@@ -1,6 +1,6 @@
 // Frontend route guard: blocks private app routes when there is no active token or the role cannot access the requested route.
 import { inject } from '@angular/core';
-import { CanActivateChildFn, CanActivateFn, Router, UrlTree } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivateChildFn, CanActivateFn, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { APP_ROUTE_PATHS, APP_STORAGE_KEYS } from '../constants/app.constants';
 
 const hasToken = (): boolean => {
@@ -32,9 +32,9 @@ const roleCanAccessRoute = (role: string, url: string): boolean => {
     || normalizedUrl.includes('/app/profile');
 };
 
-const canAccessPrivateRoute = (): boolean | UrlTree => {
+const canAccessPrivateRoute = (_route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree => {
   const router = inject(Router);
-  const url = router.url;
+  const url = state.url;
 
   if (!hasToken()) {
     return router.createUrlTree([APP_ROUTE_PATHS.login]);
@@ -54,6 +54,6 @@ const canAccessPrivateRoute = (): boolean | UrlTree => {
   return true;
 };
 
-export const authGuard: CanActivateFn = () => canAccessPrivateRoute();
+export const authGuard: CanActivateFn = (route, state) => canAccessPrivateRoute(route, state);
 
-export const authChildGuard: CanActivateChildFn = () => canAccessPrivateRoute();
+export const authChildGuard: CanActivateChildFn = (childRoute, state) => canAccessPrivateRoute(childRoute, state);

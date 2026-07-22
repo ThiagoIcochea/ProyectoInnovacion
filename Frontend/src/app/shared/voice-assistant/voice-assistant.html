@@ -14,7 +14,7 @@
   <span class="voice-fab__pulse" aria-hidden="true"></span>
 </button>
 
-<div class="voice-status" *ngIf="listening || thinking || answer">
+<div class="voice-status" [class.is-visible]="statusVisible" [hidden]="!statusVisible">
   <strong>{{ listening ? 'Escuchando' : thinking ? 'Procesando' : 'Asistente' }}</strong>
   <span>{{ listening ? 'Habla con naturalidad.' : thinking ? 'Consultando IA...' : answer }}</span>
 </div>

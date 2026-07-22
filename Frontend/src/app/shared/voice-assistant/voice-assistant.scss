@@ -99,6 +99,16 @@
   border-radius: 8px;
   background: #fff;
   box-shadow: 0 14px 35px rgba(15, 23, 42, 0.14);
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.voice-status.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .voice-status strong,
