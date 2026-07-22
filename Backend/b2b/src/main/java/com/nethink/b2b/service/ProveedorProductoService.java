@@ -290,6 +290,52 @@ public class ProveedorProductoService {
 
         Proveedor proveedor = proveedorRepo.findByUsuario_Correo(correo)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proveedor no encontrado."));
+
+        return crearProductoProveedor(proveedor, entrada);
+    }
+
+    @Transactional
+    public List<ProveedorProductoResponse> crearOModificarCatalogoProveedor(String correo, List<CatalogoResponse> entradas) {
+        if (entradas == null || entradas.isEmpty()) {
+            return List.of();
+        }
+
+        Proveedor proveedor = proveedorRepo.findByUsuario_Correo(correo)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proveedor no encontrado."));
+
+        List<ProveedorProductoResponse> result = new ArrayList<>();
+        for (CatalogoResponse entrada : entradas) {
+            if (entrada == null) {
+                continue;
+            }
+
+            ProveedorProducto existente = encontrarProveedorProductoExistente(proveedor, entrada);
+            if (existente != null) {
+                result.add(actualizarProductoProveedor(proveedor, existente, entrada));
+            } else {
+                result.add(crearProductoProveedor(proveedor, entrada));
+            }
+        }
+
+        return result;
+    }
+
+    @Transactional
+    public ProveedorProductoResponse actualizarProductoProveedor(String correo, Integer idProvProd, CatalogoResponse entrada) {
+        Proveedor proveedor = proveedorRepo.findByUsuario_Correo(correo)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proveedor no encontrado."));
+
+        ProveedorProducto proveedorProducto = proveedorProductoRepo.findById(idProvProd)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto del proveedor no encontrado."));
+
+        if (proveedorProducto.getProveedor() == null || !proveedor.getIdProveedor().equals(proveedorProducto.getProveedor().getIdProveedor())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permiso para editar este producto.");
+        }
+
+        return actualizarProductoProveedor(proveedor, proveedorProducto, entrada);
+    }
+
+    private ProveedorProductoResponse crearProductoProveedor(Proveedor proveedor, CatalogoResponse entrada) {
         Marca marca = buscarOCrearMarca(entrada.getMarca());
         Categoria categoria = buscarOCrearCategoria(entrada.getCategoria());
 
@@ -316,6 +362,76 @@ public class ProveedorProductoService {
         actualizarDescuentosVolumen(proveedorProducto, entrada.getDescuentosVolumen());
         reservaService.publicarNuevoProducto(proveedorProducto);
         return mapProveedorProductoToResponse(proveedorProducto, proveedor.getIdProveedor());
+    }
+
+    private ProveedorProductoResponse actualizarProductoProveedor(Proveedor proveedor, ProveedorProducto proveedorProducto, CatalogoResponse entrada) {
+        Producto producto = proveedorProducto.getProducto();
+        if (producto == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto del proveedor no encontrado.");
+        }
+
+        Marca marca = buscarOCrearMarca(esVacio(entrada.getMarca()) ? producto.getMarca().getNombre() : entrada.getMarca());
+        Categoria categoria = buscarOCrearCategoria(esVacio(entrada.getCategoria()) ? producto.getCategoria().getNombre() : entrada.getCategoria());
+
+        producto.setNombre(esVacio(entrada.getProducto()) ? producto.getNombre() : entrada.getProducto().trim());
+        producto.setDescripcion(esVacio(entrada.getDescripcion()) ? producto.getDescripcion() : entrada.getDescripcion().trim());
+        producto.setMarca(marca);
+        producto.setCategoria(categoria);
+        producto.setEstado(esVacio(entrada.getEstado()) ? producto.getEstado() : entrada.getEstado().trim().toUpperCase());
+        producto.setFechaActualizacion(LocalDateTime.now());
+        if (!esVacio(entrada.getSku())) {
+            producto.setSkuGlobal(entrada.getSku().trim());
+        }
+        productoRepo.save(producto);
+
+        if (entrada.getPrecioUnitario() != null) {
+            proveedorProducto.setPrecio(entrada.getPrecioUnitario());
+        }
+        if (entrada.getStock() != null) {
+            proveedorProducto.setStock(entrada.getStock());
+        }
+        proveedorProducto.setGarantiaMeses(valorNoNegativo(entrada.getGarantiaMeses()));
+        proveedorProducto.setTiempoEntregaDias(valorNoNegativo(entrada.getTiempoEntregaDias()));
+        proveedorProducto.setEnOferta(Boolean.TRUE.equals(entrada.getEnOferta()));
+        proveedorProducto.setPorcentajeDescuento(entrada.getPorcentajeDescuento() == null ? 0d : Math.max(0d, entrada.getPorcentajeDescuento()));
+        proveedorProducto.setEstado(esVacio(entrada.getEstado()) ? proveedorProducto.getEstado() : entrada.getEstado().trim().toUpperCase());
+        proveedorProducto.setUltimaActualizacionStock(LocalDateTime.now());
+        proveedorProductoRepo.save(proveedorProducto);
+
+        actualizarDescuentosVolumen(proveedorProducto, entrada.getDescuentosVolumen());
+        reservaService.publicarNuevoProducto(proveedorProducto);
+        return mapProveedorProductoToResponse(proveedorProducto, proveedor.getIdProveedor());
+    }
+
+    private ProveedorProducto encontrarProveedorProductoExistente(Proveedor proveedor, CatalogoResponse entrada) {
+        if (entrada == null) {
+            return null;
+        }
+
+        if (entrada.getIdProducto() != null) {
+            Producto producto = productoRepo.findById(entrada.getIdProducto()).orElse(null);
+            if (producto != null) {
+                return proveedorProductoRepo.findByProveedor_IdProveedorAndProducto_IdProducto(proveedor.getIdProveedor(), producto.getIdProducto()).orElse(null);
+            }
+        }
+
+        if (!esVacio(entrada.getSku())) {
+            Producto producto = productoRepo.findBySkuGlobal(entrada.getSku().trim()).orElse(null);
+            if (producto != null) {
+                return proveedorProductoRepo.findByProveedor_IdProveedorAndProducto_IdProducto(proveedor.getIdProveedor(), producto.getIdProducto()).orElse(null);
+            }
+        }
+
+        if (!esVacio(entrada.getProducto())) {
+            Marca marca = buscarOCrearMarca(entrada.getMarca());
+            Categoria categoria = buscarOCrearCategoria(entrada.getCategoria());
+            Producto producto = productoRepo.buscarProductoSimilar(entrada.getProducto().trim(), marca.getIdMarca(), categoria.getIdCategoria()).orElse(null);
+            if (producto != null) {
+                return proveedorProductoRepo.findByProveedor_IdProveedorAndProducto_IdProducto(proveedor.getIdProveedor(), producto.getIdProducto()).orElse(null);
+            }
+        }
+
+        return null;
     }
 
     @Transactional

@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
+import { MfaService } from '../../../core/services/mfa.service';
 import { extractValidationMessage } from '../../../core/utils/form-validation';
 
 @Component({
@@ -21,22 +22,27 @@ export class ProviderProductsComponent implements OnInit {
   readonly skeletonRows = Array.from({ length: 5 });
 
   search = '';
-
   activos = 0;
   stockDisponibleCount = 0;
   bajoStockCount = 0;
+
   showCreateModal = false;
+  showManageModal = false;
   saving = false;
   createError = '';
   newProduct = this.emptyProduct();
-  categorias: Array<{idCategoria:number; nombre:string}> = [];
-  marcas: Array<{idMarca:number; nombre:string}> = [];
+  manageProduct = this.emptyProduct();
+  manageProductId: number | null = null;
+
+  categorias: Array<{ idCategoria: number; nombre: string }> = [];
+  marcas: Array<{ idMarca: number; nombre: string }> = [];
 
   private API_URL = `${APP_API_BASE_URL}/proveedor-productos`;
 
   constructor(
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private mfaService: MfaService
   ) {}
 
   ngOnInit(): void {
@@ -50,27 +56,17 @@ export class ProviderProductsComponent implements OnInit {
     });
   }
 
-  cargarProductos() {
-
+  cargarProductos(): void {
     this.loading = true;
 
-    this.http.get<any[]>(
-      `${this.API_URL}/mis-productos`,
-      { headers: this.headers() }
-    )
-    .subscribe({
-
+    this.http.get<any[]>(`${this.API_URL}/mis-productos`, { headers: this.headers() }).subscribe({
       next: (data) => {
-
-        this.products = data;
-        this.filteredProducts = data;
-
+        this.products = data || [];
+        this.filteredProducts = [...this.products];
         this.calcularResumenFiltrado();
         this.loading = false;
-
         this.cdr.detectChanges();
       },
-
       error: (err) => {
         console.error('Error cargando productos:', err);
         this.products = [];
@@ -81,38 +77,38 @@ export class ProviderProductsComponent implements OnInit {
     });
   }
 
-  filtrarProductos() {
-
+  filtrarProductos(): void {
     const texto = this.search.toLowerCase();
+    this.filteredProducts = this.products.filter((p: any) => {
+      const haystack = [
+        p.skuGlobal,
+        p.nombre,
+        p.categoria,
+        p.marca,
+        p.descripcion
+      ].filter(Boolean).join(' ').toLowerCase();
 
-    this.filteredProducts = this.products.filter(p =>
-
-      p.skuGlobal?.toLowerCase().includes(texto) ||
-      p.nombre?.toLowerCase().includes(texto) ||
-      p.categoria?.toLowerCase().includes(texto)
-
-    );
+      return haystack.includes(texto);
+    });
 
     this.calcularResumenFiltrado();
   }
 
-  calcularResumenFiltrado() {
-
+  calcularResumenFiltrado(): void {
     this.activos = 0;
     this.stockDisponibleCount = 0;
     this.bajoStockCount = 0;
 
-    for (let p of this.filteredProducts) {
-
+    for (const p of this.filteredProducts) {
       if (p.estado === 'ACTIVO') {
         this.activos++;
       }
 
-      if (p.stockDisponible > 0) {
+      if (Number(p.stockDisponible ?? p.stock ?? 0) > 0) {
         this.stockDisponibleCount++;
       }
 
-      if (p.stock < 10) {
+      if (Number(p.stock ?? 0) < 10) {
         this.bajoStockCount++;
       }
     }
@@ -122,6 +118,27 @@ export class ProviderProductsComponent implements OnInit {
     this.newProduct = this.emptyProduct();
     this.createError = '';
     this.showCreateModal = true;
+    this.showManageModal = false;
+  }
+
+  abrirGestionProducto(product: any): void {
+    this.manageProductId = product?.idProvProd ?? null;
+    this.manageProduct = this.toFormProduct(product);
+    this.createError = '';
+    this.showManageModal = true;
+    this.showCreateModal = false;
+  }
+
+  cerrarNuevoProducto(): void {
+    if (!this.saving) {
+      this.showCreateModal = false;
+    }
+  }
+
+  cerrarGestionProducto(): void {
+    if (!this.saving) {
+      this.showManageModal = false;
+    }
   }
 
   private cargarCatalogoBase(): void {
@@ -146,13 +163,9 @@ export class ProviderProductsComponent implements OnInit {
     });
   }
 
-  cerrarNuevoProducto(): void {
-    if (!this.saving) this.showCreateModal = false;
-  }
-
   async crearProducto(): Promise<void> {
     this.createError = '';
-    const validationError = this.validarProducto();
+    const validationError = this.validarProducto(this.newProduct);
     if (validationError) {
       this.createError = validationError;
       await Swal.fire({ icon: 'warning', title: 'Datos incompletos', text: validationError });
@@ -160,65 +173,216 @@ export class ProviderProductsComponent implements OnInit {
     }
 
     this.saving = true;
-    const payload = {
-      producto: this.newProduct.producto,
-      sku: this.newProduct.sku && String(this.newProduct.sku).trim() ? this.newProduct.sku.trim() : null,
-      marca: this.newProduct.marca,
-      categoria: this.newProduct.categoria,
-      descripcion: this.newProduct.descripcion || null,
-      precioUnitario: Number(this.newProduct.precioUnitario),
-      stock: Number(this.newProduct.stock),
-      garantiaMeses: Number(this.newProduct.garantiaMeses || 0),
-      tiempoEntregaDias: Number(this.newProduct.tiempoEntregaDias || 0),
-      enOferta: this.newProduct.enOferta,
-      porcentajeDescuento: Number(this.newProduct.porcentajeDescuento || 0),
-      estado: 'ACTIVO',
-      imagenes: [],
-      especificaciones: [],
-      descuentosVolumen: (this.newProduct.descuentosVolumen || [])
-        .filter((item: any) => item && Number.isFinite(Number(item.cantidadMin)) && Number(item.cantidadMin) > 0
-          && Number.isFinite(Number(item.precioUnitario)) && Number(item.precioUnitario) >= 0)
+    try {
+      const token = await this.requestMfaToken();
+      const payload = this.buildCatalogPayload(this.newProduct, true);
+
+      const response = await this.sendCatalogPayload(payload, token, 'POST');
+      this.showCreateModal = false;
+      this.saving = false;
+      await Swal.fire({ icon: 'success', title: 'Producto creado', text: 'El producto se publicó correctamente.' });
+      this.cargarProductos();
+      return response;
+    } catch (error: any) {
+      this.saving = false;
+      const mensaje = extractValidationMessage(error, 'No se pudo crear el producto.');
+      this.createError = mensaje;
+      await Swal.fire({ icon: 'error', title: 'No se pudo crear el producto', text: mensaje });
+    }
+  }
+
+  async guardarProductoGestionado(): Promise<void> {
+    if (!this.manageProductId) {
+      return;
+    }
+
+    this.createError = '';
+    const validationError = this.validarProducto(this.manageProduct);
+    if (validationError) {
+      this.createError = validationError;
+      await Swal.fire({ icon: 'warning', title: 'Datos incompletos', text: validationError });
+      return;
+    }
+
+    this.saving = true;
+    try {
+      const token = await this.requestMfaToken();
+      const payload = this.buildCatalogPayload(this.manageProduct, false);
+      await this.sendCatalogPayload(payload, token, 'PUT', this.manageProductId);
+      this.showManageModal = false;
+      this.saving = false;
+      await Swal.fire({ icon: 'success', title: 'Producto actualizado', text: 'Se actualizó el stock, descuentos y descripción del producto.' });
+      this.cargarProductos();
+    } catch (error: any) {
+      this.saving = false;
+      const mensaje = extractValidationMessage(error, 'No se pudo actualizar el producto.');
+      this.createError = mensaje;
+      await Swal.fire({ icon: 'error', title: 'No se pudo actualizar el producto', text: mensaje });
+    }
+  }
+
+  private async requestMfaToken(): Promise<string> {
+    const email = localStorage.getItem('auth_user_email') || '';
+    if (!email) {
+      throw new Error('No se encontró el correo del usuario para MFA.');
+    }
+
+    return this.mfaService.requestActionToken(email, 'PROVIDER_API_UPDATE');
+  }
+
+  private buildCatalogPayload(product: any, includeCurrentCatalog: boolean): any {
+    const entry = {
+      sku: product.sku && String(product.sku).trim() ? product.sku.trim() : null,
+      marca: product.marca,
+      stock: Number(product.stock ?? 0),
+      estado: (product.estado || 'ACTIVO').toUpperCase(),
+      enOferta: Boolean(product.enOferta),
+      imagenes: Array.isArray(product.imagenes) ? product.imagenes.map((img: any) => ({
+        url: img.url || '',
+        orden: Number(img.orden ?? 1),
+        principal: Boolean(img.principal)
+      })) : [],
+      producto: product.producto,
+      categoria: product.categoria,
+      idProducto: product.idProducto ?? null,
+      descripcion: product.descripcion || null,
+      garantiaMeses: Number(product.garantiaMeses || 0),
+      precioUnitario: Number(product.precioUnitario ?? 0),
+      especificaciones: Array.isArray(product.especificaciones) ? product.especificaciones.map((spec: any) => ({
+        nombre: spec.nombre || '',
+        valor: spec.valor || ''
+      })) : [],
+      descuentosVolumen: (product.descuentosVolumen || [])
+        .filter((item: any) => item && Number.isFinite(Number(item.cantidadMin)) && Number(item.cantidadMin) > 0 && Number.isFinite(Number(item.precioUnitario)) && Number(item.precioUnitario) >= 0)
         .map((item: any) => ({
           cantidadMin: Number(item.cantidadMin),
           precioUnitario: Number(item.precioUnitario)
-        }))
+        })),
+      tiempoEntregaDias: Number(product.tiempoEntregaDias || 0),
+      porcentajeDescuento: Number(product.porcentajeDescuento || 0)
     };
-    this.http.post<any>(`${this.API_URL}/mis-productos`, payload, { headers: this.headers() }).subscribe({
-      next: async () => {
-        this.showCreateModal = false;
-        this.saving = false;
-        await Swal.fire({ icon: 'success', title: 'Producto creado', text: 'El producto se publicó correctamente.' });
-        this.cargarProductos();
-      },
-      error: async error => {
-        const mensaje = extractValidationMessage(error, 'No se pudo crear el producto.');
-        this.createError = mensaje;
-        this.saving = false;
-        await Swal.fire({ icon: 'error', title: 'No se pudo crear el producto', text: mensaje });
-      }
-    });
+
+    if (!includeCurrentCatalog) {
+      return { catalogo: [entry] };
+    }
+
+    const catalogo = (this.products || []).map((p: any) => this.toCatalogEntry(p));
+    catalogo.push(entry);
+    return { catalogo };
   }
 
-  private validarProducto(): string | null {
-    const producto = String(this.newProduct.producto || '').trim();
-    const marca = String(this.newProduct.marca || '').trim();
-    const categoria = String(this.newProduct.categoria || '').trim();
-    const precio = Number(this.newProduct.precioUnitario);
-    const stock = Number(this.newProduct.stock);
-    const descuento = Number(this.newProduct.porcentajeDescuento || 0);
+  private async sendCatalogPayload(payload: any, token: string, defaultMethod: 'POST' | 'PUT', idProvProd?: number): Promise<any> {
+    const methods: Array<'PUT' | 'PATCH' | 'POST'> = ['PUT', 'PATCH', 'POST'];
+    const preferredMethods = defaultMethod === 'PUT'
+      ? ['PUT', 'PATCH', 'POST']
+      : ['POST', 'PUT', 'PATCH'];
 
-    if (!producto) return 'Debe indicar el nombre del producto.';
+    let lastError: any;
+
+    for (const method of preferredMethods) {
+      try {
+        const url = idProvProd
+          ? `${this.API_URL}/mis-productos/${idProvProd}`
+          : `${this.API_URL}/mis-productos`;
+
+        const response = await this.http.request<any>(method, url, {
+          headers: new HttpHeaders({
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            'X-MFA-Authorization': token,
+            'Content-Type': 'application/json'
+          }),
+          body: JSON.stringify(payload)
+        }).toPromise();
+
+        return response;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError || new Error('No se pudo sincronizar el catálogo del proveedor.');
+  }
+
+  private toCatalogEntry(product: any): any {
+    return {
+      sku: product.skuGlobal ?? product.sku ?? null,
+      marca: product.marca || product.brand || '',
+      stock: Number(product.stock ?? 0),
+      estado: (product.estado || product.estadoProducto || 'ACTIVO').toUpperCase(),
+      enOferta: Boolean(product.enOferta),
+      imagenes: Array.isArray(product.imagenes) ? product.imagenes.map((img: any) => ({
+        url: img.url || '',
+        orden: Number(img.orden ?? 1),
+        principal: Boolean(img.principal)
+      })) : [],
+      producto: product.nombre || product.producto || product.name || '',
+      categoria: product.categoria || product.category || '',
+      idProducto: product.idProducto ?? null,
+      descripcion: product.descripcion || '',
+      garantiaMeses: Number(product.garantiaMeses || 0),
+      precioUnitario: Number(product.precio ?? product.precioUnitario ?? 0),
+      especificaciones: Array.isArray(product.especificaciones) ? product.especificaciones.map((spec: any) => ({
+        nombre: spec.nombre || '',
+        valor: spec.valor || ''
+      })) : [],
+      descuentosVolumen: Array.isArray(product.descuentosVolumen) ? product.descuentosVolumen
+        .filter((item: any) => item && Number.isFinite(Number(item.cantidadMin)) && Number(item.cantidadMin) > 0 && Number.isFinite(Number(item.precioUnitario)) && Number(item.precioUnitario) >= 0)
+        .map((item: any) => ({
+          cantidadMin: Number(item.cantidadMin),
+          precioUnitario: Number(item.precioUnitario)
+        })) : [],
+      tiempoEntregaDias: Number(product.tiempoEntregaDias || 0),
+      porcentajeDescuento: Number(product.porcentajeDescuento || 0)
+    };
+  }
+
+  private toFormProduct(product: any): any {
+    return {
+      idProducto: product?.idProducto ?? null,
+      idProvProd: product?.idProvProd ?? null,
+      producto: product?.nombre || product?.producto || product?.name || '',
+      sku: product?.skuGlobal || product?.sku || '',
+      marca: product?.marca || product?.brand || '',
+      categoria: product?.categoria || product?.category || '',
+      descripcion: product?.descripcion || '',
+      precioUnitario: product?.precio ?? product?.precioUnitario ?? null,
+      stock: product?.stock ?? null,
+      garantiaMeses: product?.garantiaMeses ?? 0,
+      tiempoEntregaDias: product?.tiempoEntregaDias ?? 0,
+      enOferta: Boolean(product?.enOferta),
+      porcentajeDescuento: product?.porcentajeDescuento ?? 0,
+      estado: product?.estado || product?.estadoProducto || 'ACTIVO',
+      imagenes: Array.isArray(product?.imagenes) ? product.imagenes : [],
+      especificaciones: Array.isArray(product?.especificaciones) ? product.especificaciones : [],
+      descuentosVolumen: Array.isArray(product?.descuentosVolumen)
+        ? product.descuentosVolumen.map((item: any) => ({
+          cantidadMin: Number(item?.cantidadMin ?? 0),
+          precioUnitario: Number(item?.precioUnitario ?? 0)
+        }))
+        : []
+    };
+  }
+
+  private validarProducto(producto: any): string | null {
+    const nombre = String(producto?.producto || '').trim();
+    const marca = String(producto?.marca || '').trim();
+    const categoria = String(producto?.categoria || '').trim();
+    const precio = Number(producto?.precioUnitario);
+    const stock = Number(producto?.stock);
+    const descuento = Number(producto?.porcentajeDescuento || 0);
+
+    if (!nombre) return 'Debe indicar el nombre del producto.';
     if (!marca) return 'Debe seleccionar una marca válida.';
     if (!categoria) return 'Debe seleccionar una categoría válida.';
     if (!Number.isFinite(precio) || precio < 0) return 'El precio unitario debe ser un número mayor o igual a cero.';
     if (!Number.isFinite(stock) || stock < 0) return 'El stock debe ser un número mayor o igual a cero.';
     if (!Number.isFinite(descuento) || descuento < 0 || descuento > 100) return 'El descuento debe estar entre 0 y 100.';
 
-    for (const d of this.newProduct.descuentosVolumen || []) {
-      if (!Number.isFinite(Number(d.cantidadMin)) || Number(d.cantidadMin) <= 0) {
+    for (const d of producto?.descuentosVolumen || []) {
+      if (!Number.isFinite(Number(d?.cantidadMin)) || Number(d.cantidadMin) <= 0) {
         return 'Cada descuento por volumen debe tener una cantidad mínima válida.';
       }
-      if (!Number.isFinite(Number(d.precioUnitario)) || Number(d.precioUnitario) < 0) {
+      if (!Number.isFinite(Number(d?.precioUnitario)) || Number(d.precioUnitario) < 0) {
         return 'Cada descuento por volumen debe tener un precio unitario válido.';
       }
     }
@@ -226,18 +390,21 @@ export class ProviderProductsComponent implements OnInit {
     return null;
   }
 
-  public agregarDescuento(): void {
-    (this.newProduct.descuentosVolumen || []).push({ cantidadMin: null, precioUnitario: null });
+  agregarDescuento(target: any): void {
+    if (!Array.isArray(target.descuentosVolumen)) {
+      target.descuentosVolumen = [];
+    }
+    target.descuentosVolumen.push({ cantidadMin: null, precioUnitario: null });
   }
 
-  public eliminarDescuento(index: number): void {
-    if (!Array.isArray(this.newProduct.descuentosVolumen)) {
+  eliminarDescuento(target: any, index: number): void {
+    if (!Array.isArray(target.descuentosVolumen)) {
       return;
     }
-    this.newProduct.descuentosVolumen.splice(index, 1);
+    target.descuentosVolumen.splice(index, 1);
   }
 
-  private emptyProduct() {
+  private emptyProduct(): any {
     return {
       producto: '',
       sku: '',
@@ -250,6 +417,9 @@ export class ProviderProductsComponent implements OnInit {
       tiempoEntregaDias: 0,
       enOferta: false,
       porcentajeDescuento: 0,
+      estado: 'ACTIVO',
+      imagenes: [] as Array<any>,
+      especificaciones: [] as Array<any>,
       descuentosVolumen: [] as Array<{ cantidadMin: number | null; precioUnitario: number | null; }>
     };
   }
