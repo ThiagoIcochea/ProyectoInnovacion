@@ -173,15 +173,27 @@
 
           <div class="voucher-preview">
             <img
-              *ngIf="getVoucherUrl(selectedPayment)"
+              *ngIf="getVoucherType(getVoucherUrl(selectedPayment)) === 'image'"
               [src]="getVoucherUrl(selectedPayment)"
               alt="Comprobante de pago"
               class="voucher-image"
               [style.transform]="'scale(' + voucherZoom + ')'"
             />
 
+            <iframe
+              *ngIf="getVoucherType(getVoucherUrl(selectedPayment)) === 'pdf'"
+              [src]="getVoucherUrl(selectedPayment)"
+              title="Comprobante de pago"
+              class="voucher-iframe"
+              [style.transform]="'scale(' + voucherZoom + ')'"
+            ></iframe>
+
             <div class="voucher-empty" *ngIf="!getVoucherUrl(selectedPayment)">
               Comprobante no disponible
+            </div>
+
+            <div class="voucher-empty" *ngIf="getVoucherType(getVoucherUrl(selectedPayment)) === 'other' && getVoucherUrl(selectedPayment)">
+              El archivo adjunto no es una imagen ni un PDF. Puedes descargarlo directamente.
             </div>
           </div>
 

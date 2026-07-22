@@ -129,6 +129,11 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
     this.cargarPerfil();
   };
+  private voiceOpenProviderPlansHandler = (): void => {
+    if (this.isProvider) {
+      this.abrirPlanesProveedor();
+    }
+  };
 
   constructor(
     public router: Router,
@@ -141,6 +146,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     window.addEventListener('profileUpdated', this.profileUpdatedHandler);
     window.addEventListener('providerCountsRefresh', this.providerCountsRefreshHandler);
+    window.addEventListener('voiceOpenProviderPlans', this.voiceOpenProviderPlansHandler);
     this.cargarPlanProveedorLocal();
     this.cargarPerfil();
     if (this.isProvider) {
@@ -381,6 +387,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     window.removeEventListener('profileUpdated', this.profileUpdatedHandler);
     window.removeEventListener('providerCountsRefresh', this.providerCountsRefreshHandler);
+    window.removeEventListener('voiceOpenProviderPlans', this.voiceOpenProviderPlansHandler);
   }
 
   toggleMenuMovil(): void {

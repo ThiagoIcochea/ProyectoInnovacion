@@ -356,12 +356,38 @@ getVoucherUrl(payment: any = this.selectedPayment): string {
     return '';
   }
 
-  return payment.comprobanteUrl ||
-    payment.comprobante_url ||
-    payment.voucherUrl ||
-    payment.voucher_url ||
-    payment.comprobante ||
-    '';
+  const candidates = [
+    payment.comprobanteUrl,
+    payment.comprobante_url,
+    payment.voucherUrl,
+    payment.voucher_url,
+    payment.comprobante,
+    payment.archivoAdjuntoUrl,
+    payment.archivoUrl,
+    payment.archivo,
+    payment.urlAdjunto,
+    payment.adjuntoUrl
+  ];
+
+  return candidates.find((value: any) => typeof value === 'string' && value.trim()) || '';
+}
+
+getVoucherType(url: string): 'image' | 'pdf' | 'other' {
+  if (!url) {
+    return 'other';
+  }
+
+  const normalized = url.toLowerCase();
+
+  if (normalized.match(/\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/)) {
+    return 'image';
+  }
+
+  if (normalized.match(/\.pdf(\?.*)?$/)) {
+    return 'pdf';
+  }
+
+  return 'other';
 }
 
 zoomInVoucher(): void {

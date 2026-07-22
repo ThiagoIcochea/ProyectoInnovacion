@@ -397,11 +397,25 @@ export class ProviderProductsComponent implements OnInit {
     target.descuentosVolumen.push({ cantidadMin: null, precioUnitario: null });
   }
 
+  agregarEspecificacion(target: any): void {
+    if (!Array.isArray(target.especificaciones)) {
+      target.especificaciones = [];
+    }
+    target.especificaciones.push({ nombre: '', valor: '' });
+  }
+
   eliminarDescuento(target: any, index: number): void {
     if (!Array.isArray(target.descuentosVolumen)) {
       return;
     }
     target.descuentosVolumen.splice(index, 1);
+  }
+
+  eliminarEspecificacion(target: any, index: number): void {
+    if (!Array.isArray(target.especificaciones)) {
+      return;
+    }
+    target.especificaciones.splice(index, 1);
   }
 
   private emptyProduct(): any {

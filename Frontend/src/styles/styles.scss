@@ -1,4 +1,12 @@
 @import './abstracts/theme';
+
+.swal2-container {
+  z-index: 2147483647 !important;
+}
+
+.swal2-popup {
+  z-index: 2147483647 !important;
+}
 @import './base/reset';
 @import './base/globals';
 @import './base/utilities';

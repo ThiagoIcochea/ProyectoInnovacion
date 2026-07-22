@@ -330,7 +330,8 @@
   padding: 0.75rem;
 }
 
-.voucher-image {
+.voucher-image,
+.voucher-iframe {
   max-width: 100%;
   height: auto;
   max-height: none;
@@ -338,6 +339,12 @@
   border-radius: 10px;
   transform-origin: top center;
   transition: transform 0.2s ease;
+}
+
+.voucher-iframe {
+  width: 100%;
+  min-height: 240px;
+  border: 0;
 }
 
 .voucher-empty {

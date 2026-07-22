@@ -24,6 +24,9 @@ export class ProviderClaimsComponent implements OnInit {
   guardando = false;
   cargando = false;
   errorMessage = '';
+  evidenceZoom = 1;
+  readonly minEvidenceZoom = 0.5;
+  readonly maxEvidenceZoom = 2.5;
 
   constructor(private claimsService: ProviderClaimsService) {}
 
@@ -88,6 +91,7 @@ export class ProviderClaimsComponent implements OnInit {
 
   seleccionarReclamo(claim: ProviderClaim): void {
     this.selectedClaim = claim;
+    this.evidenceZoom = 1;
     this.resetForm();
   }
 
@@ -253,6 +257,67 @@ export class ProviderClaimsComponent implements OnInit {
 
   getEstadoClass(estado?: string): string {
     return this.normalizar(estado).toLowerCase().replace('_', '-');
+  }
+
+  getEvidenceUrl(claim: ProviderClaim | null | undefined): string {
+    if (!claim) {
+      return '';
+    }
+
+    const value = (claim as ProviderClaim & Record<string, string | undefined>)[
+      'evidenciaUrl'
+    ] || (claim as ProviderClaim & Record<string, string | undefined>)[
+      'evidencia_url'
+    ] || (claim as ProviderClaim & Record<string, string | undefined>)[
+      'adjuntoUrl'
+    ] || (claim as ProviderClaim & Record<string, string | undefined>)[
+      'archivoUrl'
+    ];
+
+    return value || '';
+  }
+
+  getEvidenceType(url: string): 'image' | 'pdf' | 'other' {
+    if (!url) {
+      return 'other';
+    }
+
+    const normalized = url.toLowerCase();
+
+    if (normalized.match(/\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/)) {
+      return 'image';
+    }
+
+    if (normalized.match(/\.pdf(\?.*)?$/)) {
+      return 'pdf';
+    }
+
+    return 'other';
+  }
+
+  zoomInEvidence(): void {
+    this.evidenceZoom = Math.min(this.maxEvidenceZoom, Number((this.evidenceZoom + 0.25).toFixed(2)));
+  }
+
+  zoomOutEvidence(): void {
+    this.evidenceZoom = Math.max(this.minEvidenceZoom, Number((this.evidenceZoom - 0.25).toFixed(2)));
+  }
+
+  downloadEvidence(claim: ProviderClaim | null | undefined): void {
+    const url = this.getEvidenceUrl(claim);
+
+    if (!url) {
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.download = `evidencia-reclamo-${claim?.idReclamo || 'adjunto'}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   private normalizar(value?: string): string {

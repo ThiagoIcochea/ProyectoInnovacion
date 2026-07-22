@@ -167,6 +167,22 @@
           <button type="button" class="btn-secondary" (click)="agregarDescuento(newProduct)">+ Agregar descuento por volumen</button>
         </div>
 
+        <div class="field-group field-group--full">
+          <div class="section-title">Especificaciones</div>
+          <div class="volume-discount-row" *ngFor="let spec of newProduct.especificaciones; let i = index">
+            <label>
+              <span>Nombre</span>
+              <input name="specNombre{{i}}" [(ngModel)]="spec.nombre" placeholder="Ej. Material">
+            </label>
+            <label>
+              <span>Valor</span>
+              <input name="specValor{{i}}" [(ngModel)]="spec.valor" placeholder="Ej. Aleación de aluminio">
+            </label>
+            <button type="button" class="btn-secondary" (click)="eliminarEspecificacion(newProduct, i)">Eliminar</button>
+          </div>
+          <button type="button" class="btn-secondary" (click)="agregarEspecificacion(newProduct)">+ Agregar especificación</button>
+        </div>
+
         <label class="field-group field-group--full">
           <span>Descripción</span>
           <textarea name="descripcion" [(ngModel)]="newProduct.descripcion" rows="3" maxlength="500"></textarea>
@@ -259,6 +275,22 @@
             <button type="button" class="btn-secondary" (click)="eliminarDescuento(manageProduct, i)">Eliminar</button>
           </div>
           <button type="button" class="btn-secondary" (click)="agregarDescuento(manageProduct)">+ Agregar descuento por volumen</button>
+        </div>
+
+        <div class="field-group field-group--full">
+          <div class="section-title">Especificaciones</div>
+          <div class="volume-discount-row" *ngFor="let spec of manageProduct.especificaciones; let i = index">
+            <label>
+              <span>Nombre</span>
+              <input name="manage-specNombre{{i}}" [(ngModel)]="spec.nombre" placeholder="Ej. Compatibilidad">
+            </label>
+            <label>
+              <span>Valor</span>
+              <input name="manage-specValor{{i}}" [(ngModel)]="spec.valor" placeholder="Ej. Compatible con 220V">
+            </label>
+            <button type="button" class="btn-secondary" (click)="eliminarEspecificacion(manageProduct, i)">Eliminar</button>
+          </div>
+          <button type="button" class="btn-secondary" (click)="agregarEspecificacion(manageProduct)">+ Agregar especificación</button>
         </div>
 
         <label class="field-group field-group--full">

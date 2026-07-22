@@ -36,6 +36,7 @@ export class VoiceAssistantComponent implements OnDestroy {
   private fabDragStartY = 0;
   private fabStartLeft = 0;
   private fabStartTop = 0;
+  private fabDragFrame: number | null = null;
   private pending:
     | { type: 'TRACKING_ID' }
     | { type: 'ADD_PRODUCT'; qty: number }
@@ -57,6 +58,10 @@ export class VoiceAssistantComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.clearVoiceStatusTimer();
+    if (this.fabDragFrame) {
+      window.cancelAnimationFrame(this.fabDragFrame);
+      this.fabDragFrame = null;
+    }
     window.speechSynthesis?.cancel();
   }
 
@@ -71,6 +76,7 @@ export class VoiceAssistantComponent implements OnDestroy {
     this.fabTop = this.fabStartTop;
     this.fabRight = null;
     this.fabBottom = null;
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
     window.addEventListener('pointermove', this.onFabPointerMove);
     window.addEventListener('pointerup', this.onFabPointerUp, { once: true });
   }
@@ -80,16 +86,30 @@ export class VoiceAssistantComponent implements OnDestroy {
       return;
     }
 
-    const dx = event.clientX - this.fabDragStartX;
-    const dy = event.clientY - this.fabDragStartY;
+    if (this.fabDragFrame) {
+      return;
+    }
 
-    this.fabLeft = Math.min(Math.max(8, this.fabStartLeft + dx), window.innerWidth - 66);
-    this.fabTop = Math.min(Math.max(8, this.fabStartTop + dy), window.innerHeight - 66);
+    this.fabDragFrame = window.requestAnimationFrame(() => {
+      const dx = event.clientX - this.fabDragStartX;
+      const dy = event.clientY - this.fabDragStartY;
+
+      this.fabLeft = Math.min(Math.max(8, this.fabStartLeft + dx), window.innerWidth - 66);
+      this.fabTop = Math.min(Math.max(8, this.fabStartTop + dy), window.innerHeight - 66);
+      this.fabDragFrame = null;
+    });
   };
 
-  private onFabPointerUp = (): void => {
+  private onFabPointerUp = (event?: PointerEvent): void => {
     this.dragging = false;
+    if (this.fabDragFrame) {
+      window.cancelAnimationFrame(this.fabDragFrame);
+      this.fabDragFrame = null;
+    }
     window.removeEventListener('pointermove', this.onFabPointerMove);
+    if (event?.currentTarget instanceof HTMLElement) {
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
+    }
   };
 
   toggle(): void {
@@ -315,6 +335,17 @@ export class VoiceAssistantComponent implements OnDestroy {
 
     if (this.includesAny(normalized, ['actualiza mi cuenta', 'actualizar mi cuenta', 'cambiar mi perfil', 'actualiza mi perfil', 'cambia mi telefono', 'cambia mi whatsapp', 'cambia mi direccion', 'cambia mi correo', 'cambia mi ruc', 'cambia mi razon social', 'cambia mi descripcion'])) {
       await this.startProfileUpdate(normalized);
+      return true;
+    }
+
+    if (this.includesAny(normalized, ['cambiar plan', 'actualizar plan', 'abrir planes', 'ver planes', 'plan del proveedor'])) {
+      if (role !== 'PROVEEDOR') {
+        this.say('Ese cambio de plan está disponible para proveedores. Te ayudo a navegar al panel correcto.');
+        return true;
+      }
+
+      window.dispatchEvent(new CustomEvent('voiceOpenProviderPlans'));
+      this.say('Abriendo la gestión de planes del proveedor.');
       return true;
     }
 
@@ -649,30 +680,24 @@ export class VoiceAssistantComponent implements OnDestroy {
         return;
       }
 
-      let method = this.preferredVoiceMfaMethod(profile);
-      let start: any;
-      try {
-        start = await this.mfaService.startChallenge(currentEmail, 'PROFILE_UPDATE', method);
-      } catch (mfaError: any) {
-        method = 'email';
-        start = await this.mfaService.startChallenge(currentEmail, 'PROFILE_UPDATE', method);
-      }
+      const method = this.preferredVoiceMfaMethod(profile);
+      const mfaToken = await this.mfaService.requestActionToken(currentEmail, 'PROFILE_UPDATE', method);
 
       window.dispatchEvent(new CustomEvent('voiceProfilePatch', {
         detail: { field, value: value.trim(), profile: next }
       }));
 
       this.thinking = false;
-      this.pending = {
-        type: 'PROFILE_MFA_CODE',
-        email: currentEmail,
-        tempToken: start.tempToken,
-        method,
-        formData,
-        field,
-        value: value.trim()
-      };
-      this.say(`He colocado ${this.profileFieldLabel(field)} en el formulario. Te envié el MFA por ${this.mfaMethodLabel(method)}. Dime el código para guardar el cambio.`);
+      await this.http.put(`${APP_API_BASE_URL}/usuarios/perfil`, formData, {
+        headers: this.authOnlyHeaders().set('X-MFA-Authorization', mfaToken)
+      }).toPromise();
+
+      if (field === 'correo') {
+        localStorage.setItem('auth_user_email', value.trim());
+      }
+
+      window.dispatchEvent(new CustomEvent('profileUpdated'));
+      this.say(`${this.profileFieldLabel(field)} guardado correctamente.`);
       this.router.navigate(['/app/profile']);
     } catch (error: any) {
       this.thinking = false;
