@@ -394,4 +394,27 @@
   }
 }
 
+@media (max-width: 720px) {
+  .page-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .claim-item {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .claim-meta {
+    text-align: left;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .evidence-actions {
+    flex-direction: column;
+  }
+}
+
 

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../core/constants/app.constants';
 import { MfaService } from '../../core/services/mfa.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { buildProductNotFoundAction } from './voice-assistant.utils';
 
 declare global {
   interface Window {
@@ -455,12 +456,10 @@ export class VoiceAssistantComponent implements OnDestroy {
 
       if (!product) {
         this.thinking = false;
-        this.pending = { type: 'ADD_PRODUCT', qty };
-        this.say(this.random([
-          'No encontre una coincidencia clara. Dime otra pista como marca, categoria o modelo.',
-          'No estoy seguro de cual producto agregar. Prueba con el nombre, marca o una caracteristica.',
-          'Tengo dudas con ese producto. Dame un dato mas, por ejemplo modelo, marca o categoria.'
-        ]));
+        const fallback = buildProductNotFoundAction(query);
+        this.pending = null;
+        this.say(fallback.message);
+        this.router.navigate([fallback.navigateTo], { queryParams: { search: query } });
         return;
       }
 

@@ -808,12 +808,26 @@
 }
 
 @media (max-width: 720px) {
+  .topbar {
+    gap: 0.65rem;
+    padding: 0 0.85rem;
+  }
+
   .topbar__search {
     display: none;
   }
 
   .topbar__user-info {
     display: none;
+  }
+
+  .sidebar__brand {
+    padding: 0.75rem;
+  }
+
+  .sidebar__link {
+    min-height: 44px;
+    padding: 0.72rem 0.85rem;
   }
 
   .provider-plan-trigger {

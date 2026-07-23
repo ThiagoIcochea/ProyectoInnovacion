@@ -123,15 +123,25 @@ implements OnInit {
     const { isConfirmed, value } = await Swal.fire({
       title: 'Nueva variable de integración',
       html: `
-        <div style="text-align:left;display:grid;gap:10px">
-          <label>Clave</label>
+        <div style="text-align:left;display:grid;gap:12px;font-family:Inter,system-ui,sans-serif">
+          <label for="config-clave" style="font-size:0.9rem;font-weight:700;color:#0f172a">Clave</label>
           <input id="config-clave" class="swal2-input" placeholder="CLOUDINARY_CLOUD_NAME" />
-          <label>Valor</label>
+          <label for="config-valor" style="font-size:0.9rem;font-weight:700;color:#0f172a">Valor</label>
           <input id="config-valor" class="swal2-input" placeholder="mi-cloud" />
-          <label>Tipo</label>
-          <input id="config-tipo" class="swal2-input" placeholder="API" />
-          <label>Estado</label>
-          <input id="config-estado" class="swal2-input" placeholder="ACTIVO" />
+          <label for="config-tipo" style="font-size:0.9rem;font-weight:700;color:#0f172a">Tipo</label>
+          <select id="config-tipo" class="swal2-input" style="padding:0 0.9rem">
+            <option value="CONFIG">CONFIG</option>
+            <option value="API">API</option>
+            <option value="EMAIL">EMAIL</option>
+            <option value="CLOUDINARY">CLOUDINARY</option>
+            <option value="DOMINIO">DOMINIO</option>
+            <option value="SEGURIDAD">SEGURIDAD</option>
+          </select>
+          <label for="config-estado" style="font-size:0.9rem;font-weight:700;color:#0f172a">Estado</label>
+          <select id="config-estado" class="swal2-input" style="padding:0 0.9rem">
+            <option value="ACTIVO">ACTIVO</option>
+            <option value="INACTIVO">INACTIVO</option>
+          </select>
         </div>
       `,
       showCancelButton: true,
@@ -141,8 +151,8 @@ implements OnInit {
       preConfirm: () => ({
         clave: (document.getElementById('config-clave') as HTMLInputElement | null)?.value?.trim() || '',
         valor: (document.getElementById('config-valor') as HTMLInputElement | null)?.value?.trim() || '',
-        tipo: (document.getElementById('config-tipo') as HTMLInputElement | null)?.value?.trim() || 'CONFIG',
-        estado: (document.getElementById('config-estado') as HTMLInputElement | null)?.value?.trim() || 'ACTIVO'
+        tipo: (document.getElementById('config-tipo') as HTMLSelectElement | null)?.value?.trim() || 'CONFIG',
+        estado: (document.getElementById('config-estado') as HTMLSelectElement | null)?.value?.trim() || 'ACTIVO'
       })
     });
 
@@ -173,18 +183,30 @@ implements OnInit {
   }
 
   async configurar(item: any): Promise<void> {
+    const selectedType = item.tipo || 'CONFIG';
+    const selectedState = item.estado || 'ACTIVO';
     const { isConfirmed, value } = await Swal.fire({
       title: `Editar ${item.clave}`,
       html: `
-        <div style="text-align:left;display:grid;gap:10px">
-          <label>Clave</label>
+        <div style="text-align:left;display:grid;gap:12px;font-family:Inter,system-ui,sans-serif">
+          <label for="config-clave" style="font-size:0.9rem;font-weight:700;color:#0f172a">Clave</label>
           <input id="config-clave" class="swal2-input" value="${item.clave || ''}" />
-          <label>Valor</label>
+          <label for="config-valor" style="font-size:0.9rem;font-weight:700;color:#0f172a">Valor</label>
           <input id="config-valor" class="swal2-input" value="${item.valor || ''}" />
-          <label>Tipo</label>
-          <input id="config-tipo" class="swal2-input" value="${item.tipo || ''}" />
-          <label>Estado</label>
-          <input id="config-estado" class="swal2-input" value="${item.estado || ''}" />
+          <label for="config-tipo" style="font-size:0.9rem;font-weight:700;color:#0f172a">Tipo</label>
+          <select id="config-tipo" class="swal2-input" style="padding:0 0.9rem">
+            <option value="CONFIG" ${selectedType === 'CONFIG' ? 'selected' : ''}>CONFIG</option>
+            <option value="API" ${selectedType === 'API' ? 'selected' : ''}>API</option>
+            <option value="EMAIL" ${selectedType === 'EMAIL' ? 'selected' : ''}>EMAIL</option>
+            <option value="CLOUDINARY" ${selectedType === 'CLOUDINARY' ? 'selected' : ''}>CLOUDINARY</option>
+            <option value="DOMINIO" ${selectedType === 'DOMINIO' ? 'selected' : ''}>DOMINIO</option>
+            <option value="SEGURIDAD" ${selectedType === 'SEGURIDAD' ? 'selected' : ''}>SEGURIDAD</option>
+          </select>
+          <label for="config-estado" style="font-size:0.9rem;font-weight:700;color:#0f172a">Estado</label>
+          <select id="config-estado" class="swal2-input" style="padding:0 0.9rem">
+            <option value="ACTIVO" ${selectedState === 'ACTIVO' ? 'selected' : ''}>ACTIVO</option>
+            <option value="INACTIVO" ${selectedState === 'INACTIVO' ? 'selected' : ''}>INACTIVO</option>
+          </select>
         </div>
       `,
       showCancelButton: true,
@@ -194,8 +216,8 @@ implements OnInit {
       preConfirm: () => ({
         clave: (document.getElementById('config-clave') as HTMLInputElement | null)?.value?.trim() || '',
         valor: (document.getElementById('config-valor') as HTMLInputElement | null)?.value?.trim() || '',
-        tipo: (document.getElementById('config-tipo') as HTMLInputElement | null)?.value?.trim() || 'CONFIG',
-        estado: (document.getElementById('config-estado') as HTMLInputElement | null)?.value?.trim() || 'ACTIVO'
+        tipo: (document.getElementById('config-tipo') as HTMLSelectElement | null)?.value?.trim() || 'CONFIG',
+        estado: (document.getElementById('config-estado') as HTMLSelectElement | null)?.value?.trim() || 'ACTIVO'
       })
     });
 
@@ -227,6 +249,7 @@ implements OnInit {
         item.tipo = value.tipo;
         item.estado = value.estado;
 
+        this.integrations = this.integrations.map(config => config.id === item.id ? { ...config, ...item } : config);
         this.cdr.detectChanges();
 
         await Swal.fire({
