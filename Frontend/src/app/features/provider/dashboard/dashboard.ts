@@ -124,31 +124,56 @@ export class ProviderDashboardComponent implements OnInit, OnDestroy {
     const html = `
       <html>
         <head>
-          <title>Dashboard proveedor NETHINK B2B</title>
+          <title>Dashboard proveedor - Nethink S.A.C</title>
           <style>
-            body{font-family:Arial,sans-serif;color:#0f172a;padding:28px}
-            .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-            .card{border:1px solid #cbd5e1;border-radius:10px;padding:14px}
-            .bar{height:18px;background:#2563eb;margin:6px 0;border-radius:5px}
-            pre{white-space:pre-wrap;font-family:Arial,sans-serif}
+            body{font-family:Inter, Arial, sans-serif;color:#0f172a;padding:32px;background:linear-gradient(135deg,#f8fafc 0%,#eef2ff 100%)}
+            .hero{background:linear-gradient(135deg,#2563eb 0%,#7c3aed 100%);color:white;padding:24px 28px;border-radius:18px;margin-bottom:20px}
+            .hero h1{margin:0 0 6px;font-size:24px}
+            .hero p{margin:0;opacity:0.95}
+            .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+            .card{background:white;border:1px solid #e2e8f0;border-radius:14px;padding:16px;box-shadow:0 10px 20px rgba(15,23,42,0.06)}
+            .card b{display:block;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+            .card h2{margin:0 0 6px;font-size:24px;color:#0f172a}
+            .card p{margin:0;color:#475569}
+            .panel{background:white;border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin-bottom:16px;box-shadow:0 10px 20px rgba(15,23,42,0.06)}
+            .panel h2{margin-top:0;color:#1e3a8a;font-size:18px}
+            .bar{height:12px;background:#dbeafe;margin:8px 0 10px;border-radius:999px;overflow:hidden}
+            .bar > span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#2563eb,#7c3aed)}
+            .insights{white-space:pre-wrap;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px;color:#334155;line-height:1.55}
+            .pill{display:inline-block;background:#ecfdf5;color:#047857;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:bold}
+            table{width:100%;border-collapse:collapse;margin-top:8px}th,td{padding:10px;border-bottom:1px solid #e2e8f0;text-align:left}th{background:#f8fafc;color:#334155;font-size:12px;text-transform:uppercase}
+            @media print{body{padding:16px} .card,.panel{box-shadow:none}}
           </style>
         </head>
         <body>
-          <h1>Dashboard proveedor - ${this.providerName}</h1>
+          <div class="hero">
+            <div class="pill">Nethink S.A.C</div>
+            <h1>Dashboard proveedor</h1>
+            <p>Resumen ejecutivo para ${this.providerName}</p>
+          </div>
           <div class="grid">${this.metrics.map(metric => `<div class="card"><b>${metric.title}</b><h2>${metric.value}</h2><p>${metric.change}</p></div>`).join('')}</div>
-          <h2>Historico mensual</h2>
-          ${this.historyChart.map(item => `<p>${item.label}: ${item.count} solicitudes / S/ ${item.total.toFixed(2)}</p><div class="bar" style="width:${item.width}%"></div>`).join('')}
-          <h2>Estados</h2>
-          ${this.statusChart.map(item => `<p>${item.label}: ${item.count}</p><div class="bar" style="width:${item.width}%;background:${item.color}"></div>`).join('')}
-          <h2>Analisis IA</h2>
-          <pre>${this.insights}</pre>
+          <div class="panel">
+            <h2>Histórico mensual</h2>
+            ${this.historyChart.map(item => `<div><strong>${item.label}</strong> · ${item.count} solicitudes · S/ ${item.total.toFixed(2)}</div><div class="bar"><span style="width:${item.width}%"></span></div>`).join('')}
+          </div>
+          <div class="panel">
+            <h2>Estados de solicitudes</h2>
+            ${this.statusChart.map(item => `<div><strong>${item.label}</strong> · ${item.count}</div><div class="bar"><span style="width:${item.width}%;background:${item.color}"></span></div>`).join('')}
+          </div>
+          <div class="panel">
+            <h2>Resumen de IA</h2>
+            <div class="insights">${this.insights}</div>
+          </div>
         </body>
       </html>`;
 
-    const win = window.open('', '_blank');
+    const win = window.open('', '_blank', 'width=1200,height=900');
     win?.document.write(html);
     win?.document.close();
-    win?.print();
+    setTimeout(() => {
+      win?.focus();
+      win?.print();
+    }, 300);
   }
 
   private generarInsights(

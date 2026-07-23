@@ -18,6 +18,10 @@
 
     </div>
 
+    <button class="btn-primary" (click)="crearConfiguracion()">
+      + Nueva variable
+    </button>
+
   </div>
 
   <div class="integration-grid">
@@ -81,6 +85,14 @@
           (click)="configurar(item)">
 
           Configurar
+
+        </button>
+
+        <button
+          class="btn-secondary"
+          (click)="eliminarConfiguracion(item)">
+
+          Eliminar
 
         </button>
 

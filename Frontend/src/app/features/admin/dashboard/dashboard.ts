@@ -195,18 +195,52 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   exportarDashboard(): void {
-    const rows = [
-      ['Métrica', 'Valor', 'Detalle'],
-      ...this.metrics.map(metric => [metric.title, metric.value, metric.change])
-    ];
-    const csv = rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'dashboard-admin.csv';
-    link.click();
-    URL.revokeObjectURL(url);
+    const html = `
+      <html>
+        <head>
+          <title>Dashboard administrativo - Nethink S.A.C</title>
+          <style>
+            body{font-family:Inter, Arial, sans-serif;color:#0f172a;padding:32px;background:linear-gradient(135deg,#f8fafc 0%,#e0f2fe 100%)}
+            .hero{background:linear-gradient(135deg,#0f172a 0%,#2563eb 100%);color:white;padding:24px 28px;border-radius:18px;margin-bottom:20px}
+            .hero h1{margin:0 0 6px;font-size:24px}
+            .hero p{margin:0;opacity:0.95}
+            .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+            .card{background:white;border:1px solid #e2e8f0;border-radius:14px;padding:16px;box-shadow:0 10px 20px rgba(15,23,42,0.06)}
+            .card b{display:block;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+            .card h2{margin:0 0 6px;font-size:24px;color:#0f172a}
+            .card p{margin:0;color:#475569}
+            .panel{background:white;border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin-bottom:16px;box-shadow:0 10px 20px rgba(15,23,42,0.06)}
+            .panel h2{margin-top:0;color:#1d4ed8;font-size:18px}
+            .bar{height:12px;background:#dbeafe;margin:8px 0 10px;border-radius:999px;overflow:hidden}
+            .bar > span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#2563eb,#0ea5e9)}
+            ul{padding-left:18px;color:#334155;line-height:1.6}
+            @media print{body{padding:16px} .card,.panel{box-shadow:none}}
+          </style>
+        </head>
+        <body>
+          <div class="hero">
+            <h1>Dashboard administrativo</h1>
+            <p>Resumen ejecutivo · Nethink S.A.C</p>
+          </div>
+          <div class="grid">${this.metrics.map(metric => `<div class="card"><b>${metric.title}</b><h2>${metric.value}</h2><p>${metric.change}</p></div>`).join('')}</div>
+          <div class="panel">
+            <h2>Distribución mensual</h2>
+            ${this.chartBars.map(item => `<div><strong>${item.label}</strong> · ${item.height}%</div><div class="bar"><span style="width:${item.height}%"></span></div>`).join('')}
+          </div>
+          <div class="panel">
+            <h2>Actividad reciente</h2>
+            <ul>${this.activity.map(item => `<li><strong>${item.title}</strong> — ${item.detail} (${item.status})</li>`).join('')}</ul>
+          </div>
+        </body>
+      </html>`;
+
+    const win = window.open('', '_blank', 'width=1200,height=900');
+    win?.document.write(html);
+    win?.document.close();
+    setTimeout(() => {
+      win?.focus();
+      win?.print();
+    }, 300);
   }
 
   private formatDate(date?: string): string {

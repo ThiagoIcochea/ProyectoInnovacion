@@ -17,6 +17,7 @@ import com.nethink.b2b.repository.ProveedorRepository;
 import com.nethink.b2b.repository.ReclamoRepository;
 import com.nethink.b2b.repository.RolRepository;
 import com.nethink.b2b.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +42,7 @@ public class UsuarioService {
     private final LogsSistemaService logsSistemaService;
     private final ProveedorRepository proveedorRepository;
     private final ReclamoRepository reclamoRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UsuarioService(
             UsuarioRepository usuarioRepo,
@@ -50,7 +52,8 @@ public class UsuarioService {
             EmailService emailService,
             LogsSistemaService logsSistemaService,
             ProveedorRepository proveedorRepository,
-            ReclamoRepository reclamoRepository
+            ReclamoRepository reclamoRepository,
+            PasswordEncoder passwordEncoder
     ) {
         this.usuarioRepo = usuarioRepo;
         this.prefRepo = prefRepo;
@@ -60,6 +63,7 @@ public class UsuarioService {
         this.logsSistemaService = logsSistemaService;
         this.proveedorRepository = proveedorRepository;
         this.reclamoRepository = reclamoRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void registrarCliente(RegisterClientRequest req,  HttpServletRequest request) {
@@ -79,7 +83,7 @@ public class UsuarioService {
         usuario.setCorreo(req.getCorreo());
         usuario.setTelefono(req.getTelefono());
         usuario.setWhatsapp(req.getWhatsapp());
-        usuario.setPassword(req.getPassword());
+        usuario.setPassword(encodePassword(req.getPassword()));
         usuario.setDireccion(req.getDireccion());
         usuario.setFotoPerfil(req.getFotoPerfil());
 
@@ -357,7 +361,7 @@ public AdminUserResponse crearUsuarioAdmin(AdminCreateUserRequest req, HttpServl
     usuario.setTelefono(req.getTelefono());
     usuario.setWhatsapp(req.getWhatsapp());
     usuario.setDireccion(req.getDireccion());
-    usuario.setPassword(req.getPassword());
+    usuario.setPassword(encodePassword(req.getPassword()));
     usuario.setRol(rol);
 
     if (req.getEstado() != null && !req.getEstado().isBlank()) {
@@ -403,7 +407,7 @@ public AdminUserResponse actualizarUsuarioAdmin(Integer idUsuario, AdminUserUpda
     if (req.getTelefono() != null) usuario.setTelefono(req.getTelefono().trim());
     if (req.getWhatsapp() != null) usuario.setWhatsapp(req.getWhatsapp().trim());
     if (req.getDireccion() != null) usuario.setDireccion(req.getDireccion().trim());
-    if (req.getPassword() != null && !req.getPassword().isBlank()) usuario.setPassword(req.getPassword());
+    if (req.getPassword() != null && !req.getPassword().isBlank()) usuario.setPassword(encodePassword(req.getPassword()));
     // El rol queda fijo para evitar cambios no autorizados desde la gestión administrativa.
 
     EstadoUsuario estadoAnterior = usuario.getEstado();
@@ -443,8 +447,12 @@ public void completarResetPassword(PasswordResetCompleteRequest req) {
         throw new RuntimeException("La nueva contrasena debe tener al menos 6 caracteres");
     }
 
-    usuario.setPassword(req.getNewPassword());
+    usuario.setPassword(encodePassword(req.getNewPassword()));
     usuarioRepo.save(usuario);
+}
+
+private String encodePassword(String password) {
+    return passwordEncoder.encode(password);
 }
 
 private void reactivarProveedorSiCorresponde(Usuario usuario) {

@@ -46,14 +46,12 @@ export class ProviderDeliveriesComponent implements OnInit, OnDestroy {
 
 
   ngOnInit(): void {
-      window.addEventListener(
-    'providerCountsRefresh',
-    this.providerRefreshHandler
-  );
+    window.addEventListener('providerCountsRefresh', this.providerRefreshHandler);
     window.addEventListener('deliveryDelayClaimsUpdated', this.delayClaimsUpdatedHandler);
     window.addEventListener('storage', this.delayClaimsUpdatedHandler);
     this.cargarReclamosLocales();
     this.recargarSolicitudes();
+    setTimeout(() => this.recargarSolicitudes(), 600);
   }
 
   ngOnDestroy(): void {
@@ -66,8 +64,7 @@ export class ProviderDeliveriesComponent implements OnInit, OnDestroy {
   }
 
 recargarSolicitudes(): void {
-
-  this.deliveriesService
+    this.deliveriesService
     .listarSolicitudesEntrega()
     .subscribe({
 

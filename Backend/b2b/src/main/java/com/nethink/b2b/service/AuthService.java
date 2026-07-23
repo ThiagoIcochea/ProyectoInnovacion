@@ -8,6 +8,7 @@ import com.nethink.b2b.entity.enums.EstadoUsuario;
 import com.nethink.b2b.repository.UsuarioRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,6 +28,9 @@ public class AuthService {
 
     @Autowired
     private LoginSecurityService loginSecurityService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public MfaStartResponse login(String correo, String password, HttpServletRequest request) {
 
@@ -55,7 +59,10 @@ public class AuthService {
             throw new RuntimeException("Usuario inactivo");
         }
 
-        if (!user.getPassword().equals(password)) {
+        boolean passwordMatches = passwordEncoder.matches(password, user.getPassword())
+                || user.getPassword().equals(password);
+
+        if (!passwordMatches) {
             loginSecurityService.registrarFallo(user.getCorreo(), user, ip);
             logsSistemaService.registrarLog(
                     user.getIdUsuario(),

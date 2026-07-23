@@ -48,7 +48,7 @@
           <div>
             <strong>{{ getPagoCode(payment) }}</strong>
             <p>{{ payment.nombreEmpresa }}</p>
-            <b>$ {{ payment.totalSolicitud || 0 }}</b>
+            <b>S/ {{ payment.totalSolicitud || 0 }}</b>
           </div>
 
           <div class="payment-meta">
@@ -154,7 +154,7 @@
 
           <div class="amount-box">
             <span>Monto a validar</span>
-            <strong>$ {{ selectedPayment?.totalSolicitud }}</strong>
+            <strong>S/ {{ selectedPayment?.totalSolicitud }}</strong>
           </div>
 
           <div class="validation-box">

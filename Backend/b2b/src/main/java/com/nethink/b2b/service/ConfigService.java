@@ -33,6 +33,26 @@ public class ConfigService {
 
         repo.save(config);
     }
+
+    public void crear(String clave, String valor, String tipo, String estado) {
+        if (clave == null || clave.isBlank()) {
+            throw new RuntimeException("La clave de configuración es obligatoria");
+        }
+
+        Configuracion config = repo.findByClave(clave.trim())
+                .orElse(new Configuracion());
+
+        config.setClave(clave.trim());
+        config.setValor(valor);
+        config.setTipo(tipo == null || tipo.isBlank() ? "CONFIG" : tipo.trim().toUpperCase());
+        config.setEstado(estado == null || estado.isBlank() ? "ACTIVO" : estado.trim().toUpperCase());
+
+        repo.save(config);
+    }
+
+    public void eliminar(Integer id) {
+        repo.deleteById(id);
+    }
     
     public List<ConfiguracionResponse> listar() {
 
@@ -59,19 +79,32 @@ public class ConfigService {
             .toList();
 }
     
-    public void actualizarValor(
-        Integer id,
-        String valor
-) {
+    public void actualizarValor(Integer id, String valor) {
+        actualizarDatos(id, null, valor, null, null);
+    }
 
-    Configuracion config =
-            repo.findById(id)
-            .orElseThrow();
+    public void actualizarDatos(Integer id, String clave, String valor, String tipo, String estado) {
 
-    config.setValor(valor);
+        Configuracion config = repo.findById(id).orElseThrow();
 
-    repo.save(config);
-}
+        if (clave != null) {
+            config.setClave(clave.trim());
+        }
+
+        if (valor != null) {
+            config.setValor(valor);
+        }
+
+        if (tipo != null && !tipo.isBlank()) {
+            config.setTipo(tipo.trim().toUpperCase());
+        }
+
+        if (estado != null && !estado.isBlank()) {
+            config.setEstado(estado.trim().toUpperCase());
+        }
+
+        repo.save(config);
+    }
     
    public String probarConexion(Integer id) {
 

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,6 +78,9 @@ private LogsApiRepository logsApiRepository;
     private PlanPrecioRepository planPrecioRepository;
 
     @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
     private PlanRepository planRepository;
 
     @Transactional
@@ -132,7 +136,7 @@ private LogsApiRepository logsApiRepository;
         user.setCorreo(req.getCorreo());
         user.setTelefono(req.getTelefono());
         user.setWhatsapp(req.getWhatsapp());
-        user.setPassword(req.getPassword());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setDireccion(req.getDireccion());
         user.setEstado(EstadoUsuario.ACTIVO);
         user.setFechaRegistro(LocalDateTime.now());

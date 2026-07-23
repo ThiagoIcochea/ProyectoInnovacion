@@ -119,37 +119,113 @@ implements OnInit {
     });
   }
 
+  async crearConfiguracion(): Promise<void> {
+    const { isConfirmed, value } = await Swal.fire({
+      title: 'Nueva variable de integración',
+      html: `
+        <div style="text-align:left;display:grid;gap:10px">
+          <label>Clave</label>
+          <input id="config-clave" class="swal2-input" placeholder="CLOUDINARY_CLOUD_NAME" />
+          <label>Valor</label>
+          <input id="config-valor" class="swal2-input" placeholder="mi-cloud" />
+          <label>Tipo</label>
+          <input id="config-tipo" class="swal2-input" placeholder="API" />
+          <label>Estado</label>
+          <input id="config-estado" class="swal2-input" placeholder="ACTIVO" />
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Crear',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false,
+      preConfirm: () => ({
+        clave: (document.getElementById('config-clave') as HTMLInputElement | null)?.value?.trim() || '',
+        valor: (document.getElementById('config-valor') as HTMLInputElement | null)?.value?.trim() || '',
+        tipo: (document.getElementById('config-tipo') as HTMLInputElement | null)?.value?.trim() || 'CONFIG',
+        estado: (document.getElementById('config-estado') as HTMLInputElement | null)?.value?.trim() || 'ACTIVO'
+      })
+    });
+
+    if (!isConfirmed || !value?.clave) {
+      return;
+    }
+
+    const token = await this.requestAdminMfa();
+    if (!token) {
+      return;
+    }
+
+    this.http.post(
+      this.API_URL,
+      value,
+      {
+        headers: this.headers().set('X-MFA-Authorization', token)
+      }
+    ).subscribe({
+      next: async () => {
+        await Swal.fire({ icon: 'success', title: 'Variable creada', text: 'La configuración se agregó correctamente.' });
+        this.listar();
+      },
+      error: async (err) => {
+        await Swal.fire({ icon: 'error', title: 'No se pudo crear', text: extractValidationMessage(err, 'No se pudo crear la configuración.') });
+      }
+    });
+  }
+
   async configurar(item: any): Promise<void> {
     const { isConfirmed, value } = await Swal.fire({
       title: `Editar ${item.clave}`,
-      input: 'text',
-      inputValue: item.valor,
+      html: `
+        <div style="text-align:left;display:grid;gap:10px">
+          <label>Clave</label>
+          <input id="config-clave" class="swal2-input" value="${item.clave || ''}" />
+          <label>Valor</label>
+          <input id="config-valor" class="swal2-input" value="${item.valor || ''}" />
+          <label>Tipo</label>
+          <input id="config-tipo" class="swal2-input" value="${item.tipo || ''}" />
+          <label>Estado</label>
+          <input id="config-estado" class="swal2-input" value="${item.estado || ''}" />
+        </div>
+      `,
       showCancelButton: true,
       confirmButtonText: 'Guardar',
       cancelButtonText: 'Cancelar',
-      allowOutsideClick: false
+      allowOutsideClick: false,
+      preConfirm: () => ({
+        clave: (document.getElementById('config-clave') as HTMLInputElement | null)?.value?.trim() || '',
+        valor: (document.getElementById('config-valor') as HTMLInputElement | null)?.value?.trim() || '',
+        tipo: (document.getElementById('config-tipo') as HTMLInputElement | null)?.value?.trim() || 'CONFIG',
+        estado: (document.getElementById('config-estado') as HTMLInputElement | null)?.value?.trim() || 'ACTIVO'
+      })
     });
 
-    const nuevoValor = String(value || '').trim();
+    if (!isConfirmed || !value?.clave) {
+      return;
+    }
 
-    if (!isConfirmed || nuevoValor === '') {
+    const token = await this.requestAdminMfa();
+    if (!token) {
       return;
     }
 
     this.http.put(
       `${this.API_URL}/${item.id}`,
       {
-        valor: nuevoValor
+        valor: value.valor,
+        clave: value.clave,
+        tipo: value.tipo,
+        estado: value.estado
       },
       {
-        headers: this.headers()
+        headers: this.headers().set('X-MFA-Authorization', token)
       }
     )
     .subscribe({
-
       next: async () => {
-
-        item.valor = nuevoValor;
+        item.clave = value.clave;
+        item.valor = value.valor;
+        item.tipo = value.tipo;
+        item.estado = value.estado;
 
         this.cdr.detectChanges();
 
@@ -159,11 +235,7 @@ implements OnInit {
           text: 'El valor quedó guardado correctamente.'
         });
       },
-
       error: async (err) => {
-
-        console.error(err);
-
         await Swal.fire({
           icon: 'error',
           title: 'No se pudo actualizar',
@@ -171,5 +243,49 @@ implements OnInit {
         });
       }
     });
+  }
+
+  async eliminarConfiguracion(item: any): Promise<void> {
+    const { isConfirmed } = await Swal.fire({
+      icon: 'warning',
+      title: 'Eliminar variable',
+      text: `¿Deseas eliminar ${item.clave}?`,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    const token = await this.requestAdminMfa();
+    if (!token) {
+      return;
+    }
+
+    this.http.delete(
+      `${this.API_URL}/${item.id}`,
+      {
+        headers: this.headers().set('X-MFA-Authorization', token)
+      }
+    ).subscribe({
+      next: async () => {
+        await Swal.fire({ icon: 'success', title: 'Variable eliminada', text: 'La configuración se quitó correctamente.' });
+        this.listar();
+      },
+      error: async (err) => {
+        await Swal.fire({ icon: 'error', title: 'No se pudo eliminar', text: extractValidationMessage(err, 'No se pudo eliminar la configuración.') });
+      }
+    });
+  }
+
+  private async requestAdminMfa(): Promise<string | null> {
+    try {
+      const email = localStorage.getItem('auth_user_email') || '';
+      return await this.http.post<{ mfaActionToken?: string }>(`${APP_API_BASE_URL}/auth/mfa/action-token`, { email, purpose: 'ADMIN_ACTION' }).toPromise()?.then((res: any) => res?.mfaActionToken || null);
+    } catch (error) {
+      return null;
+    }
   }
 }
