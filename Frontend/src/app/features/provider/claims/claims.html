@@ -102,12 +102,18 @@
             </div>
           </div>
 
-          <ng-container *ngIf="getEvidenceUrl(claim)">
-            <div class="evidence-preview" *ngIf="getEvidenceType(getEvidenceUrl(claim)) !== 'other'">
+        </div>
+
+        <aside class="claim-progress-card">
+          <section class="evidence-card">
+            <h3>Evidencia adjunta</h3>
+
+            <div class="evidence-preview">
               <img
                 *ngIf="getEvidenceType(getEvidenceUrl(claim)) === 'image'"
                 [src]="getEvidenceUrl(claim)"
                 alt="Evidencia del reclamo"
+                class="evidence-image"
                 [style.transform]="'scale(' + evidenceZoom + ')'"
               />
 
@@ -115,24 +121,46 @@
                 *ngIf="getEvidenceType(getEvidenceUrl(claim)) === 'pdf'"
                 [src]="getEvidenceUrl(claim)"
                 title="Evidencia del reclamo"
+                class="evidence-iframe"
                 [style.transform]="'scale(' + evidenceZoom + ')'"
               ></iframe>
+
+              <div class="evidence-empty" *ngIf="!getEvidenceUrl(claim)">
+                Evidencia no disponible
+              </div>
+
+              <div class="evidence-empty" *ngIf="getEvidenceType(getEvidenceUrl(claim)) === 'other' && getEvidenceUrl(claim)">
+                El archivo adjunto no es una imagen ni un PDF. Puedes descargarlo directamente.
+              </div>
             </div>
 
-            <div class="evidence-actions" *ngIf="getEvidenceUrl(claim)">
-              <button type="button" class="btn-secondary" (click)="zoomInEvidence()">Zoom +</button>
-              <button type="button" class="btn-secondary" (click)="zoomOutEvidence()">Zoom -</button>
-              <a class="btn-secondary" [href]="getEvidenceUrl(claim)" target="_blank" rel="noopener">Descargar</a>
-            </div>
+            <div class="evidence-actions">
+              <button
+                type="button"
+                class="btn-secondary"
+                (click)="zoomInEvidence()"
+                [disabled]="evidenceZoom >= maxEvidenceZoom || !getEvidenceUrl(claim)">
+                Zoom +
+              </button>
 
-            <div class="evidence-fallback" *ngIf="getEvidenceType(getEvidenceUrl(claim)) === 'other'">
-              <p>El adjunto no es una imagen ni un PDF, pero puedes abrirlo o descargarlo desde el enlace.</p>
-              <a class="btn-secondary" [href]="getEvidenceUrl(claim)" target="_blank" rel="noopener">Abrir adjunto</a>
-            </div>
-          </ng-container>
-        </div>
+              <button
+                type="button"
+                class="btn-secondary"
+                (click)="zoomOutEvidence()"
+                [disabled]="evidenceZoom <= minEvidenceZoom || !getEvidenceUrl(claim)">
+                Zoom -
+              </button>
 
-        <aside class="claim-progress-card">
+              <button
+                type="button"
+                class="btn-secondary"
+                (click)="downloadEvidence(claim)"
+                [disabled]="!getEvidenceUrl(claim)">
+                Descargar
+              </button>
+            </div>
+          </section>
+
           <h3>Historial</h3>
 
           <div class="timeline" *ngIf="claim.historial.length; else noHistory">
@@ -212,4 +240,3 @@
     </ng-template>
   </div>
 </div>
-
