@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { APP_API_BASE_URL } from '../../../core/constants/app.constants';
 import { extractValidationMessage } from '../../../core/utils/form-validation';
+import { MfaService } from '../../../core/services/mfa.service';
 
 @Component({
   selector: 'app-admin-integrations',
@@ -30,12 +31,10 @@ implements OnInit {
   integrations: any[] = [];
   loading = true;
   readonly skeletonCards = Array.from({ length: 6 });
-  readonly configKeyOptions = ['CLOUDINARY', 'DOMINIO', 'EMAIL', 'API', 'URL', 'CONFIG', 'SEGURIDAD'];
-  readonly configTypeOptions = ['CONFIG', 'API', 'URL', 'EMAIL', 'CLOUDINARY', 'DOMINIO', 'SEGURIDAD'];
-
   constructor(
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private mfaService: MfaService
   ) {}
 
   ngOnInit(): void {
@@ -124,7 +123,7 @@ implements OnInit {
   async crearConfiguracion(): Promise<void> {
     const { isConfirmed, value } = await Swal.fire({
       title: 'Nueva variable de integración',
-      html: this.buildConfigModalHtml('', 'CONFIG', 'ACTIVO', ''),
+      html: this.buildConfigModalHtml('', 'KEY', 'ACTIVO', ''),
       customClass: {
         container: 'integrations-swal-container',
         popup: 'integrations-swal-popup',
@@ -140,9 +139,9 @@ implements OnInit {
       cancelButtonText: 'Cancelar',
       allowOutsideClick: false,
       preConfirm: () => ({
-        clave: (document.getElementById('config-clave') as HTMLSelectElement | null)?.value?.trim() || '',
+        clave: (document.getElementById('config-clave') as HTMLInputElement | null)?.value?.trim() || '',
         valor: (document.getElementById('config-valor') as HTMLInputElement | null)?.value?.trim() || '',
-        tipo: (document.getElementById('config-tipo') as HTMLSelectElement | null)?.value?.trim() || 'CONFIG',
+        tipo: (document.getElementById('config-tipo') as HTMLInputElement | null)?.value?.trim() || 'KEY',
         estado: (document.getElementById('config-estado') as HTMLSelectElement | null)?.value?.trim() || 'ACTIVO'
       })
     });
@@ -195,9 +194,9 @@ implements OnInit {
       cancelButtonText: 'Cancelar',
       allowOutsideClick: false,
       preConfirm: () => ({
-        clave: (document.getElementById('config-clave') as HTMLSelectElement | null)?.value?.trim() || '',
+        clave: (document.getElementById('config-clave') as HTMLInputElement | null)?.value?.trim() || '',
         valor: (document.getElementById('config-valor') as HTMLInputElement | null)?.value?.trim() || '',
-        tipo: (document.getElementById('config-tipo') as HTMLSelectElement | null)?.value?.trim() || 'CONFIG',
+        tipo: (document.getElementById('config-tipo') as HTMLInputElement | null)?.value?.trim() || 'KEY',
         estado: (document.getElementById('config-estado') as HTMLSelectElement | null)?.value?.trim() || 'ACTIVO'
       })
     });
@@ -286,17 +285,13 @@ implements OnInit {
 
   private buildConfigModalHtml(selectedKey: string, selectedType: string, selectedState: string, currentValue: string): string {
     const escapedValue = this.escapeHtml(currentValue || '');
-    const keyOptions = this.buildOptionsHtml(this.configKeyOptions, selectedKey);
-    const typeOptions = this.buildOptionsHtml(this.configTypeOptions, selectedType);
     const stateOptions = this.buildOptionsHtml(['ACTIVO', 'INACTIVO'], selectedState);
 
     return `
       <div class="config-modal-shell">
         <div class="config-modal-field">
           <label class="config-modal-label" for="config-clave">Clave</label>
-          <select id="config-clave" class="config-modal-input">
-            ${keyOptions}
-          </select>
+          <input id="config-clave" class="config-modal-input" value="${this.escapeHtml(selectedKey || '')}" placeholder="Ej. AI_COMMENTS" autocomplete="off" />
         </div>
 
         <div class="config-modal-field">
@@ -306,9 +301,7 @@ implements OnInit {
 
         <div class="config-modal-field">
           <label class="config-modal-label" for="config-tipo">Tipo</label>
-          <select id="config-tipo" class="config-modal-input">
-            ${typeOptions}
-          </select>
+          <input id="config-tipo" class="config-modal-input" value="${this.escapeHtml(selectedType || 'KEY')}" placeholder="Ej. KEY, URL o CONFIG" autocomplete="off" />
         </div>
 
         <div class="config-modal-field">
@@ -347,8 +340,19 @@ implements OnInit {
   private async requestAdminMfa(): Promise<string | null> {
     try {
       const email = localStorage.getItem('auth_user_email') || '';
-      return await this.http.post<{ mfaActionToken?: string }>(`${APP_API_BASE_URL}/auth/mfa/action-token`, { email, purpose: 'ADMIN_ACTION' }).toPromise()?.then((res: any) => res?.mfaActionToken || null);
-    } catch (error) {
+      if (!email) {
+        throw new Error('No se encontrÃ³ el correo del administrador activo.');
+      }
+
+      return await this.mfaService.requestActionToken(email, 'ADMIN_ACTION');
+    } catch (error: any) {
+      if (error?.message && !error.message.includes('cancelada')) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'No se pudo validar el MFA',
+          text: error.message
+        });
+      }
       return null;
     }
   }
