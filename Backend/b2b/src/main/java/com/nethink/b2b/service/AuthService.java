@@ -32,6 +32,30 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    public void setRepo(UsuarioRepository repo) {
+        this.repo = repo;
+    }
+
+    public void setLogsSistemaService(LogsSistemaService logsSistemaService) {
+        this.logsSistemaService = logsSistemaService;
+    }
+
+    public void setJwtUtil(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
+
+    public void setMfaService(MfaService mfaService) {
+        this.mfaService = mfaService;
+    }
+
+    public void setLoginSecurityService(LoginSecurityService loginSecurityService) {
+        this.loginSecurityService = loginSecurityService;
+    }
+
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
     public MfaStartResponse login(String correo, String password, HttpServletRequest request) {
 
         String ip = loginSecurityService.obtenerIp(request);
@@ -59,8 +83,7 @@ public class AuthService {
             throw new RuntimeException("Usuario inactivo");
         }
 
-        boolean passwordMatches = passwordEncoder.matches(password, user.getPassword())
-                || user.getPassword().equals(password);
+        boolean passwordMatches = passwordMatches(password, user.getPassword());
 
         if (!passwordMatches) {
             loginSecurityService.registrarFallo(user.getCorreo(), user, ip);
@@ -105,6 +128,18 @@ public class AuthService {
         );
 
         return new LoginResponse(token, user.getCorreo(), user.getIdUsuario(), user.getRol().getNombre());
+    }
+
+    private boolean passwordMatches(String rawPassword, String storedPassword) {
+        if (rawPassword == null || rawPassword.isBlank() || storedPassword == null || storedPassword.isBlank()) {
+            return false;
+        }
+
+        if (passwordEncoder != null && passwordEncoder.matches(rawPassword, storedPassword)) {
+            return true;
+        }
+
+        return storedPassword.equals(rawPassword);
     }
 
     private String redirectByRole(String rol) {

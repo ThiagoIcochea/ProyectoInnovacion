@@ -136,7 +136,7 @@ private LogsApiRepository logsApiRepository;
         user.setCorreo(req.getCorreo());
         user.setTelefono(req.getTelefono());
         user.setWhatsapp(req.getWhatsapp());
-        user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setPassword(encodePassword(req.getPassword()));
         user.setDireccion(req.getDireccion());
         user.setEstado(EstadoUsuario.ACTIVO);
         user.setFechaRegistro(LocalDateTime.now());
@@ -622,7 +622,11 @@ private void validarRegistroProveedor(RegisterProviderRequest req) {
     }
 }
 
-private void validarTexto(String valor, String mensaje, String regex) {
+private String encodePassword(String password) {
+        return passwordEncoder.encode(password);
+    }
+
+    private void validarTexto(String valor, String mensaje, String regex) {
     if (valor == null || !valor.trim().matches(regex)) {
         throw new RuntimeException(mensaje);
     }
