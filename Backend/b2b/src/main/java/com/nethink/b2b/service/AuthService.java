@@ -135,11 +135,7 @@ public class AuthService {
             return false;
         }
 
-        if (passwordEncoder != null && passwordEncoder.matches(rawPassword, storedPassword)) {
-            return true;
-        }
-
-        return storedPassword.equals(rawPassword);
+        return passwordEncoder != null && passwordEncoder.matches(rawPassword, storedPassword);
     }
 
     private String redirectByRole(String rol) {

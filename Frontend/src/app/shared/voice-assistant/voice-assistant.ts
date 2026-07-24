@@ -33,10 +33,15 @@ export class VoiceAssistantComponent implements OnDestroy {
   fabLeft: number | null = null;
   fabTop: number | null = null;
   private dragging = false;
+  private suppressFabClick = false;
+  private fabPointerId: number | null = null;
+  private fabElement: HTMLElement | null = null;
   private fabDragStartX = 0;
   private fabDragStartY = 0;
   private fabStartLeft = 0;
   private fabStartTop = 0;
+  private fabPointerX = 0;
+  private fabPointerY = 0;
   private fabDragFrame: number | null = null;
   private pending:
     | { type: 'TRACKING_ID' }
@@ -63,28 +68,56 @@ export class VoiceAssistantComponent implements OnDestroy {
       window.cancelAnimationFrame(this.fabDragFrame);
       this.fabDragFrame = null;
     }
+    window.removeEventListener('pointermove', this.onFabPointerMove);
+    window.removeEventListener('pointerup', this.onFabPointerUp);
+    window.removeEventListener('pointercancel', this.onFabPointerUp);
     window.speechSynthesis?.cancel();
   }
 
   onFabPointerDown(event: PointerEvent): void {
-    event.preventDefault();
-    this.dragging = true;
+    if (event.button !== 0 && event.pointerType === 'mouse') {
+      return;
+    }
+
+    this.dragging = false;
+    this.suppressFabClick = false;
+    this.fabPointerId = event.pointerId;
+    this.fabElement = event.currentTarget as HTMLElement;
     this.fabDragStartX = event.clientX;
     this.fabDragStartY = event.clientY;
     this.fabStartLeft = this.fabLeft ?? (window.innerWidth - 22 - 58);
     this.fabStartTop = this.fabTop ?? (window.innerHeight - 22 - 58);
-    this.fabLeft = this.fabStartLeft;
-    this.fabTop = this.fabStartTop;
-    this.fabRight = null;
-    this.fabBottom = null;
-    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    this.fabPointerX = event.clientX;
+    this.fabPointerY = event.clientY;
+    this.fabElement.setPointerCapture(event.pointerId);
     window.addEventListener('pointermove', this.onFabPointerMove);
-    window.addEventListener('pointerup', this.onFabPointerUp, { once: true });
+    window.addEventListener('pointerup', this.onFabPointerUp);
+    window.addEventListener('pointercancel', this.onFabPointerUp);
   }
 
   private onFabPointerMove = (event: PointerEvent): void => {
-    if (!this.dragging) {
+    if (event.pointerId !== this.fabPointerId) {
       return;
+    }
+
+    this.fabPointerX = event.clientX;
+    this.fabPointerY = event.clientY;
+
+    const dx = this.fabPointerX - this.fabDragStartX;
+    const dy = this.fabPointerY - this.fabDragStartY;
+
+    if (!this.dragging) {
+      // Preserve a normal tap/click; only turn it into a drag after a deliberate movement.
+      if (Math.hypot(dx, dy) < 7) {
+        return;
+      }
+
+      this.dragging = true;
+      this.suppressFabClick = true;
+      this.fabLeft = this.fabStartLeft;
+      this.fabTop = this.fabStartTop;
+      this.fabRight = null;
+      this.fabBottom = null;
     }
 
     if (this.fabDragFrame) {
@@ -92,26 +125,45 @@ export class VoiceAssistantComponent implements OnDestroy {
     }
 
     this.fabDragFrame = window.requestAnimationFrame(() => {
-      const dx = event.clientX - this.fabDragStartX;
-      const dy = event.clientY - this.fabDragStartY;
+      const currentDx = this.fabPointerX - this.fabDragStartX;
+      const currentDy = this.fabPointerY - this.fabDragStartY;
 
-      this.fabLeft = Math.min(Math.max(8, this.fabStartLeft + dx), window.innerWidth - 66);
-      this.fabTop = Math.min(Math.max(8, this.fabStartTop + dy), window.innerHeight - 66);
+      this.fabLeft = Math.min(Math.max(8, this.fabStartLeft + currentDx), window.innerWidth - 66);
+      this.fabTop = Math.min(Math.max(8, this.fabStartTop + currentDy), window.innerHeight - 66);
       this.fabDragFrame = null;
     });
   };
 
   private onFabPointerUp = (event?: PointerEvent): void => {
+    if (event && event.pointerId !== this.fabPointerId) {
+      return;
+    }
+
     this.dragging = false;
     if (this.fabDragFrame) {
       window.cancelAnimationFrame(this.fabDragFrame);
       this.fabDragFrame = null;
     }
     window.removeEventListener('pointermove', this.onFabPointerMove);
-    if (event?.currentTarget instanceof HTMLElement) {
-      event.currentTarget.releasePointerCapture?.(event.pointerId);
+    window.removeEventListener('pointerup', this.onFabPointerUp);
+    window.removeEventListener('pointercancel', this.onFabPointerUp);
+    if (this.fabPointerId !== null && this.fabElement?.hasPointerCapture(this.fabPointerId)) {
+      this.fabElement.releasePointerCapture(this.fabPointerId);
     }
+    this.fabPointerId = null;
+    this.fabElement = null;
   };
+
+  onFabClick(event: MouseEvent): void {
+    if (this.suppressFabClick) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.suppressFabClick = false;
+      return;
+    }
+
+    this.toggle();
+  }
 
   toggle(): void {
     if (this.listening || this.thinking) {

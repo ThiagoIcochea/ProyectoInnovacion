@@ -16,7 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -76,8 +77,33 @@ class AuthServicePasswordTest {
                 null
         )).thenReturn(new com.nethink.b2b.dto.response.MfaStartResponse());
 
-        authService.login("cliente@test.com", rawPassword, request);
+        assertDoesNotThrow(() -> authService.login("cliente@test.com", rawPassword, request));
 
-        assertTrue(true);
+    }
+
+    @Test
+    void loginRejectsPlainTextStoredPassword() {
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        authService = new AuthService();
+        authService.setRepo(repo);
+        authService.setLogsSistemaService(logsSistemaService);
+        authService.setJwtUtil(jwtUtil);
+        authService.setMfaService(mfaService);
+        authService.setLoginSecurityService(loginSecurityService);
+        authService.setPasswordEncoder(encoder);
+
+        Usuario user = new Usuario();
+        user.setCorreo("cliente@test.com");
+        user.setPassword("ClaveSegura123");
+        user.setEstado(EstadoUsuario.ACTIVO);
+        Rol rol = new Rol();
+        rol.setNombre("CLIENTE");
+        user.setRol(rol);
+
+        when(repo.findByCorreo("cliente@test.com")).thenReturn(Optional.of(user));
+        when(loginSecurityService.obtenerIp(request)).thenReturn("127.0.0.1");
+        doNothing().when(loginSecurityService).validarIp("127.0.0.1");
+
+        assertThrows(RuntimeException.class, () -> authService.login("cliente@test.com", "ClaveSegura123", request));
     }
 }

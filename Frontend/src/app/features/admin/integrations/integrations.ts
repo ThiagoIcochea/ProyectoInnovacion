@@ -126,7 +126,11 @@ implements OnInit {
       title: 'Nueva variable de integración',
       html: this.buildConfigModalHtml('', 'CONFIG', 'ACTIVO', ''),
       customClass: {
+        container: 'integrations-swal-container',
         popup: 'integrations-swal-popup',
+        title: 'integrations-swal-title',
+        htmlContainer: 'integrations-swal-description',
+        actions: 'integrations-swal-actions',
         confirmButton: 'integrations-swal-confirm',
         cancelButton: 'integrations-swal-cancel'
       },
@@ -177,7 +181,11 @@ implements OnInit {
       title: `Editar ${item.clave}`,
       html: this.buildConfigModalHtml(selectedKey, selectedType, selectedState, item.valor || ''),
       customClass: {
+        container: 'integrations-swal-container',
         popup: 'integrations-swal-popup',
+        title: 'integrations-swal-title',
+        htmlContainer: 'integrations-swal-description',
+        actions: 'integrations-swal-actions',
         confirmButton: 'integrations-swal-confirm',
         cancelButton: 'integrations-swal-cancel'
       },
