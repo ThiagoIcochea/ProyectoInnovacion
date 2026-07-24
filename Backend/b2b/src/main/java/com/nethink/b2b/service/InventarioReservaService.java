@@ -55,6 +55,7 @@ public class InventarioReservaService {
     public void confirmarReserva(Integer idSolicitud) {
         List<InventarioReserva> reservas =
                 reservaRepo.findBySolicitud_IdSolicitud(idSolicitud);
+        List<ProveedorProducto> productosActualizados = new ArrayList<>();
 
         for (InventarioReserva r : reservas) {
             if (!esReservaActiva(r)) {
@@ -63,7 +64,14 @@ public class InventarioReservaService {
             r.setEstado("CONFIRMADO");
             r.setFechaActualizacion(LocalDateTime.now());
             reservaRepo.save(r);
+
+            if (r.getProveedorProducto() != null) {
+                productosActualizados.add(r.getProveedorProducto());
+            }
         }
+
+        // La reserva confirmada ya reduce el stock disponible para el proveedor.
+        sincronizarInventarioProveedor(productosActualizados);
     }
 
     @Transactional
@@ -237,12 +245,7 @@ private void sincronizarInventarioProveedor(List<ProveedorProducto> productosAct
         List<ProveedorProducto> catalogoCompleto = proveedorProductoRepo
                 .findProductosCompletosPorProveedor(proveedor.getIdProveedor());
 
-        try {
-            enviarCatalogoConFallback(proveedor, catalogoCompleto);
-        } catch (Exception error) {
-            System.out.println("Error sincronizando inventario proveedor "
-                    + proveedor.getIdProveedor() + ": " + error.getMessage());
-        }
+        enviarCatalogoConFallback(proveedor, catalogoCompleto);
     }
 }
 
@@ -263,12 +266,7 @@ public void publicarNuevoProducto(ProveedorProducto producto) {
     // Así un proveedor que interpreta PUT como reemplazo no elimina su catálogo previo.
     List<ProveedorProducto> catalogo = proveedorProductoRepo
             .findProductosCompletosPorProveedor(proveedor.getIdProveedor());
-    try {
-        enviarCatalogoConFallback(proveedor, catalogo);
-    } catch (Exception error) {
-        System.out.println("No se pudo publicar el producto " + producto.getIdProvProd()
-                + " en la API del proveedor: " + error.getMessage());
-    }
+    enviarCatalogoConFallback(proveedor, catalogo);
 }
 
 private void enviarCatalogoConFallback(Proveedor proveedor, List<ProveedorProducto> catalogo) {
@@ -338,7 +336,8 @@ private Map<String, Object> mapProductoInventario(ProveedorProducto pp) {
     item.put("categoria", producto != null && producto.getCategoria() != null ? producto.getCategoria().getNombre() : null);
     item.put("descripcion", producto != null ? producto.getDescripcion() : null);
     item.put("precioUnitario", pp.getPrecio());
-    item.put("stock", pp.getStock());
+    // Se publica el stock realmente disponible: stock físico menos reservas activas.
+    item.put("stock", calcularStockDisponible(pp));
     item.put("garantiaMeses", pp.getGarantiaMeses());
     item.put("tiempoEntregaDias", pp.getTiempoEntregaDias());
     item.put("enOferta", pp.getEnOferta());
