@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -215,42 +216,39 @@ private void sincronizarInventarioProveedor(List<ProveedorProducto> productosAct
         return;
     }
 
-    Proveedor proveedor = productosActualizados.stream()
+    Map<Integer, Proveedor> proveedores = productosActualizados.stream()
+            .filter(Objects::nonNull)
             .map(ProveedorProducto::getProveedor)
             .filter(Objects::nonNull)
-            .findFirst()
-            .orElse(null);
-
-    if (proveedor == null || proveedor.getApiUrl() == null || proveedor.getApiUrl().isBlank()) {
-        return;
-    }
-
-    List<ProveedorProducto> productosFiltrados = productosActualizados.stream()
-            .filter(Objects::nonNull)
             .collect(java.util.stream.Collectors.toMap(
-                    pp -> pp.getIdProvProd() != null ? pp.getIdProvProd() : System.identityHashCode(pp),
-                    pp -> pp,
+                    Proveedor::getIdProveedor,
+                    proveedor -> proveedor,
                     (existing, replacement) -> existing,
                     java.util.LinkedHashMap::new
-            ))
-            .values()
-            .stream()
-            .toList();
+            ));
 
-    try {
-        enviarInventario(proveedor, HttpMethod.POST, productosFiltrados);
-    } catch (Exception postError) {
+    for (Proveedor proveedor : proveedores.values()) {
+        if (proveedor.getApiUrl() == null || proveedor.getApiUrl().isBlank()) {
+            continue;
+        }
+
+        // Se manda todo el catálogo del proveedor: un API que reemplaza la colección
+        // no pierde productos que no participaron en este consumo de stock.
+        List<ProveedorProducto> catalogoCompleto = proveedorProductoRepo
+                .findProductosCompletosPorProveedor(proveedor.getIdProveedor());
+
         try {
-            enviarInventario(proveedor, HttpMethod.PATCH, productosFiltrados);
-        } catch (Exception patchError) {
+            enviarCatalogoConFallback(proveedor, catalogoCompleto);
+        } catch (Exception error) {
             System.out.println("Error sincronizando inventario proveedor "
-                    + proveedor.getIdProveedor() + ": " + patchError.getMessage());
+                    + proveedor.getIdProveedor() + ": " + error.getMessage());
         }
     }
 }
 
-/** Publica un producto nuevo en la API del proveedor respetando sus variantes REST.
- * Algunos proveedores usan PUT, otros PATCH o solo POST; se intenta en ese orden. */
+/** Publica o actualiza el catálogo del proveedor respetando sus variantes REST.
+ * PATCH es la opción preferida para conservar registros no afectados; PUT y POST
+ * quedan como alternativas de compatibilidad. */
 public void publicarNuevoProducto(ProveedorProducto producto) {
     if (producto == null || producto.getProveedor() == null) {
         return;
@@ -261,23 +259,38 @@ public void publicarNuevoProducto(ProveedorProducto producto) {
         return;
     }
 
-    List<ProveedorProducto> catalogo = List.of(producto);
+    // Incluye los productos existentes y el nuevo en un único contrato homogéneo.
+    // Así un proveedor que interpreta PUT como reemplazo no elimina su catálogo previo.
+    List<ProveedorProducto> catalogo = proveedorProductoRepo
+            .findProductosCompletosPorProveedor(proveedor.getIdProveedor());
     try {
-        enviarInventario(proveedor, HttpMethod.POST, catalogo);
-        return;
-    } catch (Exception postError) {
+        enviarCatalogoConFallback(proveedor, catalogo);
+    } catch (Exception error) {
+        System.out.println("No se pudo publicar el producto " + producto.getIdProvProd()
+                + " en la API del proveedor: " + error.getMessage());
+    }
+}
+
+private void enviarCatalogoConFallback(Proveedor proveedor, List<ProveedorProducto> catalogo) {
+    HttpMethod[] metodos = { HttpMethod.PATCH, HttpMethod.PUT, HttpMethod.POST };
+    RuntimeException ultimoError = null;
+
+    for (HttpMethod metodo : metodos) {
         try {
-            enviarInventario(proveedor, HttpMethod.PATCH, catalogo);
+            enviarInventario(proveedor, metodo, catalogo);
             return;
-        } catch (Exception patchError) {
-            try {
-                enviarInventario(proveedor, HttpMethod.PUT, catalogo);
-            } catch (Exception putError) {
-                System.out.println("No se pudo publicar el producto " + producto.getIdProvProd()
-                        + " en la API del proveedor: " + putError.getMessage());
+        } catch (HttpStatusCodeException error) {
+            ultimoError = error;
+            int status = error.getStatusCode().value();
+            if (status != 404 && status != 405 && status != 501) {
+                throw error;
             }
         }
     }
+
+    throw ultimoError != null
+            ? ultimoError
+            : new IllegalStateException("No se pudo sincronizar el catálogo del proveedor.");
 }
 
 private void enviarInventario(

@@ -37,6 +37,16 @@ public class ProveedorProductoController {
         return service.crearProductoProveedor(principal.getName(), producto);
     }
 
+    @PutMapping("/mis-productos")
+    public List<ProveedorProductoResponse> actualizarCatalogoPut(@RequestBody Object requestBody, Principal principal) {
+        return actualizarCatalogoCompleto(requestBody, principal);
+    }
+
+    @PatchMapping("/mis-productos")
+    public List<ProveedorProductoResponse> actualizarCatalogoPatch(@RequestBody Object requestBody, Principal principal) {
+        return actualizarCatalogoCompleto(requestBody, principal);
+    }
+
     @PutMapping("/mis-productos/{idProvProd}")
     public ProveedorProductoResponse actualizarPut(@PathVariable Integer idProvProd, @RequestBody Object requestBody, Principal principal) {
         return service.actualizarProductoProveedor(principal.getName(), idProvProd, parseCatalogoRequest(requestBody));
@@ -45,6 +55,15 @@ public class ProveedorProductoController {
     @PatchMapping("/mis-productos/{idProvProd}")
     public ProveedorProductoResponse actualizarPatch(@PathVariable Integer idProvProd, @RequestBody Object requestBody, Principal principal) {
         return service.actualizarProductoProveedor(principal.getName(), idProvProd, parseCatalogoRequest(requestBody));
+    }
+
+    private List<ProveedorProductoResponse> actualizarCatalogoCompleto(Object requestBody, Principal principal) {
+        List<CatalogoResponse> catalogo = parseCatalogoList(requestBody);
+        if (catalogo.isEmpty()) {
+            throw new IllegalArgumentException("El catálogo debe incluir al menos un producto.");
+        }
+
+        return service.crearOModificarCatalogoProveedor(principal.getName(), catalogo);
     }
 
     private CatalogoResponse parseCatalogoRequest(Object requestBody) {

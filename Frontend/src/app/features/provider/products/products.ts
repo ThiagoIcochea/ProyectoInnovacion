@@ -177,7 +177,7 @@ export class ProviderProductsComponent implements OnInit {
       const token = await this.requestMfaToken();
       const payload = this.buildCatalogPayload(this.newProduct, true);
 
-      const response = await this.sendCatalogPayload(payload, token, 'POST');
+      const response = await this.sendCatalogPayload(payload, token);
       this.showCreateModal = false;
       this.saving = false;
       await Swal.fire({ icon: 'success', title: 'Producto creado', text: 'El producto se publicó correctamente.' });
@@ -208,7 +208,7 @@ export class ProviderProductsComponent implements OnInit {
     try {
       const token = await this.requestMfaToken();
       const payload = this.buildCatalogPayload(this.manageProduct, false);
-      await this.sendCatalogPayload(payload, token, 'PUT', this.manageProductId);
+      await this.sendCatalogPayload(payload, token, this.manageProductId);
       this.showManageModal = false;
       this.saving = false;
       await Swal.fire({ icon: 'success', title: 'Producto actualizado', text: 'Se actualizó el stock, descuentos y descripción del producto.' });
@@ -271,11 +271,10 @@ export class ProviderProductsComponent implements OnInit {
     return { catalogo };
   }
 
-  private async sendCatalogPayload(payload: any, token: string, defaultMethod: 'POST' | 'PUT', idProvProd?: number): Promise<any> {
-    const methods: Array<'PUT' | 'PATCH' | 'POST'> = ['PUT', 'PATCH', 'POST'];
-    const preferredMethods = defaultMethod === 'PUT'
-      ? ['PUT', 'PATCH', 'POST']
-      : ['POST', 'PUT', 'PATCH'];
+  private async sendCatalogPayload(payload: any, token: string, idProvProd?: number): Promise<any> {
+    // PATCH actualiza primero; PUT y POST quedan como compatibilidad para APIs
+    // de proveedores que no expongan ese verbo.
+    const preferredMethods: Array<'PATCH' | 'PUT' | 'POST'> = ['PATCH', 'PUT', 'POST'];
 
     let lastError: any;
 
@@ -295,8 +294,14 @@ export class ProviderProductsComponent implements OnInit {
         }).toPromise();
 
         return response;
-      } catch (error) {
+      } catch (error: any) {
         lastError = error;
+
+        // Solo se prueba el siguiente verbo cuando el servidor no lo soporta.
+        // Reintentar ante validaciones o conflictos podría duplicar o alterar el catálogo.
+        if (![404, 405, 501].includes(Number(error?.status))) {
+          throw error;
+        }
       }
     }
 
