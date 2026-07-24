@@ -8,6 +8,7 @@ import com.nethink.b2b.dto.response.ConfiguracionResponse;
 import com.nethink.b2b.entity.Configuracion;
 import com.nethink.b2b.repository.ConfiguracionRepository;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,13 +40,14 @@ public class ConfigService {
             throw new RuntimeException("La clave de configuración es obligatoria");
         }
 
-        Configuracion config = repo.findByClave(clave.trim())
+        String normalizedClave = normalizarClave(clave.trim());
+        Configuracion config = repo.findByClave(normalizedClave)
                 .orElse(new Configuracion());
 
-        config.setClave(clave.trim());
+        config.setClave(normalizedClave);
         config.setValor(valor);
-        config.setTipo(tipo == null || tipo.isBlank() ? "CONFIG" : tipo.trim().toUpperCase());
-        config.setEstado(estado == null || estado.isBlank() ? "ACTIVO" : estado.trim().toUpperCase());
+        config.setTipo(normalizarTipo(tipo));
+        config.setEstado(normalizarEstado(estado));
 
         repo.save(config);
     }
@@ -88,7 +90,7 @@ public class ConfigService {
         Configuracion config = repo.findById(id).orElseThrow();
 
         if (clave != null) {
-            config.setClave(clave.trim());
+            config.setClave(normalizarClave(clave.trim()));
         }
 
         if (valor != null) {
@@ -96,17 +98,61 @@ public class ConfigService {
         }
 
         if (tipo != null && !tipo.isBlank()) {
-            config.setTipo(tipo.trim().toUpperCase());
+            config.setTipo(normalizarTipo(tipo));
         }
 
         if (estado != null && !estado.isBlank()) {
-            config.setEstado(estado.trim().toUpperCase());
+            config.setEstado(normalizarEstado(estado));
         }
 
         repo.save(config);
     }
     
-   public String probarConexion(Integer id) {
+private String normalizarClave(String clave) {
+        if (clave == null || clave.isBlank()) {
+            return null;
+        }
+
+        String normalized = clave.trim().toUpperCase(Locale.ROOT);
+
+        return switch (normalized) {
+            case "CLOUDINARY" -> "CLOUDINARY";
+            case "CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET" -> normalized;
+            case "EMAIL", "MAIL", "SMTP", "RESEND" -> "EMAIL";
+            case "DOMINIO", "DOMAIN" -> "DOMINIO";
+            case "API", "API_REST", "API_IA", "IA" -> "API";
+            case "URL" -> "URL";
+            default -> normalized;
+        };
+    }
+
+    private String normalizarTipo(String tipo) {
+        if (tipo == null || tipo.isBlank()) {
+            return "CONFIG";
+        }
+
+        String normalized = tipo.trim().toUpperCase(Locale.ROOT);
+
+        return switch (normalized) {
+            case "CLOUDINARY" -> "CLOUDINARY";
+            case "DOMINIO", "DOMAIN" -> "DOMINIO";
+            case "EMAIL", "MAIL", "SMTP", "RESEND" -> "EMAIL";
+            case "API", "API_REST", "API_IA", "IA" -> "API";
+            case "URL" -> "URL";
+            case "CONFIG", "CONFIGURACION" -> "CONFIG";
+            default -> normalized;
+        };
+    }
+
+    private String normalizarEstado(String estado) {
+        if (estado == null || estado.isBlank()) {
+            return "ACTIVO";
+        }
+
+        return estado.trim().toUpperCase(Locale.ROOT);
+    }
+
+    public String probarConexion(Integer id) {
 
     Configuracion config =
             repo.findById(id)

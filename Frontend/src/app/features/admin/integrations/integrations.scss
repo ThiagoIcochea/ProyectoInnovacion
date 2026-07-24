@@ -1,4 +1,8 @@
 ﻿/* Backend touchpoint: integration grid and status badges. */
+:host {
+  display: block;
+}
+
 .admin-integrations-page {
   display: flex;
   flex-direction: column;
@@ -137,6 +141,67 @@
   .actions {
     flex-direction: column;
   }
+}
+
+:global(.integrations-swal-popup) {
+  border-radius: 20px;
+  padding: 1.4rem;
+  background: var(--theme-surface-raised);
+  color: var(--theme-text);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+  border: 1px solid var(--theme-border);
+}
+
+:global(.integrations-swal-confirm) {
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #2563eb, #4f46e5) !important;
+  color: #fff !important;
+  border: 0 !important;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22) !important;
+  padding: 0.7rem 1.15rem !important;
+}
+
+:global(.integrations-swal-cancel) {
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: var(--theme-text) !important;
+  border: 1px solid var(--theme-border) !important;
+  padding: 0.7rem 1.15rem !important;
+}
+
+:global(.config-modal-shell) {
+  display: grid;
+  gap: 0.95rem;
+  text-align: left;
+}
+
+:global(.config-modal-field) {
+  display: grid;
+  gap: 0.4rem;
+}
+
+:global(.config-modal-label) {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: var(--theme-text);
+}
+
+:global(.config-modal-input) {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  padding: 0 0.9rem;
+  box-sizing: border-box;
+  outline: none;
+}
+
+:global(.config-modal-input:focus) {
+  border-color: rgba(37, 99, 235, 0.45);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
 }
 
 

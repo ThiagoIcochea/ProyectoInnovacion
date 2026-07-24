@@ -42,4 +42,24 @@ class ConfigServiceTest {
         assertEquals("ACTIVO", config.getEstado());
         verify(repo).save(config);
     }
+
+    @Test
+    void actualizarDatosDeberiaNormalizarClavesCategoriaYTiposCompatibles() {
+        Configuracion config = new Configuracion();
+        config.setId(2);
+        config.setClave("ANTERIOR");
+        config.setValor("valor-viejo");
+        config.setTipo("CONFIG");
+        config.setEstado("INACTIVO");
+
+        when(repo.findById(2)).thenReturn(Optional.of(config));
+
+        service.actualizarDatos(2, "cloudinary", "valor-nuevo", "api", "activo");
+
+        assertEquals("CLOUDINARY", config.getClave());
+        assertEquals("valor-nuevo", config.getValor());
+        assertEquals("API", config.getTipo());
+        assertEquals("ACTIVO", config.getEstado());
+        verify(repo).save(config);
+    }
 }

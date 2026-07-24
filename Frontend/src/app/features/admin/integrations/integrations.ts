@@ -30,6 +30,8 @@ implements OnInit {
   integrations: any[] = [];
   loading = true;
   readonly skeletonCards = Array.from({ length: 6 });
+  readonly configKeyOptions = ['CLOUDINARY', 'DOMINIO', 'EMAIL', 'API', 'URL', 'CONFIG', 'SEGURIDAD'];
+  readonly configTypeOptions = ['CONFIG', 'API', 'URL', 'EMAIL', 'CLOUDINARY', 'DOMINIO', 'SEGURIDAD'];
 
   constructor(
     private http: HttpClient,
@@ -122,34 +124,19 @@ implements OnInit {
   async crearConfiguracion(): Promise<void> {
     const { isConfirmed, value } = await Swal.fire({
       title: 'Nueva variable de integración',
-      html: `
-        <div style="text-align:left;display:grid;gap:12px;font-family:Inter,system-ui,sans-serif">
-          <label for="config-clave" style="font-size:0.9rem;font-weight:700;color:#0f172a">Clave</label>
-          <input id="config-clave" class="swal2-input" placeholder="CLOUDINARY_CLOUD_NAME" />
-          <label for="config-valor" style="font-size:0.9rem;font-weight:700;color:#0f172a">Valor</label>
-          <input id="config-valor" class="swal2-input" placeholder="mi-cloud" />
-          <label for="config-tipo" style="font-size:0.9rem;font-weight:700;color:#0f172a">Tipo</label>
-          <select id="config-tipo" class="swal2-input" style="padding:0 0.9rem">
-            <option value="CONFIG">CONFIG</option>
-            <option value="API">API</option>
-            <option value="EMAIL">EMAIL</option>
-            <option value="CLOUDINARY">CLOUDINARY</option>
-            <option value="DOMINIO">DOMINIO</option>
-            <option value="SEGURIDAD">SEGURIDAD</option>
-          </select>
-          <label for="config-estado" style="font-size:0.9rem;font-weight:700;color:#0f172a">Estado</label>
-          <select id="config-estado" class="swal2-input" style="padding:0 0.9rem">
-            <option value="ACTIVO">ACTIVO</option>
-            <option value="INACTIVO">INACTIVO</option>
-          </select>
-        </div>
-      `,
+      html: this.buildConfigModalHtml('', 'CONFIG', 'ACTIVO', ''),
+      customClass: {
+        popup: 'integrations-swal-popup',
+        confirmButton: 'integrations-swal-confirm',
+        cancelButton: 'integrations-swal-cancel'
+      },
+      buttonsStyling: false,
       showCancelButton: true,
       confirmButtonText: 'Crear',
       cancelButtonText: 'Cancelar',
       allowOutsideClick: false,
       preConfirm: () => ({
-        clave: (document.getElementById('config-clave') as HTMLInputElement | null)?.value?.trim() || '',
+        clave: (document.getElementById('config-clave') as HTMLSelectElement | null)?.value?.trim() || '',
         valor: (document.getElementById('config-valor') as HTMLInputElement | null)?.value?.trim() || '',
         tipo: (document.getElementById('config-tipo') as HTMLSelectElement | null)?.value?.trim() || 'CONFIG',
         estado: (document.getElementById('config-estado') as HTMLSelectElement | null)?.value?.trim() || 'ACTIVO'
@@ -183,38 +170,24 @@ implements OnInit {
   }
 
   async configurar(item: any): Promise<void> {
+    const selectedKey = item.clave || 'CONFIG';
     const selectedType = item.tipo || 'CONFIG';
     const selectedState = item.estado || 'ACTIVO';
     const { isConfirmed, value } = await Swal.fire({
       title: `Editar ${item.clave}`,
-      html: `
-        <div style="text-align:left;display:grid;gap:12px;font-family:Inter,system-ui,sans-serif">
-          <label for="config-clave" style="font-size:0.9rem;font-weight:700;color:#0f172a">Clave</label>
-          <input id="config-clave" class="swal2-input" value="${item.clave || ''}" />
-          <label for="config-valor" style="font-size:0.9rem;font-weight:700;color:#0f172a">Valor</label>
-          <input id="config-valor" class="swal2-input" value="${item.valor || ''}" />
-          <label for="config-tipo" style="font-size:0.9rem;font-weight:700;color:#0f172a">Tipo</label>
-          <select id="config-tipo" class="swal2-input" style="padding:0 0.9rem">
-            <option value="CONFIG" ${selectedType === 'CONFIG' ? 'selected' : ''}>CONFIG</option>
-            <option value="API" ${selectedType === 'API' ? 'selected' : ''}>API</option>
-            <option value="EMAIL" ${selectedType === 'EMAIL' ? 'selected' : ''}>EMAIL</option>
-            <option value="CLOUDINARY" ${selectedType === 'CLOUDINARY' ? 'selected' : ''}>CLOUDINARY</option>
-            <option value="DOMINIO" ${selectedType === 'DOMINIO' ? 'selected' : ''}>DOMINIO</option>
-            <option value="SEGURIDAD" ${selectedType === 'SEGURIDAD' ? 'selected' : ''}>SEGURIDAD</option>
-          </select>
-          <label for="config-estado" style="font-size:0.9rem;font-weight:700;color:#0f172a">Estado</label>
-          <select id="config-estado" class="swal2-input" style="padding:0 0.9rem">
-            <option value="ACTIVO" ${selectedState === 'ACTIVO' ? 'selected' : ''}>ACTIVO</option>
-            <option value="INACTIVO" ${selectedState === 'INACTIVO' ? 'selected' : ''}>INACTIVO</option>
-          </select>
-        </div>
-      `,
+      html: this.buildConfigModalHtml(selectedKey, selectedType, selectedState, item.valor || ''),
+      customClass: {
+        popup: 'integrations-swal-popup',
+        confirmButton: 'integrations-swal-confirm',
+        cancelButton: 'integrations-swal-cancel'
+      },
+      buttonsStyling: false,
       showCancelButton: true,
       confirmButtonText: 'Guardar',
       cancelButtonText: 'Cancelar',
       allowOutsideClick: false,
       preConfirm: () => ({
-        clave: (document.getElementById('config-clave') as HTMLInputElement | null)?.value?.trim() || '',
+        clave: (document.getElementById('config-clave') as HTMLSelectElement | null)?.value?.trim() || '',
         valor: (document.getElementById('config-valor') as HTMLInputElement | null)?.value?.trim() || '',
         tipo: (document.getElementById('config-tipo') as HTMLSelectElement | null)?.value?.trim() || 'CONFIG',
         estado: (document.getElementById('config-estado') as HTMLSelectElement | null)?.value?.trim() || 'ACTIVO'
@@ -301,6 +274,66 @@ implements OnInit {
         await Swal.fire({ icon: 'error', title: 'No se pudo eliminar', text: extractValidationMessage(err, 'No se pudo eliminar la configuración.') });
       }
     });
+  }
+
+  private buildConfigModalHtml(selectedKey: string, selectedType: string, selectedState: string, currentValue: string): string {
+    const escapedValue = this.escapeHtml(currentValue || '');
+    const keyOptions = this.buildOptionsHtml(this.configKeyOptions, selectedKey);
+    const typeOptions = this.buildOptionsHtml(this.configTypeOptions, selectedType);
+    const stateOptions = this.buildOptionsHtml(['ACTIVO', 'INACTIVO'], selectedState);
+
+    return `
+      <div class="config-modal-shell">
+        <div class="config-modal-field">
+          <label class="config-modal-label" for="config-clave">Clave</label>
+          <select id="config-clave" class="config-modal-input">
+            ${keyOptions}
+          </select>
+        </div>
+
+        <div class="config-modal-field">
+          <label class="config-modal-label" for="config-valor">Valor</label>
+          <input id="config-valor" class="config-modal-input" value="${escapedValue}" placeholder="Ej. tu-token, dominio, URL o valor de integración" />
+        </div>
+
+        <div class="config-modal-field">
+          <label class="config-modal-label" for="config-tipo">Tipo</label>
+          <select id="config-tipo" class="config-modal-input">
+            ${typeOptions}
+          </select>
+        </div>
+
+        <div class="config-modal-field">
+          <label class="config-modal-label" for="config-estado">Estado</label>
+          <select id="config-estado" class="config-modal-input">
+            ${stateOptions}
+          </select>
+        </div>
+      </div>
+    `;
+  }
+
+  private buildOptionsHtml(options: string[], selectedValue: string): string {
+    const normalizedSelected = (selectedValue || '').trim().toUpperCase();
+    const values = options.map(option => {
+      const isSelected = normalizedSelected === option.toUpperCase();
+      return `<option value="${this.escapeHtml(option)}" ${isSelected ? 'selected' : ''}>${this.escapeHtml(option)}</option>`;
+    });
+
+    if (!options.some(option => option.toUpperCase() === normalizedSelected)) {
+      values.unshift(`<option value="${this.escapeHtml(normalizedSelected)}" selected>${this.escapeHtml(normalizedSelected)}</option>`);
+    }
+
+    return values.join('');
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   private async requestAdminMfa(): Promise<string | null> {
