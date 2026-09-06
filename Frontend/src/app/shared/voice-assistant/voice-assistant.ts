@@ -27,6 +27,7 @@ export class VoiceAssistantComponent implements OnDestroy {
   thinking = false;
   transcript = '';
   answer = '';
+  statusRendered = false;
   statusVisible = false;
   fabRight: number | null = 22;
   fabBottom: number | null = 22;
@@ -54,6 +55,7 @@ export class VoiceAssistantComponent implements OnDestroy {
     | null = null;
 
   private voiceStatusTimer: ReturnType<typeof window.setTimeout> | null = null;
+  private voiceStatusRemovalTimer: ReturnType<typeof window.setTimeout> | null = null;
 
   constructor(
     private http: HttpClient,
@@ -64,6 +66,7 @@ export class VoiceAssistantComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.clearVoiceStatusTimer();
+    this.clearVoiceStatusRemovalTimer();
     if (this.fabDragFrame) {
       window.cancelAnimationFrame(this.fabDragFrame);
       this.fabDragFrame = null;
@@ -950,16 +953,22 @@ export class VoiceAssistantComponent implements OnDestroy {
   }
 
   private showVoiceStatus(): void {
+    this.clearVoiceStatusRemovalTimer();
+    this.statusRendered = true;
     this.statusVisible = true;
 
     this.clearVoiceStatusTimer();
     this.voiceStatusTimer = window.setTimeout(() => {
       if (!this.listening && !this.thinking) {
         this.statusVisible = false;
-        this.answer = '';
-        this.transcript = '';
+        this.voiceStatusRemovalTimer = window.setTimeout(() => {
+          this.statusRendered = false;
+          this.answer = '';
+          this.transcript = '';
+          this.voiceStatusRemovalTimer = null;
+        }, 260);
       }
-    }, 3600);
+    }, 5000);
   }
 
   private clearVoiceStatusTimer(): void {
@@ -969,8 +978,17 @@ export class VoiceAssistantComponent implements OnDestroy {
     }
   }
 
+  private clearVoiceStatusRemovalTimer(): void {
+    if (this.voiceStatusRemovalTimer) {
+      window.clearTimeout(this.voiceStatusRemovalTimer);
+      this.voiceStatusRemovalTimer = null;
+    }
+  }
+
   private clearVoiceStatus(): void {
     this.clearVoiceStatusTimer();
+    this.clearVoiceStatusRemovalTimer();
+    this.statusRendered = false;
     this.statusVisible = false;
     this.answer = '';
     this.transcript = '';

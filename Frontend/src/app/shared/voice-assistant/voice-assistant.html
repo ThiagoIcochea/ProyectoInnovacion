@@ -14,7 +14,15 @@
   <span class="voice-fab__pulse" aria-hidden="true"></span>
 </button>
 
-<div class="voice-status" [class.is-visible]="statusVisible" [hidden]="!statusVisible">
+<div
+  *ngIf="statusRendered"
+  class="voice-status"
+  [class.is-visible]="statusVisible"
+  role="status"
+  aria-live="polite">
   <strong>{{ listening ? 'Escuchando' : thinking ? 'Procesando' : 'Asistente' }}</strong>
-  <span>{{ listening ? 'Habla con naturalidad.' : thinking ? 'Consultando IA...' : answer }}</span>
+  <span class="voice-status__message">
+    {{ listening ? 'Habla con naturalidad.' : thinking ? 'Consultando IA...' : answer }}
+  </span>
+  <span *ngIf="transcript" class="voice-status__transcript">“{{ transcript }}”</span>
 </div>

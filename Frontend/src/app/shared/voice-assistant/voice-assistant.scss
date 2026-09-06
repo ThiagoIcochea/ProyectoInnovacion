@@ -98,11 +98,12 @@
   border: 1px solid #dbe3ef;
   border-radius: 8px;
   background: #fff;
+  color: #0f172a;
   box-shadow: 0 14px 35px rgba(15, 23, 42, 0.14);
   opacity: 0;
   transform: translateY(8px);
   pointer-events: none;
-  transition: opacity 220ms ease, transform 220ms ease;
+  transition: opacity 260ms ease, transform 260ms ease;
 }
 
 .voice-status.is-visible {
@@ -116,10 +117,33 @@
   display: block;
 }
 
-.voice-status span {
-  color: #475569;
+.voice-status__message {
+  color: #1e293b;
   font-size: 13px;
   margin-top: 4px;
+}
+
+.voice-status__transcript {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  margin-top: 8px;
+}
+
+:host-context(body:not(.light-theme)) .voice-status {
+  border-color: #475569;
+  background: #172033;
+  color: #f8fafc;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
+}
+
+:host-context(body:not(.light-theme)) .voice-status__message {
+  color: #e2e8f0;
+}
+
+:host-context(body:not(.light-theme)) .voice-status__transcript {
+  color: #fff;
 }
 
 @keyframes voicePulse {
