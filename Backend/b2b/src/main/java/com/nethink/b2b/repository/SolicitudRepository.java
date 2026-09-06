@@ -202,7 +202,7 @@ Double calcularSatisfaccionProveedor(@Param("idProveedor") Integer idProveedor);
 
 @Query("""
 SELECT AVG(
-    DATEDIFF(s.fechaEntrega, s.fechaCreacion)
+    timestampdiff(day, s.fechaCreacion, s.fechaEntrega)
 )
 FROM Solicitud s
 WHERE s.proveedor.idProveedor = :idProveedor

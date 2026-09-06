@@ -52,7 +52,12 @@ public class SecurityConfig {
                         .hasRole(AppConstants.ROLE_ADMIN)
                         .requestMatchers("/api/seguridad/admin/**")
                         .hasRole(AppConstants.ROLE_ADMIN)
-                        .requestMatchers("/api/admin/actualizar")
+                        .requestMatchers(
+                                "/api/usuarios/admin/**",
+                                "/api/provider/admin/**",
+                                "/api/productos/admin/**",
+                                "/api/solicitudes/admin/**"
+                        )
                         .hasRole(AppConstants.ROLE_ADMIN)
                         .requestMatchers("/api/solicitudes/proveedor/**")
                         .hasRole(AppConstants.ROLE_PROVEEDOR)

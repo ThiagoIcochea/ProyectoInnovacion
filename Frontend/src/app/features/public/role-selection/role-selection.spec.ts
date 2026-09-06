@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { componentTestProviders } from '../../../testing/component-test.providers';
 
-import { RoleSelection } from './role-selection';
+import { RoleSelectionComponent as RoleSelection } from './role-selection';
 
 describe('RoleSelection', () => {
   let component: RoleSelection;
@@ -9,6 +10,7 @@ describe('RoleSelection', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RoleSelection],
+      providers: componentTestProviders
     }).compileComponents();
 
     fixture = TestBed.createComponent(RoleSelection);

@@ -1,0 +1,41 @@
+
+> nethink-frontend@0.0.0 start
+> ng serve --host 127.0.0.1
+
+[33m>[39m Building...
+[32m√[39m Building...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m            [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m             [2m | [22m[36m177.69 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m           [2m | [22m [36m63.89 kB[39m[2m | [22m
+[32mchunk-JKXNUWOH.js[39m  [2m | [22m[2m-[22m                [2m | [22m  [36m6.80 kB[39m[2m | [22m
+[32mchunk-7AJRTNDK.js[39m  [2m | [22m[2m-[22m                [2m | [22m  [36m3.36 kB[39m[2m | [22m
+[32mchunk-E3BKHXYG.js[39m  [2m | [22m[2m-[22m                [2m | [22m  [36m2.47 kB[39m[2m | [22m
+[32mchunk-CZJLB7T5.js[39m  [2m | [22m[2m-[22m                [2m | [22m  [36m1.08 kB[39m[2m | [22m
+[32mchunk-REOZSJ4Q.js[39m  [2m | [22m[2m-[22m                [2m | [22m[36m875 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m    [2m | [22m[1m256.16 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m            [2m | [22m [1mRaw size[22m
+[32mchunk-GU2IM73Y.js[39m  [2m | [22m[2mprovider-reviews[22m [2m | [22m[36m145.77 kB[39m[2m | [22m
+[32mchunk-JREH4EMH.js[39m  [2m | [22m[2mregister-provider[22m[2m | [22m[36m141.08 kB[39m[2m | [22m
+[32mchunk-T6K45KQF.js[39m  [2m | [22m[2mrfq-catalog[22m      [2m | [22m[36m134.88 kB[39m[2m | [22m
+[32mchunk-YYMHSURK.js[39m  [2m | [22m[2mproducts[22m         [2m | [22m [36m97.61 kB[39m[2m | [22m
+[32mchunk-WC7PTDRE.js[39m  [2m | [22m[2mproduct-detail[22m   [2m | [22m [36m93.13 kB[39m[2m | [22m
+[32mchunk-NONXRDPW.js[39m  [2m | [22m[2mdashboard[22m        [2m | [22m [36m85.87 kB[39m[2m | [22m
+[32mchunk-VD7EMSJO.js[39m  [2m | [22m[2mrequest-tracking[22m [2m | [22m [36m79.03 kB[39m[2m | [22m
+[32mchunk-A2VF2FDX.js[39m  [2m | [22m[2mclaims[22m           [2m | [22m [36m68.72 kB[39m[2m | [22m
+[32mchunk-MCOFI6WI.js[39m  [2m | [22m[2mrfq-quotation[22m    [2m | [22m [36m68.39 kB[39m[2m | [22m
+[32mchunk-CM2GIMDD.js[39m  [2m | [22m[2mproducts[22m         [2m | [22m [36m64.50 kB[39m[2m | [22m
+[32mchunk-TLFK4EEU.js[39m  [2m | [22m[2mpayments[22m         [2m | [22m [36m61.25 kB[39m[2m | [22m
+[32mchunk-QALRZE4Z.js[39m  [2m | [22m[2mdeliveries[22m       [2m | [22m [36m58.24 kB[39m[2m | [22m
+[32mchunk-FAWNBRSF.js[39m  [2m | [22m[2musers[22m            [2m | [22m [36m54.27 kB[39m[2m | [22m
+[32mchunk-U2RH3FGC.js[39m  [2m | [22m[2mapi-settings[22m     [2m | [22m [36m52.53 kB[39m[2m | [22m
+[32mchunk-7463UAKX.js[39m  [2m | [22m[2mrequests[22m         [2m | [22m [36m50.62 kB[39m[2m | [22m
+[2m...and 21 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation complete. [37.220 seconds] - 2026-09-05T19:13:59.411Z
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+[2m2:14:00 p. m.[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because lockfile has changed
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m4200[22m/[39m

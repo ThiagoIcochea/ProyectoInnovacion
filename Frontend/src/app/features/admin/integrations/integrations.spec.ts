@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { componentTestProviders } from '../../../testing/component-test.providers';
 
-import { Integrations } from './integrations';
+import { AdminIntegrationsComponent as Integrations } from './integrations';
 
 describe('Integrations', () => {
   let component: Integrations;
@@ -9,6 +10,7 @@ describe('Integrations', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Integrations],
+      providers: componentTestProviders
     }).compileComponents();
 
     fixture = TestBed.createComponent(Integrations);

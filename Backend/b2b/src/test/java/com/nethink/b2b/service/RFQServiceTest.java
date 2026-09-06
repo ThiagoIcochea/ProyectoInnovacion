@@ -9,6 +9,7 @@ import com.nethink.b2b.entity.Proveedor;
 import com.nethink.b2b.entity.ProveedorProducto;
 import com.nethink.b2b.entity.enums.PrioridadRFQ;
 import com.nethink.b2b.repository.DescuentoVolumenRepository;
+import com.nethink.b2b.repository.PreferenciaUsuarioRepository;
 import com.nethink.b2b.repository.ProveedorProductoRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +42,9 @@ class RFQServiceTest {
 
     @Mock
     private DescuentoVolumenRepository descuentoVolumenRepo;
+
+    @Mock
+    private PreferenciaUsuarioRepository preferenciaRepo;
 
     @Mock
     private LogsSistemaService logsSistemaService;

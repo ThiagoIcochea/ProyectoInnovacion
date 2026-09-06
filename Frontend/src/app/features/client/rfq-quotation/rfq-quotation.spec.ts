@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { componentTestProviders } from '../../../testing/component-test.providers';
 
-import { RfqQuotation } from './rfq-quotation';
+import { RfqQuotationComponent as RfqQuotation } from './rfq-quotation';
 
 describe('RfqQuotation', () => {
   let component: RfqQuotation;
@@ -9,6 +10,7 @@ describe('RfqQuotation', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RfqQuotation],
+      providers: componentTestProviders
     }).compileComponents();
 
     fixture = TestBed.createComponent(RfqQuotation);

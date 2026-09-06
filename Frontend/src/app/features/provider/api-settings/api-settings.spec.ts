@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { componentTestProviders } from '../../../testing/component-test.providers';
 
-import { ApiSettings } from './api-settings';
+import { ProviderApiSettingsComponent as ApiSettings } from './api-settings';
 
 describe('ApiSettings', () => {
   let component: ApiSettings;
@@ -9,6 +10,7 @@ describe('ApiSettings', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ApiSettings],
+      providers: componentTestProviders
     }).compileComponents();
 
     fixture = TestBed.createComponent(ApiSettings);

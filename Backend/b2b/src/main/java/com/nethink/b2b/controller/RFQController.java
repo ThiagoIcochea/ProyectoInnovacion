@@ -5,6 +5,7 @@ import com.nethink.b2b.dto.response.RFQProveedorResponse;
 import com.nethink.b2b.entity.Usuario;
 import com.nethink.b2b.repository.UsuarioRepository;
 import com.nethink.b2b.service.RFQService;
+import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class RFQController {
     }
 
     @PostMapping("/buscar-proveedores")
-    public ResponseEntity<List<RFQProveedorResponse>> buscarProveedores(@RequestBody RFQRequest request,Principal principal, HttpServletRequest httpRequest) {
+    public ResponseEntity<List<RFQProveedorResponse>> buscarProveedores(@Valid @RequestBody RFQRequest request,Principal principal, HttpServletRequest httpRequest) {
             Usuario usuario = usuarioRepo.findByCorreo(principal.getName())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 

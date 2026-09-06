@@ -2,10 +2,13 @@ package com.nethink.b2b.dto.request;
 
 import java.util.List;
 import com.nethink.b2b.entity.enums.PrioridadRFQ;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 
 public class RFQRequest {
 
-    private List<ItemRFQRequest> items;
+    @NotEmpty(message = "Debe incluir al menos un producto")
+    private List<@Valid ItemRFQRequest> items;
     private FiltroRFQRequest filtro;
     private PrioridadRFQ prioridad;
 

@@ -1,0 +1,166 @@
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m3 repetitive deprecation warnings omitted.
+Run in verbose mode to see all warnings.[0m [1m[35m[plugin angular-sass][0m
+
+  null
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/app/layout/main-layout/main-layout.scss:1:9:
+[37m      1 │ @import '[32m[37m../../../styles/abstracts/variables';
+        ╵          [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/app/layout/main-layout/main-layout.scss:2:8:
+[37m      2 │ @import [32m[37m'../../../styles/abstracts/colors';
+        ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/app/layout/main-layout/main-layout.scss:3:8:
+[37m      3 │ @import [32m[37m'../../../styles/abstracts/radius';
+        ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/app/layout/main-layout/main-layout.scss:4:8:
+[37m      4 │ @import [32m[37m'../../../styles/abstracts/shadows';
+        ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/app/layout/main-layout/main-layout.scss:5:8:
+[37m      5 │ @import [32m[37m'../../../styles/abstracts/mixins';
+        ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/styles/styles.scss:1:8:
+[37m      1 │ @import [32m[37m'./abstracts/theme';
+        ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:2:8:
+[37m      2 │ @import [32m'src/styles/styles.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/styles/styles.scss:10:8:
+[37m      10 │ @import [32m[37m'./base/reset';
+         ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:2:8:
+[37m      2 │ @import [32m'src/styles/styles.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/styles/styles.scss:11:8:
+[37m      11 │ @import [32m[37m'./base/globals';
+         ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:2:8:
+[37m      2 │ @import [32m'src/styles/styles.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/styles/styles.scss:12:8:
+[37m      12 │ @import [32m[37m'./base/utilities';
+         ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:2:8:
+[37m      2 │ @import [32m'src/styles/styles.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    src/styles/styles.scss:16:8:
+[37m      16 │ @import [32m[37m'./abstracts/variables';
+         ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:2:8:
+[37m      2 │ @import [32m'src/styles/styles.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m17 repetitive deprecation warnings omitted.
+Run in verbose mode to see all warnings.[0m [1m[35m[plugin angular-sass][0m
+
+    angular:styles/global:styles:2:8:
+[37m      2 │ @import [32m'src/styles/styles.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  null
+
+[39m[22m

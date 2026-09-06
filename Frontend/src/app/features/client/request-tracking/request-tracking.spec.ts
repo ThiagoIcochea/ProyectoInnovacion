@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { componentTestProviders } from '../../../testing/component-test.providers';
 
-import { RequestTracking } from './request-tracking';
+import { RequestTrackingComponent as RequestTracking } from './request-tracking';
 
 describe('RequestTracking', () => {
   let component: RequestTracking;
@@ -9,6 +10,7 @@ describe('RequestTracking', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RequestTracking],
+      providers: componentTestProviders
     }).compileComponents();
 
     fixture = TestBed.createComponent(RequestTracking);

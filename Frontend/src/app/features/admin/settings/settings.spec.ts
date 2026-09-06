@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { componentTestProviders } from '../../../testing/component-test.providers';
 
-import { Settings } from './settings';
+import { AdminSettingsComponent as Settings } from './settings';
 
 describe('Settings', () => {
   let component: Settings;
@@ -9,6 +10,7 @@ describe('Settings', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Settings],
+      providers: componentTestProviders
     }).compileComponents();
 
     fixture = TestBed.createComponent(Settings);

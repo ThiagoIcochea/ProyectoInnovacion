@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { componentTestProviders } from '../../../testing/component-test.providers';
 
-import { RequestEvaluation } from './request-evaluation';
+import { RequestEvaluationComponent as RequestEvaluation } from './request-evaluation';
 
 describe('RequestEvaluation', () => {
   let component: RequestEvaluation;
@@ -9,6 +10,7 @@ describe('RequestEvaluation', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RequestEvaluation],
+      providers: componentTestProviders
     }).compileComponents();
 
     fixture = TestBed.createComponent(RequestEvaluation);

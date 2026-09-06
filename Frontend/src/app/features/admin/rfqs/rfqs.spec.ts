@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { componentTestProviders } from '../../../testing/component-test.providers';
 
-import { Rfqs } from './rfqs';
+import { AdminRfqsComponent as Rfqs } from './rfqs';
 
 describe('Rfqs', () => {
   let component: Rfqs;
@@ -9,6 +10,7 @@ describe('Rfqs', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Rfqs],
+      providers: componentTestProviders
     }).compileComponents();
 
     fixture = TestBed.createComponent(Rfqs);

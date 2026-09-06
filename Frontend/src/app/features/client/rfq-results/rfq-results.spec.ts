@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { componentTestProviders } from '../../../testing/component-test.providers';
 
-import { RfqResults } from './rfq-results';
+import { RfqResultsComponent as RfqResults } from './rfq-results';
 
 describe('RfqResults', () => {
   let component: RfqResults;
@@ -9,6 +10,7 @@ describe('RfqResults', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RfqResults],
+      providers: componentTestProviders
     }).compileComponents();
 
     fixture = TestBed.createComponent(RfqResults);
