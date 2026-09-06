@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { ProviderRequestsService } from './provider-requests.service';
@@ -27,7 +27,8 @@ export class ProviderRequestsComponent implements OnInit {
   private listScrollPosition = 0;
 
   constructor(
-    private requestService: ProviderRequestsService
+    private requestService: ProviderRequestsService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -107,6 +108,7 @@ export class ProviderRequestsComponent implements OnInit {
           this.loading = false;
 
           this.notifyProviderCountsRefresh();
+          this.cdr.markForCheck();
 
         },
 
@@ -122,6 +124,7 @@ export class ProviderRequestsComponent implements OnInit {
           this.loading = false;
 
           this.notifyProviderCountsRefresh();
+          this.cdr.markForCheck();
 
         }
 

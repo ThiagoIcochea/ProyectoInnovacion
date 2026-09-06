@@ -102,12 +102,16 @@ public class AuthController {
 
         if (MfaService.PURPOSE_REGISTER_CLIENT.equals(challenge.purpose)) {
             usuarioService.registrarCliente(toPayload(challenge.payload, RegisterClientRequest.class), httpRequest);
+            response.setLogin(service.completeLogin(challenge.email, httpRequest));
+            response.setRedirectTo(response.getLogin().getRedirectTo());
             response.setMessage("Cliente registrado correctamente");
             return response;
         }
 
         if (MfaService.PURPOSE_REGISTER_PROVIDER.equals(challenge.purpose)) {
             proveedorService.registerProvider(toPayload(challenge.payload, RegisterProviderRequest.class), httpRequest);
+            response.setLogin(service.completeLogin(challenge.email, httpRequest));
+            response.setRedirectTo(response.getLogin().getRedirectTo());
             response.setMessage("Proveedor registrado correctamente");
             return response;
         }

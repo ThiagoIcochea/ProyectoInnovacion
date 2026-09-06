@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -105,5 +106,29 @@ class AuthServicePasswordTest {
         doNothing().when(loginSecurityService).validarIp("127.0.0.1");
 
         assertThrows(RuntimeException.class, () -> authService.login("cliente@test.com", "ClaveSegura123", request));
+    }
+
+    @Test
+    void completeLoginIncludesRoleDashboardRedirect() {
+        authService = new AuthService();
+        authService.setRepo(repo);
+        authService.setLogsSistemaService(logsSistemaService);
+        authService.setJwtUtil(jwtUtil);
+
+        Usuario user = new Usuario();
+        user.setIdUsuario(7);
+        user.setCorreo("proveedor@test.com");
+        user.setEstado(EstadoUsuario.ACTIVO);
+        Rol rol = new Rol();
+        rol.setNombre("PROVEEDOR");
+        user.setRol(rol);
+
+        when(repo.findByCorreo("proveedor@test.com")).thenReturn(Optional.of(user));
+        when(jwtUtil.generateToken("proveedor@test.com", "PROVEEDOR")).thenReturn("jwt-token");
+
+        var response = authService.completeLogin("proveedor@test.com", request);
+
+        assertEquals("jwt-token", response.getToken());
+        assertEquals("/app/provider/dashboard", response.getRedirectTo());
     }
 }

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../core/constants/app.constants';
 import { MfaService } from '../../core/services/mfa.service';
@@ -56,12 +56,15 @@ export class VoiceAssistantComponent implements OnDestroy {
 
   private voiceStatusTimer: ReturnType<typeof window.setTimeout> | null = null;
   private voiceStatusRemovalTimer: ReturnType<typeof window.setTimeout> | null = null;
+  private readonly voiceStatusDurationMs = 5500;
+  private readonly voiceStatusFadeMs = 300;
 
   constructor(
     private http: HttpClient,
     private router: Router,
     private mfaService: MfaService,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnDestroy(): void {
@@ -203,6 +206,7 @@ export class VoiceAssistantComponent implements OnDestroy {
     recognition.onresult = (event: any) => {
       const text = event.results?.[0]?.[0]?.transcript || '';
       this.transcript = text;
+      this.cdr.markForCheck();
       this.handleVoice(text);
     };
 
@@ -956,19 +960,22 @@ export class VoiceAssistantComponent implements OnDestroy {
     this.clearVoiceStatusRemovalTimer();
     this.statusRendered = true;
     this.statusVisible = true;
+    this.cdr.markForCheck();
 
     this.clearVoiceStatusTimer();
     this.voiceStatusTimer = window.setTimeout(() => {
       if (!this.listening && !this.thinking) {
         this.statusVisible = false;
+        this.cdr.markForCheck();
         this.voiceStatusRemovalTimer = window.setTimeout(() => {
           this.statusRendered = false;
           this.answer = '';
           this.transcript = '';
           this.voiceStatusRemovalTimer = null;
-        }, 260);
+          this.cdr.markForCheck();
+        }, this.voiceStatusFadeMs);
       }
-    }, 5000);
+    }, this.voiceStatusDurationMs);
   }
 
   private clearVoiceStatusTimer(): void {
@@ -992,6 +999,7 @@ export class VoiceAssistantComponent implements OnDestroy {
     this.statusVisible = false;
     this.answer = '';
     this.transcript = '';
+    this.cdr.markForCheck();
   }
 
   private normalize(value: string): string {

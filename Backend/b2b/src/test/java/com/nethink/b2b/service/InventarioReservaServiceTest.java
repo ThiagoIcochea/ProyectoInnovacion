@@ -8,6 +8,7 @@ import com.nethink.b2b.repository.ProveedorProductoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -25,7 +26,11 @@ class InventarioReservaServiceTest {
     void setUp() {
         reservaRepo = Mockito.mock(InventarioReservaRepository.class);
         proveedorProductoRepo = Mockito.mock(ProveedorProductoRepository.class);
-        service = new InventarioReservaService(reservaRepo, proveedorProductoRepo);
+        service = new InventarioReservaService(
+                reservaRepo,
+                proveedorProductoRepo,
+                Mockito.mock(RestTemplate.class)
+        );
     }
 
     @Test

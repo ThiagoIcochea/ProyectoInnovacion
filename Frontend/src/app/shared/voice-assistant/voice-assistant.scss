@@ -95,15 +95,15 @@
   z-index: 849;
   width: min(320px, calc(100vw - 44px));
   padding: 12px 14px;
-  border: 1px solid #dbe3ef;
+  border: 1px solid #94a3b8;
   border-radius: 8px;
   background: #fff;
-  color: #0f172a;
-  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.14);
+  color: #020617;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.22);
   opacity: 0;
   transform: translateY(8px);
   pointer-events: none;
-  transition: opacity 260ms ease, transform 260ms ease;
+  transition: opacity 300ms ease, transform 300ms ease;
 }
 
 .voice-status.is-visible {
@@ -118,13 +118,14 @@
 }
 
 .voice-status__message {
-  color: #1e293b;
-  font-size: 13px;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 500;
   margin-top: 4px;
 }
 
 .voice-status__transcript {
-  color: #0f172a;
+  color: #020617;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.45;
@@ -132,14 +133,14 @@
 }
 
 :host-context(body:not(.light-theme)) .voice-status {
-  border-color: #475569;
-  background: #172033;
-  color: #f8fafc;
+  border-color: #94a3b8;
+  background: #0f172a;
+  color: #ffffff;
   box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
 }
 
 :host-context(body:not(.light-theme)) .voice-status__message {
-  color: #e2e8f0;
+  color: #f8fafc;
 }
 
 :host-context(body:not(.light-theme)) .voice-status__transcript {

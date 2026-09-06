@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -37,7 +37,8 @@ export class ProviderDeliveriesComponent implements OnInit, OnDestroy {
 
   constructor(
     private deliveriesService: DeliveriesService,
-    private delayClaimsService: DelayClaimsService
+    private delayClaimsService: DelayClaimsService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -144,11 +145,16 @@ this.deliveries = (data || [])
 
         }
 
+        this.cdr.markForCheck();
+
       },
 
       error: (err) => {
 
         console.error("Error:", err);
+
+        this.errorMessage = 'No se pudieron cargar las entregas.';
+        this.cdr.markForCheck();
 
       }
 
@@ -231,10 +237,12 @@ this.deliveries = (data || [])
 
           this.recargarSolicitudes();
           this.notifyProviderCountsRefresh();
+          this.cdr.markForCheck();
         },
         error: () => {
           this.errorMessage = 'Error al actualizar estado.';
           this.guardando = false;
+          this.cdr.markForCheck();
         }
       });
   }

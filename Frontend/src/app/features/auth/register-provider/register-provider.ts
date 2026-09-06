@@ -24,7 +24,6 @@ export class RegisterProviderComponent implements OnInit {
     address: /^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/-]{4,149}$/,
     ruc: /^(10|20)\d{9}$/,
     razonSocial: /^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,&-]{2,119}$/,
-    description: /^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/&()-]{9,399}$/,
     url: /^https?:\/\/\S+\.\S+$/,
     apiToken: /^[A-Za-z0-9._~:/+=-]{8,}$/
   };
@@ -39,8 +38,6 @@ export class RegisterProviderComponent implements OnInit {
 
   razonSocial = '';
   ruc = '';
-  descripcion = '';
-
   apiUrl = '';
   apiTipo = 'REST';
   apiToken = '';
@@ -221,7 +218,7 @@ export class RegisterProviderComponent implements OnInit {
       this.legalModalTitle = 'Politica de Privacidad para Proveedores';
       this.legalModalIntro = 'Esta politica explica como Nethink trata los datos del proveedor durante el registro, validacion, integracion API y participacion en oportunidades RFQ.';
       this.legalModalItems = [
-        'Recolectamos datos de usuario, empresa, RUC, contacto, descripcion comercial, configuracion API, metodos de pago y certificaciones seleccionadas.',
+        'Recolectamos datos de usuario, empresa, RUC, contacto, datos fiscales consultados, configuracion API, metodos de pago y certificaciones seleccionadas.',
         'La informacion comercial necesaria puede mostrarse a clientes para evaluar cotizaciones, proveedores disponibles, cumplimiento y condiciones de compra.',
         'Los tokens o datos de API se usan para operar integraciones y pruebas de conexion; deben mantenerse protegidos y actualizarse si existe riesgo de exposicion.',
         'No vendemos datos personales. La informacion se usa para autenticacion, seguridad, trazabilidad, soporte, sincronizacion y mejora del marketplace B2B.',
@@ -438,10 +435,8 @@ export class RegisterProviderComponent implements OnInit {
       this.direccion.trim() &&
       this.razonSocial.trim() &&
       this.ruc.trim() &&
-      this.descripcion.trim() &&
       this.apiUrl.trim() &&
-      this.apiTipo.trim() &&
-      this.apiToken.trim()
+      this.apiTipo.trim()
     );
   }
 
@@ -523,7 +518,6 @@ export class RegisterProviderComponent implements OnInit {
 
       razonSocial: this.razonSocial,
       ruc: this.ruc,
-      descripcion: this.descripcion,
 
       apiUrl: this.apiUrl,
       apiTipo: this.apiTipo,
@@ -589,10 +583,6 @@ export class RegisterProviderComponent implements OnInit {
       return 'RUC invalido: debe tener 11 digitos y empezar con 10 o 20.';
     }
 
-    if (!this.validators.description.test(this.descripcion)) {
-      return 'Descripcion invalida: debe iniciar con mayuscula o numero y tener entre 10 y 400 caracteres.';
-    }
-
     if (!this.validators.url.test(this.apiUrl)) {
       return 'Endpoint API invalido: debe iniciar con http:// o https:// y tener dominio/ruta valida.';
     }
@@ -601,7 +591,7 @@ export class RegisterProviderComponent implements OnInit {
       return 'Tipo de API invalido: elige REST, GRAPHQL o WEBHOOK.';
     }
 
-    if (!this.validators.apiToken.test(this.apiToken)) {
+    if (this.apiToken.trim() && !this.validators.apiToken.test(this.apiToken)) {
       return 'API Token invalido: minimo 8 caracteres, solo letras, numeros y simbolos seguros como . _ - / : + =.';
     }
 
