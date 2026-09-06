@@ -1,7 +1,7 @@
 
 
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { PagoService } from './provider-payment.service';
 import { Payment } from './payments.model';
 import { FormsModule } from '@angular/forms';
@@ -37,7 +37,7 @@ export class ProviderPaymentsComponent  implements OnInit    {
   accionModal: 'APROBAR' | 'RECHAZAR' | null = null;
   mostrarModal = false;
 
-  constructor(private pagoService: PagoService) {}
+  constructor(private pagoService: PagoService, private cdr: ChangeDetectorRef) {}
 
 ngOnInit(): void {
   this.cargarPagos();
@@ -110,6 +110,7 @@ this.payments = (payments || [])
 
       this.voucherZoom = 1;
       this.loading = false;
+          this.cdr.markForCheck();
       this.notifyProviderCountsRefresh();
     },
     error: (err) => {
@@ -119,6 +120,7 @@ this.payments = (payments || [])
       this.selectedPayment = null;
       this.errorMessage = 'No se pudieron cargar los pagos.';
       this.loading = false;
+          this.cdr.markForCheck();
       this.notifyProviderCountsRefresh();
     }
   });

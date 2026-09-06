@@ -144,11 +144,7 @@
               <small *ngIf="isMissing(ruc)">Campo obligatorio.</small>
             </div>
 
-            <div class="form-group" [class.has-error]="isMissing(descripcion)">
-              <label for="descripcion">Descripcion</label>
-              <input id="descripcion" type="text" [(ngModel)]="descripcion" name="descripcion" placeholder="Describe tu empresa" required />
-              <small *ngIf="isMissing(descripcion)">Campo obligatorio.</small>
-            </div>
+            <p>El detalle de la empresa se obtiene automaticamente de SUNAT con tu RUC.</p>
           </div>
         </section>
 
@@ -188,10 +184,10 @@
               <small *ngIf="isMissing(apiTipo)">Campo obligatorio.</small>
             </div>
 
-            <div class="form-group" [class.has-error]="isMissing(apiToken)">
-              <label for="apiToken">API Token</label>
-              <input id="apiToken" type="text" [(ngModel)]="apiToken" name="apiToken" placeholder="Token de autenticacion" required />
-              <small *ngIf="isMissing(apiToken)">Campo obligatorio.</small>
+            <div class="form-group">
+              <label for="apiToken">API Token (opcional)</label>
+              <input id="apiToken" type="text" [(ngModel)]="apiToken" name="apiToken" placeholder="Dejar vacio si tu API no requiere token" />
+
             </div>
           </div>
         </section>

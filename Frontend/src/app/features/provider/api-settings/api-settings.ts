@@ -200,7 +200,6 @@ export class ProviderApiSettingsComponent implements OnInit {
   private validarConfiguracion(): string | null {
     const apiUrl = String(this.config.apiUrl || '').trim();
     const apiTipo = String(this.config.apiTipo || '').trim();
-    const apiToken = String(this.config.apiToken || '').trim();
 
     if (!apiUrl) {
       return 'El endpoint API es obligatorio.';
@@ -218,9 +217,7 @@ export class ProviderApiSettingsComponent implements OnInit {
       return 'El tipo de API debe ser REST, GRAPHQL o WEBHOOK.';
     }
 
-    if (!apiToken) {
-      return 'El token API es obligatorio.';
-    }
+
 
     return null;
   }

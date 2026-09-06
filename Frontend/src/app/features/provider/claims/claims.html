@@ -187,7 +187,7 @@
             <label for="nuevoEstado">Nuevo estado</label>
             <select id="nuevoEstado" [(ngModel)]="estadoSeleccionado" (ngModelChange)="onEstadoSeleccionadoCambio()">
               <option value="">Seleccione...</option>
-              <option *ngFor="let estado of getEstadosDisponibles()" [value]="estado.value">
+              <option *ngFor="let estado of getEstadosDisponibles(); trackBy: trackOptionValue" [value]="estado.value">
                 {{ estado.label }}
               </option>
             </select>
@@ -199,7 +199,7 @@
               <select
                 id="accionSolicitud"
                 [(ngModel)]="accionSolicitud">
-                <option *ngFor="let accion of getAccionesDisponibles()" [value]="accion.value">
+                <option *ngFor="let accion of getAccionesDisponibles(); trackBy: trackOptionValue" [value]="accion.value">
                   {{ accion.label }}
                 </option>
               </select>

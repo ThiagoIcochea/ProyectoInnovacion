@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { APP_API_BASE_URL, APP_STORAGE_KEYS } from '../../core/constants/app.constants';
 import { MfaService } from '../../core/services/mfa.service';
@@ -61,6 +61,7 @@ export class VoiceAssistantComponent implements OnDestroy {
     private http: HttpClient,
     private router: Router,
     private mfaService: MfaService,
+    private cdr: ChangeDetectorRef,
     private themeService: ThemeService
   ) {}
 
@@ -178,7 +179,7 @@ export class VoiceAssistantComponent implements OnDestroy {
     const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!Recognition) {
-      this.speak('Tu navegador no tiene reconocimiento de voz disponible. Puedes usar Chrome o Edge.');
+      this.say('Tu navegador no tiene reconocimiento de voz disponible. Puedes usar Chrome o Edge.');
       return;
     }
 
@@ -194,7 +195,7 @@ export class VoiceAssistantComponent implements OnDestroy {
     recognition.onerror = () => {
       this.listening = false;
       this.showVoiceStatus();
-      this.speak('No pude escuchar bien. Intenta otra vez.');
+      this.say('No pude escuchar bien. Intenta otra vez.');
     };
     recognition.onend = () => {
       this.listening = false;
@@ -243,7 +244,7 @@ export class VoiceAssistantComponent implements OnDestroy {
       error: () => {
         this.thinking = false;
         this.showVoiceStatus();
-        this.speak('No pude procesar la solicitud por voz en este momento.');
+        this.say('No pude procesar la solicitud por voz en este momento.');
       }
     });
   }
@@ -956,13 +957,16 @@ export class VoiceAssistantComponent implements OnDestroy {
     this.clearVoiceStatusRemovalTimer();
     this.statusRendered = true;
     this.statusVisible = true;
+    this.cdr.markForCheck();
 
     this.clearVoiceStatusTimer();
     this.voiceStatusTimer = window.setTimeout(() => {
       if (!this.listening && !this.thinking) {
         this.statusVisible = false;
+        this.cdr.markForCheck();
         this.voiceStatusRemovalTimer = window.setTimeout(() => {
           this.statusRendered = false;
+          this.cdr.markForCheck();
           this.answer = '';
           this.transcript = '';
           this.voiceStatusRemovalTimer = null;
@@ -990,6 +994,7 @@ export class VoiceAssistantComponent implements OnDestroy {
     this.clearVoiceStatusRemovalTimer();
     this.statusRendered = false;
     this.statusVisible = false;
+    this.cdr.markForCheck();
     this.answer = '';
     this.transcript = '';
   }

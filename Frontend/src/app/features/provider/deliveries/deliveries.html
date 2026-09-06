@@ -154,7 +154,7 @@
   <option value="">Seleccione...</option>
 
   <option
-    *ngFor="let estado of getEstadosDisponibles()"
+    *ngFor="let estado of getEstadosDisponibles(); trackBy: trackOptionValue"
     [value]="estado.value">
 
     {{ estado.label }}

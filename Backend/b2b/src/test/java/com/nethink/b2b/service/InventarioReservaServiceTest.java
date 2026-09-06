@@ -17,6 +17,34 @@ import static org.mockito.Mockito.when;
 
 class InventarioReservaServiceTest {
 
+    @Test
+    void publicaCatalogoConPatchSinToken() throws Exception {
+        var server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+        var method = new java.util.concurrent.atomic.AtomicReference<String>();
+        var authorization = new java.util.concurrent.atomic.AtomicReference<String>();
+        server.createContext("/catalogo", exchange -> {
+            method.set(exchange.getRequestMethod());
+            authorization.set(exchange.getRequestHeaders().getFirst("Authorization"));
+            exchange.getRequestBody().readAllBytes();
+            exchange.sendResponseHeaders(200, -1);
+            exchange.close();
+        });
+        server.start();
+        try {
+            var proveedor = new com.nethink.b2b.entity.Proveedor();
+            proveedor.setIdProveedor(1);
+            proveedor.setApiUrl("http://127.0.0.1:" + server.getAddress().getPort() + "/catalogo");
+            var producto = new ProveedorProducto();
+            producto.setProveedor(proveedor);
+            when(proveedorProductoRepo.findProductosCompletosPorProveedor(1)).thenReturn(List.of());
+            service.publicarNuevoProducto(producto);
+            assertEquals("PATCH", method.get());
+            org.junit.jupiter.api.Assertions.assertNull(authorization.get());
+        } finally {
+            server.stop(0);
+        }
+    }
+
     private InventarioReservaRepository reservaRepo;
     private ProveedorProductoRepository proveedorProductoRepo;
     private InventarioReservaService service;

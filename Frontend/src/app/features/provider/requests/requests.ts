@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { ProviderRequestsService } from './provider-requests.service';
@@ -27,6 +27,7 @@ export class ProviderRequestsComponent implements OnInit {
   private listScrollPosition = 0;
 
   constructor(
+    private cdr: ChangeDetectorRef,
     private requestService: ProviderRequestsService
   ) {}
 
@@ -105,6 +106,7 @@ export class ProviderRequestsComponent implements OnInit {
           }
 
           this.loading = false;
+          this.cdr.markForCheck();
 
           this.notifyProviderCountsRefresh();
 
@@ -120,6 +122,7 @@ export class ProviderRequestsComponent implements OnInit {
             'No se pudieron cargar las solicitudes.';
 
           this.loading = false;
+          this.cdr.markForCheck();
 
           this.notifyProviderCountsRefresh();
 
@@ -281,6 +284,7 @@ export class ProviderRequestsComponent implements OnInit {
           this.updateRequestState(requestId, 'PEDIDO_APROBADO');
           this.processingRequestId = null;
           this.processingAction = null;
+          this.cdr.markForCheck();
           this.loadRequests();
 
         },
@@ -289,6 +293,7 @@ export class ProviderRequestsComponent implements OnInit {
 
           this.processingRequestId = null;
           this.processingAction = null;
+          this.cdr.markForCheck();
           this.errorMessage =
             'Error al aprobar pedido.';
 
@@ -345,6 +350,7 @@ export class ProviderRequestsComponent implements OnInit {
           this.updateRequestState(requestId, 'CANCELADA');
           this.processingRequestId = null;
           this.processingAction = null;
+          this.cdr.markForCheck();
           await Swal.fire({
             icon: 'success',
             title: 'Pedido rechazado',
@@ -358,6 +364,7 @@ export class ProviderRequestsComponent implements OnInit {
 
           this.processingRequestId = null;
           this.processingAction = null;
+          this.cdr.markForCheck();
           this.errorMessage =
             'Error al rechazar pedido.';
 

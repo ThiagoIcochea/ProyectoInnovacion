@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ClaimStatus, ProviderClaim } from './claim.model';
 import { ProviderClaimsService } from './claims.service';
@@ -28,7 +28,7 @@ export class ProviderClaimsComponent implements OnInit {
   readonly minEvidenceZoom = 0.5;
   readonly maxEvidenceZoom = 2.5;
 
-  constructor(private claimsService: ProviderClaimsService) {}
+  constructor(private claimsService: ProviderClaimsService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.recargarReclamos();
@@ -61,11 +61,13 @@ export class ProviderClaimsComponent implements OnInit {
         this.selectedClaim = this.filteredClaims.find(item => item.idReclamo === currentId) || this.filteredClaims[0] || null;
         this.resetForm();
         this.cargando = false;
+        this.cdr.markForCheck();
         this.notifyProviderCountsRefresh();
       },
       error: () => {
         this.errorMessage = 'No se pudieron cargar los reclamos.';
         this.cargando = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -138,13 +140,19 @@ export class ProviderClaimsComponent implements OnInit {
         this.selectedClaim = claim;
         this.resetForm();
         this.guardando = false;
+        this.cdr.markForCheck();
         this.notifyProviderCountsRefresh();
       },
       error: () => {
         this.errorMessage = 'No se pudo actualizar el reclamo.';
         this.guardando = false;
+        this.cdr.markForCheck();
       }
     });
+  }
+
+  trackOptionValue(_index: number, option: { value: string }): string {
+    return option.value;
   }
 
   getEstadosDisponibles(): { value: ClaimStatus; label: string }[] {

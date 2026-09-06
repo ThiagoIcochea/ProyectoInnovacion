@@ -438,10 +438,8 @@ export class RegisterProviderComponent implements OnInit {
       this.direccion.trim() &&
       this.razonSocial.trim() &&
       this.ruc.trim() &&
-      this.descripcion.trim() &&
       this.apiUrl.trim() &&
-      this.apiTipo.trim() &&
-      this.apiToken.trim()
+      this.apiTipo.trim()
     );
   }
 
@@ -589,9 +587,7 @@ export class RegisterProviderComponent implements OnInit {
       return 'RUC invalido: debe tener 11 digitos y empezar con 10 o 20.';
     }
 
-    if (!this.validators.description.test(this.descripcion)) {
-      return 'Descripcion invalida: debe iniciar con mayuscula o numero y tener entre 10 y 400 caracteres.';
-    }
+
 
     if (!this.validators.url.test(this.apiUrl)) {
       return 'Endpoint API invalido: debe iniciar con http:// o https:// y tener dominio/ruta valida.';
@@ -601,7 +597,7 @@ export class RegisterProviderComponent implements OnInit {
       return 'Tipo de API invalido: elige REST, GRAPHQL o WEBHOOK.';
     }
 
-    if (!this.validators.apiToken.test(this.apiToken)) {
+    if (this.apiToken.trim() && !this.validators.apiToken.test(this.apiToken)) {
       return 'API Token invalido: minimo 8 caracteres, solo letras, numeros y simbolos seguros como . _ - / : + =.';
     }
 
