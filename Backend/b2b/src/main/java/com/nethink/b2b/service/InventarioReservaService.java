@@ -274,6 +274,7 @@ public void publicarNuevoProducto(ProveedorProducto producto) {
 private void enviarCatalogoConFallback(Proveedor proveedor, List<ProveedorProducto> catalogo) {
     HttpMethod[] metodos = { HttpMethod.PATCH, HttpMethod.PUT, HttpMethod.POST };
     RuntimeException ultimoError = null;
+    List<String> intentos = new ArrayList<>();
 
     for (HttpMethod metodo : metodos) {
         try {
@@ -282,15 +283,20 @@ private void enviarCatalogoConFallback(Proveedor proveedor, List<ProveedorProduc
         } catch (HttpStatusCodeException error) {
             ultimoError = error;
             int status = error.getStatusCode().value();
-            if (status != 404 && status != 405 && status != 501) {
-                throw error;
+            intentos.add(metodo.name() + " HTTP " + status);
+            // Cambiar el metodo puede resolver incompatibilidades incluso si el
+            // proveedor las reporta como 500. No insistir ante permisos o limites.
+            if (status == 401 || status == 403 || status == 429) {
+                throw new IllegalStateException(
+                        "No se pudo sincronizar el inventario: " + String.join(", ", intentos)
+                                + ". Revisa los permisos de la API o su limite de solicitudes.", error);
             }
         }
     }
 
-    throw ultimoError != null
-            ? ultimoError
-            : new IllegalStateException("No se pudo sincronizar el catálogo del proveedor.");
+    throw new IllegalStateException(
+            "No se pudo sincronizar el inventario. Intentos: " + String.join(", ", intentos)
+                    + ". La API del proveedor rechazo todas las opciones de actualizacion.", ultimoError);
 }
 
 private void enviarInventario(

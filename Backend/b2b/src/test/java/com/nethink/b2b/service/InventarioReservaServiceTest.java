@@ -20,6 +20,7 @@ class InventarioReservaServiceTest {
 
     @Test
     void publicaCatalogoConPatchSinToken() throws Exception {
+        service = new InventarioReservaService(reservaRepo, proveedorProductoRepo, new com.nethink.b2b.config.AppConfig().restTemplate());
         var server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
         var method = new java.util.concurrent.atomic.AtomicReference<String>();
         var authorization = new java.util.concurrent.atomic.AtomicReference<String>();
@@ -44,6 +45,65 @@ class InventarioReservaServiceTest {
         } finally {
             server.stop(0);
         }
+    }
+
+    @Test
+    void intentaPutYPostCuandoPatchDevuelve500() {
+        probarAlternativas(new int[] {500, 405, 200}, null);
+    }
+
+    @Test
+    void terminaCuandoPutFunciona() {
+        probarAlternativas(new int[] {500, 200}, null);
+    }
+
+    @Test
+    void resumeTodosLosFallosSinExponerHtml() {
+        probarAlternativas(new int[] {500, 502, 503}, "PATCH HTTP 500, PUT HTTP 502, POST HTTP 503");
+    }
+
+    @Test
+    void noInsisteAnteCredencialesInvalidas() {
+        probarAlternativas(new int[] {401}, "PATCH HTTP 401");
+    }
+
+    @Test
+    void noInsisteAnteLimiteDeSolicitudes() {
+        probarAlternativas(new int[] {429}, "PATCH HTTP 429");
+    }
+
+    private void probarAlternativas(int[] statuses, String errorEsperado) {
+        var rest = new RestTemplate();
+        var server = org.springframework.test.web.client.MockRestServiceServer.bindTo(rest).build();
+        service = new InventarioReservaService(reservaRepo, proveedorProductoRepo, rest);
+        var proveedor = new com.nethink.b2b.entity.Proveedor();
+        proveedor.setIdProveedor(1);
+        proveedor.setApiUrl("https://proveedor.test/catalogo");
+        var producto = new ProveedorProducto();
+        producto.setProveedor(proveedor);
+        when(proveedorProductoRepo.findProductosCompletosPorProveedor(1)).thenReturn(List.of());
+        var metodos = new org.springframework.http.HttpMethod[] {
+                org.springframework.http.HttpMethod.PATCH,
+                org.springframework.http.HttpMethod.PUT,
+                org.springframework.http.HttpMethod.POST
+        };
+        for (int i = 0; i < statuses.length; i++) {
+            server.expect(org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo(proveedor.getApiUrl()))
+                    .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.method(metodos[i]))
+                    .andExpect(org.springframework.test.web.client.match.MockRestRequestMatchers.content().json("{\"catalogo\":[]}"))
+                    .andRespond(org.springframework.test.web.client.response.MockRestResponseCreators
+                            .withStatus(org.springframework.http.HttpStatus.valueOf(statuses[i]))
+                            .body("<html>Error del proveedor</html>"));
+        }
+        if (errorEsperado == null) {
+            org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> service.publicarNuevoProducto(producto));
+        } else {
+            var error = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class,
+                    () -> service.publicarNuevoProducto(producto));
+            org.junit.jupiter.api.Assertions.assertTrue(error.getMessage().contains(errorEsperado));
+            org.junit.jupiter.api.Assertions.assertFalse(error.getMessage().contains("<html>"));
+        }
+        server.verify();
     }
 
     private InventarioReservaRepository reservaRepo;
