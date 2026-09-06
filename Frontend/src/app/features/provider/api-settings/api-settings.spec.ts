@@ -21,4 +21,12 @@ describe('ApiSettings', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('accepts a public endpoint without an API token', () => {
+    component.config.apiUrl = 'https://api.example.com/catalogo';
+    component.config.apiTipo = 'REST';
+    component.config.apiToken = '';
+
+    expect((component as any).validarConfiguracion()).toBeNull();
+  });
 });

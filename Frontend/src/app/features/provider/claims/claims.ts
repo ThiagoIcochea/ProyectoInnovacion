@@ -28,7 +28,10 @@ export class ProviderClaimsComponent implements OnInit {
   readonly minEvidenceZoom = 0.5;
   readonly maxEvidenceZoom = 2.5;
 
-  constructor(private claimsService: ProviderClaimsService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private claimsService: ProviderClaimsService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.recargarReclamos();
@@ -63,6 +66,7 @@ export class ProviderClaimsComponent implements OnInit {
         this.cargando = false;
         this.cdr.markForCheck();
         this.notifyProviderCountsRefresh();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.errorMessage = 'No se pudieron cargar los reclamos.';
@@ -142,6 +146,7 @@ export class ProviderClaimsComponent implements OnInit {
         this.guardando = false;
         this.cdr.markForCheck();
         this.notifyProviderCountsRefresh();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.errorMessage = 'No se pudo actualizar el reclamo.';

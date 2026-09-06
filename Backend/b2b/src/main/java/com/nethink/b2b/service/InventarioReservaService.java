@@ -25,14 +25,16 @@ public class InventarioReservaService {
 
     private final InventarioReservaRepository reservaRepo;
     private final ProveedorProductoRepository proveedorProductoRepo;
-    private final RestTemplate restTemplate = new RestTemplate(new org.springframework.http.client.JdkClientHttpRequestFactory());
+    private final RestTemplate restTemplate;
 
     public InventarioReservaService(
             InventarioReservaRepository reservaRepo,
-            ProveedorProductoRepository proveedorProductoRepo
+            ProveedorProductoRepository proveedorProductoRepo,
+            RestTemplate restTemplate
     ) {
         this.reservaRepo = reservaRepo;
         this.proveedorProductoRepo = proveedorProductoRepo;
+        this.restTemplate = restTemplate;
     }
 
     public InventarioReserva crearReserva(

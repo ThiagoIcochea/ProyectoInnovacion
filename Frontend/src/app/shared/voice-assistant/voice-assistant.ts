@@ -56,13 +56,15 @@ export class VoiceAssistantComponent implements OnDestroy {
 
   private voiceStatusTimer: ReturnType<typeof window.setTimeout> | null = null;
   private voiceStatusRemovalTimer: ReturnType<typeof window.setTimeout> | null = null;
+  private readonly voiceStatusDurationMs = 5500;
+  private readonly voiceStatusFadeMs = 300;
 
   constructor(
     private http: HttpClient,
     private router: Router,
     private mfaService: MfaService,
-    private cdr: ChangeDetectorRef,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnDestroy(): void {
@@ -204,6 +206,7 @@ export class VoiceAssistantComponent implements OnDestroy {
     recognition.onresult = (event: any) => {
       const text = event.results?.[0]?.[0]?.transcript || '';
       this.transcript = text;
+      this.cdr.markForCheck();
       this.handleVoice(text);
     };
 
@@ -970,9 +973,10 @@ export class VoiceAssistantComponent implements OnDestroy {
           this.answer = '';
           this.transcript = '';
           this.voiceStatusRemovalTimer = null;
-        }, 260);
+          this.cdr.markForCheck();
+        }, this.voiceStatusFadeMs);
       }
-    }, 5000);
+    }, this.voiceStatusDurationMs);
   }
 
   private clearVoiceStatusTimer(): void {
@@ -997,6 +1001,7 @@ export class VoiceAssistantComponent implements OnDestroy {
     this.cdr.markForCheck();
     this.answer = '';
     this.transcript = '';
+    this.cdr.markForCheck();
   }
 
   private normalize(value: string): string {

@@ -37,7 +37,10 @@ export class ProviderPaymentsComponent  implements OnInit    {
   accionModal: 'APROBAR' | 'RECHAZAR' | null = null;
   mostrarModal = false;
 
-  constructor(private pagoService: PagoService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private pagoService: PagoService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
 ngOnInit(): void {
   this.cargarPagos();
@@ -112,6 +115,7 @@ this.payments = (payments || [])
       this.loading = false;
           this.cdr.markForCheck();
       this.notifyProviderCountsRefresh();
+      this.cdr.markForCheck();
     },
     error: (err) => {
       console.error(err);
@@ -122,6 +126,7 @@ this.payments = (payments || [])
       this.loading = false;
           this.cdr.markForCheck();
       this.notifyProviderCountsRefresh();
+      this.cdr.markForCheck();
     }
   });
 }

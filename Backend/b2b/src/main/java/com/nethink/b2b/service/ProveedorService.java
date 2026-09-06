@@ -157,12 +157,10 @@ private LogsApiRepository logsApiRepository;
         prov.setUsuario(user);
         prov.setRazonSocial(sunat.getRazonSocial());
         prov.setRuc(req.getRuc());
-        prov.setDescripcion(java.util.stream.Stream.of(sunat.getRazonSocial(), sunat.getDireccion(), sunat.getEstado(), sunat.getCondicion())
-                .filter(value -> value != null && !value.isBlank())
-                .collect(java.util.stream.Collectors.joining(" | ")));
+        prov.setDescripcion(construirDescripcionSunat(sunat));
         prov.setApiUrl(req.getApiUrl());
         prov.setApiTipo(req.getApiTipo());
-        prov.setApiToken(req.getApiToken());
+        prov.setApiToken(normalizarTokenOpcional(req.getApiToken()));
         prov.setFechaRegistro(LocalDateTime.now());
         prov.setEstado("ACTIVO");
 
@@ -601,7 +599,9 @@ private void validarRegistroProveedor(RegisterProviderRequest req) {
     validarTexto(req.getRuc(), "RUC invalido", "^(10|20)\\d{9}$");
     validarTexto(req.getRazonSocial(), "Razon social invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,&-]{2,119}$");
     validarTexto(req.getApiUrl(), "Endpoint API invalido", "^https?://\\S+\\.\\S+$");
-    if (req.getApiToken() != null && !req.getApiToken().isBlank()) validarTexto(req.getApiToken(), "API Token invalido", "^[A-Za-z0-9._~:/+=-]{8,}$");
+    if (req.getApiToken() != null && !req.getApiToken().isBlank()) {
+        validarTexto(req.getApiToken(), "API Token invalido", "^[A-Za-z0-9._~:/+=-]{8,}$");
+    }
 
     String apiTipo = String.valueOf(req.getApiTipo() == null ? "" : req.getApiTipo()).trim().toUpperCase();
     if (!List.of("REST", "GRAPHQL", "WEBHOOK").contains(apiTipo)) {
@@ -621,6 +621,30 @@ private void validarRegistroProveedor(RegisterProviderRequest req) {
             validarTexto(cuenta, "Metodo de pago invalido", "^\\d{6,30}$");
         }
     }
+}
+
+private String construirDescripcionSunat(SunatResponse sunat) {
+    List<String> detalles = new ArrayList<>();
+
+    if (sunat.getEstado() != null && !sunat.getEstado().isBlank()) {
+        detalles.add("Estado SUNAT: " + sunat.getEstado().trim());
+    }
+    if (sunat.getCondicion() != null && !sunat.getCondicion().isBlank()) {
+        detalles.add("condicion: " + sunat.getCondicion().trim());
+    }
+    if (sunat.getDireccion() != null && !sunat.getDireccion().isBlank()) {
+        detalles.add("domicilio fiscal: " + sunat.getDireccion().trim());
+    }
+
+    String descripcion = detalles.isEmpty()
+            ? "Empresa validada mediante consulta SUNAT."
+            : String.join("; ", detalles) + ".";
+
+    return descripcion.length() <= 250 ? descripcion : descripcion.substring(0, 247) + "...";
+}
+
+private String normalizarTokenOpcional(String token) {
+    return token == null || token.isBlank() ? null : token.trim();
 }
 
 private String encodePassword(String password) {

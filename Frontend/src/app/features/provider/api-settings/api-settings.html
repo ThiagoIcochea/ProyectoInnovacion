@@ -68,7 +68,7 @@
               id="apiToken"
               [type]="showApiKey ? 'text' : 'password'"
               [(ngModel)]="config.apiToken"
-              placeholder="Token de autenticacion"
+              placeholder="Solo si el endpoint requiere autenticacion"
             />
 
             <button
@@ -84,6 +84,7 @@
               </svg>
             </button>
           </div>
+          <small>Puede dejarse vacio para endpoints publicos.</small>
         </div>
 
         <div class="form-group">

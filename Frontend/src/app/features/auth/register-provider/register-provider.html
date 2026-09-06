@@ -137,14 +137,11 @@
             <small *ngIf="isMissing(razonSocial)">Campo obligatorio.</small>
           </div>
 
-          <div class="form-grid form-grid--2">
-            <div class="form-group" [class.has-error]="isMissing(ruc)">
-              <label for="ruc">RUC</label>
-              <input id="ruc" type="text" [(ngModel)]="ruc" name="ruc" placeholder="11 digitos" required />
-              <small *ngIf="isMissing(ruc)">Campo obligatorio.</small>
-            </div>
-
-            <p>El detalle de la empresa se obtiene automaticamente de SUNAT con tu RUC.</p>
+          <div class="form-group" [class.has-error]="isMissing(ruc)">
+            <label for="ruc">RUC</label>
+            <input id="ruc" type="text" [(ngModel)]="ruc" name="ruc" placeholder="11 digitos" required />
+            <small *ngIf="isMissing(ruc)">Campo obligatorio.</small>
+            <small>La descripcion y los datos fiscales se completaran desde SUNAT.</small>
           </div>
         </section>
 
@@ -186,8 +183,8 @@
 
             <div class="form-group">
               <label for="apiToken">API Token (opcional)</label>
-              <input id="apiToken" type="text" [(ngModel)]="apiToken" name="apiToken" placeholder="Dejar vacio si tu API no requiere token" />
-
+              <input id="apiToken" type="text" [(ngModel)]="apiToken" name="apiToken" placeholder="Solo si tu API requiere autenticacion" />
+              <small>Puede dejarse vacio para APIs publicas.</small>
             </div>
           </div>
         </section>

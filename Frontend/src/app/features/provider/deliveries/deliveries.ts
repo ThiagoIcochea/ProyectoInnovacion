@@ -37,8 +37,8 @@ export class ProviderDeliveriesComponent implements OnInit, OnDestroy {
 
   constructor(
     private deliveriesService: DeliveriesService,
-    private cdr: ChangeDetectorRef,
-    private delayClaimsService: DelayClaimsService
+    private delayClaimsService: DelayClaimsService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -146,11 +146,16 @@ this.deliveries = (data || [])
 
         }
 
+        this.cdr.markForCheck();
+
       },
 
       error: (err) => {
 
         this.errorMessage = "No se pudieron cargar las entregas.";
+        this.cdr.markForCheck();
+
+        this.errorMessage = 'No se pudieron cargar las entregas.';
         this.cdr.markForCheck();
 
       }
@@ -235,6 +240,7 @@ this.deliveries = (data || [])
 
           this.recargarSolicitudes();
           this.notifyProviderCountsRefresh();
+          this.cdr.markForCheck();
         },
         error: () => {
           this.errorMessage = 'Error al actualizar estado.';

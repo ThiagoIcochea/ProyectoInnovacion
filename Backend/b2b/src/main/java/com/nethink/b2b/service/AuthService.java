@@ -127,7 +127,14 @@ public class AuthService {
                 request
         );
 
-        return new LoginResponse(token, user.getCorreo(), user.getIdUsuario(), user.getRol().getNombre());
+        LoginResponse response = new LoginResponse(
+                token,
+                user.getCorreo(),
+                user.getIdUsuario(),
+                user.getRol().getNombre()
+        );
+        response.setRedirectTo(redirectByRole(user.getRol().getNombre()));
+        return response;
     }
 
     private boolean passwordMatches(String rawPassword, String storedPassword) {

@@ -26,11 +26,12 @@ public class ApiConfiguracionService {
 
     public ApiConfiguracionService(
             ProveedorRepository proveedorRepo,
-            LogsApiRepository logsApiRepo
+            LogsApiRepository logsApiRepo,
+            RestTemplate restTemplate
     ) {
         this.proveedorRepo = proveedorRepo;
         this.logsApiRepo = logsApiRepo;
-        this.restTemplate = new RestTemplate();
+        this.restTemplate = restTemplate;
     }
 
     public ApiConfiguracionResponse obtenerConfiguracion(String correo) {
@@ -83,7 +84,7 @@ public class ApiConfiguracionService {
 
         proveedor.setApiUrl(request.getApiUrl());
         proveedor.setApiTipo(request.getApiTipo());
-        proveedor.setApiToken(request.getApiToken());
+        proveedor.setApiToken(normalizarTokenOpcional(request.getApiToken()));
 
         proveedorRepo.save(proveedor);
     }
@@ -181,5 +182,13 @@ public class ApiConfiguracionService {
     proveedor = proveedorRepository.save(proveedor);
 
     return obtenerConfiguracion(correo);
+}
+
+private String normalizarTokenOpcional(String token) {
+    if (token == null || token.isBlank()) {
+        return null;
+    }
+
+    return token.trim();
 }
 }

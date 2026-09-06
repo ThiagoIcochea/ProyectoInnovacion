@@ -27,8 +27,8 @@ export class ProviderRequestsComponent implements OnInit {
   private listScrollPosition = 0;
 
   constructor(
-    private cdr: ChangeDetectorRef,
-    private requestService: ProviderRequestsService
+    private requestService: ProviderRequestsService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -109,6 +109,7 @@ export class ProviderRequestsComponent implements OnInit {
           this.cdr.markForCheck();
 
           this.notifyProviderCountsRefresh();
+          this.cdr.markForCheck();
 
         },
 
@@ -125,6 +126,7 @@ export class ProviderRequestsComponent implements OnInit {
           this.cdr.markForCheck();
 
           this.notifyProviderCountsRefresh();
+          this.cdr.markForCheck();
 
         }
 
