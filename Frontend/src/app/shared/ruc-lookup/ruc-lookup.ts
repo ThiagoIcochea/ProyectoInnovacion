@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription, switchMap, timer } from 'rxjs';
 import { APP_API_BASE_URL } from '../../core/constants/app.constants';
 
-export interface EmpresaRuc { ruc: string; razonSocial: string; descripcion: string; }
+export interface EmpresaRuc { ruc: string; razonSocial: string; descripcion: string; actividadEconomica?: string; }
 
 @Component({
   selector: 'app-ruc-lookup',
@@ -25,9 +25,10 @@ export interface EmpresaRuc { ruc: string; razonSocial: string; descripcion: str
     </div>
     <div *ngIf="empresa() as datos">
       <label>Razon social</label><p>{{ datos.razonSocial }}</p>
-      <label>Descripcion fiscal</label><p>{{ datos.descripcion }}</p>
+      <label>Actividad economica (SUNAT)</label>
+      <p>{{ datos.actividadEconomica || datos.descripcion || 'Actividad economica no disponible en la consulta.' }}</p>
     </div>
-    <small>La razon social y la descripcion fiscal se completan automaticamente con la consulta del RUC.</small>
+    <small>La razon social y la actividad economica se consultan automaticamente con el RUC.</small>
   `,
   styleUrl: './ruc-lookup.scss'
 })

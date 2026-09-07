@@ -41,7 +41,7 @@ public class AuthController {
 
     @GetMapping("/proveedor/ruc/{ruc}")
     public com.nethink.b2b.dto.response.SunatResponse consultarRucProveedor(@PathVariable String ruc) {
-        return sunatService.consultarRuc(ruc);
+        return sunatService.consultarRucCompleto(ruc);
     }
 
     @PostMapping("/login")

@@ -113,7 +113,7 @@ private LogsApiRepository logsApiRepository;
             throw new RuntimeException("RUC ya registrado");
         }
 
-        SunatResponse sunat = sunatService.consultarRuc(req.getRuc());
+        SunatResponse sunat = sunatService.consultarRucCompleto(req.getRuc());
 
         if (sunat == null || sunat.getRazonSocial() == null) {
             logsSistemaService.registrarLog(

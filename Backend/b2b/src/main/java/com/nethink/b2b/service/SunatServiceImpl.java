@@ -25,13 +25,28 @@ public class SunatServiceImpl implements SunatService {
 
     @Override
     public SunatResponse consultarRuc(String ruc) {
+        return consultar(ruc, false);
+    }
+
+    @Override
+    public SunatResponse consultarRucCompleto(String ruc) {
+        try {
+            return consultar(ruc, true);
+        } catch (org.springframework.web.client.HttpStatusCodeException error) {
+            // Si la consulta ampliada no esta disponible, conservar la consulta
+            // basica para identificar la empresa, sin inventar una actividad.
+            return consultarRuc(ruc);
+        }
+    }
+
+    private SunatResponse consultar(String ruc, boolean completo) {
         
         if (ruc == null || !ruc.matches("^(10|20)\\d{9}$")) {
             throw new org.springframework.web.server.ResponseStatusException(HttpStatus.BAD_REQUEST, "El RUC debe tener 11 digitos y comenzar con 10 o 20.");
         }
         String apiKey = configService.getValor("DECOLECTA_API_TOKEN");
 
-        String url = "https://api.decolecta.com/v1/sunat/ruc?numero=" + ruc;
+        String url = "https://api.decolecta.com/v1/sunat/ruc" + (completo ? "/full" : "") + "?numero=" + ruc;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -59,6 +74,8 @@ public class SunatServiceImpl implements SunatService {
         dto.setDireccion((String) body.get("direccion"));
         dto.setEstado((String) body.get("estado"));
         dto.setCondicion((String) body.get("condicion"));
+        Object actividad = body.get("actividad_economica");
+        dto.setActividadEconomica(actividad instanceof String texto ? texto : null);
 
         return dto;
     }

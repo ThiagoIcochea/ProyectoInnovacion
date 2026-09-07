@@ -33,7 +33,8 @@ class UsuarioPerfilRucTest {
         datos.setRuc("20123456789");
         datos.setRazonSocial("EMPRESA OFICIAL S.A.C.");
         datos.setEstado("ACTIVO");
-        when(sunat.consultarRuc(datos.getRuc())).thenReturn(datos);
+        datos.setActividadEconomica("VENTA AL POR MAYOR DE EQUIPO INFORMATICO");
+        when(sunat.consultarRucCompleto(datos.getRuc())).thenReturn(datos);
         var request = new ProfileUpdateRequest();
         request.setNombres("Juan");
         request.setApellidos("Perez");

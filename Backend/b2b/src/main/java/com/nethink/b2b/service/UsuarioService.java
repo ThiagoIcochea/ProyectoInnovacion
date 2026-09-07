@@ -176,7 +176,7 @@ public class UsuarioService {
             if (duplicado.isPresent() && !duplicado.get().getIdProveedor().equals(proveedorActual.getIdProveedor())) {
                 throw new IllegalArgumentException("El RUC ya pertenece a otro proveedor.");
             }
-            datosEmpresa = sunatService.consultarRuc(req.getRuc());
+            datosEmpresa = sunatService.consultarRucCompleto(req.getRuc());
         }
 
         usuario.setNombres(req.getNombres());
@@ -241,8 +241,11 @@ public class UsuarioService {
 
         if (proveedorActual != null) {
             proveedorActual.setRazonSocial(datosEmpresa.getRazonSocial());
+            if (!datosEmpresa.getDescripcion().isBlank()
+                    || !java.util.Objects.equals(proveedorActual.getRuc(), datosEmpresa.getRuc())) {
+                proveedorActual.setDescripcion(datosEmpresa.getDescripcion());
+            }
             proveedorActual.setRuc(datosEmpresa.getRuc());
-            proveedorActual.setDescripcion(datosEmpresa.getDescripcion());
             proveedorRepository.save(proveedorActual);
         }
         
