@@ -67,6 +67,12 @@ public class JwtFilter extends OncePerRequestFilter {
         return;
     }
 
+    // Mantener la validacion de IP, pero no exigir ni validar JWT en esta consulta publica.
+    if ("GET".equals(request.getMethod()) && path.matches("/api/auth/proveedor/ruc/[0-9]{11}")) {
+        filterChain.doFilter(request, response);
+        return;
+    }
+
     String authHeader = request.getHeader("Authorization");
 
     if (authHeader != null && authHeader.startsWith("Bearer ")) {

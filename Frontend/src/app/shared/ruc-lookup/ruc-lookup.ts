@@ -18,7 +18,10 @@ export interface EmpresaRuc { ruc: string; razonSocial: string; descripcion: str
       placeholder="Ingresa los 11 digitos" aria-describedby="ruc-status" />
     <div id="ruc-status" aria-live="polite">
       <p *ngIf="loading()">Consultando datos de la empresa...</p>
-      <p *ngIf="error()">{{ error() }} <button type="button" (click)="consultar()">Reintentar</button></p>
+      <div *ngIf="error()" class="ruc-error" role="alert">
+        <p>{{ error() }}</p>
+        <button type="button" class="btn-outline" [disabled]="loading()" (click)="consultar()">Reintentar</button>
+      </div>
     </div>
     <div *ngIf="empresa() as datos">
       <label>Razon social</label><p>{{ datos.razonSocial }}</p>
@@ -26,15 +29,7 @@ export interface EmpresaRuc { ruc: string; razonSocial: string; descripcion: str
     </div>
     <small>La razon social y la descripcion fiscal se completan automaticamente con la consulta del RUC.</small>
   `,
-  styles: [`
-    :host { display: block; width: 100%; }
-    label { display: block; font-weight: 600; margin: 12px 0 6px; }
-    input { box-sizing: border-box; width: 100%; padding: 12px; border-radius: 8px;
-      border: 1px solid var(--theme-border, #94a3b8); background: var(--theme-surface, #fff); color: var(--theme-text, #172033); }
-    p { margin: 8px 0; overflow-wrap: anywhere; }
-    small { display: block; margin-top: 8px; }
-    button { cursor: pointer; margin-left: 8px; }
-  `]
+  styleUrl: './ruc-lookup.scss'
 })
 export class RucLookupComponent implements OnChanges, OnDestroy {
   @Input() ruc = '';
@@ -77,9 +72,13 @@ export class RucLookupComponent implements OnChanges, OnDestroy {
         this.empresa.set(datos);
         this.empresaChange.emit(datos);
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.error.set('No se pudo consultar el RUC. Verifica el numero y reintenta.');
+        this.error.set(err.status === 403
+          ? 'El servidor denego el acceso a la consulta de RUC. Reintenta en unos momentos.'
+          : err.status === 0
+            ? 'No se pudo conectar con el servicio de consulta. Revisa tu conexion y reintenta.'
+            : 'No se pudo consultar el RUC. Verifica el numero y reintenta.');
         this.empresaChange.emit(null);
       }
     });

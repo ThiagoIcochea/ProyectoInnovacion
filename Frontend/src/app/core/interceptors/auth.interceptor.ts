@@ -9,6 +9,11 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
+    // La consulta de RUC es publica, incluso cuando se abre desde un perfil.
+    if (req.method === 'GET' && req.url.startsWith(`${APP_API_BASE_URL}/auth/proveedor/ruc/`)) {
+      return next.handle(req.clone({ headers: req.headers.delete('Authorization') }));
+    }
+
     if (req.url.includes(`${APP_API_BASE_URL}/auth/login`)) {
     return next.handle(req);
   }
