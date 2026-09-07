@@ -131,18 +131,7 @@
             </div>
           </div>
 
-          <div class="form-group" [class.has-error]="isMissing(razonSocial)">
-            <label for="razonSocial">Razon Social</label>
-            <input id="razonSocial" type="text" [(ngModel)]="razonSocial" name="razonSocial" placeholder="Razon social" required />
-            <small *ngIf="isMissing(razonSocial)">Campo obligatorio.</small>
-          </div>
-
-          <div class="form-group" [class.has-error]="isMissing(ruc)">
-            <label for="ruc">RUC</label>
-            <input id="ruc" type="text" [(ngModel)]="ruc" name="ruc" placeholder="11 digitos" required />
-            <small *ngIf="isMissing(ruc)">Campo obligatorio.</small>
-            <small>La descripcion y los datos fiscales se completaran desde SUNAT.</small>
-          </div>
+          <app-ruc-lookup [(ruc)]="ruc" (empresaChange)="completarEmpresa($event)" />
         </section>
 
         <section class="form-section">

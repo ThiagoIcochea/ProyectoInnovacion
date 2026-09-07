@@ -26,6 +26,9 @@ public class SunatServiceImpl implements SunatService {
     @Override
     public SunatResponse consultarRuc(String ruc) {
         
+        if (ruc == null || !ruc.matches("^(10|20)\\d{9}$")) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.BAD_REQUEST, "El RUC debe tener 11 digitos y comenzar con 10 o 20.");
+        }
         String apiKey = configService.getValor("DECOLECTA_API_TOKEN");
 
         String url = "https://api.decolecta.com/v1/sunat/ruc?numero=" + ruc;
@@ -45,6 +48,10 @@ public class SunatServiceImpl implements SunatService {
 
         Map body = response.getBody();
 
+        if (body == null || !(body.get("razon_social") instanceof String razon) || razon.isBlank()
+                || !ruc.equals(body.get("numero_documento"))) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.BAD_GATEWAY, "No se encontraron datos validos para este RUC.");
+        }
         SunatResponse dto = new SunatResponse();
 
         dto.setRuc((String) body.get("numero_documento"));

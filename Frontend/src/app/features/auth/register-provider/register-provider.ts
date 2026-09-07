@@ -1,3 +1,4 @@
+import { RucLookupComponent, EmpresaRuc } from '../../../shared/ruc-lookup/ruc-lookup';
 // Backend touchpoint: provider registration payload, payment methods and certifications.
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
@@ -10,11 +11,17 @@ import { Router, RouterLink } from '@angular/router';
 @Component({
   selector: 'app-register-provider',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [RucLookupComponent, CommonModule, FormsModule, HttpClientModule],
   templateUrl: './register-provider.html',
   styleUrl: './register-provider.scss'
 })
 export class RegisterProviderComponent implements OnInit {
+
+  rucConfirmado = '';
+  completarEmpresa(datos: EmpresaRuc | null): void {
+    this.rucConfirmado = datos?.ruc || '';
+    this.razonSocial = datos?.razonSocial || '';
+  }
 
   private readonly validators = {
     name: /^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/,
@@ -433,7 +440,6 @@ export class RegisterProviderComponent implements OnInit {
       this.telefono.trim() &&
       this.whatsapp.trim() &&
       this.direccion.trim() &&
-      this.razonSocial.trim() &&
       this.ruc.trim() &&
       this.apiUrl.trim() &&
       this.apiTipo.trim()
@@ -453,6 +459,11 @@ export class RegisterProviderComponent implements OnInit {
   register() {
     this.submitted = true;
     this.formError = '';
+
+    if (this.rucConfirmado !== this.ruc || !this.rucConfirmado) {
+      this.formError = 'Espera a que se consulte correctamente el RUC.';
+      return;
+    }
 
     if (!this.hasRequiredFields()) {
       this.formError = 'Completa todos los campos obligatorios antes de registrar el proveedor.';
@@ -575,9 +586,7 @@ export class RegisterProviderComponent implements OnInit {
       return 'Direccion invalida: debe iniciar con mayuscula o numero y tener al menos 5 caracteres.';
     }
 
-    if (!this.validators.razonSocial.test(this.razonSocial)) {
-      return 'Razon social invalida: debe iniciar con mayuscula o numero y tener al menos 3 caracteres.';
-    }
+
 
     if (!this.validators.ruc.test(this.ruc)) {
       return 'RUC invalido: debe tener 11 digitos y empezar con 10 o 20.';

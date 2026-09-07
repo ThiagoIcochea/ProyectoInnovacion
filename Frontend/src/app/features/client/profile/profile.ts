@@ -1,3 +1,4 @@
+import { RucLookupComponent, EmpresaRuc } from '../../../shared/ruc-lookup/ruc-lookup';
 // Backend touchpoint: profile data loader and updater; RUC fields are provider-only.
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -16,11 +17,18 @@ import { extractValidationMessage } from '../../../core/utils/form-validation';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [RucLookupComponent, CommonModule, FormsModule],
   templateUrl: './profile.html',
   styleUrl: './profile.scss'
 })
 export class ProfileComponent implements OnInit, OnDestroy {
+
+  rucConfirmado = '';
+  completarEmpresa(datos: EmpresaRuc | null): void {
+    this.rucConfirmado = datos?.ruc || '';
+    this.usuario.razonSocial = datos?.razonSocial || '';
+    this.usuario.descripcion = datos?.descripcion || '';
+  }
 
   private readonly validators = {
     name: /^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+(?: [A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñ]+)*$/,
@@ -349,13 +357,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
         return 'RUC invalido: debe tener 11 digitos y empezar con 10 o 20.';
       }
 
-      if (!this.validators.razonSocial.test(this.usuario.razonSocial || '')) {
-        return 'Razon social invalida: debe iniciar con mayuscula o numero y tener al menos 3 caracteres.';
+      if (this.rucConfirmado !== this.usuario.ruc || !this.rucConfirmado) {
+        return 'Espera a que se consulte correctamente el RUC.';
       }
 
-      if (!this.validators.description.test(this.usuario.descripcion || '')) {
-        return 'Descripcion invalida: debe iniciar con mayuscula o numero y tener entre 10 y 400 caracteres.';
-      }
     }
 
     if (this.modoImagen === 'url' && this.fotoUrl && !this.validators.url.test(this.fotoUrl)) {

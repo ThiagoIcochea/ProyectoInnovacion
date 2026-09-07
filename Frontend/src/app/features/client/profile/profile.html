@@ -132,34 +132,8 @@
             placeholder="Av. Principal 123"
           >
         </div>
-        <div class="form-group" *ngIf="esProveedor">
-          <label for="ruc">RUC</label>
-          <input
-            id="ruc"
-            type="text"
-            [(ngModel)]="usuario.ruc"
-            placeholder="Número de RUC"
-          >
-        </div>
-        <div class="form-group" *ngIf="esProveedor">
-          <label for="razonSocial">Razón Social</label>
-          <input
-            id="razonSocial"
-            type="text"
-            [(ngModel)]="usuario.razonSocial"
-            placeholder="Razón social"
-          >
-        </div>
-
-        <div class="form-group full" *ngIf="esProveedor">
-          <label for="descripcion">Descripción</label>
-          <textarea
-            id="descripcion"
-            rows="4"
-            [(ngModel)]="usuario.descripcion"
-            placeholder="Describe tu empresa"
-          ></textarea>
-        </div>
+        <app-ruc-lookup class="form-group full" *ngIf="esProveedor"
+          [(ruc)]="usuario.ruc" (empresaChange)="completarEmpresa($event)" />
 
       </div>
 

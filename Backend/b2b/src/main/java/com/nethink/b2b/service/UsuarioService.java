@@ -43,6 +43,8 @@ public class UsuarioService {
     private final ProveedorRepository proveedorRepository;
     private final ReclamoRepository reclamoRepository;
     private final PasswordEncoder passwordEncoder;
+    @org.springframework.beans.factory.annotation.Autowired
+    private SunatService sunatService;
 
     public UsuarioService(
             UsuarioRepository usuarioRepo,
@@ -154,6 +156,7 @@ public class UsuarioService {
         return r;
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public void actualizarPerfil(
             String correo,
             ProfileUpdateRequest req,
@@ -165,6 +168,16 @@ public class UsuarioService {
 
         Usuario usuario = usuarioRepo.findByCorreo(correo)
                 .orElseThrow();
+
+        var proveedorActual = proveedorRepository.findByUsuario_Correo(correo).orElse(null);
+        com.nethink.b2b.dto.response.SunatResponse datosEmpresa = null;
+        if (proveedorActual != null) {
+            var duplicado = proveedorRepository.findByRuc(req.getRuc());
+            if (duplicado.isPresent() && !duplicado.get().getIdProveedor().equals(proveedorActual.getIdProveedor())) {
+                throw new IllegalArgumentException("El RUC ya pertenece a otro proveedor.");
+            }
+            datosEmpresa = sunatService.consultarRuc(req.getRuc());
+        }
 
         usuario.setNombres(req.getNombres());
         usuario.setApellidos(req.getApellidos());
@@ -226,12 +239,12 @@ public class UsuarioService {
 
         usuarioRepo.save(usuario);
 
-        proveedorRepository.findByUsuario_Correo(usuario.getCorreo()).ifPresent(proveedor -> {
-            proveedor.setRazonSocial(req.getRazonSocial());
-            proveedor.setRuc(req.getRuc());
-            proveedor.setDescripcion(req.getDescripcion());
-            proveedorRepository.save(proveedor);
-        });
+        if (proveedorActual != null) {
+            proveedorActual.setRazonSocial(datosEmpresa.getRazonSocial());
+            proveedorActual.setRuc(datosEmpresa.getRuc());
+            proveedorActual.setDescripcion(datosEmpresa.getDescripcion());
+            proveedorRepository.save(proveedorActual);
+        }
         
         logsSistemaService.registrarLog(
     usuario.getIdUsuario(),
@@ -509,12 +522,8 @@ private void validarPerfil(ProfileUpdateRequest req) {
     if (req.getRuc() != null && !req.getRuc().isBlank()) {
         validarTexto(req.getRuc(), "RUC invalido", "^(10|20)\\d{9}$");
     }
-    if (req.getRazonSocial() != null && !req.getRazonSocial().isBlank()) {
-        validarTexto(req.getRazonSocial(), "Razon social invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,&-]{2,119}$");
-    }
-    if (req.getDescripcion() != null && !req.getDescripcion().isBlank()) {
-        validarTexto(req.getDescripcion(), "Descripcion invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/&()-]{9,399}$");
-    }
+
+
 }
 
 public List<String> listarRoles() {

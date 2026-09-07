@@ -36,6 +36,14 @@ public class AuthController {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private com.nethink.b2b.service.SunatService sunatService;
+
+    @GetMapping("/proveedor/ruc/{ruc}")
+    public com.nethink.b2b.dto.response.SunatResponse consultarRucProveedor(@PathVariable String ruc) {
+        return sunatService.consultarRuc(ruc);
+    }
+
     @PostMapping("/login")
     public MfaStartResponse login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         return service.login(request.getCorreo(), request.getPassword(), httpRequest);

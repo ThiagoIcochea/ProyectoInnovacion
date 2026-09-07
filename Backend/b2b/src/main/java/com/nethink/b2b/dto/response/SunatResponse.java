@@ -51,4 +51,24 @@ public class SunatResponse {
     public void setCondicion(String condicion) {
         this.condicion = condicion;
     }
+public String getDescripcion() {
+    java.util.List<String> detalles = new java.util.ArrayList<>();
+
+    if (getEstado() != null && !getEstado().isBlank()) {
+        detalles.add("Estado SUNAT: " + getEstado().trim());
+    }
+    if (getCondicion() != null && !getCondicion().isBlank()) {
+        detalles.add("condicion: " + getCondicion().trim());
+    }
+    if (getDireccion() != null && !getDireccion().isBlank()) {
+        detalles.add("domicilio fiscal: " + getDireccion().trim());
+    }
+
+    String descripcion = detalles.isEmpty()
+            ? "Empresa validada mediante consulta SUNAT."
+            : String.join("; ", detalles) + ".";
+
+    return descripcion.length() <= 250 ? descripcion : descripcion.substring(0, 247) + "...";
+}
+
 }

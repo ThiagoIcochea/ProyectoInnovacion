@@ -157,7 +157,7 @@ private LogsApiRepository logsApiRepository;
         prov.setUsuario(user);
         prov.setRazonSocial(sunat.getRazonSocial());
         prov.setRuc(req.getRuc());
-        prov.setDescripcion(construirDescripcionSunat(sunat));
+        prov.setDescripcion(sunat.getDescripcion());
         prov.setApiUrl(req.getApiUrl());
         prov.setApiTipo(req.getApiTipo());
         prov.setApiToken(normalizarTokenOpcional(req.getApiToken()));
@@ -597,7 +597,6 @@ private void validarRegistroProveedor(RegisterProviderRequest req) {
     validarTexto(soloDigitos(req.getWhatsapp()), "WhatsApp invalido", "^9\\d{8}$");
     validarTexto(req.getDireccion(), "Direccion invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,#°º/-]{4,149}$");
     validarTexto(req.getRuc(), "RUC invalido", "^(10|20)\\d{9}$");
-    validarTexto(req.getRazonSocial(), "Razon social invalida", "^[A-ZÁÉÍÓÚÑ0-9][A-Za-zÁÉÍÓÚÑáéíóúñ0-9 .,&-]{2,119}$");
     validarTexto(req.getApiUrl(), "Endpoint API invalido", "^https?://\\S+\\.\\S+$");
     if (req.getApiToken() != null && !req.getApiToken().isBlank()) {
         validarTexto(req.getApiToken(), "API Token invalido", "^[A-Za-z0-9._~:/+=-]{8,}$");
@@ -623,25 +622,6 @@ private void validarRegistroProveedor(RegisterProviderRequest req) {
     }
 }
 
-private String construirDescripcionSunat(SunatResponse sunat) {
-    List<String> detalles = new ArrayList<>();
-
-    if (sunat.getEstado() != null && !sunat.getEstado().isBlank()) {
-        detalles.add("Estado SUNAT: " + sunat.getEstado().trim());
-    }
-    if (sunat.getCondicion() != null && !sunat.getCondicion().isBlank()) {
-        detalles.add("condicion: " + sunat.getCondicion().trim());
-    }
-    if (sunat.getDireccion() != null && !sunat.getDireccion().isBlank()) {
-        detalles.add("domicilio fiscal: " + sunat.getDireccion().trim());
-    }
-
-    String descripcion = detalles.isEmpty()
-            ? "Empresa validada mediante consulta SUNAT."
-            : String.join("; ", detalles) + ".";
-
-    return descripcion.length() <= 250 ? descripcion : descripcion.substring(0, 247) + "...";
-}
 
 private String normalizarTokenOpcional(String token) {
     return token == null || token.isBlank() ? null : token.trim();
